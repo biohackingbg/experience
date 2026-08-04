@@ -85,7 +85,7 @@ export function SummitTickets() {
                 key={tier.name}
                 className={`relative flex flex-col rounded-3xl p-8 ${
                   featured
-                    ? "bg-bh-lime-soft text-bh-ink"
+                    ? "bh-gradient-soft text-bh-ink"
                     : "bg-bh-cloud text-bh-ink ring-1 ring-bh-ink/8"
                 }`}
               >

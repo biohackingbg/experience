@@ -37,16 +37,16 @@ export function SummitHero() {
           </h1>
 
           <article
-            className="hu-rise flex flex-col justify-between rounded-3xl bg-bh-ink p-7 text-bh-paper"
+            className="hu-rise bh-gradient flex flex-col justify-between rounded-3xl p-7 text-bh-ink"
             style={{ animationDelay: "160ms" }}
           >
             <div className="flex items-start justify-between gap-4">
-              <span className="rounded-full border border-bh-paper/30 px-4 py-1.5 font-mono text-xs uppercase tracking-[0.15em] text-bh-paper">
+              <span className="rounded-full border border-bh-ink/25 px-4 py-1.5 font-mono text-xs uppercase tracking-[0.15em] text-bh-ink">
                 Гранд Хотел Милениум
               </span>
-              <span className="text-3xl leading-none text-bh-lime">✳</span>
+              <span className="text-3xl leading-none text-bh-ink">✳</span>
             </div>
-            <p className="mt-10 text-sm leading-relaxed text-bh-paper/70">
+            <p className="mt-10 text-sm leading-relaxed text-bh-ink/75">
               Не конференция със столове в редици. Longevity медицината излиза
               от лабораторията — на разбираем език, за един ден, в който
               слушаш, измерваш се, изпробваш и си тръгваш с личен протокол.
@@ -100,7 +100,7 @@ export function SummitHero() {
           </article>
 
           {/* zones — lime accent */}
-          <article className="flex flex-col justify-between rounded-3xl bg-bh-lime-soft p-7 text-bh-ink sm:col-span-2">
+          <article className="bh-gradient-soft flex flex-col justify-between rounded-3xl p-7 text-bh-ink sm:col-span-2">
             <div className="flex flex-wrap gap-2">
               {zoneTags.map((t) => (
                 <span

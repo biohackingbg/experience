@@ -25,7 +25,7 @@ export function SummitRegister() {
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <a
                 href="mailto:hello@biohacking.bg?subject=Ранен%20билет%20—%20Biohacking%20Experience"
-                className="inline-flex items-center gap-2 rounded-full bg-bh-lime px-7 py-3.5 text-sm font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
+                className="bh-gradient inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
               >
                 Заяви ранен билет
               </a>

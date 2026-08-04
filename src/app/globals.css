@@ -6,8 +6,9 @@
   --color-bh-paper: #ecebe5; /* warm light page / frame interior */
   --color-bh-cloud: #f7f7f3; /* near-white card */
   --color-bh-ink: #131312; /* near-black — text + dark cards */
-  --color-bh-lime: #0ecdb7; /* neon accent (brand teal) — used sparingly */
-  --color-bh-lime-soft: #d9f290; /* soft lime for large fills */
+  --color-bh-lime: #0ecdb7; /* accent teal — used sparingly */
+  --color-bh-lime-soft: #b9ece6; /* pale teal for large fills */
+  --color-bh-sky: #7cd4fc; /* gradient tail */
   --color-bh-stone: #dedcd3; /* hairlines / muted surfaces */
   --color-bh-teal: #0ecdb7; /* brand teal — logo only */
   --color-bh-forest: #14351f; /* legacy token, unused */
@@ -19,6 +20,7 @@
   --color-bh-ink: var(--color-bh-ink);
   --color-bh-lime: var(--color-bh-lime);
   --color-bh-lime-soft: var(--color-bh-lime-soft);
+  --color-bh-sky: var(--color-bh-sky);
   --color-bh-stone: var(--color-bh-stone);
   --color-bh-teal: var(--color-bh-teal);
   --color-bh-forest: var(--color-bh-forest);
@@ -31,6 +33,26 @@
 
 body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Brand gradient: teal → teal → sky. Full strength for accent surfaces,
+   tinted variant for the large pale fills. */
+.bh-gradient {
+  background-image: linear-gradient(
+    135deg,
+    #0ecdb7 0%,
+    #0acdb6 45%,
+    #7cd4fc 100%
+  );
+}
+
+.bh-gradient-soft {
+  background-image: linear-gradient(
+    135deg,
+    #cdf3ee 0%,
+    #c9f2ee 45%,
+    #dcf0fe 100%
+  );
 }
 
 /*
