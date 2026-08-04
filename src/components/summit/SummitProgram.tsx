@@ -33,31 +33,39 @@ const days = [
 
 export function SummitProgram() {
   return (
-    <section id="program" className="bg-bh-paper py-20 lg:py-28">
-      <div className="mx-auto w-full max-w-7xl px-6 lg:px-10">
-        <div className="max-w-3xl">
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-bh-forest">
-            Програма
+    <section id="program" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
+      <div className="mx-auto w-full max-w-7xl">
+        <div className="flex flex-col gap-6 border-t border-bh-ink/15 pt-8 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">
+              Програма
+            </p>
+            <h2 className="mt-4 text-[clamp(2rem,4.5vw,3.5rem)] font-black uppercase leading-[0.95] tracking-tight text-bh-ink">
+              Два дни, две сцени
+            </h2>
+          </div>
+          <p className="max-w-sm text-sm leading-relaxed text-bh-ink/60">
+            Работна програма. Лабораторията и ритуалите работят паралелно през
+            целия ден, със записване на час.
           </p>
-          <h2 className="mt-5 font-display text-4xl font-extrabold uppercase leading-[0.95] tracking-tight text-bh-ink sm:text-5xl lg:text-6xl">
-            Два дни, две сцени
-          </h2>
         </div>
 
-        <div className="mt-14 grid gap-6 lg:grid-cols-2">
+        <div className="mt-12 grid gap-4 lg:grid-cols-2">
           {days.map((d) => (
             <div
               key={d.date}
-              className="overflow-hidden rounded-3xl border border-bh-ink/10 bg-white"
+              className="overflow-hidden rounded-3xl bg-bh-cloud ring-1 ring-bh-ink/8"
             >
-              <div className="flex items-baseline justify-between bg-bh-ink px-7 py-6 text-white">
+              <div className="flex items-baseline justify-between bg-bh-ink px-7 py-6 text-bh-paper">
                 <div className="flex items-baseline gap-3">
-                  <span className="font-display text-2xl font-extrabold uppercase tracking-tight">
+                  <span className="text-xl font-black uppercase tracking-tight">
                     {d.day}
                   </span>
-                  <span className="font-mono text-sm text-bh-lime">{d.date}</span>
+                  <span className="font-mono text-sm text-bh-lime">
+                    {d.date}
+                  </span>
                 </div>
-                <span className="max-w-[9rem] text-right text-xs font-medium uppercase tracking-wide text-white/60">
+                <span className="max-w-[9rem] text-right text-xs font-medium uppercase tracking-wide text-bh-paper/55">
                   {d.theme}
                 </span>
               </div>
@@ -66,14 +74,14 @@ export function SummitProgram() {
                 {d.slots.map((slot, i) => (
                   <li
                     key={slot.t}
-                    className={`flex items-center gap-5 px-7 py-4 transition-colors hover:bg-bh-lime/15 ${
+                    className={`flex items-center gap-5 px-7 py-4 transition-colors hover:bg-bh-ink/[0.03] ${
                       i !== 0 ? "border-t border-bh-ink/8" : ""
                     }`}
                   >
-                    <span className="w-14 shrink-0 font-mono text-sm font-semibold text-bh-forest">
+                    <span className="w-14 shrink-0 font-mono text-sm text-bh-ink/45">
                       {slot.t}
                     </span>
-                    <span className="text-sm font-medium text-bh-ink sm:text-base">
+                    <span className="text-sm font-medium text-bh-ink">
                       {slot.s}
                     </span>
                   </li>
@@ -82,11 +90,6 @@ export function SummitProgram() {
             </div>
           ))}
         </div>
-
-        <p className="mt-8 max-w-3xl font-mono text-xs leading-relaxed uppercase tracking-[0.12em] text-bh-ink/45">
-          Работна програма. Лабораторията и ритуалите работят паралелно през
-          целия ден, със записване на час.
-        </p>
       </div>
     </section>
   );

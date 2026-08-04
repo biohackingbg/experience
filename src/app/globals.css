@@ -1,27 +1,30 @@
 @import "tailwindcss";
 
 :root {
-  /* Biohacking Experience — brand palette sampled from the logo */
-  --color-bh-lime: #acec1d; /* bright lime — primary accent (EXPERIENCE) */
-  --color-bh-lime-soft: #cef870; /* pale lime — logo circle / tints */
-  --color-bh-teal: #0ecdb7; /* teal — secondary accent (BIOHACKING) */
-  --color-bh-forest: #2c5d4e; /* deep green card surface */
-  --color-bh-ink: #02251f; /* near-black green — icon / primary ink */
-  --color-bh-paper: #f3f4ef; /* off-white page */
-  --color-bh-stone: #e5e7de; /* light neutral card */
+  /* Biohacking Experience — light editorial theme.
+     Monochrome + a single neon-lime accent used sparingly. */
+  --color-bh-paper: #ecebe5; /* warm light page / frame interior */
+  --color-bh-cloud: #f7f7f3; /* near-white card */
+  --color-bh-ink: #131312; /* near-black — text + dark cards */
+  --color-bh-lime: #acec1d; /* neon accent — used sparingly */
+  --color-bh-lime-soft: #d9f290; /* soft lime for large fills */
+  --color-bh-stone: #dedcd3; /* hairlines / muted surfaces */
+  --color-bh-teal: #0ecdb7; /* brand teal — logo only */
+  --color-bh-forest: #14351f; /* legacy token, unused */
 }
 
 @theme inline {
+  --color-bh-paper: var(--color-bh-paper);
+  --color-bh-cloud: var(--color-bh-cloud);
+  --color-bh-ink: var(--color-bh-ink);
   --color-bh-lime: var(--color-bh-lime);
   --color-bh-lime-soft: var(--color-bh-lime-soft);
+  --color-bh-stone: var(--color-bh-stone);
   --color-bh-teal: var(--color-bh-teal);
   --color-bh-forest: var(--color-bh-forest);
-  --color-bh-ink: var(--color-bh-ink);
-  --color-bh-paper: var(--color-bh-paper);
-  --color-bh-stone: var(--color-bh-stone);
 
   --font-sans: var(--font-body);
-  --font-display: var(--font-display);
+  --font-display: var(--font-body); /* neutral grotesk headings (Inter) */
   --font-mono: var(--font-geist-mono);
 }
 
@@ -50,26 +53,6 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .hu-rise {
-    animation: none;
-  }
-}
-
-/* Infinite marquee ticker */
-@keyframes bh-marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.bh-marquee {
-  animation: bh-marquee 28s linear infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .bh-marquee {
     animation: none;
   }
 }

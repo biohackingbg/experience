@@ -33,46 +33,49 @@ const markers = [
 
 export function SummitPassport() {
   return (
-    <section id="passport" className="bg-bh-ink py-20 text-white lg:py-28">
-      <div className="mx-auto w-full max-w-7xl px-6 lg:px-10">
-        <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+    <section id="passport" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
+      <div className="mx-auto w-full max-w-7xl">
+        <div className="flex flex-col gap-6 border-t border-bh-ink/15 pt-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-bh-lime">
+            <p className="font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">
               Ядрото на офертата
             </p>
-            <h2 className="mt-5 font-display text-4xl font-extrabold uppercase leading-[0.95] tracking-tight sm:text-5xl lg:text-6xl">
-              Longevity
-              <br />
-              <span className="text-bh-lime">паспортът</span>
+            <h2 className="mt-4 max-w-2xl text-[clamp(2rem,4.5vw,3.5rem)] font-black uppercase leading-[0.95] tracking-tight text-bh-ink">
+              Longevity паспортът
             </h2>
           </div>
-          <p className="text-lg leading-relaxed text-white/70">
-            Най-честият въпрос след всяка лекция е „добре, а аз къде съм“. Тази
-            зона отговаря — и е това, което никой друг wellness формат в България
-            не предлага.
+          <p className="max-w-sm text-sm leading-relaxed text-bh-ink/60">
+            „Добре, а аз къде съм“ — тази зона отговаря. Това, което никой друг
+            wellness формат в България не предлага.
           </p>
         </div>
 
-        <div className="mt-14 grid gap-px overflow-hidden rounded-3xl border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-3">
-          {markers.map((m) => (
-            <div
-              key={m.no}
-              className="group bg-bh-ink p-8 transition-colors hover:bg-bh-forest"
-            >
-              <span className="font-mono text-sm font-semibold text-bh-lime">
-                / {m.no}
-              </span>
-              <h3 className="mt-6 font-display text-xl font-bold tracking-tight">
-                {m.title}
-              </h3>
-              <p className="mt-3 text-sm leading-relaxed text-white/60">
-                {m.body}
-              </p>
-            </div>
-          ))}
+        <div className="mt-12 overflow-hidden rounded-3xl bg-bh-cloud ring-1 ring-bh-ink/8">
+          <div className="grid sm:grid-cols-2">
+            {markers.map((m, i) => (
+              <div
+                key={m.no}
+                className={`flex gap-6 p-8 ${
+                  i >= 2 ? "border-t border-bh-ink/8" : ""
+                } ${i % 2 === 1 ? "sm:border-l sm:border-bh-ink/8" : ""} ${
+                  i === 1 ? "sm:border-t-0" : ""
+                }`}
+              >
+                <span className="font-mono text-sm text-bh-ink/35">{m.no}</span>
+                <div>
+                  <h3 className="text-xl font-bold tracking-tight text-bh-ink">
+                    {m.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-bh-ink/60">
+                    {m.body}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <p className="mt-8 max-w-3xl font-mono text-xs leading-relaxed uppercase tracking-[0.12em] text-white/40">
+        <p className="mt-6 max-w-3xl font-mono text-[0.7rem] leading-relaxed uppercase tracking-[0.12em] text-bh-ink/40">
           Скринингът не е диагноза. Резултатите се тълкуват от специалист на
           място, който насочва към кого да се обърне посетителят.
         </p>

@@ -1,12 +1,6 @@
 import type { Metadata } from "next";
-import { Unbounded, Inter, Geist_Mono } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
-const displayFont = Unbounded({
-  variable: "--font-display",
-  subsets: ["latin", "cyrillic"],
-  weight: ["500", "600", "700", "800"],
-});
 
 const bodyFont = Inter({
   variable: "--font-body",
@@ -32,9 +26,11 @@ export default function RootLayout({
   return (
     <html
       lang="bg"
-      className={`${displayFont.variable} ${bodyFont.variable} ${monoFont.variable} h-full antialiased`}
+      className={`${bodyFont.variable} ${monoFont.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-bh-ink text-white">{children}</body>
+      <body className="min-h-full bg-bh-ink p-2 text-bh-ink sm:p-3">
+        {children}
+      </body>
     </html>
   );
 }

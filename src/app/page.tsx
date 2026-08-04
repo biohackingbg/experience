@@ -1,6 +1,5 @@
 import { SummitNav } from "@/components/summit/SummitNav";
 import { SummitHero } from "@/components/summit/SummitHero";
-import { SummitTicker } from "@/components/summit/SummitTicker";
 import { SummitConcept } from "@/components/summit/SummitConcept";
 import { SummitPassport } from "@/components/summit/SummitPassport";
 import { SummitProgram } from "@/components/summit/SummitProgram";
@@ -10,11 +9,10 @@ import { SummitFooter } from "@/components/summit/SummitFooter";
 
 export default function Home() {
   return (
-    <div className="bg-bh-ink">
+    <div className="overflow-hidden rounded-[1.75rem] bg-bh-paper">
       <SummitNav />
       <main>
         <SummitHero />
-        <SummitTicker />
         <SummitConcept />
         <SummitPassport />
         <SummitProgram />

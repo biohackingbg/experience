@@ -9,19 +9,21 @@ const links = [
 
 export function SummitNav() {
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-bh-ink/85 backdrop-blur-md">
-      <nav className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-4 lg:px-10">
+    <header className="px-5 pt-5 sm:px-8 lg:px-10">
+      <nav className="flex items-center justify-between">
         <Link
           href="#top"
           aria-label="Biohacking Experience — начало"
-          className="flex items-center"
+          className="flex items-center gap-2.5"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/logo.svg"
-            alt="Biohacking Experience"
-            className="h-8 w-auto sm:h-9"
-          />
+          <img src="/icon.svg" alt="" className="h-9 w-9" />
+          <span className="text-sm font-bold uppercase leading-none tracking-tight text-bh-ink">
+            Biohacking
+            <span className="block text-[0.6rem] font-medium tracking-[0.3em] text-bh-ink/45">
+              EXPERIENCE
+            </span>
+          </span>
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">
@@ -29,7 +31,7 @@ export function SummitNav() {
             <a
               key={l.href}
               href={l.href}
-              className="text-sm font-medium text-white/70 transition-colors hover:text-bh-lime"
+              className="text-sm font-medium text-bh-ink/70 transition-colors hover:text-bh-ink"
             >
               {l.label}
             </a>
@@ -38,7 +40,7 @@ export function SummitNav() {
 
         <a
           href="#tickets"
-          className="inline-flex items-center gap-2 rounded-full bg-bh-lime px-5 py-2.5 text-sm font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
+          className="inline-flex items-center rounded-full bg-bh-ink px-5 py-2.5 text-sm font-semibold text-bh-paper transition-transform hover:-translate-y-0.5"
         >
           Купи билет
         </a>
