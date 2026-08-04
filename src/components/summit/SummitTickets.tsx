@@ -79,7 +79,7 @@ export function SummitTickets() {
           </p>
         </Reveal>
 
-        <div className="mt-12 grid items-start gap-4 lg:grid-cols-3">
+        <div className="mt-12 grid gap-4 lg:grid-cols-3">
           {tiers.map((tier, i) => {
             const featured = tier.featured;
             return (
@@ -87,7 +87,7 @@ export function SummitTickets() {
               <div
                 className={`relative flex h-full flex-col rounded-3xl p-8 ${
                   featured
-                    ? "bh-gradient-soft text-bh-ink"
+                    ? "bh-gradient text-bh-ink"
                     : "bg-bh-cloud text-bh-ink ring-1 ring-bh-ink/8"
                 }`}
               >

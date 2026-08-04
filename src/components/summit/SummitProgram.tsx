@@ -74,7 +74,7 @@ export function SummitProgram() {
                 {d.slots.map((slot, i) => (
                   <li
                     key={slot.t}
-                    className={`flex items-center gap-5 px-7 py-4 transition-colors hover:bg-bh-ink/[0.03] ${
+                    className={`flex items-center gap-5 px-7 py-4 transition-colors hover:bg-bh-lime/10 ${
                       i !== 0 ? "border-t border-bh-ink/8" : ""
                     }`}
                   >

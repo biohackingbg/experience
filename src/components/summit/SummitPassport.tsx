@@ -63,7 +63,7 @@ export function SummitPassport() {
                   i === 1 ? "sm:border-t-0" : ""
                 }`}
               >
-                <span className="font-mono text-sm text-bh-ink/35">{m.no}</span>
+                <span className="font-mono text-sm font-semibold text-bh-lime">{m.no}</span>
                 <div>
                   <h3 className="text-xl font-bold tracking-tight text-bh-ink">
                     {m.title}

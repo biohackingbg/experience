@@ -100,7 +100,7 @@ export function SummitHero() {
           </article>
 
           {/* zones — lime accent */}
-          <article className="bh-gradient-soft flex flex-col justify-between rounded-3xl p-7 text-bh-ink sm:col-span-2">
+          <article className="bh-gradient-sky flex flex-col justify-between rounded-3xl p-7 text-bh-ink sm:col-span-2">
             <div className="flex flex-wrap gap-2">
               {zoneTags.map((t) => (
                 <span

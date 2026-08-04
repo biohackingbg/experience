@@ -82,6 +82,16 @@ body {
   );
 }
 
+/* Light-blue variant — leans on the sky end of the brand ramp. */
+.bh-gradient-sky {
+  background-image: linear-gradient(
+    135deg,
+    #d3edfe 0%,
+    #c2e5fd 55%,
+    #a9dbfc 100%
+  );
+}
+
 /*
  * Above-the-fold entrance animation. Pure CSS so markup is never JS-dependent:
  * content paints and animates immediately, instead of waiting for hydration.

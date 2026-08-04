@@ -21,6 +21,7 @@ const zones = [
     title: "Тялото",
     body: "Сесии по 30 минути със записан час. Студ, сауна, дишане, red light, PEMF.",
     dark: false,
+    fill: "bh-gradient-soft",
   },
   {
     no: "04",
@@ -28,6 +29,7 @@ const zones = [
     title: "Брандовете",
     body: "30 подбрани компании: добавки, устройства, лаборатории, клиники, храна.",
     dark: false,
+    fill: "bh-gradient-sky",
   },
 ];
 
@@ -57,7 +59,9 @@ export function SummitConcept() {
               className={`flex h-full min-h-[17rem] flex-col justify-between rounded-3xl p-7 transition-transform duration-300 hover:-translate-y-1.5 ${
                 z.dark
                   ? "bg-bh-ink text-bh-paper"
-                  : "bg-bh-cloud text-bh-ink ring-1 ring-bh-ink/8"
+                  : z.fill
+                    ? `${z.fill} text-bh-ink`
+                    : "bg-bh-cloud text-bh-ink ring-1 ring-bh-ink/8"
               }`}
             >
               <div className="flex items-center justify-between">
@@ -72,7 +76,7 @@ export function SummitConcept() {
                   className={`rounded-full px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.12em] ${
                     z.dark
                       ? "bg-bh-paper/10 text-bh-paper/80"
-                      : "bg-bh-ink/6 text-bh-ink/60"
+                      : "bg-bh-ink/10 text-bh-ink/70"
                   }`}
                 >
                   {z.tag}
