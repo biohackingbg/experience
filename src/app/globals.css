@@ -1,18 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  /* Biohacking Experience event palette — lime / forest / ink / paper */
-  --color-bh-lime: #b8e845; /* primary accent — spring green */
-  --color-bh-lime-soft: #d6f28a; /* muted lime for tints */
-  --color-bh-forest: #14351f; /* deep green card surface */
-  --color-bh-ink: #0a0b0a; /* near-black surface + ink */
-  --color-bh-paper: #f3f2ec; /* warm off-white page */
-  --color-bh-stone: #e6e5dd; /* light neutral card */
+  /* Biohacking Experience — brand palette sampled from the logo */
+  --color-bh-lime: #acec1d; /* bright lime — primary accent (EXPERIENCE) */
+  --color-bh-lime-soft: #cef870; /* pale lime — logo circle / tints */
+  --color-bh-teal: #0ecdb7; /* teal — secondary accent (BIOHACKING) */
+  --color-bh-forest: #2c5d4e; /* deep green card surface */
+  --color-bh-ink: #02251f; /* near-black green — icon / primary ink */
+  --color-bh-paper: #f3f4ef; /* off-white page */
+  --color-bh-stone: #e5e7de; /* light neutral card */
 }
 
 @theme inline {
   --color-bh-lime: var(--color-bh-lime);
   --color-bh-lime-soft: var(--color-bh-lime-soft);
+  --color-bh-teal: var(--color-bh-teal);
   --color-bh-forest: var(--color-bh-forest);
   --color-bh-ink: var(--color-bh-ink);
   --color-bh-paper: var(--color-bh-paper);

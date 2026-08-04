@@ -11,9 +11,12 @@ export function SummitFooter() {
       <div className="mx-auto w-full max-w-7xl px-6 lg:px-10">
         <div className="flex flex-col gap-10 border-t border-white/10 pt-12 lg:flex-row lg:justify-between">
           <div className="max-w-sm">
-            <p className="font-display text-lg font-extrabold uppercase tracking-tight">
-              Biohacking<span className="text-bh-lime">.</span>Experience
-            </p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo.svg"
+              alt="Biohacking Experience"
+              className="h-10 w-auto"
+            />
             <p className="mt-4 text-sm leading-relaxed text-white/55">
               Потребителската част на Sofia Life Summit. Куратор и продуцент —
               Biohacking.bg, в партньорство с Bulgarian Longevity Association.

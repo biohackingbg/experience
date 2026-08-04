@@ -13,13 +13,15 @@ export function SummitNav() {
       <nav className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-4 lg:px-10">
         <Link
           href="#top"
-          className="font-display text-sm font-extrabold uppercase leading-none tracking-tight text-white"
+          aria-label="Biohacking Experience — начало"
+          className="flex items-center"
         >
-          Biohacking
-          <span className="text-bh-lime">.</span>
-          <span className="block text-[0.62rem] font-medium tracking-[0.35em] text-white/50">
-            EXPERIENCE
-          </span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.svg"
+            alt="Biohacking Experience"
+            className="h-8 w-auto sm:h-9"
+          />
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">

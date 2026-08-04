@@ -27,7 +27,7 @@ export function SummitHero() {
           className="hu-rise mt-8 font-display text-[clamp(2.3rem,9vw,7.5rem)] font-extrabold uppercase leading-[0.92] tracking-tight"
           style={{ animationDelay: "80ms" }}
         >
-          Biohacking
+          <span className="text-bh-teal">Biohacking</span>
           <br />
           <span className="text-bh-lime">Experience</span>
         </h1>
