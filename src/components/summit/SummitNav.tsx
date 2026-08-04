@@ -10,7 +10,7 @@ const links = [
 export function SummitNav() {
   return (
     <header className="px-5 pt-5 sm:px-8 lg:px-10">
-      <nav className="flex items-center justify-between border-b-2 border-bh-ink pb-5">
+      <nav className="flex items-center justify-between border-b border-bh-ink/15 pb-5">
         <Link
           href="#top"
           aria-label="Biohacking Experience — начало"
