@@ -18,7 +18,7 @@ export function SummitHero() {
   return (
     <section id="top" className="px-5 pt-6 sm:px-8 sm:pt-8 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
-        <p className="hu-rise inline-flex flex-wrap items-center gap-x-3 gap-y-1 rounded-full bg-bh-ink px-5 py-2.5 font-mono text-[0.8rem] font-medium uppercase tracking-[0.15em] text-bh-lime sm:text-[0.9rem]">
+        <p className="hu-rise inline-flex flex-wrap items-center gap-x-4 gap-y-1 rounded-full bg-bh-ink px-7 py-4 font-mono text-base font-semibold uppercase tracking-[0.14em] text-bh-lime sm:text-lg">
           <span>Sofia Life Summit</span>
           <span aria-hidden className="text-bh-lime/40">·</span>
           <span>07—08.11.2026</span>
@@ -26,9 +26,9 @@ export function SummitHero() {
           <span>София</span>
         </p>
 
-        <div className="mt-5 grid gap-8 lg:grid-cols-[1.35fr_1fr] lg:items-end">
+        <div className="mt-5 grid gap-6 lg:grid-cols-[1.35fr_1fr] lg:items-stretch">
           <h1
-            className="hu-rise font-bricolage text-[clamp(2.7rem,7.8vw,6rem)] font-extrabold uppercase leading-[0.86] tracking-tight text-bh-ink"
+            className="hu-rise self-end font-bricolage text-[clamp(2.7rem,7.8vw,6rem)] font-extrabold uppercase leading-[0.86] tracking-tight text-bh-ink"
             style={{ animationDelay: "80ms" }}
           >
             Biohacking
@@ -36,14 +36,22 @@ export function SummitHero() {
             Experience
           </h1>
 
-          <p
-            className="hu-rise max-w-md text-base leading-relaxed text-bh-ink/65 lg:pb-3"
+          <article
+            className="hu-rise flex flex-col justify-between rounded-3xl bg-bh-ink p-7 text-bh-paper"
             style={{ animationDelay: "160ms" }}
           >
-            Не конференция със столове в редици. Longevity медицината излиза от
-            лабораторията — на разбираем език, за един ден, в който слушаш,
-            измерваш се, изпробваш и си тръгваш с личен протокол.
-          </p>
+            <div className="flex items-start justify-between">
+              <span className="rounded-full bg-bh-paper/10 px-4 py-1.5 text-xs font-semibold text-bh-paper">
+                Добре дошъл
+              </span>
+              <span className="text-3xl leading-none text-bh-lime">✳</span>
+            </div>
+            <p className="mt-10 text-sm leading-relaxed text-bh-paper/70">
+              Не конференция със столове в редици. Longevity медицината излиза
+              от лабораторията — на разбираем език, за един ден, в който
+              слушаш, измерваш се, изпробваш и си тръгваш с личен протокол.
+            </p>
+          </article>
         </div>
 
         <div
