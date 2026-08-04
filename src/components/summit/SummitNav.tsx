@@ -14,16 +14,14 @@ export function SummitNav() {
         <Link
           href="#top"
           aria-label="Biohacking Experience — начало"
-          className="flex items-center gap-2.5"
+          className="flex items-center"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/icon.svg" alt="" className="h-9 w-9" />
-          <span className="text-sm font-bold uppercase leading-none tracking-tight text-bh-ink">
-            Biohacking
-            <span className="block text-[0.6rem] font-medium tracking-[0.3em] text-bh-ink/45">
-              EXPERIENCE
-            </span>
-          </span>
+          <img
+            src="/logo.svg"
+            alt="Biohacking Experience"
+            className="h-7 w-auto sm:h-8"
+          />
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">

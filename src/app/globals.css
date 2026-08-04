@@ -25,6 +25,7 @@
 
   --font-sans: var(--font-body);
   --font-display: var(--font-body); /* neutral grotesk headings (Inter) */
+  --font-bricolage: var(--font-bricolage); /* hero wordmark */
   --font-mono: var(--font-geist-mono);
 }
 

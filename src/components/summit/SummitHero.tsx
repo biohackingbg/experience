@@ -16,15 +16,19 @@ function Arrow({ className = "" }: { className?: string }) {
 
 export function SummitHero() {
   return (
-    <section id="top" className="px-5 pt-14 sm:px-8 sm:pt-20 lg:px-10">
+    <section id="top" className="px-5 pt-6 sm:px-8 sm:pt-8 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
-        <p className="hu-rise font-mono text-[0.7rem] uppercase tracking-[0.25em] text-bh-ink/50">
-          Sofia Life Summit · 07—08.11.2026 · София
+        <p className="hu-rise inline-flex flex-wrap items-center gap-x-3 gap-y-1 rounded-full bg-bh-ink px-5 py-2.5 font-mono text-[0.8rem] font-medium uppercase tracking-[0.15em] text-bh-lime sm:text-[0.9rem]">
+          <span>Sofia Life Summit</span>
+          <span aria-hidden className="text-bh-lime/40">·</span>
+          <span>07—08.11.2026</span>
+          <span aria-hidden className="text-bh-lime/40">·</span>
+          <span>София</span>
         </p>
 
-        <div className="mt-6 grid gap-8 lg:grid-cols-[1.35fr_1fr] lg:items-end">
+        <div className="mt-5 grid gap-8 lg:grid-cols-[1.35fr_1fr] lg:items-end">
           <h1
-            className="hu-rise text-[clamp(2.7rem,7.8vw,6rem)] font-black uppercase leading-[0.86] tracking-tight text-bh-ink"
+            className="hu-rise font-bricolage text-[clamp(2.7rem,7.8vw,6rem)] font-extrabold uppercase leading-[0.86] tracking-tight text-bh-ink"
             style={{ animationDelay: "80ms" }}
           >
             Biohacking
@@ -43,7 +47,7 @@ export function SummitHero() {
         </div>
 
         <div
-          className="hu-rise mt-8 flex flex-wrap items-center gap-3"
+          className="hu-rise mt-6 flex flex-wrap items-center gap-3"
           style={{ animationDelay: "240ms" }}
         >
           <a
@@ -61,7 +65,7 @@ export function SummitHero() {
         </div>
 
         {/* bento */}
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {/* passport — tall dark */}
           <article className="flex flex-col justify-between rounded-3xl bg-bh-ink p-7 text-bh-paper sm:col-span-2 lg:col-span-1 lg:row-span-2">
             <div className="flex items-start justify-between">

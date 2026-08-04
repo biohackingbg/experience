@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
-import { Inter, Geist_Mono } from "next/font/google";
+import { Inter, Geist_Mono, Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 
 const bodyFont = Inter({
   variable: "--font-body",
   subsets: ["latin", "cyrillic"],
+});
+
+const displayFont = Bricolage_Grotesque({
+  variable: "--font-bricolage",
+  subsets: ["latin"],
 });
 
 const monoFont = Geist_Mono({
@@ -26,7 +31,7 @@ export default function RootLayout({
   return (
     <html
       lang="bg"
-      className={`${bodyFont.variable} ${monoFont.variable} h-full antialiased`}
+      className={`${bodyFont.variable} ${monoFont.variable} ${displayFont.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-bh-ink p-2 text-bh-ink sm:p-3">
         {children}
