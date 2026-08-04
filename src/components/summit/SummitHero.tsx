@@ -20,12 +20,20 @@ export function SummitHero() {
       <div className="mx-auto w-full max-w-7xl">
         <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr] lg:items-stretch">
           <h1
-            className="hu-rise self-end font-bricolage text-[clamp(2.7rem,7.8vw,6rem)] font-extrabold uppercase leading-[0.86] tracking-tight text-bh-ink"
+            className="hu-rise self-end font-bricolage font-extrabold uppercase leading-[0.86] tracking-tight text-bh-ink"
             style={{ animationDelay: "80ms" }}
           >
-            Biohacking
-            <br />
-            Experience
+            <span className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[clamp(1.1rem,2.6vw,2rem)]">
+              Sofia Life Summit
+              <span className="inline-flex items-center rounded-full border-2 border-bh-ink px-4 py-1 text-[0.85em] leading-none">
+                07—08.11.2026
+              </span>
+            </span>
+            <span className="mt-2 block text-[clamp(2.7rem,7.8vw,6rem)]">
+              Biohacking
+              <br />
+              Experience
+            </span>
           </h1>
 
           <article
@@ -33,11 +41,9 @@ export function SummitHero() {
             style={{ animationDelay: "160ms" }}
           >
             <div className="flex items-start justify-between gap-4">
-              <p className="font-mono text-base font-semibold uppercase leading-snug tracking-[0.12em] text-bh-lime sm:text-lg">
-                Sofia Life Summit
-                <span className="mt-1 block">07—08.11.2026</span>
-                <span className="mt-1 block text-bh-lime/60">София</span>
-              </p>
+              <span className="rounded-full border border-bh-paper/30 px-4 py-1.5 font-mono text-xs uppercase tracking-[0.15em] text-bh-paper">
+                Гранд Хотел Милениум
+              </span>
               <span className="text-3xl leading-none text-bh-lime">✳</span>
             </div>
             <p className="mt-10 text-sm leading-relaxed text-bh-paper/70">
