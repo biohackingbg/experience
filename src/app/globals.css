@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+:root {
+  /* Biohacking Experience event palette — lime / forest / ink / paper */
+  --color-bh-lime: #b8e845; /* primary accent — spring green */
+  --color-bh-lime-soft: #d6f28a; /* muted lime for tints */
+  --color-bh-forest: #14351f; /* deep green card surface */
+  --color-bh-ink: #0a0b0a; /* near-black surface + ink */
+  --color-bh-paper: #f3f2ec; /* warm off-white page */
+  --color-bh-stone: #e6e5dd; /* light neutral card */
+}
+
+@theme inline {
+  --color-bh-lime: var(--color-bh-lime);
+  --color-bh-lime-soft: var(--color-bh-lime-soft);
+  --color-bh-forest: var(--color-bh-forest);
+  --color-bh-ink: var(--color-bh-ink);
+  --color-bh-paper: var(--color-bh-paper);
+  --color-bh-stone: var(--color-bh-stone);
+
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/*
+ * Above-the-fold entrance animation. Pure CSS so markup is never JS-dependent:
+ * content paints and animates immediately, instead of waiting for hydration.
+ */
+@keyframes hu-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.hu-rise {
+  animation: hu-rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hu-rise {
+    animation: none;
+  }
+}
+
+/* Infinite marquee ticker */
+@keyframes bh-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.bh-marquee {
+  animation: bh-marquee 28s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bh-marquee {
+    animation: none;
+  }
+}
