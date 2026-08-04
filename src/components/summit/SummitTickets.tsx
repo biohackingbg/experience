@@ -1,3 +1,5 @@
+import { Reveal } from "@/components/ui/Reveal";
+
 const tiers = [
   {
     name: "Основен",
@@ -62,7 +64,7 @@ export function SummitTickets() {
   return (
     <section id="tickets" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
-        <div className="flex flex-col gap-6 border-t border-bh-ink/15 pt-8 lg:flex-row lg:items-end lg:justify-between">
+        <Reveal className="flex flex-col gap-6 border-t border-bh-ink/15 pt-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">
               Билети
@@ -75,15 +77,15 @@ export function SummitTickets() {
             Всички билети дават достъп до сцената и Village. Разликата е в
             лабораторията и в това с какво си тръгва посетителят.
           </p>
-        </div>
+        </Reveal>
 
         <div className="mt-12 grid items-start gap-4 lg:grid-cols-3">
-          {tiers.map((tier) => {
+          {tiers.map((tier, i) => {
             const featured = tier.featured;
             return (
+              <Reveal key={tier.name} delay={i * 110}>
               <div
-                key={tier.name}
-                className={`relative flex flex-col rounded-3xl p-8 ${
+                className={`relative flex h-full flex-col rounded-3xl p-8 ${
                   featured
                     ? "bh-gradient-soft text-bh-ink"
                     : "bg-bh-cloud text-bh-ink ring-1 ring-bh-ink/8"
@@ -137,6 +139,7 @@ export function SummitTickets() {
                   Избери {tier.name}
                 </a>
               </div>
+              </Reveal>
             );
           })}
         </div>

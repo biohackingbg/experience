@@ -35,6 +35,33 @@ body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
+/*
+ * Scroll reveal. Gated on `.js` (set by a blocking script in the layout) so
+ * content is never left invisible when scripting doesn't run.
+ */
+.js .bh-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition:
+    opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.js .bh-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js .bh-reveal,
+  .js .bh-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 /* Brand gradient: teal → teal → sky. Full strength for accent surfaces,
    tinted variant for the large pale fills. */
 .bh-gradient {

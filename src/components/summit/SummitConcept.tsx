@@ -1,3 +1,5 @@
+import { Reveal } from "@/components/ui/Reveal";
+
 const zones = [
   {
     no: "01",
@@ -33,7 +35,7 @@ export function SummitConcept() {
   return (
     <section id="concept" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
-        <div className="flex flex-col gap-6 border-t border-bh-ink/15 pt-8 lg:flex-row lg:items-end lg:justify-between">
+        <Reveal className="flex flex-col gap-6 border-t border-bh-ink/15 pt-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">
               Концепцията
@@ -46,13 +48,13 @@ export function SummitConcept() {
             Посетителят се движи между зоните през целия ден: слуша, измерва се,
             изпробва, тръгва си с план.
           </p>
-        </div>
+        </Reveal>
 
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {zones.map((z) => (
+          {zones.map((z, i) => (
+            <Reveal key={z.no} delay={i * 90}>
             <article
-              key={z.no}
-              className={`flex min-h-[17rem] flex-col justify-between rounded-3xl p-7 transition-transform duration-300 hover:-translate-y-1.5 ${
+              className={`flex h-full min-h-[17rem] flex-col justify-between rounded-3xl p-7 transition-transform duration-300 hover:-translate-y-1.5 ${
                 z.dark
                   ? "bg-bh-ink text-bh-paper"
                   : "bg-bh-cloud text-bh-ink ring-1 ring-bh-ink/8"
@@ -87,6 +89,7 @@ export function SummitConcept() {
                 </p>
               </div>
             </article>
+            </Reveal>
           ))}
         </div>
       </div>

@@ -1,3 +1,5 @@
+import { Reveal } from "@/components/ui/Reveal";
+
 const facts = [
   { label: "Дати", value: "07—08 ноември 2026" },
   { label: "Място", value: "Гранд Хотел Милениум, София" },
@@ -8,7 +10,7 @@ export function SummitRegister() {
   return (
     <section id="register" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
-        <div className="rounded-[2rem] bg-bh-ink px-8 py-14 text-bh-paper sm:px-12 lg:px-16 lg:py-20">
+        <Reveal className="rounded-[2rem] bg-bh-ink px-8 py-14 text-bh-paper sm:px-12 lg:px-16 lg:py-20">
           <div className="max-w-3xl">
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-bh-lime">
               Запази мястото си
@@ -50,7 +52,7 @@ export function SummitRegister() {
               </div>
             ))}
           </dl>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

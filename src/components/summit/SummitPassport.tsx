@@ -1,3 +1,5 @@
+import { Reveal } from "@/components/ui/Reveal";
+
 const markers = [
   {
     no: "01",
@@ -35,7 +37,7 @@ export function SummitPassport() {
   return (
     <section id="passport" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
-        <div className="flex flex-col gap-6 border-t border-bh-ink/15 pt-8 lg:flex-row lg:items-end lg:justify-between">
+        <Reveal className="flex flex-col gap-6 border-t border-bh-ink/15 pt-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">
               Ядрото на офертата
@@ -48,9 +50,9 @@ export function SummitPassport() {
             „Добре, а аз къде съм“ — тази зона отговаря. Това, което никой друг
             wellness формат в България не предлага.
           </p>
-        </div>
+        </Reveal>
 
-        <div className="mt-12 overflow-hidden rounded-3xl bg-bh-cloud ring-1 ring-bh-ink/8">
+        <Reveal className="mt-12 overflow-hidden rounded-3xl bg-bh-cloud ring-1 ring-bh-ink/8">
           <div className="grid sm:grid-cols-2">
             {markers.map((m, i) => (
               <div
@@ -73,7 +75,7 @@ export function SummitPassport() {
               </div>
             ))}
           </div>
-        </div>
+        </Reveal>
 
         <p className="mt-6 max-w-3xl font-mono text-[0.7rem] leading-relaxed uppercase tracking-[0.12em] text-bh-ink/40">
           Скринингът не е диагноза. Резултатите се тълкуват от специалист на

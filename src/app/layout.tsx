@@ -34,6 +34,13 @@ export default function RootLayout({
       className={`${bodyFont.variable} ${monoFont.variable} ${displayFont.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-bh-ink p-2 text-bh-ink sm:p-3">
+        {/* Marks scripting as available before first paint, so the scroll-reveal
+            styles only hide content when they can also un-hide it. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `document.documentElement.classList.add('js')`,
+          }}
+        />
         {children}
       </body>
     </html>

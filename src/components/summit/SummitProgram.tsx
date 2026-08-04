@@ -1,3 +1,5 @@
+import { Reveal } from "@/components/ui/Reveal";
+
 const days = [
   {
     day: "Събота",
@@ -35,7 +37,7 @@ export function SummitProgram() {
   return (
     <section id="program" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
-        <div className="flex flex-col gap-6 border-t border-bh-ink/15 pt-8 lg:flex-row lg:items-end lg:justify-between">
+        <Reveal className="flex flex-col gap-6 border-t border-bh-ink/15 pt-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">
               Програма
@@ -48,14 +50,12 @@ export function SummitProgram() {
             Работна програма. Лабораторията и ритуалите работят паралелно през
             целия ден, със записване на час.
           </p>
-        </div>
+        </Reveal>
 
         <div className="mt-12 grid gap-4 lg:grid-cols-2">
-          {days.map((d) => (
-            <div
-              key={d.date}
-              className="overflow-hidden rounded-3xl bg-bh-cloud ring-1 ring-bh-ink/8"
-            >
+          {days.map((d, i) => (
+            <Reveal key={d.date} delay={i * 120}>
+            <div className="h-full overflow-hidden rounded-3xl bg-bh-cloud ring-1 ring-bh-ink/8">
               <div className="flex items-baseline justify-between bg-bh-ink px-7 py-6 text-bh-paper">
                 <div className="flex items-baseline gap-3">
                   <span className="text-xl font-black uppercase tracking-tight">
@@ -88,6 +88,7 @@ export function SummitProgram() {
                 ))}
               </ul>
             </div>
+            </Reveal>
           ))}
         </div>
       </div>
