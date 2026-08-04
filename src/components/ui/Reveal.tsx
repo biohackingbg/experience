@@ -25,9 +25,10 @@ export function Reveal({
     const el = ref.current;
     if (!el) return;
 
+    // No observer support — show it on the next frame rather than never.
     if (typeof IntersectionObserver === "undefined") {
-      setShown(true);
-      return;
+      const frame = requestAnimationFrame(() => setShown(true));
+      return () => cancelAnimationFrame(frame);
     }
 
     // Already in view on load (e.g. deep link) — reveal immediately.
