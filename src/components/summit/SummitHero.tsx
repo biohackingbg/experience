@@ -24,18 +24,12 @@ export function SummitHero() {
 
         <div className="mt-6 grid gap-8 lg:grid-cols-[1.35fr_1fr] lg:items-end">
           <h1
-            className="hu-rise text-[clamp(2.6rem,7.5vw,6rem)] font-black uppercase leading-[0.9] tracking-tight text-bh-ink"
+            className="hu-rise text-[clamp(2.7rem,7.8vw,6rem)] font-black uppercase leading-[0.86] tracking-tight text-bh-ink"
             style={{ animationDelay: "80ms" }}
           >
-            Измерваш се.
+            Biohacking
             <br />
-            Разбираш се.
-            <br />
-            Тръгваш с{" "}
-            <span className="inline-flex items-center rounded-full border-2 border-bh-ink px-5 pb-1 align-baseline leading-none">
-              план
-            </span>
-            .
+            Experience
           </h1>
 
           <p
