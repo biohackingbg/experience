@@ -1,35 +1,30 @@
 import { Reveal } from "@/components/ui/Reveal";
 
+/** The four zones are peers, so they share one card treatment. */
 const zones = [
   {
     no: "01",
     tag: "Сцена",
     title: "Знанието",
     body: "Същите международни имена, но на разбираем език, по 25 минути. Главна сцена 600 места, втора сцена 150.",
-    dark: false,
   },
   {
     no: "02",
     tag: "Лаборатория",
     title: "Числата",
     body: "12 станции за измерване. Влизаш с празен паспорт, излизаш с реални показатели и обяснение.",
-    dark: true,
   },
   {
     no: "03",
     tag: "Ритуали",
     title: "Тялото",
     body: "Сесии по 30 минути със записан час. Студ, сауна, дишане, red light, PEMF.",
-    dark: false,
-    fill: "bh-gradient-soft",
   },
   {
     no: "04",
     tag: "Village",
     title: "Брандовете",
     body: "30 подбрани компании: добавки, устройства, лаборатории, клиники, храна.",
-    dark: false,
-    fill: "bh-gradient-sky",
   },
 ];
 
@@ -55,40 +50,18 @@ export function SummitConcept() {
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {zones.map((z, i) => (
             <Reveal key={z.no} delay={i * 90}>
-            <article
-              className={`flex h-full min-h-[17rem] flex-col justify-between rounded-3xl p-7 transition-transform duration-300 hover:-translate-y-1.5 ${
-                z.dark
-                  ? "bg-bh-ink text-bh-paper"
-                  : z.fill
-                    ? `${z.fill} text-bh-ink`
-                    : "bg-bh-cloud text-bh-ink ring-1 ring-bh-ink/8"
-              }`}
-            >
+            <article className="bh-gradient-sky flex h-full min-h-[17rem] flex-col justify-between rounded-3xl p-7 text-bh-ink transition-transform duration-300 hover:-translate-y-1.5">
               <div className="flex items-center justify-between">
-                <span
-                  className={`font-mono text-sm ${
-                    z.dark ? "text-bh-lime" : "text-bh-ink/40"
-                  }`}
-                >
+                <span className="font-mono text-sm text-bh-ink/40">
                   / {z.no}
                 </span>
-                <span
-                  className={`rounded-full px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.12em] ${
-                    z.dark
-                      ? "bg-bh-paper/10 text-bh-paper/80"
-                      : "bg-bh-ink/10 text-bh-ink/70"
-                  }`}
-                >
+                <span className="rounded-full bg-bh-ink/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-bh-ink/70">
                   {z.tag}
                 </span>
               </div>
               <div>
                 <h3 className="text-2xl font-bold tracking-tight">{z.title}</h3>
-                <p
-                  className={`mt-3 text-sm leading-relaxed ${
-                    z.dark ? "text-bh-paper/60" : "text-bh-ink/60"
-                  }`}
-                >
+                <p className="mt-3 text-sm leading-relaxed text-bh-ink/60">
                   {z.body}
                 </p>
               </div>
