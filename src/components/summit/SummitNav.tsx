@@ -48,7 +48,7 @@ export function SummitNav() {
           <ThemeToggle />
           <a
             href="#tickets"
-            className="bh-gradient inline-flex items-center rounded-full px-5 py-2.5 text-sm font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
+            className="bh-gradient inline-flex items-center whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
           >
             Купи билет
           </a>

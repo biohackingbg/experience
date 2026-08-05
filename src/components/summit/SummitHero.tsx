@@ -27,7 +27,10 @@ export function SummitHero() {
             </p>
 
             <h1
-              className="hu-rise mt-3 font-display text-[clamp(3.3rem,10.3vw,9.6rem)] font-[1000] uppercase leading-[0.82] tracking-[-0.035em] text-bh-ink"
+              /* Two sizes, because the column changes shape: below lg the
+                 heading owns the full width, at lg it shares the row with the
+                 venue card and only gets ~60% of it. */
+              className="hu-rise mt-3 font-display text-[clamp(3.3rem,16vw,9.6rem)] font-[1000] uppercase leading-[0.82] tracking-[-0.035em] text-bh-ink lg:text-[clamp(3.3rem,10.3vw,9.6rem)]"
               style={{ animationDelay: "80ms" }}
             >
               Sofia Life
