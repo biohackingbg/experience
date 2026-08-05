@@ -25,7 +25,7 @@ export function SummitFooter() {
               className="bh-logo-dark-bg h-9 w-auto"
             />
             <p className="mt-5 text-sm leading-relaxed text-bh-ink/55">
-              Потребителската част на Sofia Life Summit. Куратор и продуцент —
+              Потребителската част на Longevity Summit. Куратор и продуцент —
               Biohacking.bg, в партньорство с Bulgarian Longevity Association.
             </p>
           </div>
@@ -71,7 +71,7 @@ export function SummitFooter() {
 
         <div className="mt-12 flex flex-col gap-2 border-t border-bh-ink/10 pt-6 font-mono text-xs uppercase tracking-[0.15em] text-bh-ink/35 sm:flex-row sm:justify-between">
           <span>© 2026 Biohacking.bg</span>
-          <span>Sofia Life Summit · Longevity for everyone</span>
+          <span>Longevity Summit · Longevity for everyone</span>
         </div>
       </div>
     </footer>

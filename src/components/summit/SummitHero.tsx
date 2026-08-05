@@ -20,29 +20,23 @@ export function SummitHero() {
       <div className="mx-auto w-full max-w-7xl">
         <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr] lg:items-stretch">
           <div className="self-end">
+            <p className="hu-rise flex flex-wrap items-center gap-x-3 gap-y-2 font-bricolage text-[clamp(1.05rem,2.5vw,1.9rem)] font-extrabold uppercase leading-none tracking-tight text-bh-pine">
+              Biohacking Experience
+              <span className="text-bh-ink/35">·</span>
+              София
+              <span className="inline-flex items-center rounded-full border-2 border-bh-pine px-4 py-1 text-[0.85em] leading-none">
+                07—08.11.2026
+              </span>
+            </p>
+
             <h1
-              className="hu-rise font-bricolage font-extrabold uppercase leading-[0.86] tracking-tight text-bh-ink"
+              className="hu-rise mt-3 font-bricolage text-[clamp(2.8rem,8.2vw,6.4rem)] font-extrabold uppercase leading-[0.86] tracking-tight text-bh-ink"
               style={{ animationDelay: "80ms" }}
             >
-              <span className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[clamp(1.1rem,2.6vw,2rem)]">
-                София
-                <span className="inline-flex items-center rounded-full border-2 border-bh-ink px-4 py-1 text-[0.85em] leading-none">
-                  07—08.11.2026
-                </span>
-              </span>
-              <span className="mt-2 block text-[clamp(2.7rem,7.8vw,6rem)]">
-                Longevity
-                <br />
-                Summit
-              </span>
+              Longevity
+              <br />
+              Summit
             </h1>
-
-            <p
-              className="hu-rise mt-4 font-bricolage text-[clamp(1.25rem,3vw,2.25rem)] font-extrabold uppercase leading-none tracking-tight text-bh-pine"
-              style={{ animationDelay: "140ms" }}
-            >
-              Biohacking Experience
-            </p>
           </div>
 
           <article
