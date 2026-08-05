@@ -1,3 +1,4 @@
+import { EarlyAccessForm } from "@/components/summit/EarlyAccessForm";
 import { Reveal } from "@/components/ui/Reveal";
 
 const facts = [
@@ -24,20 +25,7 @@ export function SummitRegister() {
               първите, които ще ги получат.
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <a
-                href="mailto:hello@biohacking.bg?subject=Ранен%20билет%20—%20Biohacking%20Experience"
-                className="bh-gradient inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
-              >
-                Заяви ранен билет
-              </a>
-              <a
-                href="#tickets"
-                className="inline-flex items-center gap-2 rounded-full border border-bh-paper/25 px-7 py-3.5 text-sm font-semibold text-bh-paper transition-colors hover:border-bh-paper"
-              >
-                Виж нивата
-              </a>
-            </div>
+            <EarlyAccessForm />
           </div>
 
           <dl className="mt-14 grid gap-8 border-t border-bh-paper/15 pt-8 sm:grid-cols-3">
