@@ -21,16 +21,17 @@ export function SummitOrganizers() {
           <div className="mt-10 flex flex-col items-center justify-center gap-8 sm:flex-row sm:gap-14">
             {/* Partner — Bulgarian Longevity Association */}
             <div className="flex items-center justify-center">
+              {/* Taller than ours on purpose: their lockup spends most of its
+                  height on the mark, so matching box heights would leave their
+                  wordmark visibly smaller than ours. Shown in their own colours
+                  in both themes, on a transparent background. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/partner-logo.png"
                 alt="Bulgarian Longevity Association"
                 width={900}
                 height={458}
-                /* Taller than ours on purpose: their lockup spends most of its
-                   height on the mark, so matching box heights would leave their
-                   wordmark visibly smaller than ours. */
-                className="bh-partner-logo h-24 w-auto"
+                className="h-24 w-auto"
               />
             </div>
 

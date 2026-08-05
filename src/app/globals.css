@@ -83,15 +83,6 @@ body {
   display: block;
 }
 
-/* The partner mark is fixed artwork in their own dark teal and rose, so it
-   cannot invert with the theme. In dark mode it gets a light plate instead —
-   their brand colours stay accurate rather than being recoloured. */
-:root[data-theme="dark"] .bh-partner-logo {
-  background: #f6f7f4;
-  padding: 0.7rem 1.1rem;
-  border-radius: 0.9rem;
-}
-
 /*
  * Scroll reveal. Gated on `.js` (set by a blocking script in the layout) so
  * content is never left invisible when scripting doesn't run.
