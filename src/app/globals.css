@@ -159,6 +159,14 @@ body {
   --color-bh-pine: #146455;
 }
 
+/* Section eyebrows go neon on the dark page. Only the ones sitting on page or
+   cloud — the label inside the mint card stays muted, since lime on pale mint
+   would be unreadable. Written as a literal because the lime *token* flips to
+   dark green in dark mode (it is meant for ink-coloured surfaces). */
+:root[data-theme="dark"] .bh-eyebrow {
+  color: #cef870;
+}
+
 /* The schedule card is mint in both themes, but its header inherits the pinned
    near-black ink. In dark mode that reads as a black bar; the brand green keeps
    it green without losing contrast against the white text. */

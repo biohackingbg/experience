@@ -14,7 +14,7 @@ export function SummitOrganizers() {
     <section className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
         <Reveal className="rounded-3xl bg-bh-cloud px-8 py-12 ring-1 ring-bh-ink/8 sm:px-12">
-          <p className="text-center font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/45">
+          <p className="bh-eyebrow text-center font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/45">
             Организатори
           </p>
 
