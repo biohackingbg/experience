@@ -76,12 +76,11 @@ export function SummitOrganizers() {
           </div>
 
           <p className="mx-auto mt-10 max-w-2xl text-center text-sm leading-relaxed text-bh-ink/60">
+            Sofia Life Summit се организира съвместно от{" "}
             <span className="font-semibold text-bh-ink">
               Bulgarian Longevity Association
             </span>{" "}
-            организира медицинската конференция.{" "}
-            <span className="font-semibold text-bh-ink">Biohacking.bg</span> е
-            куратор и продуцент на потребителската част.
+            и <span className="font-semibold text-bh-ink">Biohacking.bg</span>.
           </p>
         </Reveal>
       </div>

@@ -25,8 +25,8 @@ export function SummitFooter() {
               className="bh-logo-dark-bg h-9 w-auto"
             />
             <p className="mt-5 text-sm leading-relaxed text-bh-ink/55">
-              Потребителската част на Sofia Life Summit. Куратор и продуцент —
-              Biohacking.bg, в партньорство с Bulgarian Longevity Association.
+              Sofia Life Summit се организира съвместно от Bulgarian Longevity
+              Association и Biohacking.bg.
             </p>
           </div>
 
