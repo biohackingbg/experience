@@ -18,7 +18,7 @@ export function SummitHero() {
   return (
     <section id="top" className="px-5 pt-6 sm:px-8 sm:pt-8 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
-        <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr] lg:items-stretch">
+        <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr] lg:items-stretch">
           <div className="self-end">
             <p className="hu-rise flex flex-wrap items-center gap-x-3 gap-y-2 font-display text-[clamp(1.05rem,2.5vw,1.9rem)] font-[900] uppercase leading-none tracking-[-0.01em] text-bh-pine">
               Biohacking Experience
@@ -28,7 +28,7 @@ export function SummitHero() {
             </p>
 
             <h1
-              className="hu-rise mt-3 font-display text-[clamp(3.1rem,9.6vw,8rem)] font-[1000] uppercase leading-[0.82] tracking-[-0.035em] text-bh-ink"
+              className="hu-rise mt-3 font-display text-[clamp(3.3rem,10.3vw,9.6rem)] font-[1000] uppercase leading-[0.82] tracking-[-0.035em] text-bh-ink"
               style={{ animationDelay: "80ms" }}
             >
               Sofia Life
