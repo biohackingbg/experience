@@ -26,6 +26,10 @@
   --color-bh-lime: #cef870;
   --color-bh-pine: #146455;
 
+  /* Flat mint fill. Flips to a deep tint in dark mode — the pale value would
+     glare against a dark page. */
+  --color-bh-mint: #e7f6f1;
+
   /* Partner accent — the rose from the Bulgarian Longevity Association mark.
      Used only in the co-branding strip, never as a general site colour. */
   --color-bh-rose: #d4869c;
@@ -43,6 +47,7 @@
   /* Inverted: ink cards are now light, paper is now deep green. */
   --color-bh-lime: #146455;
   --color-bh-pine: #cef870;
+  --color-bh-mint: #0d2f2b;
 }
 
 @theme inline {
@@ -59,6 +64,7 @@
   --color-bh-lime-bright: var(--color-bh-lime-bright);
   --color-bh-stone: var(--color-bh-stone);
   --color-bh-rose: var(--color-bh-rose);
+  --color-bh-mint: var(--color-bh-mint);
 
   --font-sans: var(--font-body); /* Geologica — body and UI */
   --font-display: var(--font-display-sans); /* Sofia Sans — headings */
@@ -81,6 +87,15 @@ body {
 
 :root[data-theme="dark"] .bh-logo-dark-bg {
   display: block;
+}
+
+/* The partner mark is fixed artwork in their own dark teal and rose, so it
+   cannot invert with the theme. In dark mode it gets a light plate instead —
+   their brand colours stay accurate rather than being recoloured. */
+:root[data-theme="dark"] .bh-partner-logo {
+  background: #f6f7f4;
+  padding: 0.7rem 1.1rem;
+  border-radius: 0.9rem;
 }
 
 /*

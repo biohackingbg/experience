@@ -38,7 +38,7 @@ export function SummitHero() {
           </div>
 
           <article
-            className="hu-rise bh-gradient-soft flex flex-col justify-between rounded-3xl p-7 text-bh-ink"
+            className="hu-rise flex flex-col justify-between rounded-3xl bg-bh-mint p-7 text-bh-ink"
             style={{ animationDelay: "160ms" }}
           >
             <div className="flex items-start justify-between gap-4">
