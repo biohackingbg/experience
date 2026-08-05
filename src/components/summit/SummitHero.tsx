@@ -20,9 +20,7 @@ export function SummitHero() {
       <div className="mx-auto w-full max-w-7xl">
         <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr] lg:items-stretch">
           <div className="self-end">
-            {/* Kept in Latin: Bricolage Grotesque ships no Cyrillic subset, so
-                a Cyrillic word here would silently fall back to another face. */}
-            <p className="hu-rise flex flex-wrap items-center gap-x-3 gap-y-2 font-bricolage text-[clamp(1.05rem,2.5vw,1.9rem)] font-extrabold uppercase leading-none tracking-[-0.01em] text-bh-pine">
+            <p className="hu-rise flex flex-wrap items-center gap-x-3 gap-y-2 font-display text-[clamp(1.05rem,2.5vw,1.9rem)] font-[900] uppercase leading-none tracking-[-0.01em] text-bh-pine">
               Biohacking Experience
               <span className="text-bh-ink/35">·</span>
               Sofia
@@ -32,7 +30,7 @@ export function SummitHero() {
             </p>
 
             <h1
-              className="hu-rise mt-3 font-bricolage text-[clamp(3.1rem,9.6vw,8rem)] font-extrabold uppercase leading-[0.82] tracking-[-0.035em] text-bh-ink"
+              className="hu-rise mt-3 font-display text-[clamp(3.1rem,9.6vw,8rem)] font-[1000] uppercase leading-[0.82] tracking-[-0.035em] text-bh-ink"
               style={{ animationDelay: "80ms" }}
             >
               Longevity

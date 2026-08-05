@@ -16,7 +16,7 @@ export function SummitRegister() {
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-bh-lime">
               Запази мястото си
             </p>
-            <h2 className="mt-5 text-[clamp(2.1rem,5vw,4rem)] font-black uppercase leading-[0.95] tracking-tight">
+            <h2 className="mt-5 text-[clamp(2.1rem,5vw,4rem)] font-display font-[900] uppercase leading-[0.95] tracking-tight">
               Един ден. Реални числа. Личен план.
             </h2>
             <p className="mt-6 max-w-xl text-base leading-relaxed text-bh-paper/65">

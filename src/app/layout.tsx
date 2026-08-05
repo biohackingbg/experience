@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
-import { Inter, Geist_Mono, Bricolage_Grotesque } from "next/font/google";
+import { Sofia_Sans, Geologica, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const bodyFont = Inter({
+/** Both faces carry Cyrillic, so Bulgarian headings no longer fall back. */
+const bodyFont = Geologica({
   variable: "--font-body",
   subsets: ["latin", "cyrillic"],
 });
 
-const displayFont = Bricolage_Grotesque({
-  variable: "--font-bricolage",
-  subsets: ["latin"],
+const displayFont = Sofia_Sans({
+  variable: "--font-display-sans",
+  subsets: ["latin", "cyrillic"],
 });
 
 const monoFont = Geist_Mono({

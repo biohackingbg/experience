@@ -55,9 +55,8 @@
   --color-bh-lime-bright: var(--color-bh-lime-bright);
   --color-bh-stone: var(--color-bh-stone);
 
-  --font-sans: var(--font-body);
-  --font-display: var(--font-body); /* neutral grotesk headings (Inter) */
-  --font-bricolage: var(--font-bricolage); /* hero wordmark */
+  --font-sans: var(--font-body); /* Geologica — body and UI */
+  --font-display: var(--font-display-sans); /* Sofia Sans — headings */
   --font-mono: var(--font-geist-mono);
 }
 
