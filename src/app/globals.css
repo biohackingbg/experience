@@ -29,6 +29,9 @@
   /* Partner accent — the rose from the Bulgarian Longevity Association mark.
      Used only in the co-branding strip, never as a general site colour. */
   --color-bh-rose: #d4869c;
+
+  /* One definition for every accent surface — fill, outline and buttons. */
+  --bh-brand-gradient: linear-gradient(112deg, #0bb4a0 0%, #a5e0ff 100%);
 }
 
 :root[data-theme="dark"] {
@@ -110,15 +113,9 @@ body {
   }
 }
 
-/* Brand gradient: teal → teal → sky. Full strength for accent surfaces,
-   tinted variant for the large pale fills. */
+/* Brand gradient: a direct teal → sky blend, for buttons and accent fills. */
 .bh-gradient {
-  background-image: linear-gradient(
-    112deg,
-    #0bb4a0 0%,
-    #51b6eb 68%,
-    #a5e0ff 100%
-  );
+  background-image: var(--bh-brand-gradient);
 
   /* The accent fill is bright in both themes, so pin the foreground tokens
      locally: descendants using text-bh-ink / bg-bh-ink stay readable on it
@@ -136,7 +133,7 @@ body {
   border: 2px solid transparent;
   background:
     linear-gradient(var(--color-bh-paper), var(--color-bh-paper)) padding-box,
-    linear-gradient(112deg, #0bb4a0 0%, #51b6eb 68%, #a5e0ff 100%) border-box;
+    var(--bh-brand-gradient) border-box;
 }
 
 /* On a mint card the padding box has to be mint, not page colour — and the
@@ -144,7 +141,7 @@ body {
 .bh-mint.bh-gradient-outline {
   background:
     linear-gradient(#e7f6f1, #e7f6f1) padding-box,
-    linear-gradient(112deg, #0bb4a0 0%, #51b6eb 68%, #a5e0ff 100%) border-box;
+    var(--bh-brand-gradient) border-box;
   box-shadow: none;
 }
 
