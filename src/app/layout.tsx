@@ -19,9 +19,9 @@ const monoFont = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Longevity Summit 2026 | Biohacking Experience, София",
+  title: "Sofia Life Summit 2026 | Biohacking Experience, София",
   description:
-    "Longevity Summit — 07–08 ноември 2026, Гранд Хотел Милениум, София. Четири зони, longevity паспорт, 12 станции за измерване и билети от 50 €.",
+    "Sofia Life Summit — 07–08 ноември 2026, Гранд Хотел Милениум, София. Четири зони, longevity паспорт, 12 станции за измерване и билети от 50 €.",
 };
 
 export default function RootLayout({

@@ -25,6 +25,10 @@
      paper/cloud. In dark mode those surfaces swap, so the two swap with them. */
   --color-bh-lime: #cef870;
   --color-bh-pine: #146455;
+
+  /* Partner accent — the rose from the Bulgarian Longevity Association mark.
+     Used only in the co-branding strip, never as a general site colour. */
+  --color-bh-rose: #d4869c;
 }
 
 :root[data-theme="dark"] {
@@ -54,6 +58,7 @@
   --color-bh-lime-pale: var(--color-bh-lime-pale);
   --color-bh-lime-bright: var(--color-bh-lime-bright);
   --color-bh-stone: var(--color-bh-stone);
+  --color-bh-rose: var(--color-bh-rose);
 
   --font-sans: var(--font-body); /* Geologica — body and UI */
   --font-display: var(--font-display-sans); /* Sofia Sans — headings */

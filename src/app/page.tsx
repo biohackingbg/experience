@@ -5,6 +5,7 @@ import { SummitPassport } from "@/components/summit/SummitPassport";
 import { SummitProgram } from "@/components/summit/SummitProgram";
 import { SummitTickets } from "@/components/summit/SummitTickets";
 import { SummitRegister } from "@/components/summit/SummitRegister";
+import { SummitOrganizers } from "@/components/summit/SummitOrganizers";
 import { SummitFooter } from "@/components/summit/SummitFooter";
 
 export default function Home() {
@@ -18,6 +19,7 @@ export default function Home() {
         <SummitProgram />
         <SummitTickets />
         <SummitRegister />
+        <SummitOrganizers />
       </main>
       <SummitFooter />
     </div>
