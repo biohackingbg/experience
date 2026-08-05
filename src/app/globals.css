@@ -141,22 +141,9 @@ body {
    the foreground tokens for the same reason .bh-gradient does. */
 .bh-mint {
   background-color: #e7f6f1;
-  box-shadow: inset 0 0 0 1px #009f7e;
+  /* Same hairline as the plain cloud cards use via ring-1 ring-bh-ink/8. */
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #08211d 8%, transparent);
 
-  --color-bh-ink: #08211d;
-  --color-bh-paper: #f1f5f3;
-}
-
-.bh-gradient-soft {
-  background-image: linear-gradient(
-    135deg,
-    #c6efe9 0%,
-    #cdf1ec 45%,
-    #d3edff 100%
-  );
-
-  /* Stays pale in both themes, so pin the foreground tokens locally the way
-     .bh-gradient does — otherwise dark mode would flip the text to light. */
   --color-bh-ink: #08211d;
   --color-bh-paper: #f1f5f3;
 }

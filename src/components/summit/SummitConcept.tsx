@@ -50,7 +50,7 @@ export function SummitConcept() {
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {zones.map((z, i) => (
             <Reveal key={z.no} delay={i * 90}>
-            <article className="bh-gradient-soft flex h-full min-h-[17rem] flex-col justify-between rounded-3xl p-7 text-bh-ink transition-transform duration-300 hover:-translate-y-1.5">
+            <article className="bh-mint flex h-full min-h-[17rem] flex-col justify-between rounded-3xl p-7 text-bh-ink transition-transform duration-300 hover:-translate-y-1.5">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-sm text-bh-ink/40">
                   / {z.no}
