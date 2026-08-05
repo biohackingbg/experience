@@ -18,10 +18,31 @@ const monoFont = Geist_Mono({
   subsets: ["latin"],
 });
 
+const SITE = "https://thelongevitysummit.eu";
+const TITLE = "Sofia Life Summit 2026 | Biohacking Experience, София";
+const DESCRIPTION =
+  "Sofia Life Summit — 07–08 ноември 2026, Гранд Хотел Милениум, София. Четири зони, longevity паспорт, 12 станции за измерване и билети от 50 €.";
+
 export const metadata: Metadata = {
-  title: "Sofia Life Summit 2026 | Biohacking Experience, София",
-  description:
-    "Sofia Life Summit — 07–08 ноември 2026, Гранд Хотел Милениум, София. Четири зони, longevity паспорт, 12 станции за измерване и билети от 50 €.",
+  // Makes the generated OG image resolve to an absolute URL, which every
+  // social crawler requires.
+  metadataBase: new URL(SITE),
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "bg_BG",
+    url: SITE,
+    siteName: "Sofia Life Summit",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
 };
 
 export default function RootLayout({

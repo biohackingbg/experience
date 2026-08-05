@@ -7,10 +7,16 @@ import { SummitTickets } from "@/components/summit/SummitTickets";
 import { SummitRegister } from "@/components/summit/SummitRegister";
 import { SummitOrganizers } from "@/components/summit/SummitOrganizers";
 import { SummitFooter } from "@/components/summit/SummitFooter";
+import { eventSchema } from "@/lib/event-schema";
 
 export default function Home() {
   return (
     <div className="overflow-hidden rounded-[1.75rem] bg-bh-paper">
+      <script
+        type="application/ld+json"
+        // Static, authored object — no user input reaches this.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }}
+      />
       <SummitNav />
       <main>
         <SummitHero />
