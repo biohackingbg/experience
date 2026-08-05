@@ -65,7 +65,10 @@ export function SummitProgram() {
                     {d.date}
                   </span>
                 </div>
-                <span className="max-w-[9rem] text-right text-xs font-medium uppercase tracking-wide text-bh-paper/55">
+                {/* One line from lg up, where the two cards sit side by side and
+                    a wrapped theme would leave their headers different heights.
+                    Below that they stack, so wrapping is free. */}
+                <span className="text-right text-xs font-medium uppercase tracking-wide text-bh-paper/55 lg:whitespace-nowrap">
                   {d.theme}
                 </span>
               </div>
