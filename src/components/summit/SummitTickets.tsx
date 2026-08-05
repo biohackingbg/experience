@@ -84,15 +84,16 @@ export function SummitTickets() {
             const featured = tier.featured;
             return (
               <Reveal key={tier.name} delay={i * 110}>
+              {/* All three tiers are light; the featured one is marked by the
+                  gradient — on its edge, its badge and its button — rather
+                  than by a different card colour. */}
               <div
-                className={`relative flex h-full flex-col rounded-3xl p-8 ${
-                  featured
-                    ? "bh-gradient text-bh-ink"
-                    : "bg-bh-cloud text-bh-ink ring-1 ring-bh-ink/8"
+                className={`bh-mint relative flex h-full flex-col rounded-3xl p-8 text-bh-ink ${
+                  featured ? "bh-gradient-outline" : ""
                 }`}
               >
                 {featured && (
-                  <span className="absolute right-6 top-6 rounded-full bg-bh-ink px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.15em] text-bh-lime">
+                  <span className="bh-gradient absolute right-6 top-6 rounded-full px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.15em] text-bh-ink">
                     Най-избиран
                   </span>
                 )}
@@ -134,7 +135,11 @@ export function SummitTickets() {
 
                 <a
                   href="#register"
-                  className="mt-8 inline-flex items-center justify-center rounded-full bg-bh-ink px-6 py-3.5 text-sm font-semibold text-bh-paper transition-transform hover:-translate-y-0.5"
+                  className={`mt-8 inline-flex items-center justify-center rounded-full px-6 py-3.5 text-sm font-semibold transition-transform hover:-translate-y-0.5 ${
+                    featured
+                      ? "bh-gradient text-bh-ink"
+                      : "bg-bh-ink text-bh-paper"
+                  }`}
                 >
                   Избери {tier.name}
                 </a>

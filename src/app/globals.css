@@ -131,9 +131,30 @@ body {
 
   /* The accent fill is bright in both themes, so pin the foreground tokens
      locally: descendants using text-bh-ink / bg-bh-ink stay readable on it
-     even after dark mode inverts the globals. */
+     even after dark mode inverts the globals. The accent pair is pinned for
+     the same reason — this surface never inverts, so neither should they. */
   --color-bh-ink: #08211d;
   --color-bh-paper: #f1f5f3;
+  --color-bh-lime: #cef870;
+  --color-bh-pine: #146455;
+}
+
+/* Outline drawn in the brand gradient: the gradient paints the border box and
+   the page colour paints the padding box, leaving only the border visible. */
+.bh-gradient-outline {
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--color-bh-paper), var(--color-bh-paper)) padding-box,
+    linear-gradient(112deg, #0bb4a0 0%, #51b6eb 68%, #a5e0ff 100%) border-box;
+}
+
+/* On a mint card the padding box has to be mint, not page colour — and the
+   gradient border replaces the hairline rather than doubling up with it. */
+.bh-mint.bh-gradient-outline {
+  background:
+    linear-gradient(#e7f6f1, #e7f6f1) padding-box,
+    linear-gradient(112deg, #0bb4a0 0%, #51b6eb 68%, #a5e0ff 100%) border-box;
+  box-shadow: none;
 }
 
 /* Flat mint card with a hairline edge. Constant in both themes — it carries
@@ -146,6 +167,8 @@ body {
 
   --color-bh-ink: #08211d;
   --color-bh-paper: #f1f5f3;
+  --color-bh-lime: #cef870;
+  --color-bh-pine: #146455;
 }
 
 /*

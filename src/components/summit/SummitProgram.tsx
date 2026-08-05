@@ -55,7 +55,7 @@ export function SummitProgram() {
         <div className="mt-12 grid gap-4 lg:grid-cols-2">
           {days.map((d, i) => (
             <Reveal key={d.date} delay={i * 120}>
-            <div className="h-full overflow-hidden rounded-3xl bg-bh-cloud ring-1 ring-bh-ink/8">
+            <div className="bh-mint h-full overflow-hidden rounded-3xl">
               <div className="flex items-baseline justify-between bg-bh-ink px-7 py-6 text-bh-paper">
                 <div className="flex items-baseline gap-3">
                   <span className="text-xl font-black uppercase tracking-tight">

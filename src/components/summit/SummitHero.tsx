@@ -60,13 +60,13 @@ export function SummitHero() {
         >
           <a
             href="#tickets"
-            className="inline-flex items-center gap-2 rounded-full bg-bh-ink px-6 py-3.5 text-sm font-semibold text-bh-paper transition-transform hover:-translate-y-0.5"
+            className="bh-gradient inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
           >
             Купи билет от 50 €
           </a>
           <a
             href="#program"
-            className="inline-flex items-center gap-2 rounded-full border border-bh-ink/20 px-6 py-3.5 text-sm font-semibold text-bh-ink transition-colors hover:border-bh-ink"
+            className="bh-gradient-outline inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
           >
             Виж програмата
           </a>
@@ -75,10 +75,10 @@ export function SummitHero() {
         {/* bento */}
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {/* passport — tall dark */}
-          <article className="flex flex-col justify-between rounded-3xl bg-bh-ink p-7 text-bh-paper sm:col-span-2 lg:col-span-1 lg:row-span-2">
+          <article className="bh-mint flex flex-col justify-between rounded-3xl p-7 text-bh-ink sm:col-span-2 lg:col-span-1 lg:row-span-2">
             <div className="flex items-start justify-between">
-              <span className="text-3xl leading-none text-bh-lime">✳</span>
-              <span className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-bh-paper/50">
+              <span className="text-3xl leading-none text-bh-pine">✳</span>
+              <span className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-bh-ink/45">
                 Ядрото
               </span>
             </div>
@@ -86,13 +86,13 @@ export function SummitHero() {
               <h2 className="text-2xl font-bold tracking-tight">
                 Longevity паспортът
               </h2>
-              <p className="mt-3 text-sm leading-relaxed text-bh-paper/60">
+              <p className="mt-3 text-sm leading-relaxed text-bh-ink/65">
                 Влизаш с празен паспорт, излизаш с реални показатели и обяснение
                 от специалист на място.
               </p>
               <a
                 href="#passport"
-                className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-bh-lime"
+                className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-bh-pine"
               >
                 Виж какво се мери <Arrow className="h-4 w-4" />
               </a>
@@ -132,7 +132,7 @@ export function SummitHero() {
           </article>
 
           {/* stat — light */}
-          <article className="rounded-3xl bg-bh-cloud p-7 ring-1 ring-bh-ink/8">
+          <article className="bh-mint rounded-3xl p-7">
             <div className="text-5xl font-black tracking-tight text-bh-ink">
               1 000+
             </div>
