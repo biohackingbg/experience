@@ -22,9 +22,8 @@ export function SummitHero() {
           <div className="self-end">
             <p className="hu-rise flex flex-wrap items-center gap-x-3 gap-y-2 font-display text-[clamp(1.05rem,2.5vw,1.9rem)] font-[900] uppercase leading-none tracking-[-0.01em] text-bh-pine">
               Biohacking Experience
-              <span className="inline-flex items-center rounded-full border-2 border-bh-pine px-4 py-1 text-[0.85em] leading-none">
-                07—08.11.2026
-              </span>
+              <span className="text-bh-ink/35">·</span>
+              07—08.11.2026
             </p>
 
             <h1
