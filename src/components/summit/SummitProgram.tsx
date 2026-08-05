@@ -56,7 +56,7 @@ export function SummitProgram() {
           {days.map((d, i) => (
             <Reveal key={d.date} delay={i * 120}>
             <div className="bh-mint h-full overflow-hidden rounded-3xl">
-              <div className="flex items-baseline justify-between bg-bh-ink px-7 py-6 text-bh-paper">
+              <div className="bh-day-header flex items-baseline justify-between bg-bh-ink px-7 py-6 text-bh-paper">
                 <div className="flex items-baseline gap-3">
                   <span className="text-xl font-black uppercase tracking-tight">
                     {d.day}

@@ -159,6 +159,13 @@ body {
   --color-bh-pine: #146455;
 }
 
+/* The schedule card is mint in both themes, but its header inherits the pinned
+   near-black ink. In dark mode that reads as a black bar; the brand green keeps
+   it green without losing contrast against the white text. */
+:root[data-theme="dark"] .bh-day-header {
+  background-color: #146455;
+}
+
 /*
  * Above-the-fold entrance animation. Pure CSS so markup is never JS-dependent:
  * content paints and animates immediately, instead of waiting for hydration.
