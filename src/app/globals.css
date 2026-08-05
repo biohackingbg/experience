@@ -136,6 +136,17 @@ body {
   --color-bh-paper: #f1f5f3;
 }
 
+/* Flat mint card with a hairline edge. Constant in both themes — it carries
+   the partner's colour, so it should read the same either way. The rule pins
+   the foreground tokens for the same reason .bh-gradient does. */
+.bh-mint {
+  background-color: #e7f6f1;
+  box-shadow: inset 0 0 0 1px #009f7e;
+
+  --color-bh-ink: #08211d;
+  --color-bh-paper: #f1f5f3;
+}
+
 .bh-gradient-soft {
   background-image: linear-gradient(
     135deg,
