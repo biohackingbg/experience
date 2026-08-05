@@ -19,22 +19,31 @@ export function SummitHero() {
     <section id="top" className="px-5 pt-6 sm:px-8 sm:pt-8 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
         <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr] lg:items-stretch">
-          <h1
-            className="hu-rise self-end font-bricolage font-extrabold uppercase leading-[0.86] tracking-tight text-bh-ink"
-            style={{ animationDelay: "80ms" }}
-          >
-            <span className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[clamp(1.1rem,2.6vw,2rem)]">
-              Sofia Life Summit
-              <span className="inline-flex items-center rounded-full border-2 border-bh-ink px-4 py-1 text-[0.85em] leading-none">
-                07—08.11.2026
+          <div className="self-end">
+            <h1
+              className="hu-rise font-bricolage font-extrabold uppercase leading-[0.86] tracking-tight text-bh-ink"
+              style={{ animationDelay: "80ms" }}
+            >
+              <span className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[clamp(1.1rem,2.6vw,2rem)]">
+                София
+                <span className="inline-flex items-center rounded-full border-2 border-bh-ink px-4 py-1 text-[0.85em] leading-none">
+                  07—08.11.2026
+                </span>
               </span>
-            </span>
-            <span className="mt-2 block text-[clamp(2.7rem,7.8vw,6rem)]">
-              Biohacking
-              <br />
-              Experience
-            </span>
-          </h1>
+              <span className="mt-2 block text-[clamp(2.7rem,7.8vw,6rem)]">
+                Longevity
+                <br />
+                Summit
+              </span>
+            </h1>
+
+            <p
+              className="hu-rise mt-4 font-bricolage text-[clamp(1.25rem,3vw,2.25rem)] font-extrabold uppercase leading-none tracking-tight text-bh-pine"
+              style={{ animationDelay: "140ms" }}
+            >
+              Biohacking Experience
+            </p>
+          </div>
 
           <article
             className="hu-rise bh-gradient flex flex-col justify-between rounded-3xl p-7 text-bh-ink"
