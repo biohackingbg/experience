@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 const links = [
   { href: "#concept", label: "Концепция" },
@@ -20,7 +21,14 @@ export function SummitNav() {
           <img
             src="/logo.svg"
             alt="Biohacking Experience"
-            className="h-7 w-auto sm:h-8"
+            className="bh-logo-light-bg h-7 w-auto sm:h-8"
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo-dark.svg"
+            alt=""
+            aria-hidden
+            className="bh-logo-dark-bg h-7 w-auto sm:h-8"
           />
         </Link>
 
@@ -36,12 +44,15 @@ export function SummitNav() {
           ))}
         </div>
 
-        <a
-          href="#tickets"
-          className="inline-flex items-center rounded-full bg-bh-ink px-5 py-2.5 text-sm font-semibold text-bh-paper transition-transform hover:-translate-y-0.5"
-        >
-          Купи билет
-        </a>
+        <div className="flex items-center gap-4">
+          <ThemeToggle />
+          <a
+            href="#tickets"
+            className="inline-flex items-center rounded-full bg-bh-ink px-5 py-2.5 text-sm font-semibold text-bh-paper transition-transform hover:-translate-y-0.5"
+          >
+            Купи билет
+          </a>
+        </div>
       </nav>
     </header>
   );

@@ -31,14 +31,16 @@ export default function RootLayout({
   return (
     <html
       lang="bg"
+      suppressHydrationWarning
       className={`${bodyFont.variable} ${monoFont.variable} ${displayFont.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-bh-ink p-2 text-bh-ink sm:p-3">
-        {/* Marks scripting as available before first paint, so the scroll-reveal
-            styles only hide content when they can also un-hide it. */}
+      <body className="min-h-full bg-bh-frame p-2 text-bh-ink sm:p-3">
+        {/* Runs before first paint: marks scripting as available (so the
+            scroll-reveal styles only hide what they can un-hide) and applies
+            the saved theme, avoiding a flash of the wrong one. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `document.documentElement.classList.add('js')`,
+            __html: `(function(){var d=document.documentElement;try{var t=localStorage.getItem('bh-theme');if(t!=='dark'&&t!=='light'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}d.dataset.theme=t}catch(e){d.dataset.theme='light'}d.classList.add('js')})()`,
           }}
         />
         {children}

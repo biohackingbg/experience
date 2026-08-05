@@ -1,11 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  /* Biohacking Experience — light editorial theme.
-     Monochrome + a single neon-lime accent used sparingly. */
+  color-scheme: light;
+
+  /* Biohacking Experience — editorial theme.
+     `ink` is the foreground: text, and the inverted (contrast) card fills.
+     `paper` is the page. Dark mode swaps the two, so every surface built
+     from these tokens inverts without touching component markup. */
+  --color-bh-frame: #131312; /* outside the rounded page */
   --color-bh-paper: #ecebe5; /* warm light page / frame interior */
   --color-bh-cloud: #f7f7f3; /* near-white card */
-  --color-bh-ink: #131312; /* near-black — text + dark cards */
+  --color-bh-ink: #131312; /* near-black — text + contrast cards */
   --color-bh-lime: #0ecdb7; /* accent teal — used sparingly */
   --color-bh-lime-soft: #b9ece6; /* pale teal for large fills */
   --color-bh-sky: #7cd4fc; /* gradient tail */
@@ -14,7 +19,18 @@
   --color-bh-forest: #14351f; /* legacy token, unused */
 }
 
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bh-frame: #05100e;
+  --color-bh-paper: #0e1413;
+  --color-bh-cloud: #172020;
+  --color-bh-ink: #e9eeec;
+  --color-bh-stone: #253130;
+}
+
 @theme inline {
+  --color-bh-frame: var(--color-bh-frame);
   --color-bh-paper: var(--color-bh-paper);
   --color-bh-cloud: var(--color-bh-cloud);
   --color-bh-ink: var(--color-bh-ink);
@@ -33,6 +49,20 @@
 
 body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Logo lockups: the dark-ink artwork for light backgrounds, the bright
+   artwork for dark. Both ship in the markup so the swap needs no JS. */
+.bh-logo-dark-bg {
+  display: none;
+}
+
+:root[data-theme="dark"] .bh-logo-light-bg {
+  display: none;
+}
+
+:root[data-theme="dark"] .bh-logo-dark-bg {
+  display: block;
 }
 
 /*
@@ -71,6 +101,12 @@ body {
     #0acdb6 45%,
     #7cd4fc 100%
   );
+
+  /* The accent fill is bright in both themes, so pin the foreground tokens
+     locally: descendants using text-bh-ink / bg-bh-ink stay readable on it
+     even after dark mode inverts the globals. */
+  --color-bh-ink: #08211d;
+  --color-bh-paper: #f1f5f3;
 }
 
 .bh-gradient-soft {
@@ -89,6 +125,26 @@ body {
     #d3edfe 0%,
     #c2e5fd 55%,
     #a9dbfc 100%
+  );
+}
+
+/* In dark mode the pale fills would glare, so they drop to deep tints of
+   the same ramp. The full-strength .bh-gradient stays brand-accurate. */
+:root[data-theme="dark"] .bh-gradient-soft {
+  background-image: linear-gradient(
+    135deg,
+    #0d2f2b 0%,
+    #0c302d 45%,
+    #0f2c3d 100%
+  );
+}
+
+:root[data-theme="dark"] .bh-gradient-sky {
+  background-image: linear-gradient(
+    135deg,
+    #0f2a3c 0%,
+    #113047 55%,
+    #143a55 100%
   );
 }
 

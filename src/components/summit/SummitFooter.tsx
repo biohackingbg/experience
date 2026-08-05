@@ -15,7 +15,14 @@ export function SummitFooter() {
             <img
               src="/logo.svg"
               alt="Biohacking Experience"
-              className="h-9 w-auto"
+              className="bh-logo-light-bg h-9 w-auto"
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo-dark.svg"
+              alt=""
+              aria-hidden
+              className="bh-logo-dark-bg h-9 w-auto"
             />
             <p className="mt-5 text-sm leading-relaxed text-bh-ink/55">
               Потребителската част на Sofia Life Summit. Куратор и продуцент —
