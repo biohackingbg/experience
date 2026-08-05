@@ -7,17 +7,24 @@
      `ink` is the foreground: text, and the inverted (contrast) card fills.
      `paper` is the page. Dark mode swaps the two, so every surface built
      from these tokens inverts without touching component markup. */
+  /* Brand palette — exact values from the design mockup. */
   --color-bh-frame: #02251f; /* outside the rounded page */
   --color-bh-paper: #f2f2ee; /* light page / frame interior */
   --color-bh-cloud: #f8f8f5; /* near-white card */
   --color-bh-ink: #02251f; /* deep green — text + contrast cards */
-  --color-bh-lime: #4cb39b; /* accent teal — used sparingly */
-  --color-bh-lime-soft: #a3cfe8; /* muted blue for large fills */
-  --color-bh-sky: #b0ddfc; /* light blue — gradient tail */
-  --color-bh-pine: #2c6152; /* mid green from the palette */
-  --color-bh-stone: #dedcd3; /* hairlines / muted surfaces */
-  --color-bh-teal: #0ecdb7; /* brand teal — logo only */
-  --color-bh-forest: #14351f; /* legacy token, unused */
+
+  --color-bh-teal: #0bb4a0;
+  --color-bh-blue: #51b6eb;
+  --color-bh-sky: #a5e0ff;
+  --color-bh-lime-pale: #cef870;
+  --color-bh-lime-bright: #acec1d;
+  --color-bh-stone: #dee2da; /* hairlines / muted surfaces */
+
+  /* Accents flip with the theme, because the surfaces they sit on flip too.
+     `lime` is for anything on an ink-coloured card, `pine` for anything on
+     paper/cloud. In dark mode those surfaces swap, so the two swap with them. */
+  --color-bh-lime: #cef870;
+  --color-bh-pine: #146455;
 }
 
 :root[data-theme="dark"] {
@@ -28,6 +35,10 @@
   --color-bh-cloud: #0a3229;
   --color-bh-ink: #e9f0ec;
   --color-bh-stone: #16453a;
+
+  /* Inverted: ink cards are now light, paper is now deep green. */
+  --color-bh-lime: #146455;
+  --color-bh-pine: #cef870;
 }
 
 @theme inline {
@@ -36,12 +47,13 @@
   --color-bh-cloud: var(--color-bh-cloud);
   --color-bh-ink: var(--color-bh-ink);
   --color-bh-lime: var(--color-bh-lime);
-  --color-bh-lime-soft: var(--color-bh-lime-soft);
-  --color-bh-sky: var(--color-bh-sky);
   --color-bh-pine: var(--color-bh-pine);
-  --color-bh-stone: var(--color-bh-stone);
   --color-bh-teal: var(--color-bh-teal);
-  --color-bh-forest: var(--color-bh-forest);
+  --color-bh-blue: var(--color-bh-blue);
+  --color-bh-sky: var(--color-bh-sky);
+  --color-bh-lime-pale: var(--color-bh-lime-pale);
+  --color-bh-lime-bright: var(--color-bh-lime-bright);
+  --color-bh-stone: var(--color-bh-stone);
 
   --font-sans: var(--font-body);
   --font-display: var(--font-body); /* neutral grotesk headings (Inter) */
@@ -98,10 +110,10 @@ body {
    tinted variant for the large pale fills. */
 .bh-gradient {
   background-image: linear-gradient(
-    115deg,
-    #4cb39b 0%,
-    #63bfb4 45%,
-    #b0ddfc 100%
+    112deg,
+    #0bb4a0 0%,
+    #51b6eb 68%,
+    #a5e0ff 100%
   );
 
   /* The accent fill is bright in both themes, so pin the foreground tokens
@@ -114,19 +126,19 @@ body {
 .bh-gradient-soft {
   background-image: linear-gradient(
     135deg,
-    #cdf3ee 0%,
-    #c9f2ee 45%,
-    #dcf0fe 100%
+    #c6efe9 0%,
+    #cdf1ec 45%,
+    #d3edff 100%
   );
 }
 
 /* Light-blue variant — leans on the sky end of the brand ramp. */
 .bh-gradient-sky {
   background-image: linear-gradient(
-    115deg,
-    #cbe6fb 0%,
-    #bde0fc 55%,
-    #a3cfe8 100%
+    112deg,
+    #c9ecff 0%,
+    #a5e0ff 52%,
+    #86ccf2 100%
   );
 }
 
