@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run db:deploy && next build",
+    "db:deploy": "node --env-file-if-exists=.env.local node_modules/drizzle-kit/bin.cjs migrate",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
