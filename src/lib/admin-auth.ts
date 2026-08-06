@@ -15,10 +15,8 @@ import { cookies } from "next/headers";
 export const ADMIN_COOKIE = "bh_admin";
 const MAX_AGE_SECONDS = 60 * 60 * 12;
 
-function secret(): string {
-  const value = process.env.ADMIN_SESSION_SECRET;
-  if (!value) throw new Error("ADMIN_SESSION_SECRET is not set");
-  return value;
+function secret(): string | null {
+  return process.env.ADMIN_SESSION_SECRET || null;
 }
 
 /** Constant-time compare, so a wrong password cannot be found byte by byte. */
@@ -35,13 +33,21 @@ export function checkPassword(candidate: string): boolean {
   return safeEqual(candidate, expected);
 }
 
-function sign(payload: string): string {
-  return createHmac("sha256", secret()).update(payload).digest("hex");
+function sign(payload: string): string | null {
+  const key = secret();
+  if (!key) return null;
+  return createHmac("sha256", key).update(payload).digest("hex");
 }
 
-export function createSessionToken(): string {
+/** True only when the server has both settings it needs to run the gate. */
+export function isConfigured(): boolean {
+  return Boolean(secret() && process.env.ADMIN_PASSWORD);
+}
+
+export function createSessionToken(): string | null {
   const expiresAt = String(Date.now() + MAX_AGE_SECONDS * 1000);
-  return `${expiresAt}.${sign(expiresAt)}`;
+  const signature = sign(expiresAt);
+  return signature ? `${expiresAt}.${signature}` : null;
 }
 
 export function verifySessionToken(token: string | undefined): boolean {
@@ -49,7 +55,13 @@ export function verifySessionToken(token: string | undefined): boolean {
 
   const [expiresAt, signature] = token.split(".");
   if (!expiresAt || !signature) return false;
-  if (!safeEqual(signature, sign(expiresAt))) return false;
+
+  // Fail closed: a missing secret denies access rather than throwing, which
+  // otherwise turned any malformed cookie into a 500 instead of a redirect.
+  const expected = sign(expiresAt);
+  if (!expected) return false;
+
+  if (!safeEqual(signature, expected)) return false;
 
   return Number(expiresAt) > Date.now();
 }

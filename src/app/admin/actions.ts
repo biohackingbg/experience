@@ -7,6 +7,7 @@ import {
   ADMIN_COOKIE,
   checkPassword,
   createSessionToken,
+  isConfigured,
   sessionCookieOptions,
 } from "@/lib/admin-auth";
 
@@ -16,6 +17,14 @@ export async function login(
   _prev: LoginState,
   formData: FormData,
 ): Promise<LoginState> {
+  // Says so plainly rather than rejecting a correct password as wrong.
+  if (!isConfigured()) {
+    return {
+      error:
+        "Достъпът не е настроен на сървъра (липсват ADMIN_PASSWORD или ADMIN_SESSION_SECRET).",
+    };
+  }
+
   const password = String(formData.get("password") ?? "");
 
   if (!checkPassword(password)) {
@@ -24,8 +33,11 @@ export async function login(
     return { error: "Грешна парола." };
   }
 
+  const token = createSessionToken();
+  if (!token) return { error: "Неуспешно създаване на сесия." };
+
   const store = await cookies();
-  store.set(ADMIN_COOKIE, createSessionToken(), sessionCookieOptions);
+  store.set(ADMIN_COOKIE, token, sessionCookieOptions);
   redirect("/admin");
 }
 
