@@ -1,3 +1,5 @@
+import { Hotel } from "@/components/ui/Pictograms";
+
 const zoneTags = ["Сцена", "Лаборатория", "Ритуали", "Village"];
 
 function Arrow({ className = "" }: { className?: string }) {
@@ -47,7 +49,7 @@ export function SummitHero() {
               <span className="rounded-full border border-bh-ink/25 px-4 py-1.5 font-mono text-xs uppercase tracking-[0.15em] text-bh-ink">
                 Гранд Хотел Милениум
               </span>
-              <span className="text-3xl leading-none text-bh-ink">✳</span>
+              <Hotel className="h-8 w-8 shrink-0 text-bh-ink/70" />
             </div>
             <p className="mt-10 text-sm leading-relaxed text-bh-ink/75">
               Не конференция със столове в редици. Longevity медицината излиза

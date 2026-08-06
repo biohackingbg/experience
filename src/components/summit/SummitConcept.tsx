@@ -1,27 +1,32 @@
 import { Reveal } from "@/components/ui/Reveal";
+import { Flask, Stage, Stall, Waves } from "@/components/ui/Pictograms";
 
 /** The four zones are peers, so they share one card treatment. */
 const zones = [
   {
     no: "01",
+    icon: Stage,
     tag: "Сцена",
     title: "Знанието",
     body: "Същите международни имена, но на разбираем език, по 25 минути. Главна сцена 600 места, втора сцена 150.",
   },
   {
     no: "02",
+    icon: Flask,
     tag: "Лаборатория",
     title: "Числата",
     body: "12 станции за измерване. Влизаш с празен паспорт, излизаш с реални показатели и обяснение.",
   },
   {
     no: "03",
+    icon: Waves,
     tag: "Ритуали",
     title: "Тялото",
     body: "Сесии по 30 минути със записан час. Студ, сауна, дишане, red light, PEMF.",
   },
   {
     no: "04",
+    icon: Stall,
     tag: "Village",
     title: "Брандовете",
     body: "30 подбрани компании: добавки, устройства, лаборатории, клиники, храна.",
@@ -60,7 +65,10 @@ export function SummitConcept() {
                 </span>
               </div>
               <div>
-                <h3 className="text-2xl font-bold tracking-tight">{z.title}</h3>
+                <z.icon className="h-9 w-9 text-bh-pine/70" />
+                <h3 className="mt-5 text-2xl font-bold tracking-tight">
+                  {z.title}
+                </h3>
                 <p className="mt-3 text-sm leading-relaxed text-bh-ink/60">
                   {z.body}
                 </p>
