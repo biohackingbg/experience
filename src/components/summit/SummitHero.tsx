@@ -1,4 +1,4 @@
-import { Hotel } from "@/components/ui/Pictograms";
+import { Gauge, Hotel, People } from "@/components/ui/Pictograms";
 
 const zoneTags = ["Сцена", "Лаборатория", "Ритуали", "Village"];
 
@@ -138,7 +138,8 @@ export function SummitHero() {
 
           {/* stat — light */}
           <article className="bh-mint rounded-3xl p-7">
-            <div className="text-5xl font-black tracking-tight text-bh-ink">
+            <People className="h-7 w-7 text-bh-pine/70" />
+            <div className="mt-4 text-5xl font-black tracking-tight text-bh-ink">
               1 000+
             </div>
             <div className="mt-2 font-mono text-xs uppercase tracking-[0.15em] text-bh-ink/50">
@@ -148,7 +149,8 @@ export function SummitHero() {
 
           {/* stat — dark */}
           <article className="rounded-3xl bg-bh-ink p-7 text-bh-paper">
-            <div className="text-5xl font-black tracking-tight">12</div>
+            <Gauge className="h-7 w-7 text-bh-lime" />
+            <div className="mt-4 text-5xl font-black tracking-tight">12</div>
             <div className="mt-2 font-mono text-xs uppercase tracking-[0.15em] text-bh-paper/50">
               станции за измерване
             </div>

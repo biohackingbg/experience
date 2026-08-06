@@ -1,33 +1,47 @@
 import { Reveal } from "@/components/ui/Reveal";
+import {
+  Body,
+  Droplet,
+  Eye,
+  Pulse,
+  SunSkin,
+  Walk,
+} from "@/components/ui/Pictograms";
 
 const markers = [
   {
     no: "01",
+    icon: Body,
     title: "Композиция на тялото",
     body: "Биоимпеданс: мускул, висцерални мазнини, вода.",
   },
   {
     no: "02",
+    icon: Walk,
     title: "Функционален скрининг",
     body: "Сила на захвата, скорост на походка, изправяне от стол.",
   },
   {
     no: "03",
+    icon: Pulse,
     title: "Нервна система",
     body: "HRV и дишане в покой, преди и след дихателна сесия.",
   },
   {
     no: "04",
+    icon: Droplet,
     title: "Метаболитно",
     body: "Кръвна захар, демо на непрекъснат мониторинг, липиден панел.",
   },
   {
     no: "05",
+    icon: SunSkin,
     title: "Кожа и експозом",
     body: "Хидратация, себум, пигментация, слънчеви увреждания.",
   },
   {
     no: "06",
+    icon: Eye,
     title: "Сетива и когниция",
     body: "Зрение, слух и кратък когнитивен тест.",
   },
@@ -63,7 +77,10 @@ export function SummitPassport() {
                   i === 1 ? "sm:border-t-0" : ""
                 }`}
               >
-                <span className="font-mono text-sm font-semibold text-bh-pine">{m.no}</span>
+                <div className="flex flex-col items-center gap-2">
+                  <m.icon className="h-7 w-7 shrink-0 text-bh-pine" />
+                  <span className="font-mono text-xs text-bh-ink/40">{m.no}</span>
+                </div>
                 <div>
                   <h3 className="text-xl font-bold tracking-tight text-bh-ink">
                     {m.title}

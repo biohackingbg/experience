@@ -1,10 +1,11 @@
 import { EarlyAccessForm } from "@/components/summit/EarlyAccessForm";
 import { Reveal } from "@/components/ui/Reveal";
+import { Calendar, Pin, TicketIcon } from "@/components/ui/Pictograms";
 
 const facts = [
-  { label: "Дати", value: "07—08 ноември 2026" },
-  { label: "Място", value: "Гранд Хотел Милениум, София" },
-  { label: "Достъп", value: "Ранни билети от септември" },
+  { label: "Дати", value: "07—08 ноември 2026", icon: Calendar },
+  { label: "Място", value: "Гранд Хотел Милениум, София", icon: Pin },
+  { label: "Достъп", value: "Ранни билети от септември", icon: TicketIcon },
 ];
 
 export function SummitRegister() {
@@ -31,7 +32,8 @@ export function SummitRegister() {
           <dl className="mt-14 grid gap-8 border-t border-bh-paper/15 pt-8 sm:grid-cols-3">
             {facts.map((f) => (
               <div key={f.label}>
-                <dt className="font-mono text-xs uppercase tracking-[0.2em] text-bh-paper/45">
+                <f.icon className="h-6 w-6 text-bh-lime" />
+                <dt className="mt-3 font-mono text-xs uppercase tracking-[0.2em] text-bh-paper/45">
                   {f.label}
                 </dt>
                 <dd className="mt-2 text-lg font-bold tracking-tight">
