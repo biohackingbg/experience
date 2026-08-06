@@ -19,29 +19,39 @@ function subscribe(onChange: () => void) {
 const getSnapshot = () => document.documentElement.dataset.theme === "dark";
 const getServerSnapshot = () => false;
 
+/* Both drawn on a 24 grid with a 2 stroke and round caps: at the 16px these
+   render at, thinner strokes and shorter rays turned to specks. */
 function Sun({ className = "" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
-      <circle cx="12" cy="12" r="4.2" stroke="currentColor" strokeWidth="1.6" />
-      <path
-        d="M12 2.6v2.2M12 19.2v2.2M21.4 12h-2.2M4.8 12H2.6M18.6 5.4l-1.6 1.6M7 17l-1.6 1.6M18.6 18.6L17 17M7 7L5.4 5.4"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+    >
+      <circle cx="12" cy="12" r="4.5" />
+      <path d="M12 1.5v2.2M12 20.3v2.2M22.5 12h-2.2M3.7 12H1.5M19.4 4.6l-1.6 1.6M6.2 17.8l-1.6 1.6M19.4 19.4l-1.6-1.6M6.2 6.2L4.6 4.6" />
     </svg>
   );
 }
 
 function Moon({ className = "" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
-      <path
-        d="M20 14.2A8.2 8.2 0 019.8 4a8.2 8.2 0 100 16 8.2 8.2 0 0010.2-5.8z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+    >
+      <path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z" />
     </svg>
   );
 }
