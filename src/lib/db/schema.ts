@@ -1,9 +1,11 @@
 import {
   boolean,
   index,
+  integer,
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 
@@ -51,3 +53,109 @@ export const signups = pgTable(
 
 export type Signup = typeof signups.$inferSelect;
 export type NewSignup = typeof signups.$inferInsert;
+
+/**
+ * Ticket orders.
+ *
+ * Money and tier details are *snapshotted* onto the order and its items: an
+ * order must always show what was actually charged, even after prices or tier
+ * names change. The same goes for the VAT rate — rates change by law, and a
+ * past invoice has to keep the rate that applied on the day.
+ */
+export const orders = pgTable(
+  "orders",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+
+    /** Short human-readable code used in emails and on the door. */
+    reference: text("reference").notNull().unique(),
+
+    /** pending | paid | cancelled | refunded */
+    status: text("status").notNull().default("pending"),
+
+    email: text("email").notNull(),
+    name: text("name").notNull(),
+    phone: text("phone"),
+
+    // Snapshot of the money, all in cents.
+    subtotalCents: integer("subtotal_cents").notNull(),
+    vatCents: integer("vat_cents").notNull(),
+    totalCents: integer("total_cents").notNull(),
+    currency: text("currency").notNull().default("EUR"),
+    /** Stored in basis points (2000 = 20%) to avoid float drift. */
+    vatRateBp: integer("vat_rate_bp").notNull(),
+
+    /** Optional company details, when the buyer needs a company invoice. */
+    invoiceCompany: text("invoice_company"),
+    invoiceVatNumber: text("invoice_vat_number"),
+    invoiceAddress: text("invoice_address"),
+
+    stripePaymentIntentId: text("stripe_payment_intent_id"),
+
+    /** Proof the buyer accepted the terms, same pattern as signups. */
+    termsAcceptedAt: timestamp("terms_accepted_at", { withTimezone: true }),
+    termsText: text("terms_text"),
+
+    paidAt: timestamp("paid_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("orders_status_idx").on(table.status),
+    index("orders_email_idx").on(table.email),
+    index("orders_created_at_idx").on(table.createdAt),
+  ],
+);
+
+export const orderItems = pgTable(
+  "order_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orderId: uuid("order_id")
+      .notNull()
+      .references(() => orders.id, { onDelete: "cascade" }),
+
+    tierId: text("tier_id").notNull(),
+    /** Snapshot — the tier may be renamed later. */
+    tierName: text("tier_name").notNull(),
+    unitPriceCents: integer("unit_price_cents").notNull(),
+    quantity: integer("quantity").notNull(),
+  },
+  (table) => [index("order_items_order_id_idx").on(table.orderId)],
+);
+
+/**
+ * One row per admitted person — an order of three seats produces three, each
+ * with its own code, so the door scans a person rather than a purchase.
+ */
+export const tickets = pgTable(
+  "tickets",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orderId: uuid("order_id")
+      .notNull()
+      .references(() => orders.id, { onDelete: "cascade" }),
+
+    /** Encoded into the QR. Unique across the event. */
+    code: text("code").notNull().unique(),
+    tierId: text("tier_id").notNull(),
+
+    attendeeName: text("attendee_name"),
+    checkedInAt: timestamp("checked_in_at", { withTimezone: true }),
+
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("tickets_code_idx").on(table.code),
+    index("tickets_order_id_idx").on(table.orderId),
+    index("tickets_tier_id_idx").on(table.tierId),
+  ],
+);
+
+export type Order = typeof orders.$inferSelect;
+export type NewOrder = typeof orders.$inferInsert;
+export type OrderItem = typeof orderItems.$inferSelect;
+export type Ticket = typeof tickets.$inferSelect;

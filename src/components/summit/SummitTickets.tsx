@@ -1,45 +1,6 @@
 import { Reveal } from "@/components/ui/Reveal";
+import { TIERS, formatPrice } from "@/lib/tickets";
 
-const tiers = [
-  {
-    name: "Основен",
-    price: "50",
-    featured: false,
-    features: [
-      "Един ден по избор",
-      "Главна сцена",
-      "Village и дегустации",
-      "2 базови станции",
-    ],
-    absent: ["Без работилници"],
-  },
-  {
-    name: "Пълен",
-    price: "145",
-    featured: true,
-    features: [
-      "И двата дни, двете сцени",
-      "Пълен паспорт, 12 станции",
-      "2 работилници по избор",
-      "1 ритуал по избор",
-      "Обяд в 1 ден",
-    ],
-    absent: [],
-  },
-  {
-    name: "Протокол",
-    price: "390",
-    featured: false,
-    tagline: "Ограничени места",
-    features: [
-      "Всичко от Пълен",
-      "Кръвен панел с разчитане",
-      "Гарантирани места",
-      "90-дневен личен протокол",
-    ],
-    absent: [],
-  },
-];
 
 function Check({ muted }: { muted?: boolean }) {
   return (
@@ -80,7 +41,7 @@ export function SummitTickets() {
         </Reveal>
 
         <div className="mt-12 grid gap-4 lg:grid-cols-3">
-          {tiers.map((tier, i) => {
+          {TIERS.map((tier, i) => {
             const featured = tier.featured;
             return (
               <Reveal key={tier.name} delay={i * 110}>
@@ -111,7 +72,7 @@ export function SummitTickets() {
 
                 <div className="mt-6 flex items-baseline gap-1">
                   <span className="text-6xl font-black tracking-tight">
-                    {tier.price}
+                    {formatPrice(tier.priceCents)}
                   </span>
                   <span className="text-2xl font-semibold">€</span>
                 </div>
