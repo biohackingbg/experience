@@ -128,10 +128,22 @@ export async function createPendingOrder(
  * produce a second set of tickets. The update only matches a still-pending
  * order, so a repeat call finds nothing and does no work.
  */
+export type PaidOrderSummary = {
+  issued: number;
+  /** Present only on the delivery that actually flipped the order. */
+  order?: {
+    reference: string;
+    name: string;
+    email: string;
+    totalCents: number;
+    tickets: { code: string; tierName: string }[];
+  };
+};
+
 export async function markOrderPaid(
   orderId: string,
   paymentIntentId: string | null,
-): Promise<{ issued: number }> {
+): Promise<PaidOrderSummary> {
   const db = getDb();
 
   return db.transaction(async (tx) => {
@@ -143,7 +155,13 @@ export async function markOrderPaid(
         stripePaymentIntentId: paymentIntentId,
       })
       .where(sql`${orders.id} = ${orderId} and ${orders.status} = 'pending'`)
-      .returning({ id: orders.id });
+      .returning({
+        id: orders.id,
+        reference: orders.reference,
+        name: orders.name,
+        email: orders.email,
+        totalCents: orders.totalCents,
+      });
 
     if (updated.length === 0) return { issued: 0 };
 
@@ -165,7 +183,20 @@ export async function markOrderPaid(
 
     if (rows.length) await tx.insert(tickets).values(rows);
 
-    return { issued: rows.length };
+    const [order] = updated;
+    return {
+      issued: rows.length,
+      order: {
+        reference: order.reference,
+        name: order.name,
+        email: order.email,
+        totalCents: order.totalCents,
+        tickets: rows.map((row) => ({
+          code: row.code,
+          tierName: getTier(row.tierId)?.name ?? row.tierId,
+        })),
+      },
+    };
   });
 }
 

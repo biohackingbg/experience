@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 
+import { sendTicketEmail } from "@/lib/email";
 import { markOrderPaid } from "@/lib/orders";
 import { getStripe } from "@/lib/stripe";
 
@@ -50,10 +51,29 @@ export async function POST(request: Request) {
             ? session.payment_intent
             : (session.payment_intent?.id ?? null);
 
-        const { issued } = await markOrderPaid(orderId, paymentIntent);
+        const { issued, order } = await markOrderPaid(orderId, paymentIntent);
         console.info(
           `[stripe] order ${orderId} paid, ${issued} ticket(s) issued`,
         );
+
+        // Only the delivery that actually flipped the order returns `order`,
+        // so a Stripe retry cannot send the buyer a second copy. A failed send
+        // must not fail the webhook — the money is taken and the tickets exist
+        // either way, and a 500 here would have Stripe retry a paid order.
+        if (order) {
+          const sent = await sendTicketEmail({
+            to: order.email,
+            buyerName: order.name,
+            reference: order.reference,
+            totalCents: order.totalCents,
+            tickets: order.tickets,
+          });
+          if (!sent) {
+            console.error(
+              `[stripe] ticket email NOT sent for ${order.reference} — deliver it manually`,
+            );
+          }
+        }
       }
     }
   } catch (error) {
