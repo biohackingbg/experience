@@ -100,3 +100,19 @@ export async function getTicketsForOrder(orderId: string) {
 }
 
 export { orderItems };
+
+/** Counters for the door screen. */
+export async function getDoorStats(): Promise<{
+  total: number;
+  checkedIn: number;
+}> {
+  const db = getDb();
+  const [row] = await db
+    .select({
+      total: sql<number>`count(*)::int`,
+      checkedIn: sql<number>`count(*) filter (where ${tickets.checkedInAt} is not null)::int`,
+    })
+    .from(tickets);
+
+  return { total: row?.total ?? 0, checkedIn: row?.checkedIn ?? 0 };
+}

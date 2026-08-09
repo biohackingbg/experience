@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { getDashboardData } from "@/lib/admin-stats";
 import { formatPrice } from "@/lib/tickets";
@@ -58,14 +59,22 @@ export default async function AdminDashboard() {
               Продажби
             </h1>
           </div>
-          <form action={logout}>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/admin/vhod"
+              className="rounded-full border border-bh-ink/20 px-5 py-2 text-sm font-semibold text-bh-ink transition-colors hover:border-bh-ink"
+            >
+              Вход на събитието
+            </Link>
+            <form action={logout}>
             <button
               type="submit"
               className="rounded-full border border-bh-ink/20 px-5 py-2 text-sm font-semibold text-bh-ink transition-colors hover:border-bh-ink"
             >
               Изход
-            </button>
-          </form>
+              </button>
+            </form>
+          </div>
         </header>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
