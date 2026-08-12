@@ -42,11 +42,19 @@ export const SPEAKERS: Speaker[] = [
     country: "България",
     photo: "/speakers/neli-ognyanova.jpg",
   },
+  {
+    id: "dominik-thor",
+    title: "Проф.",
+    name: "Dominik Thor",
+    specialty: "Професор по фармация",
+    affiliation: "President, Geneva College of Longevity Science",
+    photo: "/speakers/dominik-thor.jpg",
+  },
+  // One trailing slot, not five. In a strip the unconfirmed cards scrolled
+  // out of sight; in a grid they are all on screen at once, and a wall of grey
+  // reads as "we have no line-up" on the page that sells the tickets. A single
+  // slot says the same thing the intro says — more names are coming.
   { id: "tba-1", name: "Обявява се скоро", pending: true },
-  { id: "tba-2", name: "Обявява се скоро", pending: true },
-  { id: "tba-3", name: "Обявява се скоро", pending: true },
-  { id: "tba-4", name: "Обявява се скоро", pending: true },
-  { id: "tba-5", name: "Обявява се скоро", pending: true },
 ];
 
 export function initials(name: string): string {
