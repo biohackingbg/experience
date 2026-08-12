@@ -48,6 +48,7 @@ export const SPEAKERS: Speaker[] = [
     name: "Dominik Thor",
     specialty: "Професор по фармация",
     affiliation: "President, Geneva College of Longevity Science",
+    country: "Швейцария",
     photo: "/speakers/dominik-thor.jpg",
   },
   // One trailing slot, not five. In a strip the unconfirmed cards scrolled
