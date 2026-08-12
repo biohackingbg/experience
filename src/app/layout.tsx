@@ -30,6 +30,11 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/" },
+  // Proves ownership to Search Console without touching DNS. The domain sits
+  // on SuperHosting's redirect nameservers, which serve a template zone with
+  // no TXT records, so the DNS method is not available until the zone moves.
+  // The token is meant to be public — it grants nothing on its own.
+  verification: { google: "k4X2UcEpwd0cQmdN6bpoZEPUi2zl3UHdxap635lbmUM" },
   openGraph: {
     type: "website",
     locale: "bg_BG",
