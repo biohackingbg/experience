@@ -35,6 +35,13 @@ export const SPEAKERS: Speaker[] = [
     country: "България",
     photo: "/speakers/rayna-stoyanova.jpg",
   },
+  {
+    id: "neli-ognyanova",
+    title: "Д-р",
+    name: "Нели Огнянова",
+    country: "България",
+    photo: "/speakers/neli-ognyanova.jpg",
+  },
   { id: "tba-1", name: "Обявява се скоро", pending: true },
   { id: "tba-2", name: "Обявява се скоро", pending: true },
   { id: "tba-3", name: "Обявява се скоро", pending: true },
