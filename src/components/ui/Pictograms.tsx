@@ -203,3 +203,15 @@ export function TicketIcon({ className }: Props) {
     </svg>
   );
 }
+
+/** Medical track. */
+export function Stethoscope({ className }: Props) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M6.2 2.8v5.4a4.4 4.4 0 0 0 8.8 0V2.8" />
+      <path d="M4.6 2.8h3.2M13.4 2.8h3.2" />
+      <path d="M10.6 12.6v3a4.6 4.6 0 0 0 9.2 0v-2.2" />
+      <circle cx="19.4" cy="10.6" r="2.4" />
+    </svg>
+  );
+}
