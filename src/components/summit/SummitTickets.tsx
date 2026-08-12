@@ -1,4 +1,5 @@
 import { Reveal } from "@/components/ui/Reveal";
+import { Stethoscope } from "@/components/ui/Pictograms";
 import { TIERS, formatPrice } from "@/lib/tickets";
 
 
@@ -40,7 +41,32 @@ export function SummitTickets() {
           </p>
         </Reveal>
 
-        <div className="mt-12 grid gap-4 lg:grid-cols-3">
+        {/* Stated here as well as in the tracks diagram: someone who scrolls
+            straight to the prices never sees that section, and this is the
+            moment the money is decided. */}
+        <Reveal className="mt-8">
+          <div className="flex items-start gap-4 rounded-2xl bg-bh-cloud px-6 py-5 ring-1 ring-bh-ink/10">
+            <Stethoscope className="mt-0.5 h-6 w-6 shrink-0 text-bh-pine" />
+            <p className="text-sm leading-relaxed text-bh-ink/70">
+              <strong className="font-semibold text-bh-ink">
+                Билетите тук са за Biohacking Experience
+              </strong>{" "}
+              — потребителската част на Sofia Life Summit, за посетители без
+              медицинско образование. Ако си лекар или медицински специалист и
+              търсиш научната програма, регистрацията за медицинската
+              конференция е през{" "}
+              <a
+                href="#dve-sabitiya"
+                className="font-semibold text-bh-pine underline underline-offset-2"
+              >
+                Bulgarian Longevity Association
+              </a>
+              .
+            </p>
+          </div>
+        </Reveal>
+
+        <div className="mt-8 grid gap-4 lg:grid-cols-3">
           {TIERS.map((tier, i) => {
             const featured = tier.featured;
             return (
