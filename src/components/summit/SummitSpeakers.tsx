@@ -27,13 +27,17 @@ export function SummitSpeakers() {
           </p>
         </Reveal>
 
-        <div className="mt-10 -mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-4 sm:mx-0 sm:px-0 sm:[scrollbar-width:thin]">
-          {SPEAKERS.map((s, i) => (
-            <Reveal
-              key={s.id}
-              delay={i * 70}
-              className="w-[15.5rem] shrink-0 snap-start sm:w-[16.5rem]"
-            >
+        {/* The row reveals as one block. Animating each card separately made
+            the strip look unstable while scrolling past it, and `overflow-x`
+            forces `overflow-y` to `auto`, so anything moving vertically inside
+            can raise a stray scrollbar. */}
+        <Reveal className="mt-10">
+          <div className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto overflow-y-hidden px-5 pb-4 sm:mx-0 sm:px-0 sm:[scrollbar-width:thin]">
+            {SPEAKERS.map((s) => (
+              <div
+                key={s.id}
+                className="w-[15.5rem] shrink-0 snap-start sm:w-[16.5rem]"
+              >
               <article
                 className={`flex h-full flex-col overflow-hidden rounded-3xl ring-1 transition-transform duration-300 ${
                   s.pending
@@ -102,9 +106,10 @@ export function SummitSpeakers() {
                   )}
                 </div>
               </article>
-            </Reveal>
-          ))}
-        </div>
+              </div>
+            ))}
+          </div>
+        </Reveal>
       </div>
     </section>
   );
