@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { initials, type Speaker } from "@/lib/speakers";
+import { CountryMark } from "@/components/ui/Flags";
 
 /** How many cards are visible before the visitor asks for the rest. */
 const INITIAL = 8;
@@ -54,19 +55,23 @@ function SpeakerCard({ s }: { s: Speaker }) {
                 {s.title}
               </p>
             )}
-            <h3 className="text-base font-bold leading-tight tracking-tight sm:text-lg">
-              {s.name}
-            </h3>
+            {/* Country sits against the name rather than inside the small
+                print below: an international line-up should register before
+                anything is read. */}
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="text-base font-bold leading-tight tracking-tight sm:text-lg">
+                {s.name}
+              </h3>
+              {s.country && <CountryMark country={s.country} />}
+            </div>
             {s.specialty && (
               <p className="text-xs font-medium text-bh-paper/90 sm:text-sm">
                 {s.specialty}
               </p>
             )}
-            {(s.affiliation || s.country) && (
+            {s.affiliation && (
               <p className="line-clamp-3 text-[0.7rem] leading-snug text-bh-paper/60">
                 {s.affiliation}
-                {s.affiliation && s.country ? " · " : ""}
-                {s.country}
               </p>
             )}
             {s.topic && (
