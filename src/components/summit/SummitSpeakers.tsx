@@ -81,6 +81,11 @@ export function SummitSpeakers() {
                       <h3 className="text-lg font-bold leading-tight tracking-tight">
                         {s.name}
                       </h3>
+                      {s.specialty && (
+                        <p className="text-sm font-medium text-bh-paper/90">
+                          {s.specialty}
+                        </p>
+                      )}
                       {(s.affiliation || s.country) && (
                         <p className="text-xs leading-snug text-bh-paper/60">
                           {s.affiliation}

@@ -13,6 +13,8 @@ export type Speaker = {
   /** Prefix shown above the name: "Проф. д-р", "Dr.", "PhD" … */
   title?: string;
   name: string;
+  /** Medical or research speciality — the credential that matters most here. */
+  specialty?: string;
   /** Country of practice, shown as a small label. */
   country?: string;
   /** Hospital, university or company. */
@@ -25,6 +27,14 @@ export type Speaker = {
 };
 
 export const SPEAKERS: Speaker[] = [
+  {
+    id: "rayna-stoyanova",
+    title: "Д-р",
+    name: "Райна Стоянова",
+    specialty: "Ендокринолог",
+    country: "България",
+    photo: "/speakers/rayna-stoyanova.jpg",
+  },
   { id: "tba-1", name: "Обявява се скоро", pending: true },
   { id: "tba-2", name: "Обявява се скоро", pending: true },
   { id: "tba-3", name: "Обявява се скоро", pending: true },
