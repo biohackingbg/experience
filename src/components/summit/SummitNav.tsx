@@ -3,6 +3,7 @@ import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 const links = [
   { href: "#concept", label: "Концепция" },
+  { href: "#lektori", label: "Лектори" },
   { href: "#passport", label: "Паспорт" },
   { href: "#program", label: "Програма" },
   { href: "#tickets", label: "Билети" },
