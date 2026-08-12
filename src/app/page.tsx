@@ -22,9 +22,9 @@ export default function Home() {
       <SummitNav />
       <main>
         <SummitHero />
-        <SummitConcept />
         <SummitSpeakers />
         <SummitTracks />
+        <SummitConcept />
         <SummitPassport />
         <SummitProgram />
         <SummitTickets />

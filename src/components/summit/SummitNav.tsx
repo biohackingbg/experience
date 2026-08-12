@@ -2,8 +2,9 @@ import Link from "next/link";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 const links = [
-  { href: "#concept", label: "Концепция" },
+  // Same order the sections appear in on the page.
   { href: "#lektori", label: "Лектори" },
+  { href: "#concept", label: "Концепция" },
   { href: "#passport", label: "Паспорт" },
   { href: "#program", label: "Програма" },
   { href: "#tickets", label: "Билети" },
