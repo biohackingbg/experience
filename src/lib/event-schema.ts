@@ -2,6 +2,7 @@ import { SPEAKERS } from "@/lib/speakers";
 import {
   CURRENCY,
   EARLY_ACCESS,
+  PRE_ORDER,
   TIERS,
   isEarlyAccess,
   priceCents,
@@ -85,7 +86,7 @@ export function buildEventSchema() {
       priceCurrency: CURRENCY,
       availability: "https://schema.org/PreOrder",
       url: "https://thelongevitysummit.eu/bilet",
-      validFrom: "2026-09-01T00:00:00+03:00",
+      validFrom: PRE_ORDER.validFrom,
       // Tells Google when the advertised price stops being true, so a stale
       // rich result does not keep showing the launch price.
       ...(early

@@ -39,6 +39,24 @@ export const EARLY_ACCESS = {
   regularFrom: "1 октомври",
 };
 
+/**
+ * The pre-order window.
+ *
+ * Tickets are sold from August, as pre-orders, until the end of the month.
+ * Said plainly on the page because a buyer paying in August is paying months
+ * before the door opens and deserves to know that is deliberate.
+ */
+export const PRE_ORDER = {
+  endsAt: new Date("2026-08-31T23:59:59+03:00"),
+  endsLabel: "31 август",
+  /** When the offer first became valid — matters to the structured data. */
+  validFrom: "2026-08-01T00:00:00+03:00",
+};
+
+export function isPreOrder(now: Date = new Date()): boolean {
+  return now <= PRE_ORDER.endsAt;
+}
+
 export type TierId = "basic" | "full" | "protocol";
 
 export type Tier = {

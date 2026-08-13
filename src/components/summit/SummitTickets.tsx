@@ -1,10 +1,12 @@
 import { Reveal } from "@/components/ui/Reveal";
 import {
   EARLY_ACCESS,
+  PRE_ORDER,
   TIERS,
   discountLabel,
   formatPrice,
   isEarlyAccess,
+  isPreOrder,
   priceCents,
 } from "@/lib/tickets";
 
@@ -30,6 +32,7 @@ function Check({ muted }: { muted?: boolean }) {
 
 export function SummitTickets() {
   const early = isEarlyAccess();
+  const preOrder = isPreOrder();
 
   return (
     <section id="tickets" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
@@ -46,6 +49,14 @@ export function SummitTickets() {
           <p className="max-w-sm text-sm leading-relaxed text-bh-ink/60">
             Всички билети дават достъп до сцената и Village. Разликата е в
             лабораторията и в това с какво си тръгва посетителят.
+            {preOrder && (
+              <>
+                {" "}
+                <strong className="font-semibold text-bh-ink">
+                  До {PRE_ORDER.endsLabel} билетите са предварителни поръчки.
+                </strong>
+              </>
+            )}
           </p>
         </Reveal>
 
@@ -168,8 +179,10 @@ export function SummitTickets() {
             section, and this is the moment the money is decided. */}
         <p className="mt-6 max-w-3xl font-mono text-[0.7rem] leading-relaxed uppercase tracking-[0.12em] text-bh-ink/40">
           Билетите тук са за Biohacking Experience · медицинската конференция
-          има отделна регистрация · групи над 10 души и корпоративни пакети по
-          договаряне · отстъпка за студенти и медицински специалисти.
+          има отделна регистрация · продажбите започват през август, до{" "}
+          {PRE_ORDER.endsLabel} като предварителна поръчка · групи над 10 души и
+          корпоративни пакети по договаряне · отстъпка за студенти и медицински
+          специалисти.
         </p>
       </div>
     </section>

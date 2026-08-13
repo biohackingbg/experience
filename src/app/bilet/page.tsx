@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { isTestMode } from "@/lib/stripe";
-import { isEarlyAccess } from "@/lib/tickets";
+import { PRE_ORDER, isEarlyAccess, isPreOrder } from "@/lib/tickets";
 import { CheckoutForm } from "./CheckoutForm";
 
 export const metadata: Metadata = {
@@ -21,6 +21,7 @@ export default async function CheckoutPage({
 }) {
   const { nivo, otkazano } = await searchParams;
   const testMode = isTestMode();
+  const preOrder = isPreOrder();
 
   return (
     <div className="min-h-screen rounded-[1.75rem] bg-bh-paper px-5 py-10 sm:px-8 lg:px-10">
@@ -53,6 +54,19 @@ export default async function CheckoutPage({
           Sofia Life Summit · 07—08 ноември 2026 · Гранд Хотел Милениум, София.
           Цените са крайни, с включен ДДС.
         </p>
+
+        {preOrder && (
+          /* Said before the money, not after: someone paying in August is
+             paying months ahead of the door opening. */
+          <p className="mt-4 max-w-xl rounded-2xl bg-bh-cloud px-5 py-4 text-sm leading-relaxed text-bh-ink/70 ring-1 ring-bh-ink/10">
+            <strong className="font-semibold text-bh-ink">
+              Предварителна поръчка
+            </strong>{" "}
+            — до {PRE_ORDER.endsLabel} билетите се продават предварително.
+            Плащаш сега, билетът и мястото ти са запазени, а програмата се
+            допълва до събитието.
+          </p>
+        )}
 
         <CheckoutForm initialTier={nivo} early={isEarlyAccess()} />
       </div>
