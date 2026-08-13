@@ -30,8 +30,15 @@ export type Speaker = {
   specialty?: string;
   /** Country of practice, shown as a small label. */
   country?: string;
-  /** Hospital, university or company. */
+  /**
+   * Hospital, university or company — the institution's own name, nothing
+   * else. A position goes in `role`: the two are joined for display, but the
+   * event's structured data emits this as an Organization, and no organisation
+   * is called "Председател, Bulgarian Longevity Association".
+   */
   affiliation?: string;
+  /** Position held there: "Председател", "President", "Head of department". */
+  role?: string;
   /** What they speak about at the summit. */
   topic?: string;
   photo?: string;
@@ -45,6 +52,8 @@ export const SPEAKERS: Speaker[] = [
     title: "Д-р",
     name: "Райна Стоянова",
     specialty: "Ендокринолог",
+    role: "Председател",
+    affiliation: "Bulgarian Longevity Association",
     country: "България",
     photo: "/speakers/rayna-stoyanova.jpg",
   },
@@ -62,7 +71,8 @@ export const SPEAKERS: Speaker[] = [
     title: "Проф.",
     name: "Dominik Thor",
     specialty: "Професор по фармация",
-    affiliation: "President, Geneva College of Longevity Science",
+    role: "President",
+    affiliation: "Geneva College of Longevity Science",
     country: "Швейцария",
     photo: "/speakers/dominik-thor.jpg",
   },

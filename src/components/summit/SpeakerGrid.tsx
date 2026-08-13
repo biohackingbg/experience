@@ -69,9 +69,9 @@ function SpeakerCard({ s }: { s: Speaker }) {
                 {s.specialty}
               </p>
             )}
-            {s.affiliation && (
+            {(s.role || s.affiliation) && (
               <p className="line-clamp-3 text-[0.7rem] leading-snug text-bh-paper/60">
-                {s.affiliation}
+                {[s.role, s.affiliation].filter(Boolean).join(", ")}
               </p>
             )}
             {s.topic && (
