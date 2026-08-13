@@ -1,5 +1,4 @@
 import { Reveal } from "@/components/ui/Reveal";
-import { Stethoscope } from "@/components/ui/Pictograms";
 import {
   EARLY_ACCESS,
   TIERS,
@@ -50,48 +49,7 @@ export function SummitTickets() {
           </p>
         </Reveal>
 
-        {early && (
-          <Reveal className="mt-8">
-            <div className="bh-gradient-outline flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl px-6 py-4">
-              <span className="bh-gradient rounded-full px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.15em] text-bh-ink">
-                Early access {discountLabel()}
-              </span>
-              <p className="text-sm text-bh-ink/70">
-                Ранните цени важат до{" "}
-                <strong className="font-semibold text-bh-ink">
-                  {EARLY_ACCESS.endsLabel}
-                </strong>
-                . От {EARLY_ACCESS.regularFrom} всички нива минават на редовна
-                цена.
-              </p>
-            </div>
-          </Reveal>
-        )}
 
-        {/* Stated here as well as in the tracks diagram: someone who scrolls
-            straight to the prices never sees that section, and this is the
-            moment the money is decided. */}
-        <Reveal className="mt-8">
-          <div className="flex items-start gap-4 rounded-2xl bg-bh-cloud px-6 py-5 ring-1 ring-bh-ink/10">
-            <Stethoscope className="mt-0.5 h-6 w-6 shrink-0 text-bh-pine" />
-            <p className="text-sm leading-relaxed text-bh-ink/70">
-              <strong className="font-semibold text-bh-ink">
-                Билетите тук са за Biohacking Experience
-              </strong>{" "}
-              — потребителската част на Sofia Life Summit, за посетители без
-              медицинско образование. Ако си лекар или медицински специалист и
-              търсиш научната програма, регистрацията за медицинската
-              конференция е през{" "}
-              <a
-                href="#dve-sabitiya"
-                className="font-semibold text-bh-pine underline underline-offset-2"
-              >
-                Bulgarian Longevity Association
-              </a>
-              .
-            </p>
-          </div>
-        </Reveal>
 
         <div className="mt-8 grid gap-4 lg:grid-cols-3">
           {TIERS.map((tier, i) => {
@@ -205,9 +163,13 @@ export function SummitTickets() {
           })}
         </div>
 
-        <p className="mt-6 font-mono text-[0.7rem] uppercase tracking-[0.12em] text-bh-ink/40">
-          Групи над 10 души и корпоративни пакети по договаряне · отстъпка за
-          студенти и медицински специалисти.
+        {/* Folded into the existing line rather than given a box of its own:
+            someone who scrolls straight to the prices never sees the two-track
+            section, and this is the moment the money is decided. */}
+        <p className="mt-6 max-w-3xl font-mono text-[0.7rem] leading-relaxed uppercase tracking-[0.12em] text-bh-ink/40">
+          Билетите тук са за Biohacking Experience · медицинската конференция
+          има отделна регистрация · групи над 10 души и корпоративни пакети по
+          договаряне · отстъпка за студенти и медицински специалисти.
         </p>
       </div>
     </section>
