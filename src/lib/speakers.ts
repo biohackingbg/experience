@@ -9,9 +9,14 @@
  * and institutions are filled in as they are confirmed; nothing is inferred
  * from a name, least of all a country.
  *
- * TWO OMISSIONS ON PURPOSE: the source marks two people "(не е говорено с
- * нея)". They are not here. A page that sells tickets cannot announce someone
- * who has not agreed to appear.
+ * DELIBERATELY NOT CARDED — do not "fix" this by adding them back:
+ * - Two people the source marks "(не е говорено с нея)". A page that sells
+ *   tickets cannot announce someone who has not agreed to appear.
+ * - Мария Силвестър and Мария Илиева. Both are on stage and both stay in the
+ *   programme, but they host and perform rather than lecture, and this section
+ *   is what a visitor scans to judge the medical line-up.
+ *
+ * So a name in `program.ts` without a card here is expected, not a gap.
  *
  * `photo` is a path under /public. Until a portrait arrives the card falls back
  * to a monogram, which reads as deliberate rather than broken.
@@ -42,11 +47,6 @@ export const SPEAKERS: Speaker[] = [
     specialty: "Ендокринолог",
     country: "България",
     photo: "/speakers/rayna-stoyanova.jpg",
-  },
-  {
-    id: "maria-silvester",
-    name: "Мария Силвестър",
-    specialty: "Посланик на събитието",
   },
   {
     id: "dominik-thor",
@@ -91,7 +91,6 @@ export const SPEAKERS: Speaker[] = [
     name: "Даниела Илиева",
     specialty: "NLP специалист",
   },
-  { id: "maria-ilieva", name: "Мария Илиева" },
   { id: "yana-balnikova", name: "Яна Балникова" },
   { id: "maria-marinova", name: "Мария Маринова" },
   { id: "louise-newson", name: "Louise Newson" },
