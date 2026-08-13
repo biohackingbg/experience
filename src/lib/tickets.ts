@@ -32,11 +32,13 @@ export const CURRENCY = "EUR";
  */
 export const EARLY_ACCESS = {
   discount: 0.3,
-  endsAt: new Date("2026-09-30T23:59:59+03:00"),
+  // Ends with the pre-order window: one deadline, deliberately. After
+  // 31 August there are no further discounts — tickets go to list price.
+  endsAt: new Date("2026-08-31T23:59:59+03:00"),
   /** Deadline as it reads in a sentence. */
-  endsLabel: "30 септември",
+  endsLabel: "31 август",
   /** Shown wherever the regular price is struck through. */
-  regularFrom: "1 октомври",
+  regularFrom: "1 септември",
 };
 
 /**
