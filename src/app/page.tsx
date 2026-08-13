@@ -10,7 +10,12 @@ import { SummitRegister } from "@/components/summit/SummitRegister";
 import { SummitSponsors } from "@/components/summit/SummitSponsors";
 import { SummitOrganizers } from "@/components/summit/SummitOrganizers";
 import { SummitFooter } from "@/components/summit/SummitFooter";
-import { eventSchema } from "@/lib/event-schema";
+import { buildEventSchema } from "@/lib/event-schema";
+
+// Re-rendered periodically so the early-access window can close on its own.
+// A fully static page would keep advertising the launch price until the
+// next deploy.
+export const revalidate = 300;
 
 export default function Home() {
   return (
@@ -18,7 +23,7 @@ export default function Home() {
       <script
         type="application/ld+json"
         // Static, authored object — no user input reaches this.
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildEventSchema()) }}
       />
       <SummitNav />
       <main>

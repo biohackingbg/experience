@@ -1,4 +1,10 @@
 import { Gauge, Hotel, People } from "@/components/ui/Pictograms";
+import {
+  TIERS,
+  formatPrice,
+  isEarlyAccess,
+  priceCents,
+} from "@/lib/tickets";
 
 const zoneTags = ["Сцена", "Лаборатория", "Ритуали", "Village"];
 
@@ -17,6 +23,9 @@ function Arrow({ className = "" }: { className?: string }) {
 }
 
 export function SummitHero() {
+  const early = isEarlyAccess();
+  const cheapest = Math.min(...TIERS.map((t) => priceCents(t, early)));
+
   return (
     <section id="top" className="px-5 pt-6 sm:px-8 sm:pt-8 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
@@ -67,7 +76,7 @@ export function SummitHero() {
             href="#tickets"
             className="bh-gradient inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
           >
-            Купи билет от 50 €
+            Купи билет от {formatPrice(cheapest)} €
           </a>
           <a
             href="#program"

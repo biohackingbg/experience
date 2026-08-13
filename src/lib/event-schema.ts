@@ -1,4 +1,11 @@
 import { SPEAKERS } from "@/lib/speakers";
+import {
+  CURRENCY,
+  EARLY_ACCESS,
+  TIERS,
+  isEarlyAccess,
+  priceCents,
+} from "@/lib/tickets";
 
 /**
  * Speakers, as schema.org performers.
@@ -22,10 +29,17 @@ const performers = SPEAKERS.filter((s) => !s.pending).map((s) => ({
  * schema.org Event description, emitted as JSON-LD.
  *
  * This is what lets Google show the dates, venue and ticket price directly in
- * the search result instead of a plain link. Keep the offers in step with the
- * tiers in `SummitTickets`.
+ * the search result instead of a plain link.
+ *
+ * A function rather than a constant: the offers depend on whether the early
+ * window is open, and a module-level constant would freeze that answer for the
+ * life of the server process — advertising a price in search that the checkout
+ * no longer charges.
  */
-export const eventSchema = {
+export function buildEventSchema() {
+  const early = isEarlyAccess();
+
+  return {
   "@context": "https://schema.org",
   "@type": "Event",
   name: "Sofia Life Summit 2026",
@@ -63,33 +77,19 @@ export const eventSchema = {
       url: "https://thelongevitysummit.eu",
     },
   ],
-  offers: [
-    {
+  offers: TIERS.map((tier) => ({
       "@type": "Offer",
-      name: "Основен",
-      price: "50",
-      priceCurrency: "EUR",
+      name: tier.name,
+      price: (priceCents(tier, early) / 100).toFixed(2),
+      priceCurrency: CURRENCY,
       availability: "https://schema.org/PreOrder",
-      url: "https://thelongevitysummit.eu/#tickets",
+      url: "https://thelongevitysummit.eu/bilet",
       validFrom: "2026-09-01T00:00:00+03:00",
-    },
-    {
-      "@type": "Offer",
-      name: "Пълен",
-      price: "145",
-      priceCurrency: "EUR",
-      availability: "https://schema.org/PreOrder",
-      url: "https://thelongevitysummit.eu/#tickets",
-      validFrom: "2026-09-01T00:00:00+03:00",
-    },
-    {
-      "@type": "Offer",
-      name: "Протокол",
-      price: "390",
-      priceCurrency: "EUR",
-      availability: "https://schema.org/PreOrder",
-      url: "https://thelongevitysummit.eu/#tickets",
-      validFrom: "2026-09-01T00:00:00+03:00",
-    },
-  ],
-} as const;
+      // Tells Google when the advertised price stops being true, so a stale
+      // rich result does not keep showing the launch price.
+      ...(early
+        ? { priceValidUntil: EARLY_ACCESS.endsAt.toISOString().slice(0, 10) }
+        : {}),
+    })),
+  } as const;
+}

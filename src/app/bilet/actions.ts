@@ -91,8 +91,9 @@ export async function startCheckout(
         quantity: input.quantity,
         price_data: {
           currency: "eur",
-          // Stripe charges what the buyer saw; VAT is already inside it.
-          unit_amount: tier.priceCents,
+          // The price already written to the order, so the charge and the
+          // record cannot disagree. VAT is already inside it.
+          unit_amount: order.unitPriceCents,
           product_data: {
             name: `Sofia Life Summit — ${tier.name}`,
             description: "07—08 ноември 2026, Гранд Хотел Милениум, София",

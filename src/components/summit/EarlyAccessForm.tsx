@@ -3,13 +3,14 @@
 import { useActionState } from "react";
 
 import { submitSignup } from "@/app/actions";
-import { CONSENT_TEXT, TIERS, TIER_LABELS } from "@/lib/consent";
+import { CONSENT_TEXT, TIERS, tierLabels } from "@/lib/consent";
 import { initialSignupState } from "@/lib/signup-state";
 
 const fieldBase =
   "w-full rounded-2xl border border-bh-paper/25 bg-bh-paper/10 px-4 py-3 text-sm text-bh-paper placeholder:text-bh-paper/40 outline-none transition-colors focus:border-bh-lime";
 
-export function EarlyAccessForm() {
+export function EarlyAccessForm({ early }: { early: boolean }) {
+  const labels = tierLabels(early);
   const [state, formAction, pending] = useActionState(
     submitSignup,
     initialSignupState,
@@ -92,7 +93,7 @@ export function EarlyAccessForm() {
           <option value="">Кой билет те интересува? (по избор)</option>
           {TIERS.map((tier) => (
             <option key={tier} value={tier}>
-              {TIER_LABELS[tier]}
+              {labels[tier]}
             </option>
           ))}
         </select>

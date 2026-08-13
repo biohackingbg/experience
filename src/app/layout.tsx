@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 import { Sofia_Sans, Geologica, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import {
+  TIERS,
+  formatPrice,
+  isEarlyAccess,
+  priceCents,
+} from "@/lib/tickets";
 
 /** Both faces carry Cyrillic, so Bulgarian headings no longer fall back. */
 const bodyFont = Geologica({
@@ -20,10 +26,22 @@ const monoFont = Geist_Mono({
 
 const SITE = "https://thelongevitysummit.eu";
 const TITLE = "Sofia Life Summit 2026 | Biohacking Experience, София";
-const DESCRIPTION =
-  "Sofia Life Summit — 07–08 ноември 2026, Гранд Хотел Милениум, София. Четири зони, longevity паспорт, 12 станции за измерване и билети от 50 €.";
+function describe(): string {
+  const from = Math.min(...TIERS.map((t) => priceCents(t, isEarlyAccess())));
+  return (
+    "Sofia Life Summit — 07–08 ноември 2026, Гранд Хотел Милениум, София. " +
+    `Четири зони, longevity паспорт, 12 станции за измерване и билети от ${formatPrice(from)} €.`
+  );
+}
 
-export const metadata: Metadata = {
+/**
+ * Generated rather than declared: the description quotes the cheapest ticket,
+ * and a constant would keep advertising the launch price in search results
+ * after the early window has closed.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const DESCRIPTION = describe();
+  return {
   // Makes the generated OG image resolve to an absolute URL, which every
   // social crawler requires.
   metadataBase: new URL(SITE),
@@ -44,11 +62,12 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
   },
   twitter: {
-    card: "summary_large_image",
-    title: TITLE,
-    description: DESCRIPTION,
-  },
-};
+      card: "summary_large_image",
+      title: TITLE,
+      description: DESCRIPTION,
+    },
+  };
+}
 
 export default function RootLayout({
   children,

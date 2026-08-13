@@ -1,6 +1,13 @@
 import { Reveal } from "@/components/ui/Reveal";
 import { Stethoscope } from "@/components/ui/Pictograms";
-import { TIERS, formatPrice } from "@/lib/tickets";
+import {
+  EARLY_ACCESS,
+  TIERS,
+  discountLabel,
+  formatPrice,
+  isEarlyAccess,
+  priceCents,
+} from "@/lib/tickets";
 
 
 function Check({ muted }: { muted?: boolean }) {
@@ -23,6 +30,8 @@ function Check({ muted }: { muted?: boolean }) {
 }
 
 export function SummitTickets() {
+  const early = isEarlyAccess();
+
   return (
     <section id="tickets" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
@@ -40,6 +49,24 @@ export function SummitTickets() {
             лабораторията и в това с какво си тръгва посетителят.
           </p>
         </Reveal>
+
+        {early && (
+          <Reveal className="mt-8">
+            <div className="bh-gradient-outline flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl px-6 py-4">
+              <span className="bh-gradient rounded-full px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.15em] text-bh-ink">
+                Early access {discountLabel()}
+              </span>
+              <p className="text-sm text-bh-ink/70">
+                Ранните цени важат до{" "}
+                <strong className="font-semibold text-bh-ink">
+                  {EARLY_ACCESS.endsLabel}
+                </strong>
+                . От {EARLY_ACCESS.regularFrom} всички нива минават на редовна
+                цена.
+              </p>
+            </div>
+          </Reveal>
+        )}
 
         {/* Stated here as well as in the tracks diagram: someone who scrolls
             straight to the prices never sees that section, and this is the
@@ -96,11 +123,34 @@ export function SummitTickets() {
                   <span className="mt-1 block h-4" />
                 )}
 
-                <div className="mt-6 flex items-baseline gap-1">
-                  <span className="text-6xl font-black tracking-tight">
-                    {formatPrice(tier.priceCents)}
-                  </span>
-                  <span className="text-2xl font-semibold">€</span>
+                <div className="mt-6">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-6xl font-black tracking-tight">
+                      {formatPrice(priceCents(tier, early))}
+                    </span>
+                    <span className="text-2xl font-semibold">€</span>
+                  </div>
+                  {/* On its own line rather than beside the headline figure:
+                      "101,50 €" plus a struck price plus a badge overflows a
+                      third of the grid and wraps unevenly between cards. */}
+                  {early && (
+                    <>
+                      <div className="mt-2 flex items-center gap-2.5">
+                        <s className="text-xl font-semibold text-bh-ink/35">
+                          {formatPrice(tier.listPriceCents)} €
+                        </s>
+                        <span className="bh-gradient rounded-full px-2.5 py-1 text-xs font-bold tracking-tight text-bh-ink">
+                          {discountLabel()}
+                        </span>
+                      </div>
+                      {/* The struck figure is named as the price that starts on
+                          a date, not one that was ever charged — see the note
+                          in lib/tickets.ts. */}
+                      <p className="mt-1.5 text-[0.7rem] leading-snug text-bh-ink/45">
+                        редовна цена от {EARLY_ACCESS.regularFrom}
+                      </p>
+                    </>
+                  )}
                 </div>
 
                 <ul className="mt-8 flex flex-1 flex-col gap-3 text-sm text-bh-ink/75">

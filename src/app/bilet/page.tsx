@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { isTestMode } from "@/lib/stripe";
+import { isEarlyAccess } from "@/lib/tickets";
 import { CheckoutForm } from "./CheckoutForm";
 
 export const metadata: Metadata = {
@@ -53,7 +54,7 @@ export default async function CheckoutPage({
           Цените са крайни, с включен ДДС.
         </p>
 
-        <CheckoutForm initialTier={nivo} />
+        <CheckoutForm initialTier={nivo} early={isEarlyAccess()} />
       </div>
     </div>
   );

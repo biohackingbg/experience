@@ -1,4 +1,5 @@
 import { EarlyAccessForm } from "@/components/summit/EarlyAccessForm";
+import { isEarlyAccess } from "@/lib/tickets";
 import { Reveal } from "@/components/ui/Reveal";
 import { Calendar, Pin, TicketIcon } from "@/components/ui/Pictograms";
 
@@ -26,7 +27,7 @@ export function SummitRegister() {
               първите, които ще ги получат.
             </p>
 
-            <EarlyAccessForm />
+            <EarlyAccessForm early={isEarlyAccess()} />
           </div>
 
           <dl className="mt-14 grid gap-8 border-t border-bh-paper/15 pt-8 sm:grid-cols-3">

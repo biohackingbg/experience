@@ -3,6 +3,12 @@
  * a person sees is provably the wording we store. No server-only imports here —
  * this module is safe to pull into the browser bundle.
  */
+import {
+  TIERS as TICKET_TIERS,
+  formatPrice,
+  priceCents,
+} from "@/lib/tickets";
+
 export const CONSENT_VERSION = "v1";
 
 export const CONSENT_TEXT =
@@ -12,8 +18,15 @@ export const CONSENT_TEXT =
 
 export const TIERS = ["basic", "full", "protocol"] as const;
 
-export const TIER_LABELS: Record<(typeof TIERS)[number], string> = {
-  basic: "Основен — 50 €",
-  full: "Пълен — 145 €",
-  protocol: "Протокол — 390 €",
-};
+/**
+ * Derived rather than typed out, so the price offered on the signup form can
+ * never fall behind the one the checkout charges. `early` comes from the
+ * server for the same reason it does everywhere else.
+ */
+export function tierLabels(early: boolean): Record<(typeof TIERS)[number], string> {
+  const label = (id: (typeof TIERS)[number]) => {
+    const tier = TICKET_TIERS.find((t) => t.id === id)!;
+    return `${tier.name} — ${formatPrice(priceCents(tier, early))} €`;
+  };
+  return { basic: label("basic"), full: label("full"), protocol: label("protocol") };
+}

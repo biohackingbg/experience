@@ -4,7 +4,7 @@ import { useActionState, useEffect, useState } from "react";
 
 import { initialCheckoutState } from "@/lib/checkout-state";
 import { PURCHASE_TERMS_TEXT } from "@/lib/purchase-terms";
-import { TIERS, formatPrice, splitVat } from "@/lib/tickets";
+import { TIERS, formatPrice, priceCents, splitVat } from "@/lib/tickets";
 import { startCheckout } from "./actions";
 
 const fieldBase =
@@ -30,7 +30,18 @@ function Err({ children }: { children?: string }) {
   );
 }
 
-export function CheckoutForm({ initialTier }: { initialTier?: string }) {
+/**
+ * `early` is decided on the server and handed down. Working it out here from
+ * the browser clock would let a device with the wrong date show one price
+ * while the server charged another.
+ */
+export function CheckoutForm({
+  initialTier,
+  early,
+}: {
+  initialTier?: string;
+  early: boolean;
+}) {
   const [state, formAction, pending] = useActionState(
     startCheckout,
     initialCheckoutState,
@@ -51,7 +62,7 @@ export function CheckoutForm({ initialTier }: { initialTier?: string }) {
   const [wantsInvoice, setWantsInvoice] = useState(false);
 
   const tier = TIERS.find((t) => t.id === tierId)!;
-  const total = tier.priceCents * quantity;
+  const total = priceCents(tier, early) * quantity;
   const { netCents, vatCents } = splitVat(total);
 
   return (
@@ -83,7 +94,7 @@ export function CheckoutForm({ initialTier }: { initialTier?: string }) {
                   <span className="font-semibold text-bh-ink">{t.name}</span>
                 </span>
                 <span className="font-semibold text-bh-ink">
-                  {formatPrice(t.priceCents)} €
+                  {formatPrice(priceCents(t, early))} €
                 </span>
               </label>
             ))}
