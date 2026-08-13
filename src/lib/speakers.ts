@@ -110,7 +110,16 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/dean-berman.jpg",
   },
   { id: "milen-vasilev", name: "Милен Василев" },
-  { id: "viktoriya-sarafyan", name: "Виктория Сарафян" },
+  {
+    // "Проф." comes from the file the organisers sent. Her coat carries a
+    // university emblem, but it is too small in the photo to read with
+    // certainty, so no institution is claimed here yet.
+    id: "viktoriya-sarafyan",
+    title: "Проф.",
+    name: "Виктория Сарафян",
+    country: "България",
+    photo: "/speakers/viktoriya-sarafyan.jpg",
+  },
   {
     id: "godfrey-grech",
     name: "Godfrey Grech",
