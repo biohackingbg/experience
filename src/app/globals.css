@@ -141,6 +141,15 @@ body {
     var(--bh-brand-gradient) border-box;
 }
 
+/* Same for the forest card: the padding box has to be its own green, or the
+   rule paints it with the light paper colour and the card turns inside out. */
+.bh-forest.bh-gradient-outline {
+  background:
+    linear-gradient(#0a3229, #0a3229) padding-box,
+    var(--bh-brand-gradient) border-box;
+  box-shadow: none;
+}
+
 /* On a mint card the padding box has to be mint, not page colour — and the
    gradient border replaces the hairline rather than doubling up with it. */
 .bh-mint.bh-gradient-outline {

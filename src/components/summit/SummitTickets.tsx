@@ -96,14 +96,33 @@ export function SummitTickets() {
         <div className="mt-8 grid gap-4 lg:grid-cols-3">
           {TIERS.map((tier, i) => {
             const featured = tier.featured;
+            // Whole class names, never assembled from pieces: Tailwind reads
+            // the source statically, so `${x}/50` would never be generated.
+            const tone = featured
+              ? {
+                  tagline: "text-bh-paper/50",
+                  struck: "text-bh-paper/35",
+                  note: "text-bh-paper/45",
+                  list: "text-bh-paper/75",
+                  check: "text-bh-paper",
+                }
+              : {
+                  tagline: "text-bh-ink/50",
+                  struck: "text-bh-ink/35",
+                  note: "text-bh-ink/45",
+                  list: "text-bh-ink/75",
+                  check: "text-bh-ink",
+                };
             return (
               <Reveal key={tier.name} delay={i * 110}>
-              {/* All three tiers are light; the featured one is marked by the
-                  gradient — on its edge, its badge and its button — rather
-                  than by a different card colour. */}
+              {/* The featured tier is the dark one, so the eye lands on it
+                  before reading a single price. `tone` carries the foreground
+                  colours that have to invert along with the surface. */}
               <div
-                className={`bh-mint relative flex h-full flex-col rounded-3xl p-8 text-bh-ink ${
-                  featured ? "bh-gradient-outline" : ""
+                className={`relative flex h-full flex-col rounded-3xl p-8 ${
+                  featured
+                    ? "bh-forest bh-gradient-outline text-bh-paper"
+                    : "bh-mint text-bh-ink"
                 }`}
               >
                 {featured && (
@@ -116,7 +135,7 @@ export function SummitTickets() {
                   {tier.name}
                 </h3>
                 {tier.tagline ? (
-                  <span className="mt-1 font-mono text-xs uppercase tracking-[0.15em] text-bh-ink/50">
+                  <span className={`mt-1 font-mono text-xs uppercase tracking-[0.15em] ${tone.tagline}`}>
                     {tier.tagline}
                   </span>
                 ) : (
@@ -136,7 +155,7 @@ export function SummitTickets() {
                   {early && (
                     <>
                       <div className="mt-2 flex items-center gap-2.5">
-                        <s className="text-xl font-semibold text-bh-ink/35">
+                        <s className={`text-xl font-semibold ${tone.struck}`}>
                           {formatPrice(tier.listPriceCents)} €
                         </s>
                         <span className="bh-gradient rounded-full px-2.5 py-1 text-xs font-bold tracking-tight text-bh-ink">
@@ -146,17 +165,17 @@ export function SummitTickets() {
                       {/* The struck figure is named as the price that starts on
                           a date, not one that was ever charged — see the note
                           in lib/tickets.ts. */}
-                      <p className="mt-1.5 text-[0.7rem] leading-snug text-bh-ink/45">
+                      <p className={`mt-1.5 text-[0.7rem] leading-snug ${tone.note}`}>
                         редовна цена от {EARLY_ACCESS.regularFrom}
                       </p>
                     </>
                   )}
                 </div>
 
-                <ul className="mt-8 flex flex-1 flex-col gap-3 text-sm text-bh-ink/75">
+                <ul className={`mt-8 flex flex-1 flex-col gap-3 text-sm ${tone.list}`}>
                   {tier.features.map((f) => (
                     <li key={f} className="flex gap-3">
-                      <span className="text-bh-ink">
+                      <span className={tone.check}>
                         <Check />
                       </span>
                       {f}
