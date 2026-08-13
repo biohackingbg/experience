@@ -1,3 +1,23 @@
+import { SPEAKERS } from "@/lib/speakers";
+
+/**
+ * Speakers, as schema.org performers.
+ *
+ * Read from the same list the page renders, so a name can never appear in one
+ * place and not the other. Unconfirmed slots are skipped — "Обявява се скоро"
+ * is a placeholder, not a person, and Google would treat it as one.
+ */
+const performers = SPEAKERS.filter((s) => !s.pending).map((s) => ({
+  "@type": "Person" as const,
+  name: [s.title, s.name].filter(Boolean).join(" "),
+  ...(s.specialty || s.affiliation
+    ? { jobTitle: s.specialty ?? s.affiliation }
+    : {}),
+  ...(s.affiliation
+    ? { affiliation: { "@type": "Organization" as const, name: s.affiliation } }
+    : {}),
+}));
+
 /**
  * schema.org Event description, emitted as JSON-LD.
  *
@@ -30,6 +50,7 @@ export const eventSchema = {
       addressCountry: "BG",
     },
   },
+  performer: performers,
   organizer: [
     {
       "@type": "Organization",
