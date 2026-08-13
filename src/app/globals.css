@@ -177,6 +177,24 @@ body {
   --color-bh-pine: #146455;
 }
 
+/* A printable document. Pinned light in both themes and stripped of colour on
+   paper: an invoice is a record, not part of the site's skin, and a dark sheet
+   either wastes toner or prints as an empty white rectangle. */
+.bh-doc {
+  background-color: #ffffff;
+
+  --color-bh-paper: #ffffff;
+  --color-bh-cloud: #ffffff;
+  --color-bh-ink: #10241f;
+  --color-bh-pine: #146455;
+}
+
+@media print {
+  .bh-doc {
+    background-color: #ffffff;
+  }
+}
+
 /* Flat mint card with a hairline edge. Constant in both themes — it carries
    the partner's colour, so it should read the same either way. The rule pins
    the foreground tokens for the same reason .bh-gradient does. */

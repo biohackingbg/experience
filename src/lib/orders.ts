@@ -160,6 +160,8 @@ export type PaidOrderSummary = {
     name: string;
     email: string;
     totalCents: number;
+    /** Null only if the column was somehow already filled. */
+    invoiceNumber: number | null;
     tickets: { code: string; tierName: string }[];
   };
 };
@@ -189,6 +191,18 @@ export async function markOrderPaid(
 
     if (updated.length === 0) return { issued: 0 };
 
+    // The invoice number is drawn here and nowhere else: inside the same
+    // transaction that flipped the order to paid, and only on the delivery
+    // that won that flip. A sequence rather than max()+1, so two webhooks
+    // arriving together cannot take the same number — and an abandoned
+    // checkout never burns one, which would leave a hole in the run.
+    const [invoiced] = await tx.execute<{ invoice_number: string }>(
+      sql`update ${orders}
+          set invoice_number = nextval('invoice_number_seq'), invoiced_at = now()
+          where ${orders.id} = ${orderId} and ${orders.invoiceNumber} is null
+          returning invoice_number`,
+    );
+
     const items = await tx
       .select({
         tierId: orderItems.tierId,
@@ -215,6 +229,7 @@ export async function markOrderPaid(
         name: order.name,
         email: order.email,
         totalCents: order.totalCents,
+        invoiceNumber: invoiced ? Number(invoiced.invoice_number) : null,
         tickets: rows.map((row) => ({
           code: row.code,
           tierName: getTier(row.tierId)?.name ?? row.tierId,

@@ -33,6 +33,8 @@ export type TicketEmailInput = {
   buyerName: string;
   reference: string;
   totalCents: number;
+  /** Absent only if numbering somehow failed; the email still sends. */
+  invoiceNumber?: number | null;
   tickets: { code: string; tierName: string }[];
 };
 
@@ -104,7 +106,12 @@ function ticketEmailHtml(input: TicketEmailInput): string {
           </td>
           <td align="right" style="font:400 14px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251fb3">
             Поръчка<br><strong style="color:#02251f">${input.reference}</strong><br>
-            ${formatPrice(input.totalCents)} €
+            ${formatPrice(input.totalCents)} €${
+              input.invoiceNumber
+                ? `<br><a href="${SITE}/faktura/${input.reference}"
+                       style="color:#146455;font-weight:600;text-decoration:underline">Фактура</a>`
+                : ""
+            }
           </td>
         </tr>
       </table>
@@ -133,6 +140,7 @@ function ticketEmailText(input: TicketEmailInput): string {
     "",
     "07—08 ноември 2026, Гранд Хотел Милениум, София",
     `Поръчка ${input.reference} · ${formatPrice(input.totalCents)} €`,
+    ...(input.invoiceNumber ? [`Фактура: ${SITE}/faktura/${input.reference}`] : []),
     "",
     "Въпроси: hello@biohacking.bg",
   ].join("\n");

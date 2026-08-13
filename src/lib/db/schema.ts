@@ -1,4 +1,5 @@
 import {
+  bigint,
   boolean,
   index,
   integer,
@@ -90,6 +91,14 @@ export const orders = pgTable(
     invoiceVatNumber: text("invoice_vat_number"),
     invoiceAddress: text("invoice_address"),
 
+    /**
+     * Invoice number from the site's own series, drawn from a Postgres
+     * sequence the moment the order is paid — never on a pending one, so an
+     * abandoned checkout cannot burn a number and leave a hole in the run.
+     */
+    invoiceNumber: bigint("invoice_number", { mode: "number" }),
+    invoicedAt: timestamp("invoiced_at", { withTimezone: true }),
+
     stripePaymentIntentId: text("stripe_payment_intent_id"),
 
     /** Proof the buyer accepted the terms, same pattern as signups. */
@@ -105,6 +114,9 @@ export const orders = pgTable(
     index("orders_status_idx").on(table.status),
     index("orders_email_idx").on(table.email),
     index("orders_created_at_idx").on(table.createdAt),
+    // Two invoices may never share a number; the database enforces it
+    // rather than trusting the code that draws from the sequence.
+    uniqueIndex("orders_invoice_number_idx").on(table.invoiceNumber),
   ],
 );
 
