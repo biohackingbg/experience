@@ -4,7 +4,6 @@ import {
   ArrowDown,
   Calendar,
   People,
-  Pin,
   Stethoscope,
 } from "@/components/ui/Pictograms";
 
@@ -22,11 +21,6 @@ import {
  * a roof should still be told apart at a glance.
  */
 
-const shared = [
-  { icon: Calendar, label: "07—08 ноември 2026" },
-  { icon: Pin, label: "Гранд Хотел Милениум" },
-];
-
 const CONFERENCE_URL = "https://www.longevitybulgaria.com/post/conference-2026";
 
 export function SummitTracks() {
@@ -43,50 +37,13 @@ export function SummitTracks() {
             </h2>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-bh-ink/60">
-            Медицинската конференция и потребителският фест вървят паралелно, в
-            същите дни и същата сграда — но са отделни събития с отделни билети.
+            Медицинската конференция е от 6 до 8 ноември, потребителският фест —
+            на 7 и 8. Една сграда, Гранд Хотел Милениум, но отделни събития с
+            отделни билети.
           </p>
         </Reveal>
 
-        {/* Shared band */}
-        <Reveal className="mt-12">
-          <div className="bh-mint flex flex-wrap items-center justify-center gap-x-10 gap-y-4 rounded-3xl px-7 py-5">
-            <span className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-bh-ink/50">
-              Общо за двете
-            </span>
-            {shared.map((item) => (
-              <span
-                key={item.label}
-                className="flex items-center gap-2.5 text-sm font-medium text-bh-ink"
-              >
-                <item.icon className="h-5 w-5 shrink-0 text-bh-pine" />
-                {item.label}
-              </span>
-            ))}
-          </div>
-
-          {/* A fork, not a divider: a single centred line read as a boundary
-              between the two cards rather than as one thing becoming two. */}
-          <svg
-            aria-hidden
-            viewBox="0 0 400 48"
-            preserveAspectRatio="none"
-            className="hidden h-12 w-full md:block"
-          >
-            <path
-              d="M200 0v12 M200 12c0 12-90 12-90 24 M200 12c0 12 90 12 90 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1"
-              vectorEffect="non-scaling-stroke"
-              className="text-bh-ink/25"
-            />
-          </svg>
-          {/* Stacked on phones, so the fork would point nowhere. */}
-          <div aria-hidden className="h-6 md:hidden" />
-        </Reveal>
-
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="mt-12 grid gap-4 md:grid-cols-2">
           {/* ── The association's conference ─────────────────────────────── */}
           <Reveal>
             <article className="bh-mint flex h-full flex-col rounded-3xl p-7 text-bh-ink">
@@ -96,7 +53,7 @@ export function SummitTracks() {
                 <img
                   src="/partner-logo.png"
                   alt="Bulgarian Longevity Association"
-                  className="h-10 w-auto max-w-[9rem] shrink-0 object-contain object-right"
+                  className="h-14 w-auto max-w-[11rem] shrink-0 object-contain object-right"
                 />
               </div>
 
@@ -108,6 +65,10 @@ export function SummitTracks() {
               </h3>
               <p className="mt-3 text-sm font-semibold text-bh-rose">
                 За лекари и специалисти
+              </p>
+              <p className="mt-4 flex items-center gap-2 font-mono text-[0.7rem] uppercase tracking-[0.12em] text-bh-ink/55">
+                <Calendar className="h-4 w-4 shrink-0 text-bh-assoc" />
+                06—08 ноември 2026
               </p>
 
               <ul className="mt-6 flex flex-1 flex-col gap-3">
@@ -157,7 +118,7 @@ export function SummitTracks() {
                 <img
                   src="/logo-dark.svg"
                   alt="Biohacking Experience"
-                  className="h-8 w-auto shrink-0"
+                  className="h-11 w-auto shrink-0"
                 />
               </div>
 
@@ -169,6 +130,10 @@ export function SummitTracks() {
               </h3>
               <p className="mt-3 text-sm font-semibold text-bh-lime">
                 За всички, без медицинско образование
+              </p>
+              <p className="mt-4 flex items-center gap-2 font-mono text-[0.7rem] uppercase tracking-[0.12em] text-bh-paper/60">
+                <Calendar className="h-4 w-4 shrink-0 text-bh-lime" />
+                07—08 ноември 2026
               </p>
 
               <ul className="mt-6 flex flex-1 flex-col gap-3">

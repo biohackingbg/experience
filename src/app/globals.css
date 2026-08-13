@@ -155,7 +155,9 @@ body {
    two-track diagram came out pale and near-identical — losing the very
    distinction the section exists to draw. */
 .bh-forest {
-  background-color: #02251f;
+  /* The longevity passport's panel green, not the page ink: at #02251f the
+     card was the exact colour of the dark-theme background and vanished. */
+  background-color: #0a3229;
   /* Needed against the dark page: without an edge the card dissolved into the
      background and the right-hand column read as empty space. */
   box-shadow: inset 0 0 0 1px color-mix(in srgb, #f1f5f3 12%, transparent);

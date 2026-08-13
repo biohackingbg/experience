@@ -118,7 +118,6 @@ export const SPEAKERS: Speaker[] = [
     country: "Малта",
     photo: "/speakers/godfrey-grech.jpg",
   },
-  { id: "milen-vasilev", name: "Милен Василев" },
   {
     // Degrees sit after the name, the way Bulgarian academia writes them —
     // the emblem on her coat turned out to be MU Plovdiv after all.
@@ -192,13 +191,9 @@ export const SPEAKERS: Speaker[] = [
     affiliation: "Biohacking BG",
   },
   {
-    // Not in the 01.08.2026 programme document, but confirmed earlier and kept
-    // rather than dropped — a missing session is not the same as a withdrawal.
-    id: "neli-ognyanova",
-    title: "Д-р",
-    name: "Нели Огнянова",
-    country: "България",
-    photo: "/speakers/neli-ognyanova.jpg",
+    // Last on purpose: still to be confirmed whether he speaks or hosts.
+    id: "milen-vasilev",
+    name: "Милен Василев",
   },
 ];
 
