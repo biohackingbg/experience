@@ -51,7 +51,7 @@ function ticketRows(input: TicketEmailInput): string {
         </td>
         <td align="right" style="padding:14px 0;border-bottom:1px solid #dfe4e0">
           <a href="${SITE}/bilet/${t.code}"
-             style="display:inline-block;background:#02251f;color:#f2f2ee;text-decoration:none;
+             style="display:inline-block;background:#146455;color:#f1f5f3;text-decoration:none;
                     font:600 13px/1 -apple-system,Segoe UI,Roboto,sans-serif;
                     padding:11px 18px;border-radius:999px">Отвори билета</a>
         </td>
@@ -71,6 +71,12 @@ function ticketEmailHtml(input: TicketEmailInput): string {
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
          style="max-width:560px;margin:0 auto;background:#f8f8f5;border-radius:18px;padding:32px">
     <tr><td>
+      <!-- Alt text carries the brand when images are blocked, which is the
+           default in Outlook and for anyone who has turned them off. -->
+      <img src="${SITE}/email-logo.png" width="200" height="54"
+           alt="Biohacking Experience"
+           style="display:block;border:0;outline:none;text-decoration:none;
+                  width:200px;height:auto;margin:0 0 22px">
       <div style="font:400 12px/1 -apple-system,Segoe UI,Roboto,sans-serif;
                   letter-spacing:2px;text-transform:uppercase;color:#14645599">
         Sofia Life Summit
@@ -83,8 +89,10 @@ function ticketEmailHtml(input: TicketEmailInput): string {
         по-долу и го запази — ще ти трябва на входа.
       </p>
 
+      <div style="margin-top:26px;height:3px;background:#cef870;border-radius:2px"></div>
+
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
-             style="margin-top:26px;border-top:1px solid #dfe4e0">
+             style="margin-top:6px;border-top:1px solid #dfe4e0">
         ${ticketRows(input)}
       </table>
 
