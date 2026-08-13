@@ -1,4 +1,4 @@
-import { SPEAKERS } from "@/lib/speakers";
+import { announcedSpeakers } from "@/lib/speakers";
 import {
   CURRENCY,
   EARLY_ACCESS,
@@ -15,7 +15,7 @@ import {
  * place and not the other. Unconfirmed slots are skipped — "Обявява се скоро"
  * is a placeholder, not a person, and Google would treat it as one.
  */
-const performers = SPEAKERS.filter((s) => !s.pending).map((s) => ({
+const performers = announcedSpeakers().map((s) => ({
   "@type": "Person" as const,
   name: [s.title, s.name].filter(Boolean).join(" "),
   // Speciality first, then the position held. Never the institution: it was

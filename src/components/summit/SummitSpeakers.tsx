@@ -1,6 +1,6 @@
 import { Reveal } from "@/components/ui/Reveal";
 import { SpeakerGrid } from "@/components/summit/SpeakerGrid";
-import { SPEAKERS } from "@/lib/speakers";
+import { announcedSpeakers } from "@/lib/speakers";
 
 /**
  * A grid rather than a horizontal strip. The strip cost less height but hid
@@ -29,7 +29,20 @@ export function SummitSpeakers() {
         </Reveal>
 
         <Reveal className="mt-10">
-          <SpeakerGrid speakers={SPEAKERS} />
+          <SpeakerGrid speakers={announcedSpeakers()} />
+        </Reveal>
+
+        <Reveal className="mt-8">
+          <p className="text-sm leading-relaxed text-bh-ink/60">
+            Това не е целият състав — обявяваме нови лектори всяка седмица.{" "}
+            <a
+              href="#register"
+              className="font-semibold text-bh-pine underline underline-offset-2"
+            >
+              Остави имейл
+            </a>
+            , за да не пропуснеш следващите имена.
+          </p>
         </Reveal>
       </div>
     </section>

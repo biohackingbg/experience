@@ -45,11 +45,24 @@ export type Speaker = {
   photo?: string;
   /** Set while the slot is still being confirmed. */
   pending?: boolean;
+  /**
+   * Only announced speakers render on the page and in the structured data.
+   * The rest of the line-up is deliberately held back: new names are released
+   * week by week, and that weekly reveal is the reason to leave an email.
+   * Announcing someone = flipping this to true.
+   */
+  announced?: boolean;
 };
+
+/** What the page and the event schema actually show. */
+export function announcedSpeakers(): Speaker[] {
+  return SPEAKERS.filter((s) => s.announced && !s.pending);
+}
 
 export const SPEAKERS: Speaker[] = [
   {
     id: "rayna-stoyanova",
+    announced: true,
     title: "Д-р",
     name: "Райна Стоянова",
     specialty: "Ендокринолог",
@@ -60,6 +73,7 @@ export const SPEAKERS: Speaker[] = [
   },
   {
     id: "rocio-salas-whalen",
+    announced: true,
     title: "Д-р",
     name: "Rocio Salas-Whalen",
     specialty: "Ендокринология и обезитология",
@@ -69,6 +83,7 @@ export const SPEAKERS: Speaker[] = [
   },
   {
     id: "dominik-thor",
+    announced: true,
     title: "Проф.",
     name: "Dominik Thor",
     specialty: "Професор по фармация",
@@ -79,6 +94,7 @@ export const SPEAKERS: Speaker[] = [
   },
   {
     id: "sara-hagg",
+    announced: true,
     title: "Доц.",
     name: "Sara Hägg",
     specialty: "Молекулярна епидемиология на стареенето",
@@ -92,6 +108,7 @@ export const SPEAKERS: Speaker[] = [
     // why he belongs on a medical stage, and naming a party on a page that
     // sells tickets reads as a political statement the event is not making.
     id: "aleksandar-simidchiev",
+    announced: true,
     title: "Д-р",
     name: "Александър Симидчиев",
     specialty: "Пулмолог",
@@ -102,6 +119,7 @@ export const SPEAKERS: Speaker[] = [
   },
   {
     id: "dean-berman",
+    announced: true,
     title: "Д-р",
     name: "Dean Berman",
     role: "Global Vice President Medical",
@@ -111,6 +129,7 @@ export const SPEAKERS: Speaker[] = [
   },
   {
     id: "godfrey-grech",
+    announced: true,
     title: "Проф.",
     name: "Godfrey Grech",
     specialty: "Патология и молекулярна онкология",
@@ -122,6 +141,7 @@ export const SPEAKERS: Speaker[] = [
     // Degrees sit after the name, the way Bulgarian academia writes them —
     // the emblem on her coat turned out to be MU Plovdiv after all.
     id: "viktoriya-sarafyan",
+    announced: true,
     title: "Проф. д-р",
     name: "Виктория Сарафян, дм, дмн",
     affiliation: "Медицински университет – Пловдив",
