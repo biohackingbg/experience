@@ -25,12 +25,14 @@ const monoFont = Geist_Mono({
 });
 
 const SITE = "https://thelongevitysummit.eu";
-const TITLE = "Sofia Life Summit 2026 | Biohacking Experience, София";
+const TITLE =
+  "Sofia Life Summit 2026 — дълголетие и биохакинг, София | Biohacking Experience";
 function describe(): string {
   const from = Math.min(...TIERS.map((t) => priceCents(t, isEarlyAccess())));
   return (
-    "Sofia Life Summit — 07–08 ноември 2026, Гранд Хотел Милениум, София. " +
-    `Четири зони, longevity паспорт, 12 станции за измерване и билети от ${formatPrice(from)} €.`
+    "Фест за дълголетие и биохакинг — 07–08 ноември 2026, Гранд Хотел " +
+    "Милениум, София. Четири зони, longevity паспорт, 12 станции за " +
+    `измерване, международни лектори. Билети от ${formatPrice(from)} €.`
   );
 }
 
