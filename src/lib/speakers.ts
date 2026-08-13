@@ -12,9 +12,10 @@
  * DELIBERATELY NOT CARDED — do not "fix" this by adding them back:
  * - Two people the source marks "(не е говорено с нея)". A page that sells
  *   tickets cannot announce someone who has not agreed to appear.
- * - Мария Силвестър and Мария Илиева. Both are on stage and both stay in the
- *   programme, but they host and perform rather than lecture, and this section
- *   is what a visitor scans to judge the medical line-up.
+ * - Мария Силвестър, Мария Илиева and Диана Радева. All three are on stage and
+ *   all three stay in the programme, but they host and perform rather than
+ *   lecture, and this section is what a visitor scans to judge the medical
+ *   line-up.
  *
  * So a name in `program.ts` without a card here is expected, not a gap.
  *
@@ -76,19 +77,24 @@ export const SPEAKERS: Speaker[] = [
     country: "Швейцария",
     photo: "/speakers/dominik-thor.jpg",
   },
-  { id: "diana-radeva", name: "Диана Радева" },
-  { id: "aleksandar-simidchiev", name: "Александър Симидчиев" },
   {
     id: "sara-hagg",
     name: "Sara Hägg",
     affiliation: "Karolinska Institutet",
     country: "Швеция",
-    // Only 240px wide, against 900px for the others. Kept at native size —
-    // upscaling adds bytes, not detail — but it will read softer on a phone.
-    // Worth replacing if a larger file turns up.
     photo: "/speakers/sara-hagg.jpg",
   },
-  { id: "dean-berman", name: "Dean Berman" },
+  {
+    id: "aleksandar-simidchiev",
+    name: "Александър Симидчиев",
+    country: "България",
+    photo: "/speakers/aleksandar-simidchiev.jpg",
+  },
+  {
+    id: "dean-berman",
+    name: "Dean Berman",
+    photo: "/speakers/dean-berman.jpg",
+  },
   { id: "milen-vasilev", name: "Милен Василев" },
   { id: "viktoriya-sarafyan", name: "Виктория Сарафян" },
   {
