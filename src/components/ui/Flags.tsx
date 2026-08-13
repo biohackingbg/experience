@@ -19,6 +19,30 @@ const FLAGS: Record<string, React.ReactNode> = {
       <rect y="12" width="24" height="6" fill="#D62612" />
     </>
   ),
+  САЩ: (
+    <>
+      <rect width="24" height="18" fill="#B22234" />
+      {/* Six white stripes over red gives the thirteen. The stars are dropped
+          on purpose — at 18px wide they collapse into noise. */}
+      {[1, 3, 5, 7, 9, 11].map((i) => (
+        <rect
+          key={i}
+          y={(i * 18) / 13}
+          width="24"
+          height={18 / 13}
+          fill="#fff"
+        />
+      ))}
+      <rect width="9.6" height={(7 * 18) / 13} fill="#3C3B6E" />
+    </>
+  ),
+  Швеция: (
+    <>
+      <rect width="24" height="18" fill="#006AA7" />
+      <rect y="7.2" width="24" height="3.6" fill="#FECC02" />
+      <rect x="7.2" width="3.6" height="18" fill="#FECC02" />
+    </>
+  ),
   Швейцария: (
     <>
       <rect width="24" height="18" fill="#D52B1E" />

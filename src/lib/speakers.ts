@@ -49,6 +49,15 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/rayna-stoyanova.jpg",
   },
   {
+    id: "rocio-salas-whalen",
+    title: "Д-р",
+    name: "Rocio Salas-Whalen",
+    specialty: "Ендокринология и обезитология",
+    country: "САЩ",
+    topic: "Автор на „Weightless“",
+    photo: "/speakers/rocio-salas-whalen.jpg",
+  },
+  {
     id: "dominik-thor",
     title: "Проф.",
     name: "Dominik Thor",
@@ -57,10 +66,18 @@ export const SPEAKERS: Speaker[] = [
     country: "Швейцария",
     photo: "/speakers/dominik-thor.jpg",
   },
-  { id: "rocio-salas-whalen", name: "Rocio Salas-Whalen" },
   { id: "diana-radeva", name: "Диана Радева" },
   { id: "aleksandar-simidchiev", name: "Александър Симидчиев" },
-  { id: "sara-hagg", name: "Sara Hägg", affiliation: "Karolinska Institutet" },
+  {
+    id: "sara-hagg",
+    name: "Sara Hägg",
+    affiliation: "Karolinska Institutet",
+    country: "Швеция",
+    // Only 240px wide, against 900px for the others. Kept at native size —
+    // upscaling adds bytes, not detail — but it will read softer on a phone.
+    // Worth replacing if a larger file turns up.
+    photo: "/speakers/sara-hagg.jpg",
+  },
   { id: "dean-berman", name: "Dean Berman" },
   { id: "milen-vasilev", name: "Милен Василев" },
   { id: "viktoriya-sarafyan", name: "Виктория Сарафян" },
