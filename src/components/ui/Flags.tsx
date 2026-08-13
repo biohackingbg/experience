@@ -19,6 +19,12 @@ const FLAGS: Record<string, React.ReactNode> = {
       <rect y="12" width="24" height="6" fill="#D62612" />
     </>
   ),
+  Малта: (
+    <>
+      <rect width="24" height="18" fill="#fff" />
+      <rect x="12" width="12" height="18" fill="#CF142B" />
+    </>
+  ),
   Австрия: (
     <>
       <rect width="24" height="18" fill="#ED2939" />

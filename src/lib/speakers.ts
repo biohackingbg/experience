@@ -109,6 +109,15 @@ export const SPEAKERS: Speaker[] = [
     country: "Австрия",
     photo: "/speakers/dean-berman.jpg",
   },
+  {
+    id: "godfrey-grech",
+    title: "Проф.",
+    name: "Godfrey Grech",
+    specialty: "Патология и молекулярна онкология",
+    affiliation: "University of Malta",
+    country: "Малта",
+    photo: "/speakers/godfrey-grech.jpg",
+  },
   { id: "milen-vasilev", name: "Милен Василев" },
   {
     // Degrees sit after the name, the way Bulgarian academia writes them —
@@ -119,11 +128,6 @@ export const SPEAKERS: Speaker[] = [
     affiliation: "Медицински университет – Пловдив",
     country: "България",
     photo: "/speakers/viktoriya-sarafyan.jpg",
-  },
-  {
-    id: "godfrey-grech",
-    name: "Godfrey Grech",
-    affiliation: "University of Malta",
   },
   {
     id: "tsvetomir-lukanov",
