@@ -79,20 +79,34 @@ export const SPEAKERS: Speaker[] = [
   },
   {
     id: "sara-hagg",
+    title: "Доц.",
     name: "Sara Hägg",
+    specialty: "Молекулярна епидемиология на стареенето",
+    role: "Ръководител на изследователска група",
     affiliation: "Karolinska Institutet",
     country: "Швеция",
     photo: "/speakers/sara-hagg.jpg",
   },
   {
+    // His seat in parliament is left off deliberately: the card exists to say
+    // why he belongs on a medical stage, and naming a party on a page that
+    // sells tickets reads as a political statement the event is not making.
     id: "aleksandar-simidchiev",
+    title: "Д-р",
     name: "Александър Симидчиев",
+    specialty: "Пулмолог",
+    role: "Началник, Функционална диагностика",
+    affiliation: "Централна клинична болница на МВР",
     country: "България",
     photo: "/speakers/aleksandar-simidchiev.jpg",
   },
   {
     id: "dean-berman",
+    title: "Д-р",
     name: "Dean Berman",
+    role: "Global Vice President Medical",
+    affiliation: "Alma Lasers",
+    country: "Австрия",
     photo: "/speakers/dean-berman.jpg",
   },
   { id: "milen-vasilev", name: "Милен Василев" },
