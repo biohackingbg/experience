@@ -1,37 +1,5 @@
 import { Reveal } from "@/components/ui/Reveal";
-
-const days = [
-  {
-    day: "Събота",
-    date: "07.11",
-    theme: "Основите, които работят",
-    slots: [
-      { t: "10:00", s: "Дълголетие за всеки: защо България" },
-      { t: "10:40", s: "Биохакинг: кое издържа на научна проверка" },
-      { t: "11:30", s: "Метаболитно здраве и новите терапии" },
-      { t: "12:20", s: "Сън и циркаден ритъм" },
-      { t: "14:00", s: "Хранене за дълголетие, панел" },
-      { t: "15:00", s: "Добавки: доказателства срещу хайп" },
-      { t: "16:00", s: "Хормони: менопауза и андропауза" },
-      { t: "17:00", s: "Питай лекаря, отворен панел" },
-    ],
-  },
-  {
-    day: "Неделя",
-    date: "08.11",
-    theme: "Приложи го",
-    slots: [
-      { t: "10:00", s: "Кожата като огледало на тялото" },
-      { t: "10:45", s: "Микропластмаси и ендокринни дизруптори" },
-      { t: "11:30", s: "Мозъкът след 40: какво пази паметта" },
-      { t: "12:20", s: "Мускулите като орган за дълголетие" },
-      { t: "14:00", s: "Венозни инфузии и NAD+: реални очаквания" },
-      { t: "15:00", s: "Ранно откриване на рак: какво и кога" },
-      { t: "16:00", s: "Твоят 90-дневен протокол, водена сесия" },
-      { t: "17:30", s: "Закриване" },
-    ],
-  },
-];
+import { PROGRAM } from "@/lib/program";
 
 export function SummitProgram() {
   return (
@@ -43,57 +11,92 @@ export function SummitProgram() {
               Програма
             </p>
             <h2 className="mt-4 text-[clamp(2rem,4.5vw,3.5rem)] font-display font-[900] uppercase leading-[0.95] tracking-tight text-bh-ink">
-              Два дни, две сцени
+              Два дни, един голям въпрос
             </h2>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-bh-ink/60">
-            Работна програма. Лабораторията и ритуалите работят паралелно през
-            целия ден, със записване на час.
+            Как да превърнем повече години в повече живот? Лабораторията и
+            ритуалите работят паралелно през целия ден, със записване на час.
           </p>
         </Reveal>
 
-        <div className="mt-12 grid gap-4 lg:grid-cols-2">
-          {days.map((d, i) => (
+        <div className="mt-12 grid items-start gap-4 lg:grid-cols-2">
+          {PROGRAM.map((d, i) => (
             <Reveal key={d.date} delay={i * 120}>
-            <div className="bh-mint h-full overflow-hidden rounded-3xl">
-              <div className="bh-day-header flex items-baseline justify-between bg-bh-ink px-7 py-6 text-bh-paper">
-                <div className="flex items-baseline gap-3">
-                  <span className="text-xl font-black uppercase tracking-tight">
-                    {d.day}
-                  </span>
-                  <span className="font-mono text-sm text-bh-lime">
-                    {d.date}
-                  </span>
+              <div className="bh-mint h-full overflow-hidden rounded-3xl">
+                <div className="bh-day-header bg-bh-ink px-7 py-6 text-bh-paper">
+                  <div className="flex items-baseline gap-3">
+                    <span className="text-xl font-black uppercase tracking-tight">
+                      {d.day}
+                    </span>
+                    <span className="font-mono text-sm text-bh-lime">
+                      {d.date}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-xs font-medium uppercase tracking-wide text-bh-paper/55">
+                    {d.theme}
+                  </p>
+                  <p className="mt-3 text-sm leading-relaxed text-bh-paper/70">
+                    {d.intro}
+                  </p>
                 </div>
-                {/* One line from lg up, where the two cards sit side by side and
-                    a wrapped theme would leave their headers different heights.
-                    Below that they stack, so wrapping is free. */}
-                <span className="text-right text-xs font-medium uppercase tracking-wide text-bh-paper/55 lg:whitespace-nowrap">
-                  {d.theme}
-                </span>
-              </div>
 
-              <ul>
-                {d.slots.map((slot, i) => (
-                  <li
-                    key={slot.t}
-                    className={`flex items-center gap-5 px-7 py-4 transition-colors hover:bg-bh-pine/10 ${
-                      i !== 0 ? "border-t border-bh-ink/8" : ""
-                    }`}
-                  >
-                    <span className="w-14 shrink-0 font-mono text-sm text-bh-ink/45">
-                      {slot.t}
-                    </span>
-                    <span className="text-sm font-medium text-bh-ink">
-                      {slot.s}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                <ul>
+                  {d.slots.map((slot, j) => (
+                    <li
+                      key={`${slot.time}-${slot.title}`}
+                      className={`flex gap-4 px-7 py-4 transition-colors hover:bg-bh-pine/10 ${
+                        j !== 0 ? "border-t border-bh-ink/8" : ""
+                      } ${slot.pause ? "bg-bh-ink/[0.03]" : ""}`}
+                    >
+                      <span className="w-[5.5rem] shrink-0 pt-0.5 font-mono text-[0.7rem] leading-relaxed text-bh-ink/45">
+                        {slot.time}
+                      </span>
+
+                      <div className="min-w-0">
+                        <p
+                          className={`text-sm leading-snug ${
+                            slot.pause
+                              ? "font-medium text-bh-ink/55"
+                              : "font-semibold text-bh-ink"
+                          }`}
+                        >
+                          {slot.title}
+                        </p>
+
+                        {slot.note && !slot.pause && (
+                          <p className="mt-1.5 text-xs leading-relaxed text-bh-ink/55">
+                            {slot.note}
+                          </p>
+                        )}
+
+                        {slot.role && (
+                          <p className="mt-2 font-mono text-[0.62rem] uppercase tracking-[0.12em] text-bh-ink/40">
+                            {slot.role}
+                          </p>
+                        )}
+
+                        {slot.people && (
+                          <p className="mt-1 text-xs font-medium leading-snug text-bh-pine">
+                            {slot.people.join(" · ")}
+                          </p>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </Reveal>
           ))}
         </div>
+
+        {/* The organisers' own caveat, carried across rather than dropped.
+            A published schedule reads as a commitment, and both the line-up
+            and the times are still being confirmed. */}
+        <p className="mt-6 font-mono text-[0.7rem] uppercase tracking-[0.12em] text-bh-ink/40">
+          Предварителна програма · подлежи на финално потвърждение на лектори и
+          часови диапазони.
+        </p>
       </div>
     </section>
   );
