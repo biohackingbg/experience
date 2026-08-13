@@ -215,3 +215,33 @@ export function Stethoscope({ className }: Props) {
     </svg>
   );
 }
+
+/** Diagonal arrow, as used on the round buttons. */
+export function Arrow({ className }: Props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+      <path
+        d="M7 17L17 7M17 7H8M17 7V16"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/** The same arrow turned downward, for "keep scrolling" rather than "leave". */
+export function ArrowDown({ className }: Props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+      <path
+        d="M12 6v12M12 18l-6-6M12 18l6-6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}

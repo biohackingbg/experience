@@ -1,4 +1,4 @@
-import { Gauge, Hotel, People } from "@/components/ui/Pictograms";
+import { Arrow, Gauge, Hotel, People } from "@/components/ui/Pictograms";
 import {
   TIERS,
   formatPrice,
@@ -7,20 +7,6 @@ import {
 } from "@/lib/tickets";
 
 const zoneTags = ["Сцена", "Лаборатория", "Ритуали", "Village"];
-
-function Arrow({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
-      <path
-        d="M7 17L17 7M17 7H8M17 7V16"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
 
 export function SummitHero() {
   const early = isEarlyAccess();

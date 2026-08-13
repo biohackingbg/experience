@@ -28,7 +28,11 @@
 
   /* Partner accent — the rose from the Bulgarian Longevity Association mark.
      Used only in the co-branding strip, never as a general site colour. */
-  --color-bh-rose: #d4869c;
+  /* Sampled from the association's own logo, so their card carries their
+     colours rather than an approximation. Fixed in both themes: a partner's
+     brand does not flip with ours. */
+  --color-bh-rose: #cc6c7e;
+  --color-bh-assoc: #159078;
 
   /* One definition for every accent surface — fill, outline and buttons. */
   --bh-brand-gradient: linear-gradient(112deg, #0bb4a0 0%, #a5e0ff 100%);
@@ -62,6 +66,7 @@
   --color-bh-lime-bright: var(--color-bh-lime-bright);
   --color-bh-stone: var(--color-bh-stone);
   --color-bh-rose: var(--color-bh-rose);
+  --color-bh-assoc: var(--color-bh-assoc);
 
   --font-sans: var(--font-body); /* Geologica — body and UI */
   --font-display: var(--font-display-sans); /* Sofia Sans — headings */
@@ -143,6 +148,22 @@ body {
     linear-gradient(#e7f6f1, #e7f6f1) padding-box,
     var(--bh-brand-gradient) border-box;
   box-shadow: none;
+}
+
+/* The dark twin of .bh-mint, and constant for the same reason. Left to
+   `bg-bh-ink` it inverted with the theme, so in dark mode both cards in the
+   two-track diagram came out pale and near-identical — losing the very
+   distinction the section exists to draw. */
+.bh-forest {
+  background-color: #02251f;
+  /* Needed against the dark page: without an edge the card dissolved into the
+     background and the right-hand column read as empty space. */
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #f1f5f3 12%, transparent);
+
+  --color-bh-ink: #02251f;
+  --color-bh-paper: #f1f5f3;
+  --color-bh-lime: #cef870;
+  --color-bh-pine: #146455;
 }
 
 /* Flat mint card with a hairline edge. Constant in both themes — it carries
