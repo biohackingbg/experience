@@ -9,12 +9,12 @@ import {
   priceCents,
 } from "@/lib/tickets";
 
-export const CONSENT_VERSION = "v1";
+export const CONSENT_VERSION = "v2";
 
 export const CONSENT_TEXT =
-  "Съгласявам се Biohacking.bg да съхранява имейла ми, за да ме уведоми за " +
-  "старта на ранните билети за Biohacking Experience. Мога да оттегля " +
-  "съгласието си по всяко време.";
+  "Съгласявам се Biohacking.bg да ми изпраща новини за Sofia Life Summit — " +
+  "нови лектори, програма и цени на билетите. Мога да оттегля съгласието си " +
+  "по всяко време.";
 
 export const TIERS = ["basic", "full", "protocol"] as const;
 

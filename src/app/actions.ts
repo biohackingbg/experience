@@ -70,6 +70,6 @@ export async function submitSignup(
 
   return {
     status: "success",
-    message: "Готово! Ще ти пишем, щом ранните билети тръгнат.",
+    message: "Готово! Ще ти пишем, когато обявим нови лектори и новини за програмата.",
   };
 }

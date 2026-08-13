@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Reveal } from "@/components/ui/Reveal";
 import {
   EARLY_ACCESS,
@@ -158,8 +160,11 @@ export function SummitTickets() {
                   ))}
                 </ul>
 
-                <a
-                  href="#register"
+                {/* Straight to the checkout with the tier pre-selected. This
+                    pointed at the waitlist while sales had not started — a
+                    buyer who picked a tier landed on an email form. */}
+                <Link
+                  href={`/bilet?nivo=${tier.id}`}
                   className={`mt-8 inline-flex items-center justify-center rounded-full px-6 py-3.5 text-sm font-semibold transition-transform hover:-translate-y-0.5 ${
                     featured
                       ? "bh-gradient text-bh-ink"
@@ -167,7 +172,7 @@ export function SummitTickets() {
                   }`}
                 >
                   Избери {tier.name}
-                </a>
+                </Link>
               </div>
               </Reveal>
             );

@@ -1,15 +1,33 @@
+import Link from "next/link";
+
 import { EarlyAccessForm } from "@/components/summit/EarlyAccessForm";
-import { isEarlyAccess } from "@/lib/tickets";
+import { EARLY_ACCESS, discountLabel, isEarlyAccess } from "@/lib/tickets";
 import { Reveal } from "@/components/ui/Reveal";
 import { Calendar, Pin, TicketIcon } from "@/components/ui/Pictograms";
 
-const facts = [
-  { label: "Дати", value: "07—08 ноември 2026", icon: Calendar },
-  { label: "Място", value: "Гранд Хотел Милениум, София", icon: Pin },
-  { label: "Достъп", value: "Ранни билети от септември", icon: TicketIcon },
-];
-
+/**
+ * The closing call to action.
+ *
+ * Until sales opened this section collected a waitlist. Now the sale itself is
+ * the primary ask, and the email form serves the visitor who is not ready to
+ * pay — the hook is the one the page already makes: new speakers announced
+ * every week. Under the v2 consent, that is also exactly what they sign up for.
+ */
 export function SummitRegister() {
+  const early = isEarlyAccess();
+
+  const facts = [
+    { label: "Дати", value: "07—08 ноември 2026", icon: Calendar },
+    { label: "Място", value: "Гранд Хотел Милениум, София", icon: Pin },
+    {
+      label: "Достъп",
+      value: early
+        ? `Билети с ${discountLabel()} до ${EARLY_ACCESS.endsLabel}`
+        : "Билетите са в продажба",
+      icon: TicketIcon,
+    },
+  ];
+
   return (
     <section id="register" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
@@ -22,12 +40,35 @@ export function SummitRegister() {
               Един ден. Реални числа. Личен план.
             </h2>
             <p className="mt-6 max-w-xl text-base leading-relaxed text-bh-paper/65">
-              Местата в Лабораторията и ритуалите са с предварително записване.
-              Ранните билети тръгват от септември — остави имейл и ще си сред
-              първите, които ще ги получат.
+              Билетите са в продажба
+              {early && (
+                <>
+                  {" "}
+                  — с{" "}
+                  <strong className="font-semibold text-bh-lime">
+                    {discountLabel()} до {EARLY_ACCESS.endsLabel}
+                  </strong>
+                  , като предварителна поръчка
+                </>
+              )}
+              . Местата в Лабораторията и ритуалите са ограничени и се запазват
+              с реда на купуване.
             </p>
 
-            <EarlyAccessForm early={isEarlyAccess()} />
+            <Link
+              href="/bilet"
+              className="bh-gradient mt-8 inline-flex items-center gap-2 rounded-full px-8 py-4 text-base font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
+            >
+              Купи билет{early && <> с {discountLabel()}</>}
+            </Link>
+
+            {/* The fallback ask, deliberately quieter than the sale. */}
+            <p className="mt-12 max-w-xl border-t border-bh-paper/15 pt-8 text-sm leading-relaxed text-bh-paper/65">
+              Още се колебаеш? Обявяваме нови лектори всяка седмица — остави
+              имейл и няма да пропуснеш нищо от програмата.
+            </p>
+
+            <EarlyAccessForm early={early} />
           </div>
 
           <dl className="mt-14 grid gap-8 border-t border-bh-paper/15 pt-8 sm:grid-cols-3">

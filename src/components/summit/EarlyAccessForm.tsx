@@ -136,7 +136,7 @@ export function EarlyAccessForm({ early }: { early: boolean }) {
         disabled={pending}
         className="bh-gradient mt-6 inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold text-bh-ink transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {pending ? "Записваме те…" : "Заяви ранен билет"}
+        {pending ? "Записваме те…" : "Искам новините"}
       </button>
     </form>
   );
