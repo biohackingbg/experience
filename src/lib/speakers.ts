@@ -111,12 +111,12 @@ export const SPEAKERS: Speaker[] = [
   },
   { id: "milen-vasilev", name: "Милен Василев" },
   {
-    // "Проф." comes from the file the organisers sent. Her coat carries a
-    // university emblem, but it is too small in the photo to read with
-    // certainty, so no institution is claimed here yet.
+    // Degrees sit after the name, the way Bulgarian academia writes them —
+    // the emblem on her coat turned out to be MU Plovdiv after all.
     id: "viktoriya-sarafyan",
-    title: "Проф.",
-    name: "Виктория Сарафян",
+    title: "Проф. д-р",
+    name: "Виктория Сарафян, дм, дмн",
+    affiliation: "Медицински университет – Пловдив",
     country: "България",
     photo: "/speakers/viktoriya-sarafyan.jpg",
   },

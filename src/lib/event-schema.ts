@@ -17,9 +17,10 @@ import {
 const performers = SPEAKERS.filter((s) => !s.pending).map((s) => ({
   "@type": "Person" as const,
   name: [s.title, s.name].filter(Boolean).join(" "),
-  ...(s.specialty || s.affiliation
-    ? { jobTitle: s.specialty ?? s.affiliation }
-    : {}),
+  // Speciality first, then the position held. Never the institution: it was
+  // standing in as a jobTitle whenever a speaker had no speciality recorded,
+  // which told Google that "Медицински университет – Пловдив" is a job.
+  ...(s.specialty ?? s.role ? { jobTitle: s.specialty ?? s.role } : {}),
   ...(s.affiliation
     ? { affiliation: { "@type": "Organization" as const, name: s.affiliation } }
     : {}),
