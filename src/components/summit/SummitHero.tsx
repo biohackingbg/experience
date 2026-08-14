@@ -58,7 +58,7 @@ export function SummitHero() {
               each line takes its own indent, and the date rides inside the
               first line as a pill instead of hanging above as a subtitle. */}
           <div className="relative self-center pb-8 lg:pb-6">
-            <p className="hu-rise font-display text-[clamp(1rem,2vw,1.4rem)] font-[900] uppercase tracking-[-0.01em] text-bh-pine">
+            <p className="hu-rise font-display text-[clamp(1.2rem,2.5vw,1.9rem)] font-[900] uppercase tracking-[-0.01em] text-bh-pine">
               Sofia Life Summit
             </p>
 
@@ -68,13 +68,13 @@ export function SummitHero() {
             >
               <span className="block">
                 Два дни,{" "}
-                <span className="mx-1 inline-block -translate-y-[0.4em] whitespace-nowrap rounded-full border border-bh-ink/30 px-[0.55em] py-[0.24em] align-middle font-mono text-[0.22em] font-medium tracking-[0.18em] text-bh-ink/80">
+                <span className="mx-1 inline-block -translate-y-[0.32em] whitespace-nowrap rounded-full border border-bh-ink/30 px-[0.5em] py-[0.22em] align-middle font-mono text-[0.3em] font-semibold tracking-[0.16em] text-bh-ink/80">
                   07—08.11.2026
                 </span>{" "}
                 които могат да
               </span>
               <span className="block">променят начина, по който живееш</span>
-              <span className="block lg:pl-[10%]">следващите 20 години.</span>
+              <span className="block lg:pl-[24%]">следващите 20 години.</span>
             </h1>
 
             <OrbitBadge />
