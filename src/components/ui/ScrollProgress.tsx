@@ -3,8 +3,10 @@
 import { useEffect, useRef } from "react";
 
 /**
- * The gradient thread under the nav: fills left to right as the page scrolls,
- * pulls back as it returns.
+ * The accent thread on the very top edge of the screen: fills left to right
+ * as the page scrolls, pulls back as it returns — the loader-style line from
+ * the reference. Lives inside the sticky nav, whose top edge is the viewport's
+ * top edge while stuck.
  *
  * Driven by scroll position, not by an animation — the bar is a mirror of
  * where you are, the same information the scrollbar carries, so it stays
@@ -39,7 +41,7 @@ export function ScrollProgress() {
     <div
       ref={bar}
       aria-hidden
-      className="absolute inset-x-0 bottom-0 h-[3px] origin-left scale-x-0 bg-[image:var(--bh-button-gradient)]"
+      className="absolute inset-x-0 top-0 h-[3px] origin-left scale-x-0 bg-bh-teal"
     />
   );
 }
