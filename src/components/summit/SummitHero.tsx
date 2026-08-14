@@ -15,7 +15,7 @@ export function SummitHero() {
   return (
     <section id="top" className="px-5 pt-6 sm:px-8 sm:pt-8 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
-        <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr] lg:items-stretch">
+        <div className="grid gap-6 lg:grid-cols-[2.1fr_1fr] lg:items-stretch">
           <div className="self-end">
             {/* The name steps down to an eyebrow so the headline can sell.
                 A visitor who lands here already saw the brand in the nav;
@@ -39,7 +39,7 @@ export function SummitHero() {
           </div>
 
           <article
-            className="hu-rise bh-mint flex flex-col justify-between rounded-3xl p-7 text-bh-ink"
+            className="hu-rise bh-mint flex flex-col justify-between rounded-3xl p-6 text-bh-ink"
             style={{ animationDelay: "160ms" }}
           >
             <div className="flex items-start justify-between gap-4">
@@ -48,7 +48,7 @@ export function SummitHero() {
               </span>
               <Hotel className="h-8 w-8 shrink-0 text-bh-ink/70" />
             </div>
-            <p className="mt-10 text-sm leading-relaxed text-bh-ink/75">
+            <p className="mt-6 text-base leading-relaxed text-bh-ink/80">
               Не конференция със столове в редици. Науката за дълголетието и
               биохакинга излиза от лабораторията — на разбираем език, за един
               ден, в който слушаш, измерваш се, изпробваш и си тръгваш с личен
