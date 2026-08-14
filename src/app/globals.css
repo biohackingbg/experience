@@ -132,16 +132,16 @@ body {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(48rem 30rem at 88% -12%, rgba(94, 207, 221, 0.34), transparent 68%),
-    radial-gradient(56rem 36rem at -12% 26%, rgba(11, 180, 160, 0.20), transparent 70%),
-    radial-gradient(38rem 26rem at 58% 6%, rgba(165, 224, 255, 0.16), transparent 72%);
+    radial-gradient(52rem 34rem at 88% -12%, rgba(64, 196, 214, 0.62), transparent 70%),
+    radial-gradient(58rem 38rem at -10% 28%, rgba(11, 180, 160, 0.38), transparent 70%),
+    radial-gradient(40rem 28rem at 58% 4%, rgba(140, 214, 255, 0.32), transparent 72%);
 }
 
 :root[data-theme="dark"] .bh-aurora {
   background:
-    radial-gradient(48rem 30rem at 88% -12%, rgba(94, 207, 221, 0.20), transparent 68%),
-    radial-gradient(56rem 36rem at -12% 26%, rgba(11, 180, 160, 0.16), transparent 70%),
-    radial-gradient(38rem 26rem at 58% 6%, rgba(206, 248, 112, 0.07), transparent 72%);
+    radial-gradient(52rem 34rem at 88% -12%, rgba(94, 207, 221, 0.42), transparent 70%),
+    radial-gradient(58rem 38rem at -10% 28%, rgba(11, 180, 160, 0.34), transparent 70%),
+    radial-gradient(40rem 28rem at 58% 4%, rgba(206, 248, 112, 0.14), transparent 72%);
 }
 
 /* Brand gradient: a direct teal → sky blend, for buttons and accent fills. */
