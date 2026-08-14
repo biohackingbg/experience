@@ -128,6 +128,17 @@ body {
  * themes, because it is a surface with its own colours, like the invoice is
  * pinned light; the headline pins its foreground to match (.bh-on-deep).
  */
+/*
+ * Anchor navigation glides instead of jumping. Scoped to the reduced-motion
+ * preference the same way the reveal animations are: someone who asked the
+ * OS for less motion gets the instant jump, which for them is the feature.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 .bh-aurora {
   position: absolute;
   inset: 0;
