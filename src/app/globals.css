@@ -122,27 +122,27 @@ body {
 }
 
 /*
- * Aurora behind the hero, after the reference: not a tint but a committed
- * field — deep teal owning the top of the page, a bright cyan bloom breaking
- * through, and a silky diagonal fade into the page colour. Identical in both
- * themes, because it is a surface with its own colours, like the invoice is
- * pinned light; the headline pins its foreground to match (.bh-on-deep).
+ * Aurora behind the hero — two temperaments, one idea.
+ *
+ * Light theme: a gentle wash. Soft cyan and teal blooms over the pale paper,
+ * fading down — colour as atmosphere, with the dark ink headline untouched.
+ *
+ * Dark theme: the committed field from the reference. Deep teal owning the
+ * top, a bright bloom breaking through, a silky fade into the page. It works
+ * there because the field and the page are relatives; over white paper the
+ * same field read as a hole in the layout.
  */
-/*
- * Anchor navigation glides instead of jumping. Scoped to the reduced-motion
- * preference the same way the reveal animations are: someone who asked the
- * OS for less motion gets the instant jump, which for them is the feature.
- */
-@media (prefers-reduced-motion: no-preference) {
-  html {
-    scroll-behavior: smooth;
-  }
-}
-
 .bh-aurora {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  background:
+    radial-gradient(52rem 34rem at 88% -12%, rgba(64, 196, 214, 0.5), transparent 70%),
+    radial-gradient(58rem 38rem at -10% 28%, rgba(11, 180, 160, 0.3), transparent 70%),
+    radial-gradient(40rem 28rem at 58% 4%, rgba(140, 214, 255, 0.28), transparent 72%);
+}
+
+:root[data-theme="dark"] .bh-aurora {
   background:
     radial-gradient(56rem 38rem at 88% -18%, rgba(126, 224, 238, 0.95), transparent 60%),
     radial-gradient(48rem 32rem at 52% -10%, rgba(11, 180, 160, 0.65), transparent 68%),
@@ -154,12 +154,6 @@ body {
       rgba(10, 90, 76, 0.18) 54%,
       transparent 64%
     );
-}
-
-/* Foreground for content sitting on the deep part of the wash. */
-.bh-on-deep {
-  --color-bh-ink: #f1f5f3;
-  --color-bh-pine: #cef870;
 }
 
 /* Brand gradient: a direct teal → sky blend, for buttons and accent fills. */
