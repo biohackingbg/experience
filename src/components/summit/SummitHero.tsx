@@ -24,7 +24,7 @@ function OrbitBadge() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute -bottom-4 left-2 hidden h-24 w-24 lg:block"
+      className="pointer-events-none absolute right-1 top-0 hidden h-24 w-24 lg:block"
     >
       <svg
         viewBox="0 0 120 120"
@@ -62,13 +62,13 @@ export function SummitHero() {
           {/* Staggered editorial headline, the reference's defining move:
               each line takes its own indent, and the date rides inside the
               first line as a pill instead of hanging above as a subtitle. */}
-          <div className="relative self-center pb-8 lg:pb-6">
-            <p className="hu-rise font-display text-[clamp(1.2rem,2.5vw,1.9rem)] font-[900] uppercase tracking-[-0.01em] text-bh-pine">
+          <div className="relative flex flex-col gap-8 lg:justify-between lg:gap-0">
+            <p className="hu-rise font-display text-[clamp(1.5rem,3.4vw,2.7rem)] font-[900] uppercase tracking-[-0.01em] text-bh-pine">
               Sofia Life Summit
             </p>
 
             <h1
-              className="hu-rise mt-2 font-display text-[clamp(2.2rem,7.5vw,3rem)] font-[1000] uppercase leading-[0.94] tracking-[-0.03em] text-bh-ink"
+              className="hu-rise font-display text-[clamp(2.2rem,7.5vw,3rem)] font-[1000] uppercase leading-[0.94] tracking-[-0.03em] text-bh-ink"
               style={{ animationDelay: "80ms" }}
             >
               <span className="block">
