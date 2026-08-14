@@ -53,7 +53,7 @@ export function SummitHero() {
     >
       <div aria-hidden className="bh-aurora -z-10" />
       <div className="mx-auto w-full max-w-7xl">
-        <div className="grid gap-6 lg:grid-cols-[2fr_1fr] lg:items-stretch">
+        <div className="grid gap-6 lg:grid-cols-[2.45fr_1fr] lg:items-stretch">
           {/* Staggered editorial headline, the reference's defining move:
               each line takes its own indent, and the date rides inside the
               first line as a pill instead of hanging above as a subtitle. */}
@@ -63,19 +63,18 @@ export function SummitHero() {
             </p>
 
             <h1
-              className="hu-rise mt-2 font-display text-[clamp(2.2rem,7.5vw,2.95rem)] font-[1000] uppercase leading-[0.94] tracking-[-0.03em] text-bh-ink"
+              className="hu-rise mt-2 font-display text-[clamp(2.2rem,7.5vw,3rem)] font-[1000] uppercase leading-[0.94] tracking-[-0.03em] text-bh-ink"
               style={{ animationDelay: "80ms" }}
             >
               <span className="block">
                 Два дни,{" "}
                 <span className="mx-1 inline-block -translate-y-[0.4em] whitespace-nowrap rounded-full border border-bh-ink/30 px-[0.55em] py-[0.24em] align-middle font-mono text-[0.22em] font-medium tracking-[0.18em] text-bh-ink/80">
                   07—08.11.2026
-                </span>
+                </span>{" "}
+                които могат да
               </span>
-              <span className="block lg:pl-[8%]">които могат да</span>
-              <span className="block">променят начина,</span>
-              <span className="block lg:pl-[13%]">по който живееш</span>
-              <span className="block lg:pl-[4%]">следващите 20 години.</span>
+              <span className="block">променят начина, по който живееш</span>
+              <span className="block lg:pl-[10%]">следващите 20 години.</span>
             </h1>
 
             <OrbitBadge />
