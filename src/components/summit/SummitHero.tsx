@@ -13,7 +13,13 @@ export function SummitHero() {
   const cheapest = Math.min(...TIERS.map((t) => priceCents(t, early)));
 
   return (
-    <section id="top" className="px-5 pt-6 sm:px-8 sm:pt-8 lg:px-10">
+    <section
+      id="top"
+      className="relative isolate overflow-hidden px-5 pt-6 sm:px-8 sm:pt-8 lg:px-10"
+    >
+      {/* Reaches above the section's own box so the glow starts behind the
+          nav's hairline rather than on a visible seam beneath it. */}
+      <div aria-hidden className="bh-aurora -top-28 -z-10" />
       <div className="mx-auto w-full max-w-7xl">
         <div className="grid gap-6 lg:grid-cols-[2.9fr_1fr] lg:items-stretch">
           <div className="self-end">
