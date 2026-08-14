@@ -41,7 +41,8 @@ export function ScrollProgress() {
     <div
       ref={bar}
       aria-hidden
-      className="absolute inset-x-0 top-0 h-[3px] origin-left scale-x-0 bg-bh-teal"
+      style={{ transform: "scaleX(0)" }}
+      className="absolute inset-x-0 top-0 h-[4px] origin-left bg-bh-teal shadow-[0_0_10px_rgba(11,180,160,0.75)]"
     />
   );
 }
