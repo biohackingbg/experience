@@ -1,6 +1,20 @@
-import { Arrow, Gauge, People } from "@/components/ui/Pictograms";
+import {
+  Arrow,
+  Flask,
+  Gauge,
+  Hotel,
+  People,
+  Stage,
+  Stall,
+  Waves,
+} from "@/components/ui/Pictograms";
 
-const zoneTags = ["Сцена", "Лаборатория", "Ритуали", "Village"];
+const zoneTags = [
+  { label: "Сцена", icon: Stage },
+  { label: "Лаборатория", icon: Flask },
+  { label: "Ритуали", icon: Waves },
+  { label: "Village", icon: Stall },
+];
 
 /**
  * Editorial signature from the reference: circular type slowly orbiting a
@@ -80,9 +94,7 @@ export function SummitHero() {
               <span className="rounded-full border border-bh-paper/30 px-4 py-1.5 font-mono text-xs uppercase tracking-[0.15em] text-bh-paper/90">
                 Гранд Хотел Милениум
               </span>
-              <span className="text-3xl leading-none text-bh-lime" aria-hidden>
-                ✳
-              </span>
+              <Hotel className="h-8 w-8 shrink-0 text-bh-lime" />
             </div>
             <p className="text-sm leading-relaxed text-bh-paper/80">
               Не конференция със столове в редици. Науката за дълголетието и
@@ -152,10 +164,11 @@ export function SummitHero() {
             <div className="flex flex-wrap gap-2">
               {zoneTags.map((t) => (
                 <span
-                  key={t}
-                  className="rounded-full bg-bh-ink/10 px-3 py-1 text-xs font-medium"
+                  key={t.label}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-bh-ink/10 px-3 py-1 text-xs font-medium"
                 >
-                  {t}
+                  <t.icon className="h-3.5 w-3.5 text-bh-pine" />
+                  {t.label}
                 </span>
               ))}
             </div>
