@@ -24,7 +24,7 @@ function OrbitBadge() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute right-1 top-0 hidden h-24 w-24 lg:block"
+      className="pointer-events-none relative hidden h-24 w-24 shrink-0 lg:block"
     >
       <svg
         viewBox="0 0 120 120"
@@ -63,9 +63,12 @@ export function SummitHero() {
               each line takes its own indent, and the date rides inside the
               first line as a pill instead of hanging above as a subtitle. */}
           <div className="relative flex flex-col gap-8 lg:justify-between lg:gap-0">
-            <p className="hu-rise font-display text-[clamp(1.5rem,3.4vw,2.7rem)] font-[900] uppercase tracking-[-0.01em] text-bh-pine">
-              Sofia Life Summit
-            </p>
+            <div className="flex items-center justify-between gap-4">
+              <p className="hu-rise font-display text-[clamp(1.5rem,3.4vw,2.7rem)] font-[900] uppercase tracking-[-0.01em] text-bh-pine">
+                Sofia Life Summit
+              </p>
+              <OrbitBadge />
+            </div>
 
             <h1
               className="hu-rise font-display text-[clamp(2.2rem,7.5vw,3rem)] font-[1000] uppercase leading-[0.94] tracking-[-0.03em] text-bh-ink"
@@ -81,8 +84,6 @@ export function SummitHero() {
               <span className="block">променят начина, по който живееш</span>
               <span className="block lg:pl-[24%]">следващите 20 години.</span>
             </h1>
-
-            <OrbitBadge />
           </div>
 
           {/* The dark welcome card from the reference, in our forest. */}
