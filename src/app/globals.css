@@ -122,26 +122,33 @@ body {
 }
 
 /*
- * Aurora wash behind the hero — large soft radial blooms in the brand accents,
- * fading into the page colour. Pure gradients: no image to load, no blur
- * filter to composite, and the page background stays the base coat so the
- * effect can only ever tint, not replace.
+ * Aurora behind the hero, after the reference: not a tint but a committed
+ * field — deep teal owning the top of the page, a bright cyan bloom breaking
+ * through, and a silky diagonal fade into the page colour. Identical in both
+ * themes, because it is a surface with its own colours, like the invoice is
+ * pinned light; the headline pins its foreground to match (.bh-on-deep).
  */
 .bh-aurora {
   position: absolute;
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(52rem 34rem at 88% -12%, rgba(64, 196, 214, 0.62), transparent 70%),
-    radial-gradient(58rem 38rem at -10% 28%, rgba(11, 180, 160, 0.38), transparent 70%),
-    radial-gradient(40rem 28rem at 58% 4%, rgba(140, 214, 255, 0.32), transparent 72%);
+    radial-gradient(56rem 38rem at 88% -18%, rgba(126, 224, 238, 0.95), transparent 60%),
+    radial-gradient(48rem 32rem at 52% -10%, rgba(11, 180, 160, 0.65), transparent 68%),
+    linear-gradient(
+      168deg,
+      #05463c 0%,
+      #0a5a4c 24%,
+      rgba(10, 90, 76, 0.55) 42%,
+      rgba(10, 90, 76, 0.18) 54%,
+      transparent 64%
+    );
 }
 
-:root[data-theme="dark"] .bh-aurora {
-  background:
-    radial-gradient(52rem 34rem at 88% -12%, rgba(94, 207, 221, 0.42), transparent 70%),
-    radial-gradient(58rem 38rem at -10% 28%, rgba(11, 180, 160, 0.34), transparent 70%),
-    radial-gradient(40rem 28rem at 58% 4%, rgba(206, 248, 112, 0.14), transparent 72%);
+/* Foreground for content sitting on the deep part of the wash. */
+.bh-on-deep {
+  --color-bh-ink: #f1f5f3;
+  --color-bh-pine: #cef870;
 }
 
 /* Brand gradient: a direct teal → sky blend, for buttons and accent fills. */

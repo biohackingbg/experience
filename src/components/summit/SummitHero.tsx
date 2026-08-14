@@ -17,12 +17,10 @@ export function SummitHero() {
       id="top"
       className="relative isolate overflow-hidden px-5 pt-6 sm:px-8 sm:pt-8 lg:px-10"
     >
-      {/* Reaches above the section's own box so the glow starts behind the
-          nav's hairline rather than on a visible seam beneath it. */}
-      <div aria-hidden className="bh-aurora -top-28 -z-10" />
+      <div aria-hidden className="bh-aurora -z-10" />
       <div className="mx-auto w-full max-w-7xl">
         <div className="grid gap-6 lg:grid-cols-[2.9fr_1fr] lg:items-stretch">
-          <div className="self-end">
+          <div className="bh-on-deep self-end">
             {/* The name steps down to an eyebrow so the headline can sell.
                 A visitor who lands here already saw the brand in the nav;
                 what they have not seen is a reason to stay. */}
