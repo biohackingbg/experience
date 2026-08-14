@@ -17,22 +17,24 @@ export function SummitHero() {
       <div className="mx-auto w-full max-w-7xl">
         <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr] lg:items-stretch">
           <div className="self-end">
-            <p className="hu-rise flex flex-wrap items-center gap-x-3 gap-y-2 font-display text-[clamp(1.05rem,2.5vw,1.9rem)] font-[900] uppercase leading-none tracking-[-0.01em] text-bh-pine">
-              Biohacking Experience
+            {/* The name steps down to an eyebrow so the headline can sell.
+                A visitor who lands here already saw the brand in the nav;
+                what they have not seen is a reason to stay. */}
+            <p className="hu-rise flex flex-wrap items-center gap-x-3 gap-y-2 font-display text-[clamp(1.2rem,3vw,2.2rem)] font-[1000] uppercase leading-none tracking-[-0.01em] text-bh-pine">
+              Sofia Life Summit
               <span className="text-bh-ink/35">·</span>
               07—08.11.2026
             </p>
 
             <h1
-              /* Two sizes, because the column changes shape: below lg the
-                 heading owns the full width, at lg it shares the row with the
-                 venue card and only gets ~60% of it. */
-              className="hu-rise mt-3 font-display text-[clamp(3.3rem,16vw,9.6rem)] font-[1000] uppercase leading-[0.82] tracking-[-0.035em] text-bh-ink lg:text-[clamp(3.3rem,10.3vw,9.6rem)]"
+              /* A sentence, not a wordmark: sentence case and a tighter clamp,
+                 because ninety characters of uppercase at wordmark size read
+                 as a wall. Two sizes for the two column shapes, as before. */
+              className="hu-rise mt-4 font-display text-[clamp(2.1rem,7.4vw,4.4rem)] font-[900] leading-[1.02] tracking-[-0.02em] text-bh-ink lg:text-[clamp(2.1rem,4.5vw,4.4rem)]"
               style={{ animationDelay: "80ms" }}
             >
-              Sofia Life
-              <br />
-              Summit
+              Два дни, които могат да променят начина, по който живееш{" "}
+              <span className="text-bh-pine">следващите 20 години</span>.
             </h1>
           </div>
 
