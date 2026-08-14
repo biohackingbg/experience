@@ -7,6 +7,8 @@ import { redirect } from "next/navigation";
 import {
   ADMIN_COOKIE,
   checkPassword,
+  checkTotp,
+  isTotpConfigured,
   createSessionToken,
   isConfigured,
   sessionCookieOptions,
@@ -38,10 +40,15 @@ export async function login(
 
   const password = String(formData.get("password") ?? "");
 
-  if (!checkPassword(password)) {
-    // Deliberately vague, and slow enough to make guessing tedious.
+  const totp = String(formData.get("totp") ?? "");
+
+  // One combined verdict for password and code: separate errors would tell a
+  // guesser which half was right.
+  const ok =
+    checkPassword(password) && (!isTotpConfigured() || checkTotp(totp));
+  if (!ok) {
     await new Promise((r) => setTimeout(r, 600));
-    return { error: "Грешна парола." };
+    return { error: "Грешна парола или код." };
   }
 
   const token = createSessionToken();

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { isAdmin, isTotpConfigured } from "@/lib/admin-auth";
 import { LoginForm } from "./LoginForm";
 
 export const metadata: Metadata = {
@@ -21,7 +21,7 @@ export default async function AdminLoginPage() {
         <p className="mt-2 text-sm text-bh-ink/60">
           Sofia Life Summit — продажби и статистика.
         </p>
-        <LoginForm />
+        <LoginForm needsTotp={isTotpConfigured()} />
       </div>
     </div>
   );

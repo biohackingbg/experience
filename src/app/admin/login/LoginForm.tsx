@@ -6,7 +6,7 @@ import { login, type LoginState } from "../actions";
 
 const initialState: LoginState = {};
 
-export function LoginForm() {
+export function LoginForm({ needsTotp }: { needsTotp: boolean }) {
   const [state, formAction, pending] = useActionState(login, initialState);
 
   return (
@@ -26,6 +26,26 @@ export function LoginForm() {
         autoComplete="current-password"
         className="mt-2 w-full rounded-2xl border border-bh-ink/15 bg-bh-cloud px-4 py-3 text-bh-ink outline-none focus:border-bh-pine"
       />
+
+      {needsTotp && (
+        <div className="mt-3">
+          <label htmlFor="totp" className="sr-only">
+            Код от приложението
+          </label>
+          <input
+            id="totp"
+            name="totp"
+            type="text"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            pattern="[0-9]{6}"
+            maxLength={6}
+            required
+            placeholder="6-цифрен код"
+            className="w-full rounded-2xl border border-bh-ink/15 bg-bh-cloud px-4 py-3 text-sm text-bh-ink placeholder:text-bh-ink/35 outline-none transition-colors focus:border-bh-pine"
+          />
+        </div>
+      )}
 
       {state.error && (
         <p role="alert" className="mt-3 text-sm text-red-700">

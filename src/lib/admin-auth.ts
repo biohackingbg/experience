@@ -79,3 +79,67 @@ export const sessionCookieOptions = {
   path: "/",
   maxAge: MAX_AGE_SECONDS,
 };
+
+/*
+ * ── Second factor: TOTP (RFC 6238) ──────────────────────────────────────
+ *
+ * Implemented directly on node:crypto rather than pulling a dependency —
+ * the whole algorithm is an HMAC and a modulo, and an auth path is the last
+ * place to add third-party code.
+ *
+ * Deliberately optional: with no ADMIN_TOTP_SECRET set, login behaves as
+ * before. That makes the rollout safe — deploy the code, enrol the phone,
+ * verify a login, and only then set the secret in production. Recovery from
+ * a lost phone is removing the variable.
+ */
+
+function base32Decode(encoded: string): Buffer {
+  const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+  let bits = 0;
+  let value = 0;
+  const bytes: number[] = [];
+  for (const ch of encoded.toUpperCase().replace(/=+$/, "")) {
+    const idx = ALPHABET.indexOf(ch);
+    if (idx === -1) continue;
+    value = (value << 5) | idx;
+    bits += 5;
+    if (bits >= 8) {
+      bytes.push((value >>> (bits - 8)) & 0xff);
+      bits -= 8;
+    }
+  }
+  return Buffer.from(bytes);
+}
+
+function totpAt(secret: Buffer, counter: number): string {
+  const msg = Buffer.alloc(8);
+  msg.writeBigUInt64BE(BigInt(counter));
+  const digest = createHmac("sha1", secret).update(msg).digest();
+  const offset = digest[digest.length - 1] & 0xf;
+  const code = (digest.readUInt32BE(offset) & 0x7fffffff) % 1_000_000;
+  return String(code).padStart(6, "0");
+}
+
+export function isTotpConfigured(): boolean {
+  return Boolean(process.env.ADMIN_TOTP_SECRET);
+}
+
+/**
+ * Accepts the previous, current and next 30-second step, so a code typed
+ * just as it rolls over still works and modest clock drift is tolerated.
+ */
+export function checkTotp(code: string): boolean {
+  const raw = process.env.ADMIN_TOTP_SECRET;
+  if (!raw) return true;
+
+  const digits = code.replace(/\s+/g, "");
+  if (!/^\d{6}$/.test(digits)) return false;
+
+  const secret = base32Decode(raw);
+  if (secret.length === 0) return false;
+
+  const step = Math.floor(Date.now() / 30_000);
+  return [step - 1, step, step + 1].some((s) =>
+    safeEqual(totpAt(secret, s), digits),
+  );
+}
