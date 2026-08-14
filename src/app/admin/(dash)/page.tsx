@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+
+import { isAdmin } from "@/lib/admin-auth";
 
 import { getDashboardData } from "@/lib/admin-stats";
 import { formatPrice } from "@/lib/tickets";
@@ -42,6 +45,10 @@ function Tile({
 }
 
 export default async function AdminDashboard() {
+  // The layout also checks, but a layout is not an auth boundary — the
+  // Next docs are explicit that it may be skipped on RSC navigations.
+  if (!(await isAdmin())) redirect("/admin/login");
+
   const d = await getDashboardData();
   const soldPct = d.capacityTotal
     ? Math.round((d.ticketsSold / d.capacityTotal) * 100)

@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+
+import { isAdmin } from "@/lib/admin-auth";
 import { sql } from "drizzle-orm";
 
 import { CopyEmails } from "./CopyEmails";
@@ -19,6 +22,10 @@ function bgDateTime(d: Date): string {
 }
 
 export default async function SignupsPage() {
+  // The layout also checks, but a layout is not an auth boundary — the
+  // Next docs are explicit that it may be skipped on RSC navigations.
+  if (!(await isAdmin())) redirect("/admin/login");
+
   const db = getDb();
 
   const rows = await db

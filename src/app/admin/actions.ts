@@ -1,6 +1,7 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import {
@@ -23,6 +24,16 @@ export async function login(
       error:
         "Достъпът не е настроен на сървъра (липсват ADMIN_PASSWORD или ADMIN_SESSION_SECRET).",
     };
+  }
+
+  // The only thing between the internet and every buyer's data is this one
+  // password, so guessing gets throttled per address. Same vague error as a
+  // wrong password: a limiter that says "slow down" confirms the endpoint.
+  const head = await headers();
+  const ip = head.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  if (!checkRateLimit(`login:${ip}`).allowed) {
+    await new Promise((r) => setTimeout(r, 600));
+    return { error: "Грешна парола." };
   }
 
   const password = String(formData.get("password") ?? "");

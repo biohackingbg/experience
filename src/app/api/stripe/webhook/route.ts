@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 
 import { sendTicketEmail } from "@/lib/email";
+import { sql } from "drizzle-orm";
+
+import { getDb } from "@/lib/db";
+import { orders } from "@/lib/db/schema";
 import { markOrderPaid } from "@/lib/orders";
 import { getStripe } from "@/lib/stripe";
 
@@ -51,6 +55,25 @@ export async function POST(request: Request) {
             ? session.payment_intent
             : (session.payment_intent?.id ?? null);
 
+        // Defence in depth: sessions are only created server-side with the
+        // order's own price, but if a future change ever let an amount drift,
+        // a mismatch must not mint tickets quietly.
+        const db = getDb();
+        const [expected] = await db
+          .select({ totalCents: orders.totalCents })
+          .from(orders)
+          .where(sql`${orders.id} = ${orderId}`);
+        if (
+          expected &&
+          typeof session.amount_total === "number" &&
+          session.amount_total !== expected.totalCents
+        ) {
+          console.error(
+            `[stripe] amount mismatch for ${orderId}: session ${session.amount_total} vs order ${expected.totalCents} — not issuing tickets`,
+          );
+          return NextResponse.json({ received: true });
+        }
+
         const { issued, order } = await markOrderPaid(orderId, paymentIntent);
         console.info(
           `[stripe] order ${orderId} paid, ${issued} ticket(s) issued`,
@@ -66,6 +89,7 @@ export async function POST(request: Request) {
             buyerName: order.name,
             reference: order.reference,
             totalCents: order.totalCents,
+            invoiceNumber: order.invoiceNumber,
             tickets: order.tickets,
           });
           if (!sent) {

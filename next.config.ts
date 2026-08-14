@@ -1,6 +1,28 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          // The site embeds nowhere; the admin panel especially must not be
+          // frameable. CSP frame-ancestors is the modern header, X-Frame-
+          // Options covers older engines.
+          { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          // Camera stays available to this origin: the door scanner on
+          // /admin/vhod reads QR codes with it.
+          {
+            key: "Permissions-Policy",
+            value: "camera=(self), microphone=(), geolocation=(), payment=()",
+          },
+        ],
+      },
+    ];
+  },
   async redirects() {
     return [
       {

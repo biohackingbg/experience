@@ -76,9 +76,10 @@ export async function startCheckout(
     return fail("Поръчката не можа да бъде създадена. Опитай отново.");
   }
 
-  const origin =
-    head.get("origin") ??
-    `https://${head.get("host") ?? "thelongevitysummit.eu"}`;
+  // Fixed rather than read from Origin/Host: today the platform pins those
+  // headers, but a URL Stripe redirects buyers to should not be one proxy
+  // config away from attacker influence.
+  const origin = "https://thelongevitysummit.eu";
 
   const session = await getStripe().checkout.sessions.create({
     mode: "payment",
@@ -101,9 +102,10 @@ export async function startCheckout(
         },
       },
     ],
-    // Stops an abandoned checkout from holding a seat longer than the
-    // pending-order window in createPendingOrder.
-    expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
+    // Strictly inside the 30-minute pending hold, not equal to it: a payment
+    // landing in the final seconds of an expired hold could otherwise pair
+    // with a resold seat and oversell by one.
+    expires_at: Math.floor(Date.now() / 1000) + 25 * 60,
     success_url: `${origin}/bilet/uspeh?ref=${order.reference}`,
     cancel_url: `${origin}/bilet?otkazano=1`,
   });

@@ -28,6 +28,21 @@ export function isEmailConfigured(): boolean {
 
 const SITE = "https://thelongevitysummit.eu";
 
+/**
+ * The buyer's name is attacker-controlled at checkout and lands inside HTML.
+ * Normally that mail goes to the buyer (self-XSS at worst), but the admin
+ * resend can deliver the same HTML to any address — without escaping, a €35
+ * purchase becomes DKIM-signed phishing from our own domain.
+ */
+function esc(s: string): string {
+  return s
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
 export type TicketEmailInput = {
   to: string;
   buyerName: string;
@@ -87,7 +102,7 @@ function ticketEmailHtml(input: TicketEmailInput): string {
         Билетът ти е готов
       </h1>
       <p style="margin:14px 0 0;font:400 15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251fb3">
-        Здравей, ${input.buyerName}! Плащането е потвърдено. Отвори билета си
+        Здравей, ${esc(input.buyerName)}! Плащането е потвърдено. Отвори билета си
         по-долу и го запази — ще ти трябва на входа.
       </p>
 
@@ -132,7 +147,7 @@ function ticketEmailText(input: TicketEmailInput): string {
     .join("\n");
 
   return [
-    `Здравей, ${input.buyerName}!`,
+    `Здравей, ${esc(input.buyerName)}!`,
     "",
     "Плащането е потвърдено, билетът ти е готов.",
     "",

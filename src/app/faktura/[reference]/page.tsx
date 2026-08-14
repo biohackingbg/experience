@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { PrintButton } from "./PrintButton";
 import { COMPANY } from "@/lib/company";
 import { getInvoice } from "@/lib/invoices";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { formatPrice } from "@/lib/tickets";
 
 export const dynamic = "force-dynamic";
@@ -35,6 +37,15 @@ export default async function InvoicePage({
   params: Promise<{ reference: string }>;
 }) {
   const { reference } = await params;
+
+  // The reference is the only key to a page full of personal data. The
+  // keyspace is ~1e9, which holds only while nobody can try candidates at
+  // machine speed — so lookups are throttled per address, and a throttled
+  // request is indistinguishable from a miss.
+  const head = await headers();
+  const ip = head.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  if (!checkRateLimit(`faktura:${ip}`).allowed) notFound();
+
   const inv = await getInvoice(decodeURIComponent(reference).toUpperCase());
   if (!inv) notFound();
 

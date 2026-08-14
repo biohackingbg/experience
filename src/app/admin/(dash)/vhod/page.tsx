@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+
+import { isAdmin } from "@/lib/admin-auth";
 
 import { getDoorStats } from "@/lib/tickets-lookup";
 import { Scanner } from "./Scanner";
@@ -12,6 +15,10 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function DoorPage() {
+  // The layout also checks, but a layout is not an auth boundary — the
+  // Next docs are explicit that it may be skipped on RSC navigations.
+  if (!(await isAdmin())) redirect("/admin/login");
+
   const stats = await getDoorStats();
 
   return (
