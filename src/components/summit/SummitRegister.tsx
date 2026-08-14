@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { EarlyAccessForm } from "@/components/summit/EarlyAccessForm";
-import { EARLY_ACCESS, discountLabel, isEarlyAccess } from "@/lib/tickets";
+import { EARLY_ACCESS, isEarlyAccess } from "@/lib/tickets";
 import { Reveal } from "@/components/ui/Reveal";
 import { Calendar, Pin, TicketIcon } from "@/components/ui/Pictograms";
 
@@ -22,7 +22,7 @@ export function SummitRegister() {
     {
       label: "Достъп",
       value: early
-        ? `Билети с ${discountLabel()} до ${EARLY_ACCESS.endsLabel}`
+        ? `Ранни цени до ${EARLY_ACCESS.endsLabel}`
         : "Билетите са в продажба",
       icon: TicketIcon,
     },
@@ -44,22 +44,22 @@ export function SummitRegister() {
               {early && (
                 <>
                   {" "}
-                  — с{" "}
+                  — на{" "}
                   <strong className="font-semibold text-bh-lime">
-                    {discountLabel()} до {EARLY_ACCESS.endsLabel}
+                    ранни цени до {EARLY_ACCESS.endsLabel}
                   </strong>
                   , като предварителна поръчка
                 </>
               )}
-              . Местата в Лабораторията и ритуалите са ограничени и се запазват
-              с реда на купуване.
+              . Местата в работилниците и специалните преживявания са
+              ограничени и се запазват с реда на купуване.
             </p>
 
             <Link
               href="/bilet"
               className="bh-gradient mt-8 inline-flex items-center gap-2 rounded-full px-8 py-4 text-base font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
             >
-              Купи билет{early && <> с {discountLabel()}</>}
+              Купи билет{early && <> от 35 €</>}
             </Link>
 
             {/* The fallback ask, deliberately quieter than the sale. */}

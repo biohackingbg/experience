@@ -31,7 +31,6 @@ export const CURRENCY = "EUR";
  * forward-looking schedule, not a claim about the past.
  */
 export const EARLY_ACCESS = {
-  discount: 0.3,
   // Ends with the pre-order window: one deadline, deliberately. After
   // 31 August there are no further discounts — tickets go to list price.
   endsAt: new Date("2026-08-31T23:59:59+03:00"),
@@ -59,12 +58,18 @@ export function isPreOrder(now: Date = new Date()): boolean {
   return now <= PRE_ORDER.endsAt;
 }
 
-export type TierId = "basic" | "full" | "protocol";
+export type TierId = "core" | "plus" | "peak";
 
 export type Tier = {
   id: TierId;
   name: string;
-  /** Regular price, VAT included, in cents. Applies once the window closes. */
+  /**
+   * Both prices are stated, not derived: the early figures were chosen as
+   * round numbers (35/89/249), and no single percentage produces them from
+   * the equally round list prices (49/129/349).
+   */
+  earlyPriceCents: number;
+  /** Regular price, VAT included, in cents. Applies from 1 September. */
   listPriceCents: number;
   /** Hard cap on how many of this tier may be sold. */
   capacity: number;
@@ -76,44 +81,50 @@ export type Tier = {
 
 export const TIERS: Tier[] = [
   {
-    id: "basic",
-    name: "Основен",
-    listPriceCents: 5000,
+    id: "core",
+    name: "CORE",
+    earlyPriceCents: 3500,
+    listPriceCents: 4900,
     capacity: 700,
     features: [
       "Един ден по избор",
-      "Главна сцена",
-      "Village и дегустации",
-      "2 базови станции",
+      "Лекции при наличие на места",
+      "Партньорски оферти и привилегии",
     ],
-    absent: ["Без работилници"],
+    absent: ["Без работилници", "Без специални преживявания"],
   },
   {
-    id: "full",
-    name: "Пълен",
-    listPriceCents: 14500,
+    id: "plus",
+    name: "PLUS",
+    earlyPriceCents: 8900,
+    listPriceCents: 12900,
     capacity: 250,
     featured: true,
     features: [
-      "И двата дни, двете сцени",
-      "Пълен паспорт, 12 станции",
-      "2 работилници по избор",
-      "1 ритуал по избор",
-      "Обяд в 1 ден",
+      "И двата дни",
+      "Приоритетен достъп до лекциите",
+      "Работилниците включени",
+      "1 специално преживяване по избор",
+      "Смути + обяд в избран ден",
+      "Goody bag на стойност €100+",
     ],
     absent: [],
   },
   {
-    id: "protocol",
-    name: "Протокол",
-    listPriceCents: 39000,
+    id: "peak",
+    name: "PEAK",
+    earlyPriceCents: 24900,
+    listPriceCents: 34900,
     capacity: 50,
     tagline: "Ограничени места",
     features: [
-      "Всичко от Пълен",
-      "Кръвен панел с разчитане",
-      "Гарантирани места",
-      "90-дневен личен протокол",
+      "Гарантиран достъп + премиум зона",
+      "Работилници и преживявания с приоритет",
+      "Смути + обяд през двата дни",
+      "Goody bag на стойност €250+",
+      "Premium Lounge",
+      "Meet & Greet с лектори",
+      "Приоритетен вход",
     ],
     absent: [],
   },
@@ -136,14 +147,12 @@ export function isEarlyAccess(now: Date = new Date()): boolean {
 
 /** What the buyer pays, VAT included, in cents. */
 export function priceCents(tier: Tier, early: boolean): number {
-  return early
-    ? Math.round(tier.listPriceCents * (1 - EARLY_ACCESS.discount))
-    : tier.listPriceCents;
+  return early ? tier.earlyPriceCents : tier.listPriceCents;
 }
 
-/** "-30%" */
-export function discountLabel(): string {
-  return `-${Math.round(EARLY_ACCESS.discount * 100)}%`;
+/** Per tier, since the round prices imply slightly different cuts: "-29%". */
+export function tierDiscountLabel(tier: Tier): string {
+  return `-${Math.round((1 - tier.earlyPriceCents / tier.listPriceCents) * 100)}%`;
 }
 
 /** Splits a VAT-inclusive total into its net and VAT parts, in cents. */

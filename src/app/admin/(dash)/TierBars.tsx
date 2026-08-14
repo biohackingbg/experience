@@ -12,9 +12,9 @@ import { formatPrice } from "@/lib/tickets";
 
 /** Validated with the dataviz checker in both light and dark. */
 const TIER_COLORS: Record<string, string> = {
-  basic: "#0E8C7D",
-  full: "#3F6FD8",
-  protocol: "#C4607F",
+  core: "#0E8C7D",
+  plus: "#3F6FD8",
+  peak: "#C4607F",
 };
 
 export function TierBars({ tiers }: { tiers: TierSales[] }) {

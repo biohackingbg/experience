@@ -5,11 +5,11 @@ import {
   EARLY_ACCESS,
   PRE_ORDER,
   TIERS,
-  discountLabel,
   formatPrice,
   isEarlyAccess,
   isPreOrder,
   priceCents,
+  tierDiscountLabel,
 } from "@/lib/tickets";
 
 
@@ -50,7 +50,7 @@ export function SummitTickets() {
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-bh-ink/60">
             Всички билети дават достъп до сцената и Village. Разликата е в
-            лабораторията и в това с какво си тръгва посетителят.
+            дните, работилниците и специалните преживявания.
             {preOrder && (
               <>
                 {" "}
@@ -130,7 +130,7 @@ export function SummitTickets() {
                           {formatPrice(tier.listPriceCents)} €
                         </s>
                         <span className="bh-gradient rounded-full px-2.5 py-1 text-xs font-bold tracking-tight text-bh-ink">
-                          {discountLabel()}
+                          {tierDiscountLabel(tier)}
                         </span>
                       </div>
                       {/* The struck figure is named as the price that starts on
@@ -178,6 +178,58 @@ export function SummitTickets() {
             );
           })}
         </div>
+
+
+        {/* The full matrix from the sales sheet. The cards carry each tier's
+            highlights; the table is where the three get compared row by row,
+            which a stack of bullet lists cannot do. */}
+        <Reveal className="mt-14">
+          <h3 className="text-xl font-black uppercase tracking-tight text-bh-ink">
+            Сравни билетите
+          </h3>
+          <div className="mt-5 overflow-x-auto">
+            <table className="w-full min-w-[40rem] text-sm">
+              <thead>
+                <tr className="text-left font-mono text-[0.62rem] uppercase tracking-[0.15em] text-bh-ink/45">
+                  <th className="w-1/3 py-3 pr-4 font-normal" />
+                  {TIERS.map((tier) => (
+                    <th key={tier.id} className="py-3 pr-4 font-bold normal-case tracking-normal text-sm text-bh-ink">
+                      {tier.name}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ["Цена", early ? "Ранна €35" : "€49", early ? "Ранна €89" : "€129", early ? "Ранна €249" : "€349"],
+                  ["Достъп", "1 ден по избор", "И двата дни", "И двата дни"],
+                  ["Лекции", "При наличие на места", "Приоритетен достъп", "Гарантиран достъп"],
+                  ["Запазени места", "—", "—", "Премиум зона"],
+                  ["Работилници", "—", "Включени", "Включени с приоритет"],
+                  ["Специални преживявания", "—", "1 по избор", "Всички включени"],
+                  ["Храна и напитки", "—", "Смути + обяд в избран ден", "Смути + обяд и през двата дни"],
+                  ["Goody bag", "—", "Стойност €100+", "Стойност €250+"],
+                  ["Premium Lounge", "—", "—", "Включен"],
+                  ["Meet & Greet с лектори", "—", "—", "Включен"],
+                  ["Приоритетен вход", "—", "—", "Включен"],
+                  ["Партньорски оферти и привилегии", "✓", "✓", "✓"],
+                ].map(([label, ...cells]) => (
+                  <tr key={label} className="border-t border-bh-ink/8 align-top">
+                    <td className="py-3 pr-4 font-semibold text-bh-ink">{label}</td>
+                    {cells.map((cell, i) => (
+                      <td
+                        key={i}
+                        className={`py-3 pr-4 ${cell === "—" ? "text-bh-ink/30" : "text-bh-ink/75"}`}
+                      >
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Reveal>
 
         {/* Folded into the existing line rather than given a box of its own:
             someone who scrolls straight to the prices never sees the two-track

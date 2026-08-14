@@ -16,7 +16,7 @@ export const CONSENT_TEXT =
   "нови лектори, програма и цени на билетите. Мога да оттегля съгласието си " +
   "по всяко време.";
 
-export const TIERS = ["basic", "full", "protocol"] as const;
+export const TIERS = ["core", "plus", "peak"] as const;
 
 /**
  * Derived rather than typed out, so the price offered on the signup form can
@@ -28,5 +28,5 @@ export function tierLabels(early: boolean): Record<(typeof TIERS)[number], strin
     const tier = TICKET_TIERS.find((t) => t.id === id)!;
     return `${tier.name} — ${formatPrice(priceCents(tier, early))} €`;
   };
-  return { basic: label("basic"), full: label("full"), protocol: label("protocol") };
+  return { core: label("core"), plus: label("plus"), peak: label("peak") };
 }

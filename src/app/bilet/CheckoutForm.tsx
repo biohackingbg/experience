@@ -56,7 +56,7 @@ export function CheckoutForm({
   }, [state]);
 
   const [tierId, setTierId] = useState(
-    TIERS.some((t) => t.id === initialTier) ? initialTier! : "full",
+    TIERS.some((t) => t.id === initialTier) ? initialTier! : "plus",
   );
   const [quantity, setQuantity] = useState(1);
   const [wantsInvoice, setWantsInvoice] = useState(false);
