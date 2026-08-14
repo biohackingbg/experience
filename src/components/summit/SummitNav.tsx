@@ -1,5 +1,12 @@
 import Link from "next/link";
+
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import {
+  TIERS,
+  formatPrice,
+  isEarlyAccess,
+  priceCents,
+} from "@/lib/tickets";
 
 const links = [
   // Same order the sections appear in on the page.
@@ -11,9 +18,18 @@ const links = [
 ];
 
 export function SummitNav() {
+  // The hero gave up its CTA row for a cleaner composition; the price anchor
+  // moves here, onto the one button that is now always on screen.
+  const early = isEarlyAccess();
+  const cheapest = Math.min(...TIERS.map((t) => priceCents(t, early)));
+
   return (
-    <header className="px-5 pt-5 sm:px-8 lg:px-10">
-      <nav className="flex items-center justify-between border-b border-bh-ink/15 pb-5">
+    /* Sticky glass: translucent paper over a backdrop blur, so the page
+       stays legible sliding underneath. Works because the page wrapper
+       clips with overflow-clip, not overflow-hidden — hidden would make it
+       the scroll container and quietly kill the stickiness. */
+    <header className="sticky top-0 z-40 border-b border-bh-ink/10 bg-bh-paper/70 px-5 backdrop-blur-lg sm:px-8 lg:px-10">
+      <nav className="flex items-center justify-between py-4">
         <Link
           href="#top"
           aria-label="Biohacking Experience — начало"
@@ -52,7 +68,7 @@ export function SummitNav() {
             href="#tickets"
             className="bh-gradient inline-flex items-center whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
           >
-            Купи билет
+            Купи билет от {formatPrice(cheapest)} €
           </a>
         </div>
       </nav>

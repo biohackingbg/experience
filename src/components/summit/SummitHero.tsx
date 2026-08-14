@@ -1,10 +1,4 @@
 import { Arrow, Gauge, People } from "@/components/ui/Pictograms";
-import {
-  TIERS,
-  formatPrice,
-  isEarlyAccess,
-  priceCents,
-} from "@/lib/tickets";
 
 const zoneTags = ["Сцена", "Лаборатория", "Ритуали", "Village"];
 
@@ -43,9 +37,6 @@ function OrbitBadge() {
 }
 
 export function SummitHero() {
-  const early = isEarlyAccess();
-  const cheapest = Math.min(...TIERS.map((t) => priceCents(t, early)));
-
   return (
     <section
       id="top"
@@ -102,23 +93,6 @@ export function SummitHero() {
           </article>
         </div>
 
-        <div
-          className="hu-rise mt-3 flex flex-wrap items-center gap-3"
-          style={{ animationDelay: "240ms" }}
-        >
-          <a
-            href="#tickets"
-            className="bh-gradient inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
-          >
-            Купи билет от {formatPrice(cheapest)} €
-          </a>
-          <a
-            href="#program"
-            className="bh-gradient-outline inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
-          >
-            Виж програмата
-          </a>
-        </div>
 
         {/* Bento after the reference: a tall card and two square stats on the
             left, one large accent card owning the right. */}

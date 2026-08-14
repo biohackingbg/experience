@@ -19,7 +19,7 @@ export const revalidate = 300;
 
 export default function Home() {
   return (
-    <div className="overflow-hidden rounded-[1.75rem] bg-bh-paper">
+    <div className="overflow-clip rounded-[1.75rem] bg-bh-paper">
       <script
         type="application/ld+json"
         // Static, authored object — no user input reaches this.
