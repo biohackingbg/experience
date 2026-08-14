@@ -34,8 +34,11 @@
   --color-bh-rose: #cc6c7e;
   --color-bh-assoc: #159078;
 
-  /* One definition for every accent surface — fill, outline and buttons. */
+  /* Outline and edge accents keep the original teal → sky blend. */
   --bh-brand-gradient: linear-gradient(112deg, #0bb4a0 0%, #a5e0ff 100%);
+  /* Filled buttons: the cyan → teal from the brand sample. Separate from the
+     outline gradient so each can be tuned without dragging the other. */
+  --bh-button-gradient: linear-gradient(135deg, #5ecfdd 0%, #12b39c 100%);
 }
 
 :root[data-theme="dark"] {
@@ -120,7 +123,7 @@ body {
 
 /* Brand gradient: a direct teal → sky blend, for buttons and accent fills. */
 .bh-gradient {
-  background-image: var(--bh-brand-gradient);
+  background-image: var(--bh-button-gradient);
 
   /* The accent fill is bright in both themes, so pin the foreground tokens
      locally: descendants using text-bh-ink / bg-bh-ink stay readable on it
