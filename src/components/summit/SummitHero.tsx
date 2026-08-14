@@ -15,7 +15,7 @@ export function SummitHero() {
   return (
     <section id="top" className="px-5 pt-6 sm:px-8 sm:pt-8 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
-        <div className="grid gap-6 lg:grid-cols-[2.1fr_1fr] lg:items-stretch">
+        <div className="grid gap-6 lg:grid-cols-[2.9fr_1fr] lg:items-stretch">
           <div className="self-end">
             {/* The name steps down to an eyebrow so the headline can sell.
                 A visitor who lands here already saw the brand in the nav;
@@ -30,11 +30,11 @@ export function SummitHero() {
               /* A sentence, not a wordmark: sentence case and a tighter clamp,
                  because ninety characters of uppercase at wordmark size read
                  as a wall. Two sizes for the two column shapes, as before. */
-              className="hu-rise mt-4 font-display text-[clamp(2.1rem,7.4vw,4.4rem)] font-[900] leading-[1.02] tracking-[-0.02em] text-bh-ink lg:text-[clamp(2.1rem,4.5vw,4.4rem)]"
+              className="hu-rise mt-4 font-display text-[clamp(2.1rem,7.4vw,4.4rem)] font-[900] leading-[1.02] tracking-[-0.02em] text-bh-ink lg:text-[clamp(2.1rem,4.5vw,3.9rem)]"
               style={{ animationDelay: "80ms" }}
             >
-              Два дни, които могат да променят начина, по който живееш{" "}
-              <span className="text-bh-pine">следващите 20 години</span>.
+              Два дни, които могат да променят начина, по който живееш
+              следващите 20 години.
             </h1>
           </div>
 
