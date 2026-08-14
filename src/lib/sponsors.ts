@@ -46,6 +46,29 @@ export const ZONE_BLURB: Record<Zone, string> = {
   Ритуали: "Студ, сауна, дишане, red light, PEMF.",
 };
 
-export const ZONE_SPONSORS: ZoneSponsor[] = [];
+export const ZONE_SPONSORS: ZoneSponsor[] = [
+  { zone: "Сцена", name: "Вашият бранд" },
+  { zone: "Лаборатория", name: "Вашият бранд" },
+  { zone: "Ритуали", name: "Вашият бранд" },
+];
 
-export const EXHIBITORS: Exhibitor[] = [];
+export const EXHIBITORS: Exhibitor[] = [
+  { name: "Вашият бранд", category: "устройства" },
+  { name: "Бранд 02", category: "лаборатории" },
+  { name: "Бранд 03", category: "клиники" },
+  { name: "Бранд 04", category: "храна" },
+  { name: "Бранд 05", category: "технологии" },
+  { name: "Бранд 06", category: "добавки" },
+  { name: "Бранд 07", category: "устройства" },
+  { name: "Бранд 08", category: "лаборатории" },
+  { name: "Бранд 09", category: "клиники" },
+  { name: "Бранд 10", category: "храна" },
+  { name: "Бранд 11", category: "технологии" },
+  { name: "Бранд 12", category: "добавки" },
+  { name: "Бранд 13", category: "устройства" },
+  { name: "Бранд 14", category: "лаборатории" },
+  { name: "Бранд 15", category: "клиники" },
+  { name: "Бранд 16", category: "храна" },
+  { name: "Бранд 17", category: "технологии" },
+  { name: "Бранд 18", category: "добавки" },
+];
