@@ -137,21 +137,21 @@ export function SummitHero() {
 
             {/* two square stats, one light one dark, like the reference */}
             <div className="grid grid-cols-2 gap-3">
-              <article className="bh-mint rounded-3xl p-5">
-                <People className="h-6 w-6 text-bh-pine/70" />
-                <div className="mt-3 text-3xl font-black tracking-tight text-bh-ink">
+              <article className="bh-forest rounded-3xl p-5 text-bh-paper">
+                <People className="h-6 w-6 text-bh-lime" />
+                <div className="mt-3 text-3xl font-black tracking-tight">
                   1 000+
                 </div>
-                <div className="mt-1.5 font-mono text-[0.65rem] uppercase tracking-[0.15em] text-bh-ink/50">
+                <div className="mt-1.5 font-mono text-[0.65rem] uppercase tracking-[0.15em] text-bh-paper/50">
                   посетители
                 </div>
               </article>
-              <article className="bh-forest rounded-3xl p-5 text-bh-paper">
-                <Gauge className="h-6 w-6 text-bh-lime" />
-                <div className="mt-3 text-3xl font-black tracking-tight">
+              <article className="bh-mint rounded-3xl p-5">
+                <Gauge className="h-6 w-6 text-bh-pine/70" />
+                <div className="mt-3 text-3xl font-black tracking-tight text-bh-ink">
                   12
                 </div>
-                <div className="mt-1.5 font-mono text-[0.65rem] uppercase tracking-[0.15em] text-bh-paper/50">
+                <div className="mt-1.5 font-mono text-[0.65rem] uppercase tracking-[0.15em] text-bh-ink/50">
                   станции за измерване
                 </div>
               </article>
