@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { CountryMark } from "@/components/ui/Flags";
 import { Arrow } from "@/components/ui/Pictograms";
 import { Reveal } from "@/components/ui/Reveal";
+import { SPEAKERS, announcedSpeakers } from "@/lib/speakers";
 
 export const metadata: Metadata = {
   title: "Партньорска програма 2026 | Sofia Life Summit",
@@ -117,6 +119,21 @@ const extras = [
   { h: "Лекция на сцената", p: "25 минути с твой експерт пред залата, включени в официалната програма и във видеото след събитието.", price: "3 500 €" },
   { h: "Мостра или флаер в чантата", p: "Твой продукт в ръцете на всеки посетител, преди още да е влязъл в залата.", price: "800 €" },
 ];
+
+/**
+ * The stage, shown through the people already confirmed. Same source as the
+ * public site, so a name cannot be on the deck and missing from the page —
+ * or the reverse. Unannounced speakers stay unannounced here too.
+ */
+const speakers = announcedSpeakers();
+const lineupSize = SPEAKERS.filter((s) => !s.pending).length;
+const countries = new Set(SPEAKERS.filter((s) => !s.pending && s.country).map((s) => s.country)).size;
+
+/** One line under the name: what they are, then where. */
+function credential(s: (typeof speakers)[number]): string {
+  const where = [s.role, s.affiliation].filter(Boolean).join(", ");
+  return [s.specialty, where].filter(Boolean).join(" · ");
+}
 
 const steps = [
   { n: "01", h: "Кажи ни целта", p: "20 минути разговор: продажби, лийдове или видимост за бранда." },
@@ -256,6 +273,83 @@ export default function PartnersPage() {
                 <span className="mt-auto pt-6 font-display text-6xl font-[300] leading-none tracking-[-0.05em] text-bh-ink/85">
                   {z.no}
                 </span>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+      </Section>
+
+      {/* 03b speakers — the stage, as people. Tall portrait cards after the
+          reference: the name set large on the photograph, one line of
+          credential, a white pill at the foot, an arrow disc in the corner
+          and a tag pill (here the country) at the top. */}
+      <Section className="border-t border-bh-ink/10">
+        <Reveal>
+          <Eyebrow>Сцената</Eyebrow>
+          <H2>Имената, които вече са потвърдени.</H2>
+          <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-bh-ink/70">
+            {lineupSize} лектори от {countries} държави — лекари и изследователи,
+            на разбираем език, по 25 минути. Обявяваме нови имена всяка седмица;
+            тук са първите {speakers.length}.
+          </p>
+        </Reveal>
+        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {speakers.map((s, i) => (
+            <Reveal key={s.id} delay={i * 70}>
+              <article className="group relative aspect-[3/4] overflow-hidden rounded-[1.6rem] bg-[#0a3229] text-white">
+                {s.photo && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={s.photo}
+                    alt={s.name}
+                    loading="lazy"
+                    className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                  />
+                )}
+                {/* Ink gradient from the foot so the type stays legible on any
+                    portrait — the photographs range from studio white to dark. */}
+                <div
+                  aria-hidden
+                  className="absolute inset-0 bg-gradient-to-t from-[#02251f]/90 via-[#02251f]/30 via-45% to-transparent"
+                />
+
+                <div className="absolute inset-x-4 top-4 flex items-start justify-between gap-3">
+                  {s.country ? (
+                    <span className="flex items-center gap-2 rounded-full border border-white/35 bg-[#02251f]/45 py-1.5 pl-2.5 pr-3.5 font-mono text-[0.62rem] uppercase tracking-[0.15em] text-white backdrop-blur-md [&_svg]:mt-0">
+                      <CountryMark country={s.country} />
+                      {s.country}
+                    </span>
+                  ) : (
+                    <span />
+                  )}
+                  <span
+                    aria-hidden
+                    className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white text-bh-ink transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                  >
+                    <Arrow className="h-5 w-5" />
+                  </span>
+                </div>
+
+                <div className="absolute inset-x-4 bottom-4">
+                  {s.title && (
+                    <p className="font-mono text-[0.62rem] uppercase tracking-[0.2em] text-white/70">
+                      {s.title}
+                    </p>
+                  )}
+                  <h3 className="mt-1 font-display text-[1.75rem] font-[500] leading-[1.02] tracking-[-0.02em] text-white">
+                    {s.name}
+                  </h3>
+                  <p className="mt-2 line-clamp-2 text-[0.8rem] font-light leading-snug text-white/80">
+                    {credential(s)}
+                  </p>
+                  <Link
+                    href="/#lektori"
+                    className="mt-4 flex items-center justify-between rounded-full bg-white px-5 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-bh-ink transition-colors hover:bg-bh-lime-pale"
+                  >
+                    Виж лекторите
+                    <span aria-hidden className="text-base leading-none">›</span>
+                  </Link>
+                </div>
               </article>
             </Reveal>
           ))}
