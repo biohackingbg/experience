@@ -13,7 +13,6 @@ const links = [
   // Same order the sections appear in on the page.
   { href: "#lektori", label: "Лектори" },
   { href: "#concept", label: "Станции" },
-  { href: "#passport", label: "Паспорт" },
   { href: "#program", label: "Програма" },
   { href: "#tickets", label: "Билети" },
 ];

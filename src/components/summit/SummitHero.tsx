@@ -161,7 +161,7 @@ export function SummitHero() {
             </div>
 
             <div className="mt-auto pt-5">
-              <div className="text-5xl font-black tracking-tight lg:text-7xl">
+              <div className="text-[1.35rem] font-bold leading-snug tracking-tight">
                 Международни лектори
               </div>
               <div className="mt-6 border-t border-bh-ink/15 pt-5" />

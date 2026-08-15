@@ -3,7 +3,7 @@ import { SummitHero } from "@/components/summit/SummitHero";
 import { SummitConcept } from "@/components/summit/SummitConcept";
 import { SummitSpeakers } from "@/components/summit/SummitSpeakers";
 import { SummitTracks } from "@/components/summit/SummitTracks";
-import { SummitPassport } from "@/components/summit/SummitPassport";
+// import { SummitPassport } from "@/components/summit/SummitPassport";
 import { SummitProgram } from "@/components/summit/SummitProgram";
 import { SummitTickets } from "@/components/summit/SummitTickets";
 import { SummitRegister } from "@/components/summit/SummitRegister";
@@ -31,7 +31,8 @@ export default function Home() {
         <SummitSpeakers />
         <SummitTracks />
         <SummitConcept />
-        <SummitPassport />
+        {/* Held back until the passport programme is confirmed. */}
+        {/* <SummitPassport /> */}
         <SummitProgram />
         <SummitTickets />
         <SummitRegister />
