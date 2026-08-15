@@ -245,3 +245,67 @@ export function ArrowDown({ className }: Props) {
     </svg>
   );
 }
+
+/* ── Station categories ─────────────────────────────────────────────────── */
+
+/** Wearable: a watch face on a strap. */
+export function Watch({ className }: Props) {
+  return (
+    <svg {...base} className={className}>
+      <rect x="7" y="7" width="10" height="10" rx="2.5" />
+      <path d="M9 7V4.5h6V7M9 17v2.5h6V17M12 10v2.5l1.5 1" />
+    </svg>
+  );
+}
+
+/** AI & precision: a neural node cluster. */
+export function Neural({ className }: Props) {
+  return (
+    <svg {...base} className={className}>
+      <circle cx="12" cy="12" r="2.2" />
+      <circle cx="5" cy="7" r="1.6" />
+      <circle cx="19" cy="7" r="1.6" />
+      <circle cx="5" cy="17" r="1.6" />
+      <circle cx="19" cy="17" r="1.6" />
+      <path d="M6.4 7.8l3.8 2.8M17.6 7.8l-3.8 2.8M6.4 16.2l3.8-2.8M17.6 16.2l-3.8-2.8" />
+    </svg>
+  );
+}
+
+/** Supplement: a capsule. */
+export function Capsule({ className }: Props) {
+  return (
+    <svg {...base} className={className}>
+      <rect x="3.5" y="9" width="17" height="6" rx="3" transform="rotate(-35 12 12)" />
+      <path d="M9.6 8.4l4.8 7.2" />
+    </svg>
+  );
+}
+
+/** Medical technology: a chip with a heartbeat. */
+export function Chip({ className }: Props) {
+  return (
+    <svg {...base} className={className}>
+      <rect x="6" y="6" width="12" height="12" rx="2" />
+      <path d="M8.5 12h2l1-2 1.5 4 1-2h1.5M9 3v3M12 3v3M15 3v3M9 18v3M12 18v3M15 18v3M3 9h3M3 12h3M3 15h3M18 9h3M18 12h3M18 15h3" />
+    </svg>
+  );
+}
+
+/** Women's health: a heart held in a curve. */
+export function Heart({ className }: Props) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M12 20s-7-4.4-7-9.6A3.9 3.9 0 0 1 12 8.2a3.9 3.9 0 0 1 7 2.2c0 5.2-7 9.6-7 9.6z" />
+    </svg>
+  );
+}
+
+/** Functional testing: a test tube with a reading. */
+export function TestTube({ className }: Props) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M9 3h6M10 3v11.5a2 2 0 1 0 4 0V3M10 10h4" />
+    </svg>
+  );
+}

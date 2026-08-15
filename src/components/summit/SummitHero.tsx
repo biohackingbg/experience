@@ -1,19 +1,19 @@
 import {
   Arrow,
-  Flask,
+  Capsule,
   Gauge,
   Hotel,
   People,
-  Stage,
-  Stall,
+  Pulse,
+  Watch,
   Waves,
 } from "@/components/ui/Pictograms";
 
-const zoneTags = [
-  { label: "Сцена", icon: Stage },
-  { label: "Лаборатория", icon: Flask },
-  { label: "Ритуали", icon: Waves },
-  { label: "Village", icon: Stall },
+const stationTags = [
+  { label: "Диагностика", icon: Pulse },
+  { label: "Wearables", icon: Watch },
+  { label: "Recovery", icon: Waves },
+  { label: "Добавки", icon: Capsule },
 ];
 
 /**
@@ -159,11 +159,11 @@ export function SummitHero() {
             </div>
           </div>
 
-          {/* zones — the big accent card: tags, headline word, rule, copy,
+          {/* stations — the big accent card: tags, headline word, rule, copy,
               and the diagonal arrow anchoring the corner. */}
           <article className="bh-mint flex flex-col rounded-3xl p-6 text-bh-ink lg:p-7">
             <div className="flex flex-wrap gap-2">
-              {zoneTags.map((t) => (
+              {stationTags.map((t) => (
                 <span
                   key={t.label}
                   className="inline-flex items-center gap-1.5 rounded-full bg-bh-ink/10 px-3 py-1 text-xs font-medium"
@@ -176,17 +176,17 @@ export function SummitHero() {
 
             <div className="mt-auto pt-5">
               <div className="text-5xl font-black tracking-tight lg:text-7xl">
-                4 зони
+                10+ станции
               </div>
               <div className="mt-6 border-t border-bh-ink/15 pt-5" />
               <div className="flex items-end justify-between gap-6">
                 <p className="max-w-md text-sm leading-relaxed text-bh-ink/70 lg:text-base">
-                  Един ден в тялото ти — движиш се между зоните, не седиш на
-                  стол. Слушаш, измерваш се, изпробваш, възстановяваш се.
+                  Не гледаш отстрани — измерваш се, пробваш, питаш. Всяка
+                  станция е водена от партньор в своята област.
                 </p>
                 <a
                   href="#concept"
-                  aria-label="Към концепцията"
+                  aria-label="Към станциите"
                   className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-bh-ink text-bh-lime transition-transform hover:-translate-y-0.5"
                 >
                   <Arrow className="h-5 w-5" />
