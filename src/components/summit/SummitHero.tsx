@@ -111,28 +111,23 @@ export function SummitHero() {
             left, one large accent card owning the right. */}
         <div className="mt-3 grid gap-3 lg:grid-cols-[1fr_1.5fr]">
           <div className="flex flex-col gap-3">
-            {/* passport — tall */}
+            {/* Held back until the passport programme is confirmed — the card
+                stays, and carries the claim that is true today. */}
             <article className="bh-mint flex flex-1 flex-col justify-between rounded-3xl p-6 text-bh-ink">
               <div className="flex items-start justify-between">
                 <span className="text-3xl leading-none text-bh-pine">✳</span>
                 <span className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-bh-ink/45">
-                  Ядрото
+                  Първото
                 </span>
               </div>
               <div className="mt-4">
-                <h2 className="text-2xl font-bold tracking-tight">
-                  Longevity паспортът
+                <h2 className="text-[1.35rem] font-bold leading-snug tracking-tight">
+                  Първото по рода си биохакинг изживяване в България.
                 </h2>
                 <p className="mt-3 text-sm leading-relaxed text-bh-ink/65">
-                  Влизаш с празен паспорт, излизаш с реални показатели и
-                  обяснение от специалист на място.
+                  Два дни, в които науката за дълголетието се пипа, пробва и
+                  измерва — не се слуша от стол.
                 </p>
-                <a
-                  href="#passport"
-                  className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-bh-pine"
-                >
-                  Виж какво се мери <Arrow className="h-4 w-4" />
-                </a>
               </div>
             </article>
 
@@ -176,7 +171,7 @@ export function SummitHero() {
 
             <div className="mt-auto pt-5">
               <div className="text-5xl font-black tracking-tight lg:text-7xl">
-                10+ станции
+                10 станции
               </div>
               <div className="mt-6 border-t border-bh-ink/15 pt-5" />
               <div className="flex items-end justify-between gap-6">

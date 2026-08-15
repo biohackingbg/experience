@@ -36,7 +36,7 @@ export function SummitConcept() {
               Станциите
             </p>
             <h2 className="mt-4 max-w-2xl text-[clamp(2rem,4.5vw,3.5rem)] font-display font-[900] uppercase leading-[0.95] tracking-tight text-bh-ink">
-              10+ интерактивни станции
+              10 интерактивни станции
             </h2>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-bh-ink/60">
