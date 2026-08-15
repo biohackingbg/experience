@@ -323,14 +323,6 @@ export function Dna({ className }: Props) {
       <path d="M8.2 6.4h7.6M9.9 9h4.2M9.9 15h4.2M8.2 17.6h7.6" />
     </svg>
   );
-}: Props) {
-  return (
-    <svg {...base} className={className}>
-      <path d="M8 3c0 4.5 8 4.5 8 9s-8 4.5-8 9" />
-      <path d="M16 3c0 4.5-8 4.5-8 9s8 4.5 8 9" />
-      <path d="M8.9 4.8h6.2M9.6 7.2h4.8M9.6 16.8h4.8M8.9 19.2h6.2" />
-    </svg>
-  );
 }
 
 /** Diagonal arrow pointing down-left: "the thing you want is below, on the left". */
