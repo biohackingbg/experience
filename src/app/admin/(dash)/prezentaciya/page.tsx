@@ -64,7 +64,7 @@ export default async function DeckPage() {
   }
 
   return (
-    <div className="px-5 py-10 sm:px-8 lg:px-10">
+    <div className="min-h-screen rounded-[1.75rem] bg-bh-paper px-5 py-10 sm:px-8 lg:px-10">
       <div className="mx-auto w-full max-w-6xl">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
