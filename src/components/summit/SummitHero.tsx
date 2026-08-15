@@ -1,4 +1,11 @@
-import { Arrow, Gauge, Hotel, People } from "@/components/ui/Pictograms";
+import {
+  ArrowDownLeft,
+  Dna,
+  Gauge,
+  Hotel,
+  People,
+  Stage,
+} from "@/components/ui/Pictograms";
 import { SPEAKERS } from "@/lib/speakers";
 
 /**
@@ -107,7 +114,7 @@ export function SummitHero() {
                 stays, and carries the claim that is true today. */}
             <article className="bh-mint flex flex-1 flex-col justify-between rounded-3xl p-6 text-bh-ink">
               <div className="flex items-start justify-between">
-                <span className="text-3xl leading-none text-bh-pine">✳</span>
+                <Dna className="h-8 w-8 text-bh-pine" />
                 <span className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-bh-ink/45">
                   Първото
                 </span>
@@ -150,7 +157,7 @@ export function SummitHero() {
               and the diagonal arrow anchoring the corner. */}
           <article className="bh-mint flex flex-col rounded-3xl p-6 text-bh-ink lg:p-7">
             <div className="flex items-start justify-between">
-              <span className="text-3xl leading-none text-bh-pine">✳</span>
+              <Stage className="h-8 w-8 text-bh-pine" />
               <span className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-bh-ink/45">
                 Сцената
               </span>
@@ -174,7 +181,9 @@ export function SummitHero() {
                   aria-label="Към лекторите"
                   className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-bh-ink text-bh-lime transition-transform hover:-translate-y-0.5"
                 >
-                  <Arrow className="h-5 w-5" />
+                  {/* Down-left: the speakers sit below and start at the left
+                      edge, so the arrow points at where they actually are. */}
+                  <ArrowDownLeft className="h-5 w-5" />
                 </a>
               </div>
             </div>

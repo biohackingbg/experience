@@ -309,3 +309,28 @@ export function TestTube({ className }: Props) {
     </svg>
   );
 }
+
+/** DNA: two strands with the rungs between them. */
+export function Dna({ className }: Props) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M8 3c0 6 8 6 8 12s-8 6-8 12M16 3c0 6-8 6-8 12s8 6 8 12" />
+      <path d="M8.6 6h6.8M8.6 21h6.8M10 9.6h4M10 17.4h4" />
+    </svg>
+  );
+}
+
+/** Diagonal arrow pointing down-left: "the thing you want is below, on the left". */
+export function ArrowDownLeft({ className }: Props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+      <path
+        d="M17 7L7 17M7 17h9M7 17V8"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
