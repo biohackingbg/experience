@@ -1,20 +1,11 @@
-import {
-  Arrow,
-  Capsule,
-  Gauge,
-  Hotel,
-  People,
-  Pulse,
-  Watch,
-  Waves,
-} from "@/components/ui/Pictograms";
+import { CountryMark } from "@/components/ui/Flags";
+import { Arrow, Gauge, Hotel, People } from "@/components/ui/Pictograms";
+import { announcedSpeakers } from "@/lib/speakers";
 
-const stationTags = [
-  { label: "Диагностика", icon: Pulse },
-  { label: "Wearables", icon: Watch },
-  { label: "Recovery", icon: Waves },
-  { label: "Добавки", icon: Capsule },
-];
+/** Countries of the announced speakers — read from the same list they come from. */
+const speakerCountries = Array.from(
+  new Set(announcedSpeakers().map((s) => s.country).filter(Boolean)),
+) as string[];
 
 /**
  * Editorial signature from the reference: circular type slowly orbiting a
@@ -145,43 +136,44 @@ export function SummitHero() {
               <article className="bh-mint rounded-3xl p-5">
                 <Gauge className="h-6 w-6 text-bh-pine/70" />
                 <div className="mt-3 text-3xl font-black tracking-tight text-bh-ink">
-                  12
+                  10
                 </div>
                 <div className="mt-1.5 font-mono text-[0.65rem] uppercase tracking-[0.15em] text-bh-ink/50">
-                  станции за измерване
+                  интерактивни станции
                 </div>
               </article>
             </div>
           </div>
 
-          {/* stations — the big accent card: tags, headline word, rule, copy,
+          {/* speakers — the big accent card: tags, headline word, rule, copy,
               and the diagonal arrow anchoring the corner. */}
           <article className="bh-mint flex flex-col rounded-3xl p-6 text-bh-ink lg:p-7">
             <div className="flex flex-wrap gap-2">
-              {stationTags.map((t) => (
+              {speakerCountries.map((c) => (
                 <span
-                  key={t.label}
+                  key={c}
                   className="inline-flex items-center gap-1.5 rounded-full bg-bh-ink/10 px-3 py-1 text-xs font-medium"
                 >
-                  <t.icon className="h-3.5 w-3.5 text-bh-pine" />
-                  {t.label}
+                  <CountryMark country={c} />
+                  {c}
                 </span>
               ))}
             </div>
 
             <div className="mt-auto pt-5">
               <div className="text-5xl font-black tracking-tight lg:text-7xl">
-                10 станции
+                Международни лектори
               </div>
               <div className="mt-6 border-t border-bh-ink/15 pt-5" />
               <div className="flex items-end justify-between gap-6">
                 <p className="max-w-md text-sm leading-relaxed text-bh-ink/70 lg:text-base">
-                  Не гледаш отстрани — измерваш се, пробваш, питаш. Всяка
-                  станция е водена от партньор в своята област.
+                  Лекари и изследователи от {speakerCountries.length} държави
+                  — на разбираем език, по 25 минути. Обявяваме нови имена всяка
+                  седмица.
                 </p>
                 <a
-                  href="#concept"
-                  aria-label="Към станциите"
+                  href="#lektori"
+                  aria-label="Към лекторите"
                   className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-bh-ink text-bh-lime transition-transform hover:-translate-y-0.5"
                 >
                   <Arrow className="h-5 w-5" />
