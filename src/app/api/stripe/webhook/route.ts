@@ -6,7 +6,7 @@ import { sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { orders } from "@/lib/db/schema";
-import { markOrderPaid } from "@/lib/orders";
+import { markOrderPaid, markOrderRefunded } from "@/lib/orders";
 import { getStripe } from "@/lib/stripe";
 
 /**
@@ -100,8 +100,33 @@ export async function POST(request: Request) {
         }
       }
     }
+
+    // A refund made in the Stripe dashboard (or via API) — the only way one
+    // happens; the site itself never refunds. Full refunds close the order
+    // and its tickets; partial ones are recorded. The invoice is untouched:
+    // the accountant answers it with a credit note against the same number.
+    if (event.type === "charge.refunded") {
+      const charge = event.data.object;
+      const paymentIntent =
+        typeof charge.payment_intent === "string"
+          ? charge.payment_intent
+          : (charge.payment_intent?.id ?? null);
+
+      if (!paymentIntent) {
+        console.error("[stripe] refunded charge without payment intent:", charge.id);
+      } else {
+        const outcome = await markOrderRefunded(paymentIntent, charge.amount_refunded);
+        if (outcome.status === "not_found") {
+          console.error(`[stripe] refund for unknown payment intent ${paymentIntent}`);
+        } else {
+          console.info(
+            `[stripe] order ${outcome.reference} ${outcome.status === "refunded" ? "fully" : "partially"} refunded: ${outcome.refundedCents}/${outcome.totalCents} — invoice ${outcome.invoiceNumber ?? "—"} needs a credit note`,
+          );
+        }
+      }
+    }
   } catch (error) {
-    // 500 asks Stripe to retry; markOrderPaid is idempotent, so a retry is safe.
+    // 500 asks Stripe to retry; both handlers are idempotent, so a retry is safe.
     console.error("[stripe] handler failed:", error);
     return NextResponse.json({ error: "handler failed" }, { status: 500 });
   }

@@ -81,6 +81,8 @@ export async function listInvoices(limit = 200) {
       email: orders.email,
       company: orders.invoiceCompany,
       totalCents: orders.totalCents,
+      refundedCents: orders.refundedCents,
+      status: orders.status,
     })
     .from(orders)
     .where(sql`${orders.invoiceNumber} is not null`)

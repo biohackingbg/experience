@@ -46,6 +46,7 @@ export type DashboardData = {
   paidOrders: number;
   pendingOrders: number;
   abandonedOrders: number;
+  refundedOrders: number;
   ticketsSold: number;
   capacityTotal: number;
   signupCount: number;
@@ -65,6 +66,7 @@ export async function getDashboardData(): Promise<DashboardData> {
           gross: sql<number>`coalesce(sum(${orders.totalCents}) filter (where ${orders.status} = 'paid'), 0)::int`,
           vat: sql<number>`coalesce(sum(${orders.vatCents}) filter (where ${orders.status} = 'paid'), 0)::int`,
           paid: sql<number>`count(*) filter (where ${orders.status} = 'paid')::int`,
+          refunded: sql<number>`count(*) filter (where ${orders.status} = 'refunded')::int`,
           // Still inside the seat hold — a payment may yet land.
           pending: sql<number>`count(*) filter (where ${orders.status} = 'pending' and ${orders.createdAt} > now() - interval '${sql.raw(String(PENDING_HOLD_MINUTES))} minutes')::int`,
           // Hold expired without payment: the checkout was closed. Their seats
@@ -165,6 +167,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     paidOrders: totals[0]?.paid ?? 0,
     pendingOrders: totals[0]?.pending ?? 0,
     abandonedOrders: totals[0]?.abandoned ?? 0,
+    refundedOrders: totals[0]?.refunded ?? 0,
     ticketsSold: perTier.reduce((sum, t) => sum + t.sold, 0),
     capacityTotal: TIERS.reduce((sum, t) => sum + t.capacity, 0),
     signupCount: signupRow[0]?.n ?? 0,

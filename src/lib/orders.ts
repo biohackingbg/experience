@@ -253,3 +253,65 @@ export async function getRemaining(tierId: string): Promise<number> {
 
   return Math.max(tier.capacity - (taken?.n ?? 0), 0);
 }
+
+/**
+ * Records a refund reported by Stripe (`charge.refunded`).
+ *
+ * Keyed on the payment intent, which is the only identifier the charge event
+ * carries that we also hold. A full refund flips the order to `refunded` —
+ * `findTicket` only resolves tickets of paid orders, so the door stops
+ * admitting them without any row being touched. A partial refund records the
+ * amount and leaves the order paid: which of three seats was given back is
+ * not something the site can know.
+ *
+ * Idempotent: Stripe sends the event once per refund and retries it; the
+ * amount written is Stripe's running total, so a repeat is a no-op.
+ */
+export type RefundOutcome =
+  | { status: "not_found" }
+  | {
+      status: "refunded" | "partial";
+      reference: string;
+      totalCents: number;
+      refundedCents: number;
+      invoiceNumber: number | null;
+    };
+
+export async function markOrderRefunded(
+  paymentIntentId: string,
+  amountRefundedCents: number,
+): Promise<RefundOutcome> {
+  const db = getDb();
+  const [order] = await db
+    .select({
+      id: orders.id,
+      reference: orders.reference,
+      totalCents: orders.totalCents,
+      invoiceNumber: orders.invoiceNumber,
+    })
+    .from(orders)
+    .where(
+      sql`${orders.stripePaymentIntentId} = ${paymentIntentId} and ${orders.status} in ('paid', 'refunded')`,
+    )
+    .limit(1);
+
+  if (!order) return { status: "not_found" };
+
+  const full = amountRefundedCents >= order.totalCents;
+  await db
+    .update(orders)
+    .set({
+      refundedCents: amountRefundedCents,
+      refundedAt: new Date(),
+      ...(full ? { status: "refunded" } : {}),
+    })
+    .where(sql`${orders.id} = ${order.id}`);
+
+  return {
+    status: full ? "refunded" : "partial",
+    reference: order.reference,
+    totalCents: order.totalCents,
+    refundedCents: amountRefundedCents,
+    invoiceNumber: order.invoiceNumber,
+  };
+}

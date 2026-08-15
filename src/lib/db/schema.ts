@@ -106,6 +106,17 @@ export const orders = pgTable(
     termsText: text("terms_text"),
 
     paidAt: timestamp("paid_at", { withTimezone: true }),
+
+    /**
+     * Set from Stripe's charge.refunded event. A full refund flips `status`
+     * to "refunded", which is what stops the tickets at the door; a partial
+     * one only records the amount and leaves the order paid. The invoice
+     * stays as issued — Bulgarian accounting answers a refund with a credit
+     * note, which the accountant raises against this number.
+     */
+    refundedAt: timestamp("refunded_at", { withTimezone: true }),
+    refundedCents: integer("refunded_cents"),
+
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

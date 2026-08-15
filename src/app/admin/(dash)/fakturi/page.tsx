@@ -93,6 +93,15 @@ export default async function InvoicesPage() {
                     </td>
                     <td className="py-3 pr-4 text-right tabular-nums text-bh-ink">
                       {formatPrice(r.totalCents)} €
+                      {r.refundedCents ? (
+                        // The invoice itself is not changed by a refund — the
+                        // accountant answers it with a credit note, so this
+                        // is the reminder that one is owed.
+                        <span className="block text-[0.65rem] font-semibold uppercase tracking-wide text-[#9c3d5c]">
+                          {r.status === "refunded" ? "върната" : `върнати ${formatPrice(r.refundedCents)} €`}{" "}
+                          · кредитно известие
+                        </span>
+                      ) : null}
                     </td>
                     <td className="py-3">
                       <div className="flex flex-wrap items-center gap-3">

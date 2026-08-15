@@ -109,6 +109,7 @@ export default async function AdminDashboard() {
             sub={
               [
                 d.pendingOrders ? `${d.pendingOrders} в процес` : null,
+                d.refundedOrders ? `${d.refundedOrders} върнати` : null,
                 d.abandonedOrders ? `${d.abandonedOrders} изоставени` : null,
               ]
                 .filter(Boolean)
@@ -169,10 +170,18 @@ export default async function AdminDashboard() {
                           className={`rounded-full px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide ${
                             o.status === "paid"
                               ? "bg-[#0E8C7D]/15 text-[#0b6d61]"
-                              : "bg-bh-ink/10 text-bh-ink/60"
+                              : o.status === "refunded"
+                                ? "bg-[#C4607F]/15 text-[#9c3d5c]"
+                                : "bg-bh-ink/10 text-bh-ink/60"
                           }`}
                         >
-                          {o.status === "paid" ? "платена" : o.status === "pending" ? "незавършена" : o.status}
+                          {o.status === "paid"
+                            ? "платена"
+                            : o.status === "pending"
+                              ? "незавършена"
+                              : o.status === "refunded"
+                                ? "върната"
+                                : o.status}
                         </span>
                       </td>
                       <td className="px-5 py-3 text-right font-semibold text-bh-ink">
