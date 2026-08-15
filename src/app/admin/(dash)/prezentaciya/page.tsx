@@ -3,10 +3,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { isAdmin } from "@/lib/admin-auth";
-import { deckUrl, getDeckStats } from "@/lib/deck-links";
+import { STAGES, deckUrl, getDeckStats } from "@/lib/deck-links";
 
-import { reactivateDeckLink, revokeDeckLink } from "./actions";
-import { CopyLink, NewLinkForm } from "./LinkTools";
+import { reactivateDeckLink, revokeDeckLink, updateDeckLink } from "./actions";
+import { CopyLink, NewLinkForm, PipelineEditor } from "./LinkTools";
 
 export const metadata: Metadata = {
   title: "Презентация | Администрация",
@@ -70,11 +70,20 @@ export default async function DeckPage() {
           Презентацията се отваря само през тези линкове — няма общ адрес и не
           е в търсачките. Направи отделен линк за всяка компания (или за пост,
           имейл кампания, екипа) и ще виждаш кой я е отворил и кога, без да
-          искаш имейл от никого. „Спри“ не трие нищо — линкът спира да се
-          отваря, историята му остава и можеш да го пуснеш пак.
+          искаш имейл от никого. Всеки ред е и разговорът с партньора: цъкни
+          етапа, за да го смениш и да оставиш бележка и какво се очаква от нас.
+          „Спри“ не трие нищо — линкът спира да се отваря, историята остава.
         </p>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-3">
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Tile
+            label="Партньори"
+            value={d.byStage.find((s) => s.id === "confirmed")?.n ?? 0}
+            sub={d.byStage
+              .filter((s) => s.id !== "confirmed" && s.n)
+              .map((s) => `${s.n} ${s.label}`)
+              .join(" · ") || "потвърдени · още никой не е в процес"}
+          />
           <Tile label="Отваряния общо" value={d.total} sub={`${active.length} активни линка`} />
           <Tile label="Последните 7 дни" value={d.last7Days} sub={`днес ${d.today}`} />
           <Tile
@@ -103,10 +112,11 @@ export default async function DeckPage() {
             </p>
           ) : (
             <div className="mt-4 overflow-x-auto rounded-2xl bg-bh-cloud ring-1 ring-bh-ink/8">
-              <table className="w-full min-w-[46rem] text-left text-sm">
+              <table className="w-full min-w-[64rem] text-left text-sm">
                 <thead>
                   <tr className="border-b border-bh-ink/10 font-mono text-[0.65rem] uppercase tracking-[0.15em] text-bh-ink/50">
                     <th className="px-5 py-3 font-medium">За кого</th>
+                    <th className="px-5 py-3 font-medium">Етап · бележки</th>
                     <th className="px-5 py-3 font-medium">Линк</th>
                     <th className="px-5 py-3 text-right font-medium">Отваряния</th>
                     <th className="px-5 py-3 font-medium">Последно</th>
@@ -125,13 +135,23 @@ export default async function DeckPage() {
                         className={`border-b border-bh-ink/8 last:border-0 ${off ? "text-bh-ink/45" : ""}`}
                       >
                         <td className={`px-5 py-3 font-medium ${off ? "" : "text-bh-ink"}`}>{l.label}</td>
+                        <td className="px-5 py-3 align-top">
+                          <PipelineEditor
+                            id={l.id}
+                            stage={l.stage}
+                            note={l.note}
+                            nextStep={l.nextStep}
+                            stages={STAGES}
+                            action={updateDeckLink}
+                          />
+                        </td>
                         <td className="px-5 py-3">
                           <div className="flex items-center gap-2">
                             <a
                               href={url}
                               target="_blank"
                               rel="noreferrer"
-                              className="max-w-[16rem] truncate font-mono text-xs text-bh-ink/70 underline-offset-2 hover:underline"
+                              className="max-w-[9rem] truncate font-mono text-xs text-bh-ink/70 underline-offset-2 hover:underline"
                             >
                               …/{l.token}
                             </a>

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { isAdmin } from "@/lib/admin-auth";
-import { createLink, reactivateLink, revokeLink } from "@/lib/deck-links";
+import { createLink, isStage, reactivateLink, revokeLink, updateLinkPipeline } from "@/lib/deck-links";
 
 export type LinkFormState = { status: "idle" | "ok" | "error"; message?: string };
 
@@ -40,4 +40,30 @@ export async function reactivateDeckLink(formData: FormData): Promise<void> {
   if (!/^[0-9a-f-]{36}$/.test(id)) return;
   await reactivateLink(id);
   revalidatePath("/admin/prezentaciya");
+}
+
+/** Saves stage, note and next step for one link. */
+export async function updateDeckLink(
+  _prev: LinkFormState,
+  formData: FormData,
+): Promise<LinkFormState> {
+  if (!(await isAdmin())) return { status: "error", message: "Няма достъп." };
+
+  const id = String(formData.get("id") ?? "");
+  const stage = formData.get("stage");
+  if (!/^[0-9a-f-]{36}$/.test(id) || !isStage(stage)) {
+    return { status: "error", message: "Невалидни данни." };
+  }
+  const clean = (v: FormDataEntryValue | null, max: number) => {
+    const t = String(v ?? "").trim().slice(0, max);
+    return t.length ? t : null;
+  };
+
+  await updateLinkPipeline(id, {
+    stage,
+    note: clean(formData.get("note"), 1000),
+    nextStep: clean(formData.get("nextStep"), 300),
+  });
+  revalidatePath("/admin/prezentaciya");
+  return { status: "ok", message: "Записано." };
 }

@@ -18,6 +18,24 @@ import { type DeckLink, deckLinks, deckViews } from "@/lib/db/schema";
 
 export const DECK_BASE = "/za-partniori";
 
+/** The partner pipeline, in the order a conversation moves. */
+export const STAGES = [
+  { id: "new", label: "нов", hint: "още не сме се свързали" },
+  { id: "contacted", label: "свързахме се", hint: "изпратен е линкът / първи разговор" },
+  { id: "waiting", label: "чакаме потвърждение", hint: "топката е при тях" },
+  { id: "confirmed", label: "потвърдил", hint: "договорено, предстои договор / плащане" },
+  { id: "declined", label: "отказал", hint: "не тази година" },
+] as const;
+export type StageId = (typeof STAGES)[number]["id"];
+
+export function isStage(v: unknown): v is StageId {
+  return typeof v === "string" && STAGES.some((s) => s.id === v);
+}
+
+export function stageLabel(id: string): string {
+  return STAGES.find((s) => s.id === id)?.label ?? id;
+}
+
 export function deckUrl(token: string, origin = "https://thelongevitysummit.eu"): string {
   return `${origin}${DECK_BASE}/${token}`;
 }
@@ -64,6 +82,17 @@ export async function revokeLink(id: string): Promise<void> {
     .where(and(eq(deckLinks.id, id), isNull(deckLinks.revokedAt)));
 }
 
+/** Pipeline fields — the notes a sales conversation leaves behind. */
+export async function updateLinkPipeline(
+  id: string,
+  input: { stage: StageId; note: string | null; nextStep: string | null },
+): Promise<void> {
+  await getDb()
+    .update(deckLinks)
+    .set({ ...input, updatedAt: new Date() })
+    .where(eq(deckLinks.id, id));
+}
+
 /** Reopens a stopped link — same token, so an already-sent URL works again. */
 export async function reactivateLink(id: string): Promise<void> {
   await getDb().update(deckLinks).set({ revokedAt: null }).where(eq(deckLinks.id, id));
@@ -84,6 +113,8 @@ export type LinkStats = DeckLink & {
 
 export type DeckStats = {
   links: LinkStats[];
+  /** Active links per pipeline stage, in STAGES order. */
+  byStage: { id: StageId; label: string; n: number }[];
   total: number;
   last7Days: number;
   today: number;
@@ -108,6 +139,10 @@ export async function getDeckStats(): Promise<DeckStats> {
         token: deckLinks.token,
         createdAt: deckLinks.createdAt,
         revokedAt: deckLinks.revokedAt,
+        stage: deckLinks.stage,
+        note: deckLinks.note,
+        nextStep: deckLinks.nextStep,
+        updatedAt: deckLinks.updatedAt,
         views: count(deckViews.id),
         lastViewedAt: sql<Date | null>`max(${deckViews.createdAt})`,
       })
@@ -127,10 +162,16 @@ export async function getDeckStats(): Promise<DeckStats> {
       .limit(5),
   ]);
 
+  const activeLinks = links.filter((l) => !l.revokedAt);
   return {
     links: links.map((l) => ({
       ...l,
       lastViewedAt: l.lastViewedAt ? new Date(l.lastViewedAt) : null,
+    })),
+    byStage: STAGES.map((s) => ({
+      id: s.id,
+      label: s.label,
+      n: activeLinks.filter((l) => l.stage === s.id).length,
     })),
     total: totals?.n ?? 0,
     last7Days: week?.n ?? 0,

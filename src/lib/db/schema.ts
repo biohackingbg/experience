@@ -196,6 +196,18 @@ export const deckLinks = pgTable(
       .notNull()
       .defaultNow(),
     revokedAt: timestamp("revoked_at", { withTimezone: true }),
+
+    /**
+     * Where the conversation with this partner stands — the link doubles as
+     * the pipeline row, since there is exactly one per partner anyway.
+     * new | contacted | waiting | confirmed | declined (see deck-links.ts).
+     */
+    stage: text("stage").notNull().default("new"),
+    /** Free note: who we spoke to, what they said. */
+    note: text("note"),
+    /** What is expected from us next — the thing that must not be forgotten. */
+    nextStep: text("next_step"),
+    updatedAt: timestamp("updated_at", { withTimezone: true }),
   },
   (table) => [uniqueIndex("deck_links_token_idx").on(table.token)],
 );
