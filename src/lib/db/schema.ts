@@ -167,6 +167,53 @@ export const tickets = pgTable(
   ],
 );
 
+/**
+ * Share links for the partner deck. The deck is not reachable at a fixed URL:
+ * every partner gets their own link (`/za-partniori/<token>`), created in the
+ * admin, so an opening can be attributed to a company without asking anyone
+ * for an email. Revoking a link closes it without touching the others.
+ */
+export const deckLinks = pgTable(
+  "deck_links",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    /** Who the link was made for: "Alma Lasers", "LinkedIn пост", "екип". */
+    label: text("label").notNull(),
+    /** URL-safe random token, the only thing the visitor sees. */
+    token: text("token").notNull().unique(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  },
+  (table) => [uniqueIndex("deck_links_token_idx").on(table.token)],
+);
+
+/**
+ * One row per opening of a share link. Answers "how often, when, and roughly
+ * from where" — nothing that identifies a person: no IP, no user agent, no
+ * cookie. The referrer is kept as a bare hostname so a forwarded link ("came
+ * from linkedin.com") can be told from a direct open, and no more.
+ */
+export const deckViews = pgTable(
+  "deck_views",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    linkId: uuid("link_id")
+      .notNull()
+      .references(() => deckLinks.id, { onDelete: "cascade" }),
+    referrerHost: text("referrer_host"),
+    /** "mobile" | "desktop" — coarse, from the viewport, not the UA string. */
+    device: text("device"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [index("deck_views_link_created_idx").on(table.linkId, table.createdAt)],
+);
+
+export type DeckLink = typeof deckLinks.$inferSelect;
+
 export type Order = typeof orders.$inferSelect;
 export type NewOrder = typeof orders.$inferInsert;
 export type OrderItem = typeof orderItems.$inferSelect;

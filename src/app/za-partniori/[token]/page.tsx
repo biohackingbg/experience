@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 import { CountryMark } from "@/components/ui/Flags";
 import { Arrow } from "@/components/ui/Pictograms";
 import { Reveal } from "@/components/ui/Reveal";
+import { findActiveLink } from "@/lib/deck-links";
 import { SPEAKERS, announcedSpeakers } from "@/lib/speakers";
+
+import { ViewBeacon } from "./ViewBeacon";
 
 export const metadata: Metadata = {
   title: "Партньорска програма 2026 | Sofia Life Summit",
@@ -13,6 +17,9 @@ export const metadata: Metadata = {
   // Shared by link with prospective partners, not found by search.
   robots: { index: false, follow: false },
 };
+
+// Every request checks the token — a revoked link must close at once.
+export const dynamic = "force-dynamic";
 
 /*
  * The partner deck as a page, after the MYDNA reference: white paper, a lot
@@ -182,9 +189,18 @@ function CornerArrow() {
 
 /* ── page ───────────────────────────────────────────────────────────────── */
 
-export default function PartnersPage() {
+/**
+ * Reachable only through a share link made in the admin. An unknown or
+ * revoked token is a plain 404 — the deck does not confirm it exists.
+ */
+export default async function PartnersPage({ params }: { params: Promise<{ token: string }> }) {
+  const { token } = await params;
+  const link = await findActiveLink(token);
+  if (!link) notFound();
+
   return (
     <div className="bh-doc min-h-screen text-bh-ink">
+      <ViewBeacon token={token} />
       {/* header */}
       <header className="px-6 pt-8 sm:px-10 lg:px-14">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 border-b border-bh-ink/10 pb-6">

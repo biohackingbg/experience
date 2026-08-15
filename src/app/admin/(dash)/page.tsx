@@ -66,13 +66,21 @@ export default async function AdminDashboard() {
               Продажби
             </h1>
           </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/admin/vhod"
-              className="rounded-full border border-bh-ink/20 px-5 py-2 text-sm font-semibold text-bh-ink transition-colors hover:border-bh-ink"
-            >
-              Вход на събитието
-            </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            {[
+              ["/admin/fakturi", "Фактури"],
+              ["/admin/zapisvaniya", "Записвания"],
+              ["/admin/prezentaciya", "Презентация"],
+              ["/admin/vhod", "Вход на събитието"],
+            ].map(([href, label]) => (
+              <Link
+                key={href}
+                href={href}
+                className="rounded-full border border-bh-ink/20 px-5 py-2 text-sm font-semibold text-bh-ink transition-colors hover:border-bh-ink"
+              >
+                {label}
+              </Link>
+            ))}
             <form action={logout}>
             <button
               type="submit"
