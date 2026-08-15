@@ -64,6 +64,11 @@ export async function revokeLink(id: string): Promise<void> {
     .where(and(eq(deckLinks.id, id), isNull(deckLinks.revokedAt)));
 }
 
+/** Reopens a stopped link — same token, so an already-sent URL works again. */
+export async function reactivateLink(id: string): Promise<void> {
+  await getDb().update(deckLinks).set({ revokedAt: null }).where(eq(deckLinks.id, id));
+}
+
 export async function recordView(input: {
   linkId: string;
   referrerHost: string | null;

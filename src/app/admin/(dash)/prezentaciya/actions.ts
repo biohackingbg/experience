@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { isAdmin } from "@/lib/admin-auth";
-import { createLink, revokeLink } from "@/lib/deck-links";
+import { createLink, reactivateLink, revokeLink } from "@/lib/deck-links";
 
 export type LinkFormState = { status: "idle" | "ok" | "error"; message?: string };
 
@@ -30,5 +30,14 @@ export async function revokeDeckLink(formData: FormData): Promise<void> {
   const id = String(formData.get("id") ?? "");
   if (!/^[0-9a-f-]{36}$/.test(id)) return;
   await revokeLink(id);
+  revalidatePath("/admin/prezentaciya");
+}
+
+/** Reopens a stopped link. Nothing is ever deleted here — only switched. */
+export async function reactivateDeckLink(formData: FormData): Promise<void> {
+  if (!(await isAdmin())) return;
+  const id = String(formData.get("id") ?? "");
+  if (!/^[0-9a-f-]{36}$/.test(id)) return;
+  await reactivateLink(id);
   revalidatePath("/admin/prezentaciya");
 }

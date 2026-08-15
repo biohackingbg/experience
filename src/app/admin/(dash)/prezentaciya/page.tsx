@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { isAdmin } from "@/lib/admin-auth";
 import { deckUrl, getDeckStats } from "@/lib/deck-links";
 
-import { revokeDeckLink } from "./actions";
+import { reactivateDeckLink, revokeDeckLink } from "./actions";
 import { CopyLink, NewLinkForm } from "./LinkTools";
 
 export const metadata: Metadata = {
@@ -47,7 +47,6 @@ export default async function DeckPage() {
 
   const d = await getDeckStats();
   const active = d.links.filter((l) => !l.revokedAt);
-  const revoked = d.links.filter((l) => l.revokedAt);
 
   return (
     <div className="px-5 py-10 sm:px-8 lg:px-10">
@@ -71,8 +70,8 @@ export default async function DeckPage() {
           Презентацията се отваря само през тези линкове — няма общ адрес и не
           е в търсачките. Направи отделен линк за всяка компания (или за пост,
           имейл кампания, екипа) и ще виждаш кой я е отворил и кога, без да
-          искаш имейл от никого. Спрян линк спира да се отваря веднага;
-          историята му остава.
+          искаш имейл от никого. „Спри“ не трие нищо — линкът спира да се
+          отваря, историята му остава и можеш да го пуснеш пак.
         </p>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
@@ -98,7 +97,7 @@ export default async function DeckPage() {
 
         <section className="mt-10">
           <h2 className="text-lg font-bold tracking-tight text-bh-ink">Линкове</h2>
-          {active.length === 0 ? (
+          {d.links.length === 0 ? (
             <p className="mt-4 rounded-2xl bg-bh-cloud px-6 py-8 text-center text-sm text-bh-ink/55 ring-1 ring-bh-ink/8">
               Още няма линкове — направи първия по-горе.
             </p>
@@ -112,15 +111,20 @@ export default async function DeckPage() {
                     <th className="px-5 py-3 text-right font-medium">Отваряния</th>
                     <th className="px-5 py-3 font-medium">Последно</th>
                     <th className="px-5 py-3 font-medium">Създаден</th>
+                    <th className="px-5 py-3 font-medium">Статус</th>
                     <th className="px-5 py-3 font-medium" />
                   </tr>
                 </thead>
                 <tbody>
-                  {active.map((l) => {
+                  {d.links.map((l) => {
                     const url = deckUrl(l.token);
+                    const off = !!l.revokedAt;
                     return (
-                      <tr key={l.id} className="border-b border-bh-ink/8 last:border-0">
-                        <td className="px-5 py-3 font-medium text-bh-ink">{l.label}</td>
+                      <tr
+                        key={l.id}
+                        className={`border-b border-bh-ink/8 last:border-0 ${off ? "text-bh-ink/45" : ""}`}
+                      >
+                        <td className={`px-5 py-3 font-medium ${off ? "" : "text-bh-ink"}`}>{l.label}</td>
                         <td className="px-5 py-3">
                           <div className="flex items-center gap-2">
                             <a
@@ -134,19 +138,40 @@ export default async function DeckPage() {
                             <CopyLink url={url} />
                           </div>
                         </td>
-                        <td className="px-5 py-3 text-right font-semibold text-bh-ink">{l.views}</td>
-                        <td className="px-5 py-3 text-bh-ink/70">{bgDateTime(l.lastViewedAt)}</td>
-                        <td className="px-5 py-3 text-bh-ink/70">{bgDateTime(l.createdAt)}</td>
+                        <td className={`px-5 py-3 text-right font-semibold ${off ? "" : "text-bh-ink"}`}>{l.views}</td>
+                        <td className="px-5 py-3">{bgDateTime(l.lastViewedAt)}</td>
+                        <td className="px-5 py-3">{bgDateTime(l.createdAt)}</td>
+                        <td className="px-5 py-3">
+                          <span
+                            className={`rounded-full px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide ${
+                              off ? "bg-bh-ink/10 text-bh-ink/60" : "bg-[#0E8C7D]/15 text-[#0b6d61]"
+                            }`}
+                          >
+                            {off ? `спрян ${bgDateTime(l.revokedAt)}` : "активен"}
+                          </span>
+                        </td>
                         <td className="px-5 py-3 text-right">
-                          <form action={revokeDeckLink}>
-                            <input type="hidden" name="id" value={l.id} />
-                            <button
-                              type="submit"
-                              className="rounded-full border border-bh-ink/20 px-3 py-1.5 text-xs font-semibold text-bh-ink/70 transition-colors hover:border-red-600 hover:text-red-600"
-                            >
-                              Спри
-                            </button>
-                          </form>
+                          {off ? (
+                            <form action={reactivateDeckLink}>
+                              <input type="hidden" name="id" value={l.id} />
+                              <button
+                                type="submit"
+                                className="rounded-full border border-bh-ink/20 px-3 py-1.5 text-xs font-semibold text-bh-ink transition-colors hover:border-bh-ink"
+                              >
+                                Пусни пак
+                              </button>
+                            </form>
+                          ) : (
+                            <form action={revokeDeckLink}>
+                              <input type="hidden" name="id" value={l.id} />
+                              <button
+                                type="submit"
+                                className="rounded-full border border-bh-ink/20 px-3 py-1.5 text-xs font-semibold text-bh-ink/70 transition-colors hover:border-red-600 hover:text-red-600"
+                              >
+                                Спри
+                              </button>
+                            </form>
+                          )}
                         </td>
                       </tr>
                     );
@@ -156,20 +181,6 @@ export default async function DeckPage() {
             </div>
           )}
 
-          {revoked.length > 0 && (
-            <details className="mt-6">
-              <summary className="cursor-pointer font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/50">
-                Спрени линкове ({revoked.length})
-              </summary>
-              <ul className="mt-3 space-y-1 text-sm text-bh-ink/60">
-                {revoked.map((l) => (
-                  <li key={l.id}>
-                    {l.label} — {l.views} отваряния, спрян {bgDateTime(l.revokedAt)}
-                  </li>
-                ))}
-              </ul>
-            </details>
-          )}
         </section>
       </div>
     </div>
