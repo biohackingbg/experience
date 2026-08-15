@@ -1,6 +1,6 @@
 import "server-only";
 
-import { sql } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { orderItems, orders } from "@/lib/db/schema";
@@ -48,8 +48,10 @@ export async function getInvoice(reference: string): Promise<InvoiceData | null>
     })
     .from(orders)
     .where(
+      // A refunded order keeps its invoice — the refund is answered with a
+      // credit note, not by making the invoice disappear.
       sql`${orders.reference} = ${reference}
-          and ${orders.status} = 'paid'
+          and ${orders.status} in ('paid', 'refunded')
           and ${orders.invoiceNumber} is not null`,
     )
     .limit(1);
@@ -88,4 +90,68 @@ export async function listInvoices(limit = 200) {
     .where(sql`${orders.invoiceNumber} is not null`)
     .orderBy(sql`${orders.invoiceNumber} desc`)
     .limit(limit);
+}
+
+/**
+ * Every issued invoice with its lines, oldest first — the run the accountant
+ * gets after the event. Refunded orders are included (their invoice stands)
+ * and marked, so the credit notes can be raised against them.
+ */
+export type InvoiceExportRow = InvoiceData & {
+  status: string;
+  refundedCents: number | null;
+  refundedAt: Date | null;
+};
+
+export async function getAllInvoices(): Promise<InvoiceExportRow[]> {
+  const db = getDb();
+  const rows = await db
+    .select({
+      id: orders.id,
+      number: orders.invoiceNumber,
+      issuedAt: orders.invoicedAt,
+      reference: orders.reference,
+      buyerName: orders.name,
+      buyerEmail: orders.email,
+      company: orders.invoiceCompany,
+      vatNumber: orders.invoiceVatNumber,
+      address: orders.invoiceAddress,
+      subtotalCents: orders.subtotalCents,
+      vatCents: orders.vatCents,
+      totalCents: orders.totalCents,
+      vatRateBp: orders.vatRateBp,
+      currency: orders.currency,
+      status: orders.status,
+      refundedCents: orders.refundedCents,
+      refundedAt: orders.refundedAt,
+    })
+    .from(orders)
+    .where(sql`${orders.invoiceNumber} is not null and ${orders.invoicedAt} is not null`)
+    .orderBy(sql`${orders.invoiceNumber} asc`);
+
+  if (rows.length === 0) return [];
+
+  const items = await db
+    .select({
+      orderId: orderItems.orderId,
+      tierName: orderItems.tierName,
+      unitPriceCents: orderItems.unitPriceCents,
+      quantity: orderItems.quantity,
+    })
+    .from(orderItems)
+    .where(inArray(orderItems.orderId, rows.map((r) => r.id)));
+
+  const byOrder = new Map<string, InvoiceData["items"]>();
+  for (const it of items) {
+    const arr = byOrder.get(it.orderId) ?? [];
+    arr.push({ tierName: it.tierName, unitPriceCents: it.unitPriceCents, quantity: it.quantity });
+    byOrder.set(it.orderId, arr);
+  }
+
+  return rows.map(({ id, ...r }) => ({
+    ...r,
+    number: r.number as number,
+    issuedAt: r.issuedAt as Date,
+    items: byOrder.get(id) ?? [],
+  }));
 }
