@@ -107,9 +107,12 @@ export default async function AdminDashboard() {
             label="Поръчки"
             value={d.paidOrders}
             sub={
-              d.pendingOrders
-                ? `${d.pendingOrders} незавършени`
-                : "няма незавършени"
+              [
+                d.pendingOrders ? `${d.pendingOrders} в процес` : null,
+                d.abandonedOrders ? `${d.abandonedOrders} изоставени` : null,
+              ]
+                .filter(Boolean)
+                .join(" · ") || "няма незавършени"
             }
           />
           <Tile
@@ -169,7 +172,7 @@ export default async function AdminDashboard() {
                               : "bg-bh-ink/10 text-bh-ink/60"
                           }`}
                         >
-                          {o.status === "paid" ? "платена" : o.status}
+                          {o.status === "paid" ? "платена" : o.status === "pending" ? "незавършена" : o.status}
                         </span>
                       </td>
                       <td className="px-5 py-3 text-right font-semibold text-bh-ink">

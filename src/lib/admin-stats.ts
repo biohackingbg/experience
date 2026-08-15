@@ -4,6 +4,7 @@ import { desc, inArray, sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { orderItems, orders, signups, tickets } from "@/lib/db/schema";
+import { PENDING_HOLD_MINUTES } from "@/lib/orders";
 import { TIERS, VAT_RATE, type TierId } from "@/lib/tickets";
 
 /**
@@ -44,6 +45,7 @@ export type DashboardData = {
   vatCents: number;
   paidOrders: number;
   pendingOrders: number;
+  abandonedOrders: number;
   ticketsSold: number;
   capacityTotal: number;
   signupCount: number;
@@ -63,7 +65,12 @@ export async function getDashboardData(): Promise<DashboardData> {
           gross: sql<number>`coalesce(sum(${orders.totalCents}) filter (where ${orders.status} = 'paid'), 0)::int`,
           vat: sql<number>`coalesce(sum(${orders.vatCents}) filter (where ${orders.status} = 'paid'), 0)::int`,
           paid: sql<number>`count(*) filter (where ${orders.status} = 'paid')::int`,
-          pending: sql<number>`count(*) filter (where ${orders.status} = 'pending')::int`,
+          // Still inside the seat hold — a payment may yet land.
+          pending: sql<number>`count(*) filter (where ${orders.status} = 'pending' and ${orders.createdAt} > now() - interval '${sql.raw(String(PENDING_HOLD_MINUTES))} minutes')::int`,
+          // Hold expired without payment: the checkout was closed. Their seats
+          // are already free again; kept as a number because a rising count
+          // is a signal about the checkout, not a to-do.
+          abandoned: sql<number>`count(*) filter (where ${orders.status} = 'pending' and ${orders.createdAt} <= now() - interval '${sql.raw(String(PENDING_HOLD_MINUTES))} minutes')::int`,
         })
         .from(orders),
 
@@ -157,6 +164,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     netCents: grossCents - vatCents,
     paidOrders: totals[0]?.paid ?? 0,
     pendingOrders: totals[0]?.pending ?? 0,
+    abandonedOrders: totals[0]?.abandoned ?? 0,
     ticketsSold: perTier.reduce((sum, t) => sum + t.sold, 0),
     capacityTotal: TIERS.reduce((sum, t) => sum + t.capacity, 0),
     signupCount: signupRow[0]?.n ?? 0,

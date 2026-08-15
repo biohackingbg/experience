@@ -18,7 +18,7 @@ import {
  * How long an unpaid order keeps holding a seat. Long enough to finish a card
  * payment, short enough that abandoned checkouts do not lock up the room.
  */
-const PENDING_HOLD_MINUTES = 30;
+export const PENDING_HOLD_MINUTES = 30;
 
 /** Ambiguous characters left out so codes survive being read aloud. */
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
