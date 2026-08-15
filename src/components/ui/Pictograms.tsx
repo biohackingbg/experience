@@ -310,12 +310,25 @@ export function TestTube({ className }: Props) {
   );
 }
 
-/** DNA: two strands with the rungs between them. */
+/**
+ * DNA: the familiar helix — two gentle strands weaving through one and a
+ * half turns, rungs where they part. Wide, soft crossings so it survives at
+ * icon size instead of collapsing into an X.
+ */
 export function Dna({ className }: Props) {
   return (
     <svg {...base} className={className}>
-      <path d="M8 3c0 6 8 6 8 12s-8 6-8 12M16 3c0 6-8 6-8 12s8 6 8 12" />
-      <path d="M8.6 6h6.8M8.6 21h6.8M10 9.6h4M10 17.4h4" />
+      <path d="M7 3.5c0 3.4 10 4.4 10 8.5S7 15.6 7 20.5" />
+      <path d="M17 3.5c0 3.4-10 4.4-10 8.5s10 3.6 10 8.5" />
+      <path d="M8.2 6.4h7.6M9.9 9h4.2M9.9 15h4.2M8.2 17.6h7.6" />
+    </svg>
+  );
+}: Props) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M8 3c0 4.5 8 4.5 8 9s-8 4.5-8 9" />
+      <path d="M16 3c0 4.5-8 4.5-8 9s8 4.5 8 9" />
+      <path d="M8.9 4.8h6.2M9.6 7.2h4.8M9.6 16.8h4.8M8.9 19.2h6.2" />
     </svg>
   );
 }
