@@ -1,11 +1,12 @@
-import { CountryMark } from "@/components/ui/Flags";
 import { Arrow, Gauge, Hotel, People } from "@/components/ui/Pictograms";
-import { announcedSpeakers } from "@/lib/speakers";
+import { SPEAKERS } from "@/lib/speakers";
 
-/** Countries of the announced speakers — read from the same list they come from. */
-const speakerCountries = Array.from(
-  new Set(announcedSpeakers().map((s) => s.country).filter(Boolean)),
-) as string[];
+/**
+ * The full line-up size, announced or not — the number is public even while
+ * most of the names are held back. Read from the list, so it stays honest as
+ * people are added or drop out.
+ */
+const speakerCount = SPEAKERS.filter((s) => !s.pending).length;
 
 /**
  * Editorial signature from the reference: circular type slowly orbiting a
@@ -148,28 +149,25 @@ export function SummitHero() {
           {/* speakers — the big accent card: tags, headline word, rule, copy,
               and the diagonal arrow anchoring the corner. */}
           <article className="bh-mint flex flex-col rounded-3xl p-6 text-bh-ink lg:p-7">
-            <div className="flex flex-wrap gap-2">
-              {speakerCountries.map((c) => (
-                <span
-                  key={c}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-bh-ink/10 px-3 py-1 text-xs font-medium"
-                >
-                  <CountryMark country={c} />
-                  {c}
-                </span>
-              ))}
+            <div className="flex items-start justify-between">
+              <span className="text-3xl leading-none text-bh-pine">✳</span>
+              <span className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-bh-ink/45">
+                Сцената
+              </span>
             </div>
 
             <div className="mt-auto pt-5">
-              <div className="text-[1.35rem] font-bold leading-snug tracking-tight">
-                Международни лектори
+              <div className="text-5xl font-black tracking-tight lg:text-7xl">
+                {speakerCount}
+              </div>
+              <div className="mt-2 text-[1.35rem] font-bold leading-snug tracking-tight">
+                международни лектори
               </div>
               <div className="mt-6 border-t border-bh-ink/15 pt-5" />
               <div className="flex items-end justify-between gap-6">
                 <p className="max-w-md text-sm leading-relaxed text-bh-ink/70 lg:text-base">
-                  Лекари и изследователи от {speakerCountries.length} държави
-                  — на разбираем език, по 25 минути. Обявяваме нови имена всяка
-                  седмица.
+                  Лекари и изследователи от България и чужбина — на разбираем
+                  език, по 25 минути. Обявяваме нови имена всяка седмица.
                 </p>
                 <a
                   href="#lektori"
