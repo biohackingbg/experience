@@ -7,8 +7,6 @@ import { createLink, revokeLink } from "@/lib/deck-links";
 
 export type LinkFormState = { status: "idle" | "ok" | "error"; message?: string };
 
-export const initialLinkFormState: LinkFormState = { status: "idle" };
-
 /** Makes a new share link for the partner deck, labelled with who it is for. */
 export async function createDeckLink(
   _prev: LinkFormState,

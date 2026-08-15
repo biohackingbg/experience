@@ -2,7 +2,9 @@
 
 import { useActionState } from "react";
 
-import { initialResendState, resendTicketEmail } from "./actions";
+import { type ResendState, resendTicketEmail } from "./actions";
+
+const initialResendState: ResendState = { status: "idle" };
 
 /**
  * Re-delivers the ticket email, to the buyer's address or to another one.

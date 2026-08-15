@@ -2,7 +2,11 @@
 
 import { useActionState, useState } from "react";
 
-import { createDeckLink, initialLinkFormState } from "./actions";
+import { createDeckLink, type LinkFormState } from "./actions";
+
+// Lives here, not in actions.ts: a "use server" module may export only
+// async functions — an exported object fails the build.
+const initialLinkFormState: LinkFormState = { status: "idle" };
 
 /** New share link: a label for who it is for, nothing else to fill in. */
 export function NewLinkForm() {

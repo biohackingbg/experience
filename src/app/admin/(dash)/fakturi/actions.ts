@@ -9,8 +9,6 @@ import { sendTicketEmail } from "@/lib/email";
 
 export type ResendState = { status: "idle" | "ok" | "error"; message?: string };
 
-export const initialResendState: ResendState = { status: "idle" };
-
 /**
  * Sends the ticket email again, optionally to a different address.
  *
