@@ -318,9 +318,12 @@ export function TestTube({ className }: Props) {
 export function Dna({ className }: Props) {
   return (
     <svg {...base} className={className}>
-      <path d="M7 3.5c0 3.4 10 4.4 10 8.5S7 15.6 7 20.5" />
-      <path d="M17 3.5c0 3.4-10 4.4-10 8.5s10 3.6 10 8.5" />
-      <path d="M8.2 6.4h7.6M9.9 9h4.2M9.9 15h4.2M8.2 17.6h7.6" />
+      {/* Two strands, each a full S: open at the top, crossing twice, open
+          at the bottom — the wide bulge in the middle carries two rungs,
+          the open ends one each. */}
+      <path d="M6.5 2.5C6.5 6.5 17.5 8 17.5 12S6.5 17.5 6.5 21.5" />
+      <path d="M17.5 2.5C17.5 6.5 6.5 8 6.5 12S17.5 17.5 17.5 21.5" />
+      <path d="M8.6 4.8h6.8M7.7 10.4h8.6M7.7 13.6h8.6M8.6 19.2h6.8" />
     </svg>
   );
 }
