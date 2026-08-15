@@ -8,6 +8,7 @@ import { Reveal } from "@/components/ui/Reveal";
 import { findActiveLink } from "@/lib/deck-links";
 import { SPEAKERS, announcedSpeakers } from "@/lib/speakers";
 
+import { DECK_SECTIONS } from "@/lib/deck-sections";
 import { ViewBeacon } from "./ViewBeacon";
 
 export const metadata: Metadata = {
@@ -171,9 +172,13 @@ function H2({ children, className = "" }: { children: React.ReactNode; className
   );
 }
 
-function Section({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+/**
+ * `name` marks the section for the reading-progress beacon: the admin sees
+ * the deepest section a reader reached, in the order they appear here.
+ */
+function Section({ name, children, className = "" }: { name: string; children: React.ReactNode; className?: string }) {
   return (
-    <section className={`px-6 py-16 sm:px-10 sm:py-24 lg:px-14 ${className}`}>
+    <section data-deck-section={name} className={`px-6 py-16 sm:px-10 sm:py-24 lg:px-14 ${className}`}>
       <div className="mx-auto w-full max-w-6xl">{children}</div>
     </section>
   );
@@ -200,7 +205,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
 
   return (
     <div className="bh-doc min-h-screen text-bh-ink">
-      <ViewBeacon token={token} />
+      <ViewBeacon token={token} sections={DECK_SECTIONS} />
       {/* header */}
       <header className="px-6 pt-8 sm:px-10 lg:px-14">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 border-b border-bh-ink/10 pb-6">
@@ -215,7 +220,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
       </header>
 
       {/* 01 cover */}
-      <Section className="pt-14 sm:pt-20">
+      <Section name="cover" className="pt-14 sm:pt-20">
         <p className="font-mono text-[0.68rem] uppercase tracking-[0.3em] text-bh-ink/50">
           Biohacking.bg <span className="text-bh-teal">✳</span> Bulgarian Longevity Association
         </p>
@@ -242,7 +247,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
       </Section>
 
       {/* 02 market */}
-      <Section className="border-t border-bh-ink/10">
+      <Section name="market" className="border-t border-bh-ink/10">
         <Reveal>
           <Eyebrow>Защо България, защо сега</Eyebrow>
           <H2>
@@ -266,7 +271,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
       </Section>
 
       {/* 03 concept */}
-      <Section className="border-t border-bh-ink/10">
+      <Section name="concept" className="border-t border-bh-ink/10">
         <Reveal>
           <Eyebrow>Концепцията</Eyebrow>
           <H2>Не конференция със столове в редици.</H2>
@@ -299,7 +304,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
           reference: the name set large on the photograph, one line of
           credential, a white pill at the foot, an arrow disc in the corner
           and a tag pill (here the country) at the top. */}
-      <Section className="border-t border-bh-ink/10">
+      <Section name="speakers" className="border-t border-bh-ink/10">
         <Reveal>
           <Eyebrow>Сцената</Eyebrow>
           <H2>Имената, които вече са потвърдени.</H2>
@@ -373,7 +378,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
       </Section>
 
       {/* 04 scale */}
-      <Section className="border-t border-bh-ink/10">
+      <Section name="scale" className="border-t border-bh-ink/10">
         <Reveal>
           <Eyebrow>Мащабът</Eyebrow>
         </Reveal>
@@ -406,7 +411,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
       </Section>
 
       {/* 05 audience */}
-      <Section className="border-t border-bh-ink/10">
+      <Section name="audience" className="border-t border-bh-ink/10">
         <Reveal>
           <Eyebrow>Кой стои пред щанда ти</Eyebrow>
           <H2>Хора, които вече плащат за здравето си.</H2>
@@ -434,7 +439,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
       </Section>
 
       {/* 06 reasons */}
-      <Section className="border-t border-bh-ink/10">
+      <Section name="reasons" className="border-t border-bh-ink/10">
         <Reveal>
           <Eyebrow>Защо това работи по-добре от реклама</Eyebrow>
           <H2>Пет причини брандовете да се връщат всяка година.</H2>
@@ -455,7 +460,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
       </Section>
 
       {/* 07 territories */}
-      <Section className="border-t border-bh-ink/10">
+      <Section name="territories" className="border-t border-bh-ink/10">
         <Reveal>
           <Eyebrow>Територии за брандиране</Eyebrow>
           <H2>Избери зона и я направи своя.</H2>
@@ -477,7 +482,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
       </Section>
 
       {/* 08 packages */}
-      <Section className="border-t border-bh-ink/10">
+      <Section name="packages" className="border-t border-bh-ink/10">
         <Reveal>
           <Eyebrow>Партньорски пакети</Eyebrow>
         </Reveal>
@@ -540,7 +545,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
       </Section>
 
       {/* 09 extras */}
-      <Section className="border-t border-bh-ink/10">
+      <Section name="extras" className="border-t border-bh-ink/10">
         <Reveal>
           <Eyebrow>Допълнително</Eyebrow>
           <H2>Добави точно това, което ти трябва.</H2>
@@ -568,7 +573,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
       </Section>
 
       {/* 10 next step */}
-      <Section className="border-t border-bh-ink/10">
+      <Section name="next" className="border-t border-bh-ink/10">
         <Reveal>
           <Eyebrow>Следваща стъпка</Eyebrow>
           <H2>

@@ -6,6 +6,7 @@ import { and, count, desc, eq, gte, isNull, sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { type DeckLink, deckLinks, deckViews } from "@/lib/db/schema";
+import { DECK_SECTIONS, sectionIndex } from "@/lib/deck-sections";
 
 /**
  * The partner deck is reachable only through share links, one per recipient.
@@ -100,15 +101,92 @@ export async function reactivateLink(id: string): Promise<void> {
 
 export async function recordView(input: {
   linkId: string;
+  viewId: string | null;
+  visitor: string | null;
   referrerHost: string | null;
   device: "mobile" | "desktop" | null;
+  country: string | null;
+  city: string | null;
+  browser: string | null;
+  os: string | null;
 }): Promise<void> {
-  await getDb().insert(deckViews).values(input);
+  // A repeated "open" beacon for the same viewId (retry, storage race) must
+  // not become a second opening.
+  await getDb().insert(deckViews).values(input).onConflictDoNothing({ target: deckViews.viewId });
+}
+
+/** SQL expression ranking the stored section by reading order (-1 if none). */
+const SECTION_RANK_SQL = `case section ${DECK_SECTIONS.map((s, i) => `when '${s.id}' then ${i}`).join(" ")} else -1 end`;
+
+/** Progress for one opening; the maximum of what was seen wins. */
+export async function recordProgress(input: {
+  linkId: string;
+  viewId: string;
+  seconds: number;
+  scrollPct: number;
+  section: string | null;
+}): Promise<void> {
+  const idx = sectionIndex(input.section);
+  await getDb().execute(sql`
+    update ${deckViews}
+    set seconds = greatest(coalesce(seconds, 0), ${input.seconds}),
+        scroll_pct = greatest(coalesce(scroll_pct, 0), ${input.scrollPct}),
+        section = case
+          when ${idx} > ${sql.raw(SECTION_RANK_SQL)} then ${input.section}
+          else section
+        end
+    where view_id = ${input.viewId} and link_id = ${input.linkId}
+  `);
+}
+
+export type ViewRow = {
+  id: string;
+  linkId: string;
+  createdAt: Date;
+  visitor: string | null;
+  referrerHost: string | null;
+  device: string | null;
+  country: string | null;
+  city: string | null;
+  browser: string | null;
+  os: string | null;
+  seconds: number | null;
+  scrollPct: number | null;
+  section: string | null;
+};
+
+/** Recent openings across all links, newest first — grouped by the admin. */
+export async function listViews(limit = 1000): Promise<ViewRow[]> {
+  return getDb()
+    .select({
+      id: deckViews.id,
+      linkId: deckViews.linkId,
+      createdAt: deckViews.createdAt,
+      visitor: deckViews.visitor,
+      referrerHost: deckViews.referrerHost,
+      device: deckViews.device,
+      country: deckViews.country,
+      city: deckViews.city,
+      browser: deckViews.browser,
+      os: deckViews.os,
+      seconds: deckViews.seconds,
+      scrollPct: deckViews.scrollPct,
+      section: deckViews.section,
+    })
+    .from(deckViews)
+    .orderBy(desc(deckViews.createdAt))
+    .limit(limit);
 }
 
 export type LinkStats = DeckLink & {
   views: number;
+  /** Distinct visitor ids; opens without one count as one each. */
+  people: number;
   lastViewedAt: Date | null;
+  /** Average seconds over openings that reported progress. */
+  avgSeconds: number | null;
+  /** Openings that reached the packages section (saw the prices). */
+  reachedPackages: number;
 };
 
 export type DeckStats = {
@@ -120,6 +198,10 @@ export type DeckStats = {
   today: number;
   /** Top referrer hosts, most frequent first. Direct opens excluded. */
   referrers: { host: string; n: number }[];
+  /** Over all openings that reported progress. */
+  avgSeconds: number | null;
+  reachedPackagesPct: number | null;
+  topPlaces: { place: string; n: number }[];
 };
 
 export async function getDeckStats(): Promise<DeckStats> {
@@ -131,7 +213,7 @@ export async function getDeckStats(): Promise<DeckStats> {
     new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia" }).format(now) + "T00:00:00+03:00",
   );
 
-  const [links, [totals], [week], [today], refs] = await Promise.all([
+  const [links, [totals], [week], [today], refs, [engagement], places] = await Promise.all([
     db
       .select({
         id: deckLinks.id,
@@ -144,7 +226,10 @@ export async function getDeckStats(): Promise<DeckStats> {
         nextStep: deckLinks.nextStep,
         updatedAt: deckLinks.updatedAt,
         views: count(deckViews.id),
+        people: sql<number>`(count(distinct ${deckViews.visitor}) + count(*) filter (where ${deckViews.visitor} is null))::int`,
         lastViewedAt: sql<Date | null>`max(${deckViews.createdAt})`,
+        avgSeconds: sql<number | null>`round(avg(${deckViews.seconds}))::int`,
+        reachedPackages: sql<number>`count(*) filter (where ${sql.raw(SECTION_RANK_SQL)} >= ${sectionIndex("packages")})::int`,
       })
       .from(deckLinks)
       .leftJoin(deckViews, eq(deckViews.linkId, deckLinks.id))
@@ -160,6 +245,23 @@ export async function getDeckStats(): Promise<DeckStats> {
       .groupBy(deckViews.referrerHost)
       .orderBy(sql`count(*) desc`)
       .limit(5),
+    db
+      .select({
+        avgSeconds: sql<number | null>`round(avg(${deckViews.seconds}))::int`,
+        withProgress: sql<number>`count(${deckViews.seconds})::int`,
+        reached: sql<number>`count(*) filter (where ${sql.raw(SECTION_RANK_SQL)} >= ${sectionIndex("packages")})::int`,
+      })
+      .from(deckViews),
+    db
+      .select({
+        place: sql<string>`coalesce(nullif(concat_ws(', ', ${deckViews.city}, ${deckViews.country}), ''), '—')`,
+        n: count(),
+      })
+      .from(deckViews)
+      .where(sql`${deckViews.country} is not null`)
+      .groupBy(sql`1`)
+      .orderBy(sql`count(*) desc`)
+      .limit(4),
   ]);
 
   const activeLinks = links.filter((l) => !l.revokedAt);
@@ -177,5 +279,10 @@ export async function getDeckStats(): Promise<DeckStats> {
     last7Days: week?.n ?? 0,
     today: today?.n ?? 0,
     referrers: refs.filter((r): r is { host: string; n: number } => !!r.host),
+    avgSeconds: engagement?.avgSeconds ?? null,
+    reachedPackagesPct: engagement?.withProgress
+      ? Math.round((engagement.reached / engagement.withProgress) * 100)
+      : null,
+    topPlaces: places,
   };
 }

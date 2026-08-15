@@ -3,7 +3,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { isAdmin } from "@/lib/admin-auth";
-import { STAGES, deckUrl, getDeckStats } from "@/lib/deck-links";
+import { STAGES, deckUrl, getDeckStats, listViews } from "@/lib/deck-links";
+import { sectionIndex, sectionLabel } from "@/lib/deck-sections";
 
 import { reactivateDeckLink, revokeDeckLink, updateDeckLink } from "./actions";
 import { CopyLink, NewLinkForm, PipelineEditor } from "./LinkTools";
@@ -26,6 +27,14 @@ function bgDateTime(d: Date | null): string {
   }).format(d);
 }
 
+function fmtSeconds(s: number | null): string {
+  if (s === null) return "—";
+  if (s < 60) return `${s} с`;
+  return `${Math.floor(s / 60)} мин ${s % 60 ? `${s % 60} с` : ""}`.trim();
+}
+
+const PACKAGES_IDX = sectionIndex("packages");
+
 function Tile({ label, value, sub }: { label: string; value: React.ReactNode; sub?: string }) {
   return (
     <div className="rounded-2xl bg-bh-cloud p-6 ring-1 ring-bh-ink/8">
@@ -45,8 +54,14 @@ export default async function DeckPage() {
   // Next docs are explicit that it may be skipped on RSC navigations.
   if (!(await isAdmin())) redirect("/admin/login");
 
-  const d = await getDeckStats();
+  const [d, views] = await Promise.all([getDeckStats(), listViews()]);
   const active = d.links.filter((l) => !l.revokedAt);
+  const viewsByLink = new Map<string, typeof views>();
+  for (const v of views) {
+    const arr = viewsByLink.get(v.linkId) ?? [];
+    arr.push(v);
+    viewsByLink.set(v.linkId, arr);
+  }
 
   return (
     <div className="px-5 py-10 sm:px-8 lg:px-10">
@@ -87,15 +102,22 @@ export default async function DeckPage() {
           <Tile label="Отваряния общо" value={d.total} sub={`${active.length} активни линка`} />
           <Tile label="Последните 7 дни" value={d.last7Days} sub={`днес ${d.today}`} />
           <Tile
-            label="Откъде идват"
-            value={d.referrers.length ? d.referrers[0].host : "директно"}
+            label="Четене"
+            value={fmtSeconds(d.avgSeconds)}
             sub={
-              d.referrers.length
-                ? d.referrers.map((r) => `${r.host} ${r.n}`).join(" · ")
-                : "само от директно отваряне на линка"
+              d.reachedPackagesPct === null
+                ? "средно време · още няма данни за докъде стигат"
+                : `средно · ${d.reachedPackagesPct}% стигат до пакетите`
             }
           />
         </div>
+        <p className="mt-3 text-xs text-bh-ink/55">
+          Откъде идват:{" "}
+          {d.referrers.length
+            ? d.referrers.map((r) => `${r.host} ${r.n}`).join(" · ")
+            : "директно (никой не е дошъл от друг сайт)"}
+          {d.topPlaces.length ? ` · Места: ${d.topPlaces.map((p) => `${p.place} ${p.n}`).join(" · ")}` : ""}
+        </p>
 
         <div className="mt-10 rounded-2xl bg-bh-cloud p-6 ring-1 ring-bh-ink/8">
           <h2 className="text-sm font-bold tracking-tight text-bh-ink">Нов линк</h2>
@@ -118,7 +140,7 @@ export default async function DeckPage() {
                     <th className="px-5 py-3 font-medium">За кого</th>
                     <th className="px-5 py-3 font-medium">Етап · бележки</th>
                     <th className="px-5 py-3 font-medium">Линк</th>
-                    <th className="px-5 py-3 text-right font-medium">Отваряния</th>
+                    <th className="px-5 py-3 font-medium">Отваряния</th>
                     <th className="px-5 py-3 font-medium">Последно</th>
                     <th className="px-5 py-3 font-medium">Създаден</th>
                     <th className="px-5 py-3 font-medium">Статус</th>
@@ -158,7 +180,48 @@ export default async function DeckPage() {
                             <CopyLink url={url} />
                           </div>
                         </td>
-                        <td className={`px-5 py-3 text-right font-semibold ${off ? "" : "text-bh-ink"}`}>{l.views}</td>
+                        <td className="px-5 py-3 align-top">
+                          {l.views === 0 ? (
+                            <span className="text-bh-ink/45">0</span>
+                          ) : (
+                            <details className="group">
+                              <summary className={`cursor-pointer list-none font-semibold ${off ? "" : "text-bh-ink"}`}>
+                                {l.views}
+                                <span className="ml-1 font-normal text-bh-ink/55">
+                                  {l.people === 1 ? "· 1 човек" : `· ${l.people} души`}
+                                </span>
+                                <span className="block text-xs font-normal text-bh-ink/55">
+                                  {l.avgSeconds !== null ? `ср. ${fmtSeconds(l.avgSeconds)}` : "време —"}
+                                  {l.reachedPackages ? ` · ${l.reachedPackages}× до пакетите` : ""}
+                                  <span className="ml-1 text-bh-ink/40 group-open:hidden">▸ подробно</span>
+                                  <span className="ml-1 hidden text-bh-ink/40 group-open:inline">▾ скрий</span>
+                                </span>
+                              </summary>
+                              <ul className="mt-2 w-80 space-y-1.5 border-l border-bh-ink/10 pl-3 text-xs text-bh-ink/70">
+                                {(viewsByLink.get(l.id) ?? []).map((v) => {
+                                  const where = [v.city, v.country].filter(Boolean).join(", ");
+                                  const client = [v.device === "mobile" ? "телефон" : v.device === "desktop" ? "компютър" : null, v.os, v.browser]
+                                    .filter(Boolean)
+                                    .join(" · ");
+                                  const reachedPrices = sectionIndex(v.section) >= PACKAGES_IDX;
+                                  return (
+                                    <li key={v.id}>
+                                      <span className="font-medium text-bh-ink">{bgDateTime(v.createdAt)}</span>
+                                      {where ? ` · ${where}` : ""}
+                                      {client ? ` · ${client}` : ""}
+                                      {v.referrerHost ? ` · от ${v.referrerHost}` : ""}
+                                      <span className="block text-bh-ink/55">
+                                        {v.seconds !== null
+                                          ? `${fmtSeconds(v.seconds)} · до „${sectionLabel(v.section)}“ (${v.scrollPct ?? 0}%)${reachedPrices ? " · видял цените" : ""}`
+                                          : "само отворено — без данни за четене"}
+                                      </span>
+                                    </li>
+                                  );
+                                })}
+                              </ul>
+                            </details>
+                          )}
+                        </td>
                         <td className="px-5 py-3">{bgDateTime(l.lastViewedAt)}</td>
                         <td className="px-5 py-3">{bgDateTime(l.createdAt)}</td>
                         <td className="px-5 py-3">

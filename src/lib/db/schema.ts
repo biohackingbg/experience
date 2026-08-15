@@ -228,11 +228,40 @@ export const deckViews = pgTable(
     referrerHost: text("referrer_host"),
     /** "mobile" | "desktop" — coarse, from the viewport, not the UA string. */
     device: text("device"),
+
+    /**
+     * Client-made id for this opening, so the progress beacon sent when the
+     * tab is hidden or closed can find its own row. Random, per opening.
+     */
+    viewId: text("view_id"),
+    /**
+     * Random id kept in the visitor's localStorage *for this link only* — it
+     * tells "3 openings by 2 people" from "3 people". Not shared across links
+     * or with anything else, and it names nobody.
+     */
+    visitor: text("visitor"),
+
+    /** Coarse location from the edge (Vercel geo headers); the IP is not kept. */
+    country: text("country"),
+    city: text("city"),
+    /** Coarse client: "Safari" / "Chrome" …, "iOS" / "macOS" / "Windows" … */
+    browser: text("browser"),
+    os: text("os"),
+
+    /** Engagement, filled in by the progress beacon; the max seen wins. */
+    seconds: integer("seconds"),
+    scrollPct: integer("scroll_pct"),
+    /** Deepest deck section reached: cover … packages … next. */
+    section: text("section"),
+
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
   },
-  (table) => [index("deck_views_link_created_idx").on(table.linkId, table.createdAt)],
+  (table) => [
+    index("deck_views_link_created_idx").on(table.linkId, table.createdAt),
+    uniqueIndex("deck_views_view_id_idx").on(table.viewId),
+  ],
 );
 
 export type DeckLink = typeof deckLinks.$inferSelect;

@@ -43,6 +43,13 @@
       "when": 1786819335943,
       "tag": "0005_deck_link_pipeline",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1786825930402,
+      "tag": "0006_deck_view_detail",
+      "breakpoints": true
     }
   ]
 }
