@@ -1,0 +1,1 @@
+ALTER TABLE "deck_links" ADD COLUMN "owner" text;

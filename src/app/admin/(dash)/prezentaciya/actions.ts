@@ -63,6 +63,7 @@ export async function updateDeckLink(
     stage,
     note: clean(formData.get("note"), 1000),
     nextStep: clean(formData.get("nextStep"), 300),
+    owner: clean(formData.get("owner"), 40),
   });
   revalidatePath("/admin/prezentaciya");
   return { status: "ok", message: "Записано." };

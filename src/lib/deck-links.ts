@@ -86,7 +86,7 @@ export async function revokeLink(id: string): Promise<void> {
 /** Pipeline fields — the notes a sales conversation leaves behind. */
 export async function updateLinkPipeline(
   id: string,
-  input: { stage: StageId; note: string | null; nextStep: string | null },
+  input: { stage: StageId; note: string | null; nextStep: string | null; owner: string | null },
 ): Promise<void> {
   await getDb()
     .update(deckLinks)
@@ -193,6 +193,8 @@ export type DeckStats = {
   links: LinkStats[];
   /** Active links per pipeline stage, in STAGES order. */
   byStage: { id: StageId; label: string; n: number }[];
+  /** Names already used in "owner", for the editor's suggestions. */
+  owners: string[];
   total: number;
   last7Days: number;
   today: number;
@@ -224,6 +226,7 @@ export async function getDeckStats(): Promise<DeckStats> {
         stage: deckLinks.stage,
         note: deckLinks.note,
         nextStep: deckLinks.nextStep,
+        owner: deckLinks.owner,
         updatedAt: deckLinks.updatedAt,
         views: count(deckViews.id),
         people: sql<number>`(count(distinct ${deckViews.visitor}) + count(*) filter (where ${deckViews.visitor} is null))::int`,
@@ -270,6 +273,7 @@ export async function getDeckStats(): Promise<DeckStats> {
       ...l,
       lastViewedAt: l.lastViewedAt ? new Date(l.lastViewedAt) : null,
     })),
+    owners: [...new Set(links.map((l) => l.owner).filter((o): o is string => !!o))].sort(),
     byStage: STAGES.map((s) => ({
       id: s.id,
       label: s.label,

@@ -207,6 +207,8 @@ export const deckLinks = pgTable(
     note: text("note"),
     /** What is expected from us next — the thing that must not be forgotten. */
     nextStep: text("next_step"),
+    /** Who on the team leads this conversation (a first name is enough). */
+    owner: text("owner"),
     updatedAt: timestamp("updated_at", { withTimezone: true }),
   },
   (table) => [uniqueIndex("deck_links_token_idx").on(table.token)],

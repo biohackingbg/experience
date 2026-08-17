@@ -86,7 +86,8 @@ export default async function DeckPage() {
           е в търсачките. Направи отделен линк за всяка компания (или за пост,
           имейл кампания, екипа) и ще виждаш кой я е отворил и кога, без да
           искаш имейл от никого. Всеки ред е и разговорът с партньора: цъкни
-          етапа, за да го смениш и да оставиш бележка и какво се очаква от нас.
+          етапа, за да го смениш, да отбележиш кой от вас води разговора и да
+          оставиш бележка и какво се очаква от нас.
           „Спри“ не трие нищо — линкът спира да се отваря, историята остава.
         </p>
 
@@ -134,11 +135,11 @@ export default async function DeckPage() {
             </p>
           ) : (
             <div className="mt-4 overflow-x-auto rounded-2xl bg-bh-cloud ring-1 ring-bh-ink/8">
-              <table className="w-full min-w-[64rem] text-left text-sm">
+              <table className="w-full min-w-[72rem] text-left text-sm">
                 <thead>
                   <tr className="border-b border-bh-ink/10 font-mono text-[0.65rem] uppercase tracking-[0.15em] text-bh-ink/50">
                     <th className="px-5 py-3 font-medium">За кого</th>
-                    <th className="px-5 py-3 font-medium">Етап · бележки</th>
+                    <th className="px-5 py-3 font-medium">Етап · води · бележки</th>
                     <th className="px-5 py-3 font-medium">Линк</th>
                     <th className="px-5 py-3 font-medium">Отваряния</th>
                     <th className="px-5 py-3 font-medium">Последно</th>
@@ -163,6 +164,8 @@ export default async function DeckPage() {
                             stage={l.stage}
                             note={l.note}
                             nextStep={l.nextStep}
+                            owner={l.owner}
+                            owners={d.owners}
                             stages={STAGES}
                             action={updateDeckLink}
                           />

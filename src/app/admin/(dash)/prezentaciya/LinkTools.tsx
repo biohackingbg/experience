@@ -77,6 +77,8 @@ export function PipelineEditor({
   stage,
   note,
   nextStep,
+  owner,
+  owners,
   stages,
   action,
 }: {
@@ -84,6 +86,9 @@ export function PipelineEditor({
   stage: string;
   note: string | null;
   nextStep: string | null;
+  owner: string | null;
+  /** Names already in use, offered as suggestions. */
+  owners: string[];
   stages: readonly Stage[];
   action: (prev: LinkFormState, data: FormData) => Promise<LinkFormState>;
 }) {
@@ -100,19 +105,40 @@ export function PipelineEditor({
 
   if (!open) {
     return (
-      <div className="flex flex-col items-start gap-1.5">
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          title="Редактирай етап и бележки"
-          className={`rounded-full px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide ${STAGE_TONE[stage] ?? STAGE_TONE.new}`}
-        >
-          {label} ✎
-        </button>
-        {note && <p className="max-w-xs whitespace-pre-line text-xs text-bh-ink/70">{note}</p>}
+      <div className="flex min-w-[18rem] max-w-md flex-col items-start gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            title="Редактирай етап, бележки и кой води"
+            className={`rounded-full px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide ${STAGE_TONE[stage] ?? STAGE_TONE.new}`}
+          >
+            {label} ✎
+          </button>
+          {owner ? (
+            <span
+              title="Води комуникацията"
+              className="inline-flex items-center gap-1.5 rounded-full border border-bh-ink/15 py-1 pl-1 pr-2.5 text-xs font-medium text-bh-ink"
+            >
+              <span className="grid h-5 w-5 place-items-center rounded-full bg-bh-ink text-[0.6rem] font-bold uppercase text-bh-paper">
+                {owner.trim().slice(0, 1)}
+              </span>
+              {owner}
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              className="rounded-full border border-dashed border-bh-ink/25 px-2.5 py-1 text-xs text-bh-ink/50 hover:border-bh-ink/50 hover:text-bh-ink"
+            >
+              + кой води
+            </button>
+          )}
+        </div>
+        {note && <p className="whitespace-pre-line text-sm leading-relaxed text-bh-ink/80">{note}</p>}
         {nextStep && (
-          <p className="max-w-xs text-xs text-bh-ink">
-            <span className="font-mono text-[0.6rem] uppercase tracking-[0.15em] text-bh-ink/45">от нас: </span>
+          <p className="rounded-xl bg-bh-lime-pale/40 px-3 py-2 text-sm leading-snug text-bh-ink">
+            <span className="mr-1 font-mono text-[0.6rem] uppercase tracking-[0.15em] text-bh-ink/55">от нас</span>
             {nextStep}
           </p>
         )}
@@ -121,26 +147,42 @@ export function PipelineEditor({
   }
 
   return (
-    <form action={formAction} className="flex w-72 flex-col gap-2">
+    <form action={formAction} className="flex w-[26rem] max-w-full flex-col gap-2">
       <input type="hidden" name="id" value={id} />
-      <select
-        name="stage"
-        defaultValue={stage}
-        className="rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-1.5 text-xs text-bh-ink"
-      >
-        {stages.map((s) => (
-          <option key={s.id} value={s.id}>
-            {s.label} — {s.hint}
-          </option>
-        ))}
-      </select>
+      <div className="grid grid-cols-[1fr_9rem] gap-2">
+        <select
+          name="stage"
+          defaultValue={stage}
+          className="rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink"
+        >
+          {stages.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.label} — {s.hint}
+            </option>
+          ))}
+        </select>
+        <input
+          type="text"
+          name="owner"
+          list={`owners-${id}`}
+          defaultValue={owner ?? ""}
+          maxLength={40}
+          placeholder="кой води"
+          className="rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35"
+        />
+        <datalist id={`owners-${id}`}>
+          {owners.map((o) => (
+            <option key={o} value={o} />
+          ))}
+        </datalist>
+      </div>
       <textarea
         name="note"
         defaultValue={note ?? ""}
-        rows={3}
+        rows={5}
         maxLength={1000}
         placeholder="бележка — с кого говорихме, какво казаха"
-        className="rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-1.5 text-xs text-bh-ink placeholder:text-bh-ink/35"
+        className="rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm leading-relaxed text-bh-ink placeholder:text-bh-ink/35"
       />
       <input
         type="text"
@@ -148,7 +190,7 @@ export function PipelineEditor({
         defaultValue={nextStep ?? ""}
         maxLength={300}
         placeholder="какво се очаква от нас"
-        className="rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-1.5 text-xs text-bh-ink placeholder:text-bh-ink/35"
+        className="rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35"
       />
       <div className="flex items-center gap-2">
         <button
