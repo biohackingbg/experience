@@ -2,13 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { CountryMark } from "@/components/ui/Flags";
-import { Arrow } from "@/components/ui/Pictograms";
 import { Reveal } from "@/components/ui/Reveal";
 import { findActiveLink } from "@/lib/deck-links";
-import { SPEAKERS, announcedSpeakers } from "@/lib/speakers";
-
 import { DECK_SECTIONS } from "@/lib/deck-sections";
+
 import { ViewBeacon } from "./ViewBeacon";
 
 export const metadata: Metadata = {
@@ -23,130 +20,265 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 /*
- * The partner deck as a page, after the MYDNA reference: white paper, a lot
- * of air, large light type, hairline rules under numbers, cards with a pill
- * and a corner arrow, oversized step numbers. Our palette, our copy.
- *
- * Content is data at the top so the deck can be edited without touching
- * layout, and so the same numbers cannot drift between two places.
+ * The partner deck as a page. Content mirrors the approved PDF
+ * (sofia-life-summit-sponsori-svetla, Aug 2026) word for word — the copy is
+ * the client's, the layout is the site's. Data sits at the top so the deck
+ * can be edited without touching layout.
  */
 
 const CONTACT = "hello@biohacking.bg";
 const MAILTO = `mailto:${CONTACT}?subject=${encodeURIComponent("Партньорство Sofia Life Summit 2026")}`;
 
-const market = [
+/* ── 02 форматът ── */
+const format = [
   {
-    idx: "Пазарът",
-    h: "75.8 години",
-    p: "Продължителност на живота в България срещу 81.5 средно за ЕС. Eurostat, 2024. Проблемът е национален — и вече е осъзнат.",
+    h: "Преживяването остава",
+    p: "Продуктът ви става част от момент, който посетителят помни и свързва с вашия бранд — не поредна реклама, покрай която минава.",
   },
   {
-    idx: "Купувачът",
-    h: "Готов, но необслужен",
-    p: "Добавки, устройства, диагностика и клиники растат двуцифрено. Липсва мястото, където човек ги пробва на живо, преди да купи.",
+    h: "Тридесет минути пълно внимание",
+    p: "Активациите са със записан час и ограничени места. Никой друг формат не дава на бранда половин час насаме с клиента.",
   },
   {
-    idx: "Мястото",
-    h: "Sofia Life Summit",
-    p: "Два дни, в които 1 000+ души влизат в режим „ще променя нещо“. Твоят бранд може да е причината.",
+    h: "Пробваното се купува",
+    p: "Когато човек пробва нещо лично, е много по-лесно да го купи. Активностите правят точно това — а Village е на крачка от тях.",
   },
 ];
 
-const zones = [
-  { no: "01", tag: "Сцена", h: "Знанието", p: "Международни имена на разбираем език. 16 лекции и панела по 25 минути." },
-  { no: "02", tag: "Движение", h: "Тялото в действие", p: "Пилатес (mat и reformer), Power Plate, водени сесии със записан час." },
-  { no: "03", tag: "Възстановяване", h: "Нервната система", p: "Cold plunge, дишане, Recovery Zone. Най-сниманата зона на събитието." },
-  { no: "04", tag: "Village", h: "Брандовете", p: "30 подбрани компании: добавки, устройства, клиники, храна, технологии." },
-];
-
+/* ── 03 мащаб ── */
 const scale = [
   { n: "1 000+", l: "посетители" },
-  { n: "2", l: "дни" },
   { n: "4", l: "зони" },
-  { n: "16", l: "лекции и панела" },
+  { n: "10", l: "интерактивни станции" },
+  { n: "50", l: "международни лектори" },
+  { n: "30", l: "подбрани бранда" },
 ];
 
-const scaleAccent = [
-  { n: "30", l: "места за брандове — и толкова" },
-  { n: "50 €", l: "най-ниската цена на билет — публика с намерение" },
-  { n: "1", l: "маршрут — всеки минава през Village" },
+/* ── 04 организаторите ── */
+const organizers = [
+  { n: "25 000+", l: "Общност", p: "Изградена аудитория в социалните канали и имейл листата на Biohacking.bg." },
+  { n: "10+", l: "Проведени събития", p: "Конференции, корпоративни обучения и ретрийти в България и чужбина." },
+  { n: "15+", l: "Корпоративни клиенти", p: "Компании, преминали през wellness програмите и обученията на Biohacking.bg." },
+  { n: "400+", l: "Курсисти", p: "Преминали през платените онлайн програми на Biohacking.bg." },
+  { n: "BLA", l: "Медицински гръб", p: "Bulgarian Longevity Association — лекари и изследователи, не инфлуенсър формат." },
+  { n: "6", l: "Държави в програмата", p: "Karolinska Institutet, Geneva College of Longevity Science, University of Malta и др." },
 ];
 
+/* ── 05 лекторите — the deck's own credential lines, with the site's portraits ── */
+const speakers = [
+  { name: "Д-р Райна Стоянова", line1: "България · Ендокринолог", line2: "Председател, Bulgarian Longevity Association", photo: "/speakers/rayna-stoyanova.jpg" },
+  { name: "Д-р Rocio Salas-Whalen", line1: "САЩ · Ендокринология", line2: "Автор на „Weightless“", photo: "/speakers/rocio-salas-whalen.jpg" },
+  { name: "Проф. Dominik Thor", line1: "Швейцария · Фармация", line2: "President, Geneva College of Longevity Science", photo: "/speakers/dominik-thor.jpg" },
+  { name: "Доц. Sara Hägg", line1: "Швеция · Епидемиология на стареенето", line2: "Karolinska Institutet", photo: "/speakers/sara-hagg.jpg" },
+  { name: "Д-р Александър Симидчиев", line1: "България · Пулмолог", line2: "Централна клинична болница на МВР", photo: "/speakers/aleksandar-simidchiev.jpg" },
+  { name: "Д-р Dean Berman", line1: "Австрия", line2: "Global VP Medical, Alma Lasers", photo: "/speakers/dean-berman.jpg" },
+  { name: "Проф. Godfrey Grech", line1: "Малта · Молекулярна онкология", line2: "University of Malta", photo: "/speakers/godfrey-grech.jpg" },
+  { name: "Проф. д-р Виктория Сарафян", line1: "България", line2: "Медицински университет — Пловдив", photo: "/speakers/viktoriya-sarafyan.jpg" },
+];
+
+/* ── 06 концепцията ── */
+const concept = [
+  { no: "01", tag: "Знанието", h: "Сцена", sym: "◎", p: "18 лекции и панела — лекари и изследователи на разбираем език." },
+  { no: "02", tag: "Тялото", h: "Движение", sym: "◍", p: "Power Plate зона и пилатес — на постелка и на реформър, със записан час." },
+  { no: "03", tag: "Балансът", h: "Възстановяване", sym: "≋", p: "Cold plunge, breathwork сесии и Recovery зона, по 30 минути." },
+  { no: "04", tag: "Брандовете", h: "Village", sym: "⌂", p: "30 подбрани компании: добавки, устройства, клиники, храна." },
+];
+
+/* ── 07 зоните ── */
+const activities = [
+  { no: "01", h: "Cold Plunge", p: "Потапяне в студена вода с инструктор и подготовка." },
+  { no: "02", h: "Breathwork", p: "Групови дихателни сесии по 30 минути." },
+  { no: "03", h: "Recovery Zone", p: "Компресия, перкусия и възстановяване след натоварване." },
+  { no: "04", h: "Power Plate Zone", p: "Вибрационна тренировка с демонстрации на живо." },
+  { no: "05", h: "Пилатес — постелка", p: "Групови сесии за начинаещи и напреднали." },
+  { no: "06", h: "Пилатес — реформър", p: "Малки групи с инструктор, със записан час." },
+];
+
+/* ── 08 брандирана зона ── */
+const brandZonePoints = [
+  "LED стена с вашето лого",
+  "Име на зоната в програмата",
+  "Инструктор с вашия бранд",
+  "Мостра за всеки участник",
+  "Списък със записалите се",
+];
+
+/* ── 09 публиката ── */
 const audience = [
-  ["Семейства", true],
-  ["Фитнес ентусиасти", false],
-  ["Предприемачи", false],
-  ["Лекари и медицински специалисти", true],
-  ["Диетолози и треньори", false],
-  ["Изследователи", false],
-  ["Инфлуенсъри", true],
-  ["Anti-aging специалисти", false],
-  ["Спортисти", false],
-  ["Жени 35—55 в перименопауза", true],
-  ["Млади професионалисти", false],
-  ["Корпоративни HR и wellbeing екипи", false],
-  ["Инвеститори и стартъпи", true],
-] as const;
-
-const reasons = [
-  { n: "01", h: "Демо, не банер", p: "Продуктът се пипа, вкусва и изпробва на място. Това е разликата между impression и опит." },
-  { n: "02", h: "Аудитория в решение", p: "Хората идват с въпрос „какво да променя“. Ти си отговорът, който е пред тях в този момент." },
-  { n: "03", h: "Само 30 бранда", p: "Village не е панаир. Ограничен брой места означава внимание, а не шум." },
-  { n: "04", h: "Доверие по асоциация", p: "Съорганизатор е Bulgarian Longevity Association. Стоиш до лекари и наука, не до промо щанд." },
-  { n: "05", h: "Съдържание след събитието", p: "Видео, снимки и UGC от два дни — материал за твоя маркетинг до края на годината." },
+  "Предприемачи и мениджъри",
+  "Лекари и специалисти",
+  "Жени 35—55 с висок разполагаем доход",
+  "Инвеститори",
+  "Треньори и нутриционисти",
+  "Корпоративни екипи",
+  "Ранни осиновители на здравни продукти",
+  "Biohacking.bg общност",
+  "Спортисти",
+  "Естетична медицина",
 ];
 
-const territories = [
-  { tag: "Сцена", h: "Гласът", p: "Лекция или панел с твой експерт, лого на екрана, видео между сесиите." },
-  { tag: "Движение", h: "Енергията", p: "Брандирани постелки, вода, екипировка. Твоето име върху всяка сесия." },
-  { tag: "Възстановяване", h: "Емоцията", p: "Cold plunge и дишане — зоната, която се снима и споделя най-много." },
-  { tag: "Village", h: "Продажбата", p: "Щанд, семплинг, промо код на място. Кеш още на 17-ти." },
+const audienceStats = [
+  { n: "6 ч.", l: "Среден престой", p: "Ангажирано внимание на място, не импресия от три секунди." },
+  { n: "35—349 €", l: "Платен вход", p: "Всеки вече е инвестирал в здравето си, преди да влезе." },
+  { n: "×3", l: "Минавания през Village", p: "Повторен контакт с бранда — по няколко пъти на ден." },
+  { n: "35—55", l: "Ядро на аудиторията", p: "Активни професионалисти в най-силните си кариерни години." },
+  { n: "~120 €", l: "Среден разход за билет", p: "Изчислен от реалния микс на трите нива билети." },
+  { n: "249 €", l: "Премиум билетът PEAK", p: "Ограничени места с Premium Lounge и Meet & Greet — запълват се първи." },
 ];
 
-const tiers = ["Изложител", "Silver", "Gold", "Platinum"];
+/* ── 10 пътуването · brand: does this touchpoint put the visitor at a brand? ── */
+const journey = [
+  { t: "10:00", h: "Регистрация и Village", p: "Първи контакт с брандовете още на входа", brand: true },
+  { t: "10:30", h: "Лекция на сцената", p: "25 минути наука на разбираем език", brand: false },
+  { t: "11:15", h: "Активация: движение", p: "Power Plate или пилатес — със записан час", brand: true },
+  { t: "12:00", h: "Village и обяд", p: "Дегустации и разговори с брандовете", brand: true },
+  { t: "13:30", h: "Активация: възстановяване", p: "Cold plunge, breathwork или Recovery", brand: true },
+  { t: "14:30", h: "Уъркшоп", p: "Малка група, продукт в ръцете", brand: true },
+  { t: "15:30", h: "Отново сцената", p: "Панел и въпроси към лекарите", brand: false },
+  { t: "16:30", h: "Village преди тръгване", p: "Покупка и последен разговор", brand: true },
+];
+
+/* ── 11 стойността ── */
+const value = [
+  { h: "Квалифицирани контакти", p: "Списък с участниците от вашите активации и лийдове от щанда — хора, които са дали време, не имейл от томбола." },
+  { h: "Директен опит с продукта", p: "Качественият разговор започва след пробата, не преди нея. Вашият продукт е в ръцете на посетителя, не на рафт." },
+  { h: "Видимост на сцената и в дигитала", p: "Лого пред 1 000 души на място и пред общността на Biohacking.bg преди, по време и след събитието." },
+  { h: "Съдържание за цяла година", p: "Професионални снимки и видео от вашата зона — активи, които маркетингът ви ползва след ноември." },
+  { h: "Отчет след събитието", p: "Посещаемост на зоната, записани сесии, събрани контакти и социален обхват — числа за вашия вътрешен отчет." },
+  { h: "Дългосрочни клиенти", p: "Посетителят свързва бранда ви с преживяване, което помни — основата на повторната покупка." },
+];
+
+/* ── 12 нива ── */
+type Tier = {
+  no: string;
+  name: string;
+  price: string;
+  best?: boolean;
+  has: string[];
+  not: string[];
+};
+
+const tiers: Tier[] = [
+  {
+    no: "01",
+    name: "Сребърен",
+    price: "10 000 €",
+    has: [
+      "Щанд до 6 м² на премиум позиция",
+      "2 пълни билета",
+      "20 билета за Village зоната",
+      "Лого — сайт, дигитал, сцена",
+      "Мостра във фестивалната чанта",
+      "Видео в Village зоната",
+    ],
+    not: ["Брандирана активация в зона", "Лектор на сцената"],
+  },
+  {
+    no: "02",
+    name: "Златен",
+    price: "12 000 €",
+    best: true,
+    has: [
+      "Щанд до 8 м² на премиум позиция",
+      "4 пълни билета",
+      "40 билета за Village зоната",
+      "Брандирана активация в зона Движение или Възстановяване",
+      "Уъркшоп в зона по избор",
+      "Видео на сцената",
+      "Всичко от Сребърен",
+    ],
+    not: ["Лектор на сцената"],
+  },
+  {
+    no: "03",
+    name: "Платинен",
+    price: "17 000 €",
+    has: [
+      "Щанд до 10 м² на премиум позиция",
+      "6 пълни билета",
+      "80 билета за Village зоната",
+      "Лектор на сцената, 25 минути",
+      "Име на брандирана зона",
+      "Категорийна ексклузивност",
+      "Всичко от Златен",
+    ],
+    not: [],
+  },
+];
+
+/* ── 13 Village щанд ── */
+const villageRows: [string, string][] = [
+  ["Щанд площ за 2 дни", "до 6 м²"],
+  ["Лого на сайта", "Включено"],
+  ["Лого в социалните канали", "Включено"],
+  ["Мостра във фестивалната чанта", "Включено"],
+  ["Билети за Village зоната", "20"],
+  ["Право на дегустация и демонстрация", "Включено"],
+];
+
+/* ── 14 сравнение ── */
 type Cell = string | boolean;
-const packages: { row: string; cells: Cell[] }[] = [
-  { row: "Щанд във Village (м²)", cells: ["4", "6", "9", "12"] },
-  { row: "Премиум локация", cells: [false, true, true, true] },
-  { row: "Лого на сайт и социални", cells: [true, true, true, true] },
-  { row: "Лого на сцената", cells: [false, true, true, true] },
-  { row: "Мостра в чантата на посетителя", cells: [false, true, true, true] },
-  { row: "Видео на екрана на сцената", cells: [false, false, true, true] },
-  { row: "Участие в панел", cells: [false, false, true, true] },
-  { row: "Собствена лекция на сцената (25 мин)", cells: [false, false, false, true] },
-  { row: "Брандиране на зона", cells: [false, false, false, true] },
-  { row: "Ексклузивност в категорията", cells: [false, false, false, true] },
-  { row: "Пълни билети за екипа", cells: ["2", "4", "6", "10"] },
-  { row: "Билети за твои клиенти", cells: ["20", "40", "60", "100"] },
-  { row: "Комуникация в бюлетина и социални", cells: [false, "1 споменаване", "1 самостоятелен пост", "2 самостоятелни поста"] },
+const compareRows: { row: string; cells: Cell[] }[] = [
+  { row: "Щанд площ за 2 дни", cells: ["до 6 м²", "до 8 м²", "до 10 м²"] },
+  { row: "Премиум позиция в Village", cells: [true, true, true] },
+  { row: "Пълни билети за двата дни", cells: ["2", "4", "6"] },
+  { row: "Билети за Village зоната", cells: ["20", "40", "80"] },
+  { row: "Лого — сайт, дигитал, сцена", cells: [true, true, true] },
+  { row: "Мостра във фестивалната чанта", cells: [true, true, true] },
+  { row: "Видео в Village зоната", cells: [true, true, true] },
+  { row: "Брандирана активация в зона", cells: [false, true, true] },
+  { row: "Уъркшоп в зона по избор", cells: [false, true, true] },
+  { row: "Видео на сцената", cells: [false, true, true] },
+  { row: "Лектор на сцената, 25 мин", cells: [false, false, true] },
+  { row: "Име на брандирана зона", cells: [false, false, true] },
 ];
-const prices = ["2 500 €", "4 500 €", "7 500 €", "12 000 €"];
+const compareNames = ["Сребърен", "Златен", "Платинен"];
+const comparePrices = ["10 000 €", "12 000 €", "17 000 €"];
 
+/* ── 15 по избор ── */
 const extras = [
-  { h: "Заглавен партньор на зона", p: "Името на бранда ти пред и в комуникацията на цяла зона — Движение, Възстановяване или Village.", price: "по запитване" },
-  { h: "Лекция на сцената", p: "25 минути с твой експерт пред залата, включени в официалната програма и във видеото след събитието.", price: "3 500 €" },
-  { h: "Мостра или флаер в чантата", p: "Твой продукт в ръцете на всеки посетител, преди още да е влязъл в залата.", price: "800 €" },
+  { price: "4 500 €", h: "Партньор на Recovery", p: "Cold plunge и breathwork зоната носи вашето име. Присъствие при всяка сесия, двата дни. Най-сниманата зона на събитието." },
+  { price: "3 000 €", h: "Партньор на Движение", p: "Power Plate или пилатес зоната с ваше име. Записан час, 30 минути, целодневно. Продуктът се пробва на място." },
+  { price: "4 500 €", h: "Презентация / уъркшоп", p: "Сесия до 15 минути с ваш експерт. Запис за вашите канали и място в програмата на сайта." },
+  { price: "500 €", h: "Фестивална чанта", p: "Един рекламен материал за 1 000 души, без щанд. Най-бързият вход в събитието." },
 ];
 
-/**
- * The stage, shown through the people already confirmed. Same source as the
- * public site, so a name cannot be on the deck and missing from the page —
- * or the reverse. Unannounced speakers stay unannounced here too.
- */
-const speakers = announcedSpeakers();
-const lineupSize = SPEAKERS.filter((s) => !s.pending).length;
-const countries = new Set(SPEAKERS.filter((s) => !s.pending && s.country).map((s) => s.country)).size;
+/* ── 16 след ноември ── */
+const after = [
+  { t: "До 10 дни", h: "Отчет с данни", p: "Посещаемост на зоната, записани сесии, лийдове и социален обхват." },
+  { t: "До 14 дни", h: "Фото и видео активи", p: "Професионално заснет материал от вашата зона, с права за ползване." },
+  { t: "Ноември", h: "Event recap", p: "Обобщение на събитието към цялата общност — с партньорите в него." },
+  { t: "До 31 януари", h: "Право на първи отказ", p: "Вашата категория е запазена за 2027 на фиксирана цена, докато не откажете." },
+];
 
-/** One line under the name: what they are, then where. */
-function credential(s: (typeof speakers)[number]): string {
-  const where = [s.role, s.affiliation].filter(Boolean).join(", ");
-  return [s.specialty, where].filter(Boolean).join(" · ");
-}
+/* ── 17 подкрепа ── */
+const supportRows = [
+  { l: "Организатори", names: "Bulgarian Longevity Association · Biohacking.bg" },
+  { l: "Медицински партньори", names: null },
+  { l: "Корпоративни партньори", names: null },
+  { l: "Технологични партньори", names: null },
+  { l: "Медийни партньори", names: null },
+  { l: "Общности", names: null },
+];
 
-const steps = [
-  { n: "01", h: "Кажи ни целта", p: "20 минути разговор: продажби, лийдове или видимост за бранда." },
-  { n: "02", h: "Получаваш оферта", p: "Пакет и активация, съобразени с продукта ти — до 3 работни дни." },
-  { n: "03", h: "Запазваш мястото", p: "Договор, категорията ти е блокирана, влизаш в комуникацията веднага." },
+/* ── 18 founding partners ── */
+const territories = [
+  { h: "Сцена", sub: "Presenting Partner" },
+  { h: "Cold Plunge", sub: "Активация" },
+  { h: "Breathwork", sub: "Активация" },
+  { h: "Recovery Zone", sub: "Активация" },
+  { h: "Power Plate", sub: "Активация" },
+  { h: "Пилатес — постелка", sub: "Активация" },
+  { h: "Пилатес — реформър", sub: "Активация" },
+  { h: "Networking вечеря", sub: "Вечеря, ден 1" },
+  { h: "Фестивална чанта", sub: "Мостра за 1 000 души" },
+  { h: "Village", sub: "30 места" },
+];
+
+const foundingPoints = [
+  "Зона с реален трафик и списък с участници, не щанд с брошури",
+  "Роля на сцената и име в цялата комуникация до ноември",
+  "Отчет с данни след събитието и право на първи отказ за 2027",
 ];
 
 /* ── primitives ─────────────────────────────────────────────────────────── */
@@ -176,18 +308,36 @@ function H2({ children, className = "" }: { children: React.ReactNode; className
  * `name` marks the section for the reading-progress beacon: the admin sees
  * the deepest section a reader reached, in the order they appear here.
  */
-function Section({ name, children, className = "" }: { name: string; children: React.ReactNode; className?: string }) {
+function Section({
+  name,
+  id,
+  children,
+  className = "",
+}: {
+  name: string;
+  id?: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <section data-deck-section={name} className={`px-6 py-16 sm:px-10 sm:py-24 lg:px-14 ${className}`}>
+    <section data-deck-section={name} id={id} className={`px-6 py-16 sm:px-10 sm:py-24 lg:px-14 ${className}`}>
       <div className="mx-auto w-full max-w-6xl">{children}</div>
     </section>
   );
 }
 
-function CornerArrow() {
+function Tick() {
   return (
-    <span className="absolute right-5 top-5 text-bh-teal/70" aria-hidden>
-      <Arrow className="h-6 w-6" />
+    <span className="mt-0.5 shrink-0 text-bh-teal" aria-hidden>
+      ✳
+    </span>
+  );
+}
+
+function Dash() {
+  return (
+    <span className="mt-0.5 shrink-0 text-bh-ink/30" aria-hidden>
+      —
     </span>
   );
 }
@@ -206,6 +356,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
   return (
     <div className="bh-doc min-h-screen text-bh-ink">
       <ViewBeacon token={token} sections={DECK_SECTIONS} />
+
       {/* header */}
       <header className="px-6 pt-8 sm:px-10 lg:px-14">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 border-b border-bh-ink/10 pb-6">
@@ -221,74 +372,183 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
 
       {/* 01 cover */}
       <Section name="cover" className="pt-14 sm:pt-20">
-        <p className="font-mono text-[0.68rem] uppercase tracking-[0.3em] text-bh-ink/50">
-          Biohacking.bg <span className="text-bh-teal">✳</span> Bulgarian Longevity Association
-        </p>
-        <div className="mt-14 grid gap-12 lg:grid-cols-[1.4fr_1fr] lg:items-end">
+        <Eyebrow>Партньорски възможности · 07—08.11.2026</Eyebrow>
+        <div className="mt-8 grid gap-12 lg:grid-cols-[1.4fr_1fr] lg:items-end">
           <div>
-            <Eyebrow>Biohacking Experience · 07—08.11.2026</Eyebrow>
-            <h1 className="mt-6 font-display text-[clamp(3.4rem,10vw,8.4rem)] font-[300] leading-[0.92] tracking-[-0.04em] text-bh-ink">
-              Sofia Life
+            <h1 className="font-display text-[clamp(3.4rem,10vw,8.4rem)] font-[300] leading-[0.92] tracking-[-0.04em] text-bh-ink">
+              Стани
               <br />
-              Summit
+              партньор
             </h1>
-            <div className="mt-8 flex flex-wrap gap-x-8 gap-y-2 font-mono text-[0.72rem] uppercase tracking-[0.2em] text-bh-ink/70">
-              <span>Гранд Хотел Милениум, София</span>
-              <span className="text-bh-teal">1 000+ посетители</span>
-              <span>30 бранда</span>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <span className="rounded-full bg-bh-ink px-5 py-2.5 text-sm font-semibold text-white">
+                Партньорски пакети от 2 500 €
+              </span>
+              <a
+                href="#zonite"
+                className="rounded-full border border-bh-ink/25 px-5 py-2.5 text-sm font-semibold text-bh-ink transition-colors hover:border-bh-ink"
+              >
+                Виж зоните ↓
+              </a>
             </div>
           </div>
-          <p className="max-w-md text-lg font-light leading-relaxed text-bh-ink/70">
-            Два дни, в които 1 000+ души пипат, пробват и решават какво да
-            променят в здравето си. Тази брошура е за брандовете, които искат
-            да са там в този момент.
-          </p>
+          <div>
+            <p className="max-w-md text-lg font-light leading-relaxed text-bh-ink/70">
+              Дълголетието е най-бързо растящата тема в потребителското здраве.
+              Sofia Life Summit я превръща в преживяване: два дни, в които 1 000
+              платили посетители тренират, възстановяват се и изпробват продукти
+              с ръцете си.
+            </p>
+            <p className="mt-4 font-mono text-[0.68rem] uppercase leading-relaxed tracking-[0.2em] text-bh-ink/50">
+              Организирано съвместно от Bulgarian Longevity Association и
+              Biohacking.bg
+            </p>
+          </div>
         </div>
       </Section>
 
-      {/* 02 market */}
-      <Section name="market" className="border-t border-bh-ink/10">
+      {/* 02 форматът */}
+      <Section name="format" className="border-t border-bh-ink/10">
         <Reveal>
-          <Eyebrow>Защо България, защо сега</Eyebrow>
-          <H2>
-            Най-ниската продължителност на живот в ЕС. И най-бързо растящият
-            интерес към здравето.
-          </H2>
+          <Eyebrow>Форматът</Eyebrow>
+          <H2>Защо преживяването продава повече от щанда</H2>
         </Reveal>
         <div className="mt-14 grid gap-10 md:grid-cols-3">
-          {market.map((m, i) => (
-            <Reveal key={m.idx} delay={i * 90}>
+          {format.map((f, i) => (
+            <Reveal key={f.h} delay={i * 90}>
               <div className="border-t border-bh-ink/15 pt-5">
-                <p className="font-mono text-[0.65rem] uppercase tracking-[0.25em] text-bh-teal">
-                  {m.idx}
-                </p>
-                <h3 className="mt-3 text-2xl font-semibold tracking-tight">{m.h}</h3>
-                <p className="mt-3 text-sm font-light leading-relaxed text-bh-ink/65">{m.p}</p>
+                <span className="text-bh-teal" aria-hidden>
+                  ✳
+                </span>
+                <h3 className="mt-3 text-2xl font-semibold tracking-tight">{f.h}</h3>
+                <p className="mt-3 text-sm font-light leading-relaxed text-bh-ink/65">{f.p}</p>
               </div>
             </Reveal>
           ))}
         </div>
       </Section>
 
-      {/* 03 concept */}
-      <Section name="concept" className="border-t border-bh-ink/10">
+      {/* 03 мащаб */}
+      <Section name="scale" className="border-t border-bh-ink/10">
         <Reveal>
-          <Eyebrow>Концепцията</Eyebrow>
-          <H2>Не конференция със столове в редици.</H2>
+          <Eyebrow>Мащаб</Eyebrow>
+          <H2>Двата дни в числа</H2>
+        </Reveal>
+        <div className="mt-12 grid grid-cols-2 gap-x-8 gap-y-12 sm:grid-cols-3 lg:grid-cols-5">
+          {scale.map((s, i) => (
+            <Reveal key={s.l} delay={i * 70}>
+              <div>
+                <div className="font-display text-[clamp(2.6rem,5.4vw,4.6rem)] font-[300] leading-none tracking-[-0.04em]">
+                  {s.n}
+                </div>
+                <div className="mt-4 h-px w-full bg-bh-ink/15" />
+                <p className="mt-3 font-mono text-[0.66rem] uppercase tracking-[0.2em] text-bh-ink/55">{s.l}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+        <Reveal className="mt-14">
+          <div className="rounded-[1.4rem] bg-bh-cloud p-7 ring-1 ring-bh-ink/8">
+            <h3 className="text-lg font-semibold tracking-tight">
+              Платена публика, а не случайни минувачи
+            </h3>
+            <p className="mt-2 max-w-3xl text-sm font-light leading-relaxed text-bh-ink/65">
+              Билети от 35 до 249 € на ранни цени (редовни до 349 €), среден
+              престой около шест часа. Записаните часове за активностите
+              задържат посетителя целия ден.
+            </p>
+            <p className="mt-4 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bh-teal">
+              ↗ Организира се съвместно с Bulgarian Longevity Association
+            </p>
+          </div>
+        </Reveal>
+      </Section>
+
+      {/* 04 организаторите */}
+      <Section name="organizers" className="border-t border-bh-ink/10">
+        <Reveal>
+          <Eyebrow>Организаторите</Eyebrow>
+          <H2>Защо Biohacking.bg и BLA</H2>
           <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-bh-ink/70">
-            Посетителят се движи между четири зони през целия ден: слуша,
-            движи се, възстановява се, пробва брандове. Никой не седи два дни
-            на стол — затова и никой не подминава щанд.
+            Общност, която вече купува в тази категория, и медицинска асоциация,
+            която ѝ дава легитимност.
+          </p>
+        </Reveal>
+        <div className="mt-14 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+          {organizers.map((o, i) => (
+            <Reveal key={o.l} delay={i * 70}>
+              <div>
+                <div className="font-display text-5xl font-[300] leading-none tracking-[-0.04em] text-bh-teal">
+                  {o.n}
+                </div>
+                <h3 className="mt-4 font-mono text-[0.66rem] uppercase tracking-[0.2em] text-bh-ink/55">{o.l}</h3>
+                <p className="mt-2 text-sm font-light leading-relaxed text-bh-ink/65">{o.p}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </Section>
+
+      {/* 05 лекторите */}
+      <Section name="speakers" className="border-t border-bh-ink/10">
+        <Reveal>
+          <Eyebrow>Сцената</Eyebrow>
+          <H2>50 международни лектори</H2>
+          <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-bh-ink/70">
+            Първите обявени имена — лекари и изследователи от шест държави. Нови
+            лектори всяка седмица.
           </p>
         </Reveal>
         <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {zones.map((z, i) => (
+          {speakers.map((s, i) => (
+            <Reveal key={s.name} delay={i * 70}>
+              <article className="group relative aspect-[3/4] overflow-hidden rounded-[1.6rem] bg-[#0a3229] text-white">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={s.photo}
+                  alt={s.name}
+                  loading="lazy"
+                  className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                />
+                {/* Ink gradient from the foot so the type stays legible on any
+                    portrait — the photographs range from studio white to dark. */}
+                <div
+                  aria-hidden
+                  className="absolute inset-0 bg-gradient-to-t from-[#02251f]/90 via-[#02251f]/25 via-50% to-transparent"
+                />
+                <div className="absolute inset-x-4 bottom-4">
+                  <h3 className="font-display text-[1.45rem] font-[500] leading-[1.05] tracking-[-0.02em] text-white">
+                    {s.name}
+                  </h3>
+                  <p className="mt-1.5 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-white/70">
+                    {s.line1}
+                  </p>
+                  <p className="mt-1 text-[0.8rem] font-light leading-snug text-white/85">{s.line2}</p>
+                </div>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+      </Section>
+
+      {/* 06 концепцията */}
+      <Section name="concept" className="border-t border-bh-ink/10">
+        <Reveal>
+          <Eyebrow>Концепцията</Eyebrow>
+          <H2>Четири зони, един ден в тялото ти</H2>
+        </Reveal>
+        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {concept.map((z, i) => (
             <Reveal key={z.no} delay={i * 80}>
               <article className="relative flex min-h-[15rem] flex-col rounded-[1.4rem] bg-bh-cloud p-6 ring-1 ring-bh-ink/8">
-                <span className="w-fit rounded-full border border-bh-ink/20 px-3 py-1 font-mono text-[0.62rem] uppercase tracking-[0.15em] text-bh-ink/70">
-                  {z.tag}
-                </span>
-                <CornerArrow />
+                <div className="flex items-start justify-between">
+                  <span className="w-fit rounded-full border border-bh-ink/20 px-3 py-1 font-mono text-[0.62rem] uppercase tracking-[0.15em] text-bh-ink/70">
+                    {z.tag}
+                  </span>
+                  <span className="text-2xl text-bh-teal/70" aria-hidden>
+                    {z.sym}
+                  </span>
+                </div>
                 <h3 className="mt-8 text-xl font-semibold tracking-tight">{z.h}</h3>
                 <p className="mt-2 text-sm font-light leading-relaxed text-bh-ink/65">{z.p}</p>
                 <span className="mt-auto pt-6 font-display text-6xl font-[300] leading-none tracking-[-0.05em] text-bh-ink/85">
@@ -300,133 +560,108 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
         </div>
       </Section>
 
-      {/* 03b speakers — the stage, as people. Tall portrait cards after the
-          reference: the name set large on the photograph, one line of
-          credential, a white pill at the foot, an arrow disc in the corner
-          and a tag pill (here the country) at the top. */}
-      <Section name="speakers" className="border-t border-bh-ink/10">
+      {/* 07 зоните */}
+      <Section name="zones" id="zonite" className="border-t border-bh-ink/10">
         <Reveal>
-          <Eyebrow>Сцената</Eyebrow>
-          <H2>Имената, които вече са потвърдени.</H2>
+          <Eyebrow>Ядрото на офертата</Eyebrow>
+          <H2>Какво се случва в зоните</H2>
           <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-bh-ink/70">
-            {lineupSize} лектори от {countries} държави — лекари и изследователи,
-            на разбираем език, по 25 минути. Обявяваме нови имена всяка седмица;
-            тук са първите {speakers.length}.
+            Всяка активност е със записан час и ограничен брой места. Всяка от
+            тях може да носи името на партньор.
           </p>
         </Reveal>
-        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {speakers.map((s, i) => (
-            <Reveal key={s.id} delay={i * 70}>
-              <article className="group relative aspect-[3/4] overflow-hidden rounded-[1.6rem] bg-[#0a3229] text-white">
-                {s.photo && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={s.photo}
-                    alt={s.name}
-                    loading="lazy"
-                    className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-                  />
-                )}
-                {/* Ink gradient from the foot so the type stays legible on any
-                    portrait — the photographs range from studio white to dark. */}
-                <div
-                  aria-hidden
-                  className="absolute inset-0 bg-gradient-to-t from-[#02251f]/90 via-[#02251f]/30 via-45% to-transparent"
-                />
+        <div className="mt-14 grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+          {activities.map((a, i) => (
+            <Reveal key={a.no} delay={i * 60}>
+              <div className="border-t border-bh-ink/15 pt-5">
+                <p className="font-mono text-[0.65rem] uppercase tracking-[0.25em] text-bh-teal">/ {a.no}</p>
+                <h3 className="mt-3 text-xl font-semibold tracking-tight">{a.h}</h3>
+                <p className="mt-2 text-sm font-light leading-relaxed text-bh-ink/65">{a.p}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </Section>
 
-                <div className="absolute inset-x-4 top-4 flex items-start justify-between gap-3">
-                  {s.country ? (
-                    <span className="flex items-center gap-2 rounded-full border border-white/35 bg-[#02251f]/45 py-1.5 pl-2.5 pr-3.5 font-mono text-[0.62rem] uppercase tracking-[0.15em] text-white backdrop-blur-md [&_svg]:mt-0">
-                      <CountryMark country={s.country} />
-                      {s.country}
-                    </span>
-                  ) : (
-                    <span />
-                  )}
-                  <span
-                    aria-hidden
-                    className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white text-bh-ink transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                  >
-                    <Arrow className="h-5 w-5" />
+      {/* 08 брандирана зона — the LED-wall visual */}
+      <Section name="brandzone" className="border-t border-bh-ink/10">
+        <Reveal>
+          <Eyebrow>Как изглежда на място</Eyebrow>
+          <H2>Зоната носи вашето име</H2>
+          <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-bh-ink/70">
+            LED стената, разписанието и инструкторът работят под вашия бранд през
+            целия ден — с ваш продукт в ръцете на всеки участник.
+          </p>
+        </Reveal>
+
+        <Reveal className="mt-12">
+          {/* The zone as the visitor sees it: the LED wall over the room. A
+              styled mock rather than a render — honest about being a concept,
+              and it puts the buyer's name on the wall. */}
+          <figure>
+            <div className="relative overflow-hidden rounded-[1.6rem] bg-[#0a3229] p-6 sm:p-10">
+              <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_0%,rgba(11,180,160,0.22),transparent_65%)]" />
+              {/* the LED wall */}
+              <div className="relative mx-auto max-w-3xl rounded-2xl border border-white/15 bg-[#04231d] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.45)] sm:p-10">
+                <div className="flex items-center justify-between font-mono text-[0.6rem] uppercase tracking-[0.3em] text-white/45">
+                  <span>Sofia Life Summit 26</span>
+                  <span className="flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-bh-teal" aria-hidden />
+                    Live
                   </span>
                 </div>
-
-                <div className="absolute inset-x-4 bottom-4">
-                  {s.title && (
-                    <p className="font-mono text-[0.62rem] uppercase tracking-[0.2em] text-white/70">
-                      {s.title}
-                    </p>
-                  )}
-                  <h3 className="mt-1 font-display text-[1.75rem] font-[500] leading-[1.02] tracking-[-0.02em] text-white">
-                    {s.name}
-                  </h3>
-                  <p className="mt-2 line-clamp-2 text-[0.8rem] font-light leading-snug text-white/80">
-                    {credential(s)}
-                  </p>
-                  <Link
-                    href="/#lektori"
-                    className="mt-4 flex items-center justify-between rounded-full bg-white px-5 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-bh-ink transition-colors hover:bg-bh-lime-pale"
-                  >
-                    Виж лекторите
-                    <span aria-hidden className="text-base leading-none">›</span>
-                  </Link>
+                <p className="mt-8 font-display text-[clamp(1.8rem,5vw,3.6rem)] font-[600] uppercase leading-[0.95] tracking-[-0.02em] text-white">
+                  Pilates
+                  <br />
+                  Reformer Flow
+                </p>
+                <p className="mt-4 inline-block rounded-md bg-[#cef870] px-3 py-1.5 font-mono text-[0.72rem] font-bold uppercase tracking-[0.2em] text-[#02251f]">
+                  [Вашият бранд]
+                </p>
+                <div className="mt-8 flex items-center gap-3 border-t border-white/10 pt-5 font-mono text-[0.68rem] uppercase tracking-[0.25em] text-white/70">
+                  <span className="rounded-full border border-white/20 px-3 py-1">13:45</span>
+                  <span className="rounded-full border border-white/20 px-3 py-1">45 мин</span>
                 </div>
-              </article>
-            </Reveal>
-          ))}
-        </div>
-      </Section>
-
-      {/* 04 scale */}
-      <Section name="scale" className="border-t border-bh-ink/10">
-        <Reveal>
-          <Eyebrow>Мащабът</Eyebrow>
+              </div>
+              {/* floor line, to ground the wall in a room */}
+              <div aria-hidden className="relative mx-auto mt-6 h-px max-w-4xl bg-white/15" />
+            </div>
+            <figcaption className="mt-3 font-mono text-[0.62rem] uppercase leading-relaxed tracking-[0.2em] text-bh-ink/45">
+              Cold plunge и реформър зоните на Sofia Life Summit — визуализация в
+              Гранд Хотел Милениум.
+            </figcaption>
+          </figure>
         </Reveal>
-        <div className="mt-10 grid grid-cols-2 gap-x-8 gap-y-12 lg:grid-cols-4">
-          {scale.map((s, i) => (
-            <Reveal key={s.l} delay={i * 70}>
-              <div>
-                <div className="font-display text-[clamp(3rem,6vw,5.2rem)] font-[300] leading-none tracking-[-0.04em]">
-                  {s.n}
-                </div>
-                <div className="mt-4 h-px w-full bg-bh-ink/15" />
-                <p className="mt-3 font-mono text-[0.68rem] uppercase tracking-[0.2em] text-bh-ink/55">{s.l}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-        <div className="mt-16 grid gap-x-8 gap-y-12 border-t border-bh-ink/10 pt-14 md:grid-cols-3">
-          {scaleAccent.map((s, i) => (
-            <Reveal key={s.l} delay={i * 70}>
-              <div>
-                <div className="font-display text-[clamp(3rem,6vw,5.2rem)] font-[300] leading-none tracking-[-0.04em] text-bh-teal">
-                  {s.n}
-                </div>
-                <div className="mt-4 h-px w-full bg-bh-teal/30" />
-                <p className="mt-3 max-w-xs font-mono text-[0.68rem] uppercase leading-relaxed tracking-[0.2em] text-bh-ink/55">{s.l}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
+
+        <Reveal className="mt-10">
+          <p className="max-w-2xl text-lg font-light leading-relaxed text-bh-ink/70">
+            Същият формат при вас: вашето лого, вашият инструктор, вашият продукт
+            в ръцете на участниците.
+          </p>
+          <ul className="mt-6 grid gap-x-10 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
+            {brandZonePoints.map((p) => (
+              <li key={p} className="flex items-start gap-2.5 text-sm text-bh-ink/80">
+                <Tick />
+                {p}
+              </li>
+            ))}
+          </ul>
+        </Reveal>
       </Section>
 
-      {/* 05 audience */}
+      {/* 09 публиката */}
       <Section name="audience" className="border-t border-bh-ink/10">
         <Reveal>
-          <Eyebrow>Кой стои пред щанда ти</Eyebrow>
-          <H2>Хора, които вече плащат за здравето си.</H2>
-          <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-bh-ink/70">
-            Билетът е от 50 €. Това само по себе си пресява публиката: идват
-            хора с намерение и с бюджет, не случайни минувачи от мол.
-          </p>
+          <Eyebrow>Публиката</Eyebrow>
+          <H2>1 000 души, които вече купуват</H2>
         </Reveal>
         <Reveal className="mt-10">
           <div className="flex flex-wrap gap-2.5">
-            {audience.map(([label, on]) => (
+            {audience.map((label, i) => (
               <span
                 key={label}
                 className={
-                  on
+                  i % 3 === 0
                     ? "rounded-full bg-bh-teal px-4 py-2 text-sm font-medium text-white"
                     : "rounded-full border border-bh-ink/20 px-4 py-2 text-sm text-bh-ink/80"
                 }
@@ -436,185 +671,438 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
             ))}
           </div>
         </Reveal>
-      </Section>
-
-      {/* 06 reasons */}
-      <Section name="reasons" className="border-t border-bh-ink/10">
-        <Reveal>
-          <Eyebrow>Защо това работи по-добре от реклама</Eyebrow>
-          <H2>Пет причини брандовете да се връщат всяка година.</H2>
-        </Reveal>
-        <div className="mt-14 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-5">
-          {reasons.map((r, i) => (
-            <Reveal key={r.n} delay={i * 70}>
+        <div className="mt-14 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+          {audienceStats.map((s, i) => (
+            <Reveal key={s.l} delay={i * 70}>
               <div>
-                <span className="font-display text-5xl font-[300] leading-none tracking-[-0.04em] text-bh-teal">
-                  {r.n}
-                </span>
-                <h3 className="mt-5 text-lg font-semibold tracking-tight">{r.h}</h3>
-                <p className="mt-2 text-sm font-light leading-relaxed text-bh-ink/65">{r.p}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </Section>
-
-      {/* 07 territories */}
-      <Section name="territories" className="border-t border-bh-ink/10">
-        <Reveal>
-          <Eyebrow>Територии за брандиране</Eyebrow>
-          <H2>Избери зона и я направи своя.</H2>
-        </Reveal>
-        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {territories.map((t, i) => (
-            <Reveal key={t.tag} delay={i * 80}>
-              <article className="relative flex min-h-[13rem] flex-col rounded-[1.4rem] bg-bh-cloud p-6 ring-1 ring-bh-ink/8">
-                <span className="w-fit rounded-full border border-bh-ink/20 px-3 py-1 font-mono text-[0.62rem] uppercase tracking-[0.15em] text-bh-ink/70">
-                  {t.tag}
-                </span>
-                <CornerArrow />
-                <h3 className="mt-8 text-2xl font-semibold tracking-tight">{t.h}</h3>
-                <p className="mt-2 text-sm font-light leading-relaxed text-bh-ink/65">{t.p}</p>
-              </article>
-            </Reveal>
-          ))}
-        </div>
-      </Section>
-
-      {/* 08 packages */}
-      <Section name="packages" className="border-t border-bh-ink/10">
-        <Reveal>
-          <Eyebrow>Партньорски пакети</Eyebrow>
-        </Reveal>
-        <Reveal className="mt-10 overflow-x-auto">
-          <table className="w-full min-w-[52rem] text-sm">
-            <thead>
-              <tr>
-                <th className="w-[34%] pb-4 text-left" />
-                {tiers.map((t, i) => (
-                  <th
-                    key={t}
-                    className={`pb-4 text-center font-display text-lg font-semibold tracking-tight ${
-                      i === 3 ? "text-bh-teal" : "text-bh-ink"
-                    }`}
-                  >
-                    {t}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {packages.map((p) => (
-                <tr key={p.row} className="border-t border-bh-ink/10">
-                  <td className="py-3.5 pr-4 text-bh-ink/85">{p.row}</td>
-                  {p.cells.map((c, i) => (
-                    <td key={i} className="py-3.5 text-center">
-                      {c === true ? (
-                        <span className="text-bh-teal">включено</span>
-                      ) : c === false ? (
-                        <span className="text-bh-ink/25">—</span>
-                      ) : (
-                        <span className="text-bh-ink/85">{c}</span>
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-              <tr className="border-t border-bh-ink/20">
-                <td className="pt-6 font-mono text-[0.65rem] uppercase tracking-[0.2em] text-bh-ink/50">
-                  Инвестиция
-                </td>
-                {prices.map((p, i) => (
-                  <td
-                    key={p}
-                    className={`pt-6 text-center font-display text-2xl font-semibold tracking-tight ${
-                      i === 3 ? "text-bh-teal" : "text-bh-ink"
-                    }`}
-                  >
-                    {p}
-                  </td>
-                ))}
-              </tr>
-            </tbody>
-          </table>
-        </Reveal>
-        <div className="mt-8 flex flex-wrap justify-between gap-4 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-bh-ink/50">
-          <span>Цените са без ДДС · местата са ограничени до 30 бранда</span>
-          <span>Diamond партньорство — по запитване</span>
-        </div>
-      </Section>
-
-      {/* 09 extras */}
-      <Section name="extras" className="border-t border-bh-ink/10">
-        <Reveal>
-          <Eyebrow>Допълнително</Eyebrow>
-          <H2>Добави точно това, което ти трябва.</H2>
-        </Reveal>
-        <div className="mt-14 grid gap-4 md:grid-cols-3">
-          {extras.map((e, i) => (
-            <Reveal key={e.h} delay={i * 80}>
-              <article className="flex min-h-[15rem] flex-col rounded-[1.4rem] bg-bh-cloud p-6 ring-1 ring-bh-ink/8">
-                <h3 className="text-xl font-semibold tracking-tight">{e.h}</h3>
-                <p className="mt-3 text-sm font-light leading-relaxed text-bh-ink/65">{e.p}</p>
-                <div className="mt-auto pt-6 font-display text-2xl font-semibold tracking-tight text-bh-teal">
-                  {e.price}
-                </div>
-              </article>
-            </Reveal>
-          ))}
-        </div>
-        <Reveal className="mt-8">
-          <p className="max-w-3xl text-sm font-light leading-relaxed text-bh-ink/65">
-            Диджитъл пакет (бюлетин, реклама, съдържание с инфлуенсъри),
-            брандиран networking коктейл и партньорство върху билета — правим
-            ги по мярка.
-          </p>
-        </Reveal>
-      </Section>
-
-      {/* 10 next step */}
-      <Section name="next" className="border-t border-bh-ink/10">
-        <Reveal>
-          <Eyebrow>Следваща стъпка</Eyebrow>
-          <H2>
-            Village е с 30 места. Категориите се затварят по реда на
-            подписване.
-          </H2>
-        </Reveal>
-        <div className="mt-14 grid gap-x-8 gap-y-10 md:grid-cols-3">
-          {steps.map((s, i) => (
-            <Reveal key={s.n} delay={i * 80}>
-              <div>
-                <span className="font-display text-5xl font-[300] leading-none tracking-[-0.04em] text-bh-teal">
-                  {s.n}
-                </span>
-                <h3 className="mt-5 text-lg font-semibold tracking-tight">{s.h}</h3>
+                <div className="font-display text-5xl font-[300] leading-none tracking-[-0.04em]">{s.n}</div>
+                <div className="mt-4 h-px w-full bg-bh-ink/15" />
+                <h3 className="mt-3 font-mono text-[0.66rem] uppercase tracking-[0.2em] text-bh-ink/55">{s.l}</h3>
                 <p className="mt-2 text-sm font-light leading-relaxed text-bh-ink/65">{s.p}</p>
               </div>
             </Reveal>
           ))}
         </div>
-        <Reveal className="mt-14">
-          <a
-            href={MAILTO}
-            className="bh-gradient inline-flex items-center gap-2 rounded-full px-8 py-4 text-base font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
-          >
-            Запази място за твоя бранд <Arrow className="h-4 w-4" />
-          </a>
+      </Section>
+
+      {/* 10 пътуването — timeline infographic */}
+      <Section name="journey" className="border-t border-bh-ink/10">
+        <Reveal>
+          <Eyebrow>Един ден на място</Eyebrow>
+          <H2>Пътуването на посетителя</H2>
+          <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-bh-ink/70">
+            Записаните часове разпределят деня между зоните — и връщат всеки
+            посетител при брандовете по няколко пъти.
+          </p>
+        </Reveal>
+        <Reveal className="mt-12">
+          <ol className="relative ml-2 border-l border-bh-ink/15 sm:ml-24">
+            {journey.map((j) => (
+              <li key={j.t} className="relative pb-8 pl-8 last:pb-0 sm:pl-10">
+                {/* teal dot = the visitor is standing at a brand */}
+                <span
+                  aria-hidden
+                  className={`absolute -left-[7px] top-1.5 h-3.5 w-3.5 rounded-full ring-4 ring-white ${
+                    j.brand ? "bg-bh-teal" : "border border-bh-ink/30 bg-white"
+                  }`}
+                />
+                <span className="font-mono text-[0.72rem] tabular-nums tracking-[0.15em] text-bh-ink/50 sm:absolute sm:-left-24 sm:top-0.5">
+                  {j.t}
+                </span>
+                <div className="mt-1 sm:mt-0">
+                  <span className="text-lg font-semibold tracking-tight">{j.h}</span>
+                  {j.brand && (
+                    <span className="ml-3 inline-block rounded-full bg-bh-teal/12 px-2.5 py-0.5 align-middle font-mono text-[0.58rem] uppercase tracking-[0.15em] text-bh-teal">
+                      Контакт с бранда
+                    </span>
+                  )}
+                  <p className="mt-1 text-sm font-light leading-relaxed text-bh-ink/65">{j.p}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </Reveal>
+        <Reveal className="mt-10">
+          <p className="rounded-[1.4rem] bg-bh-cloud p-6 text-sm font-medium leading-relaxed text-bh-ink ring-1 ring-bh-ink/8">
+            Осем допирни точки на ден — вашият бранд е на поне три от тях,
+            независимо от пакета.
+          </p>
         </Reveal>
       </Section>
 
-      <footer className="px-6 pb-12 sm:px-10 lg:px-14">
-        <div className="mx-auto flex w-full max-w-6xl flex-wrap justify-between gap-4 border-t border-bh-ink/10 pt-8 font-mono text-[0.65rem] uppercase tracking-[0.2em] text-bh-ink/50">
-          <a href={`mailto:${CONTACT}`} className="hover:text-bh-ink">
+      {/* 11 стойността */}
+      <Section name="value" className="border-t border-bh-ink/10">
+        <Reveal>
+          <Eyebrow>Стойността</Eyebrow>
+          <H2>Какво получава вашата компания</H2>
+          <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-bh-ink/70">
+            Написано от вашата гледна точка: какво остава за бранда, когато
+            двата дни свършат.
+          </p>
+        </Reveal>
+        <div className="mt-14 grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+          {value.map((v, i) => (
+            <Reveal key={v.h} delay={i * 60}>
+              <div className="border-t border-bh-ink/15 pt-5">
+                <span className="text-bh-teal" aria-hidden>
+                  ✳
+                </span>
+                <h3 className="mt-3 text-xl font-semibold tracking-tight">{v.h}</h3>
+                <p className="mt-2 text-sm font-light leading-relaxed text-bh-ink/65">{v.p}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </Section>
+
+      {/* 12 нива */}
+      <Section name="packages" className="border-t border-bh-ink/10">
+        <Reveal>
+          <Eyebrow>Партньорства</Eyebrow>
+          <H2>Три партньорски нива</H2>
+          <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-bh-ink/70">
+            Местата на всяко ниво са ограничени. Категорийната ексклузивност е
+            запазена за Платинен — една марка в сегмента.
+          </p>
+        </Reveal>
+        <div className="mt-14 grid gap-4 lg:grid-cols-3">
+          {tiers.map((t, i) => (
+            <Reveal key={t.no} delay={i * 80}>
+              <article
+                className={`relative flex h-full flex-col rounded-[1.6rem] p-7 ${
+                  t.best
+                    ? "bg-[#0a3229] text-white ring-1 ring-[#0a3229]"
+                    : "bg-bh-cloud text-bh-ink ring-1 ring-bh-ink/8"
+                }`}
+              >
+                {t.best && (
+                  <span className="absolute -top-3 left-7 rounded-full bg-[#cef870] px-3 py-1 font-mono text-[0.58rem] font-bold uppercase tracking-[0.2em] text-[#02251f]">
+                    Най-добра стойност
+                  </span>
+                )}
+                <p className={`font-mono text-[0.62rem] uppercase tracking-[0.25em] ${t.best ? "text-white/50" : "text-bh-ink/45"}`}>
+                  Ниво {t.no}
+                </p>
+                <h3 className="mt-3 font-display text-3xl font-[600] tracking-[-0.02em]">{t.name}</h3>
+                <p className="mt-4 font-display text-4xl font-[300] tracking-[-0.03em]">
+                  {t.price}
+                  <span className={`ml-2 align-middle font-sans text-xs font-normal ${t.best ? "text-white/50" : "text-bh-ink/45"}`}>
+                    / без ДДС
+                  </span>
+                </p>
+                <ul className={`mt-7 flex flex-col gap-2.5 border-t pt-6 text-sm ${t.best ? "border-white/15" : "border-bh-ink/10"}`}>
+                  {t.has.map((f) => (
+                    <li key={f} className="flex items-start gap-2.5">
+                      <span className={`mt-0.5 shrink-0 ${t.best ? "text-[#cef870]" : "text-bh-teal"}`} aria-hidden>
+                        ✳
+                      </span>
+                      {f}
+                    </li>
+                  ))}
+                  {t.not.map((f) => (
+                    <li key={f} className={`flex items-start gap-2.5 ${t.best ? "text-white/40" : "text-bh-ink/40"}`}>
+                      <Dash />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+      </Section>
+
+      {/* 13 Village щанд */}
+      <Section name="village" className="border-t border-bh-ink/10">
+        <div className="grid gap-10 lg:grid-cols-[1fr_1.3fr] lg:items-start">
+          <Reveal>
+            <Eyebrow>Village щанд</Eyebrow>
+            <H2>Village щанд</H2>
+            <p className="mt-6 max-w-md text-lg font-light leading-relaxed text-bh-ink/70">
+              Присъствие в зоната на брандовете за двата дни, без допълнения.
+            </p>
+            <p className="mt-6 font-display text-5xl font-[300] tracking-[-0.03em]">
+              2 500 €
+              <span className="ml-2 align-middle font-sans text-xs font-normal text-bh-ink/45">/ без ДДС</span>
+            </p>
+            <p className="mt-4 max-w-md text-sm font-light leading-relaxed text-bh-ink/65">
+              В цената влизат 20 билета за Village зоната, право на дегустация и
+              позиция по маршрута на всички 1 000 посетители.
+            </p>
+          </Reveal>
+          <Reveal delay={100}>
+            <div className="rounded-[1.4rem] bg-bh-cloud p-2 ring-1 ring-bh-ink/8">
+              <table className="w-full text-sm">
+                <tbody>
+                  {villageRows.map(([k, v]) => (
+                    <tr key={k} className="border-b border-bh-ink/8 last:border-0">
+                      <td className="px-5 py-3.5 text-bh-ink/75">{k}</td>
+                      <td className="px-5 py-3.5 text-right font-medium">
+                        <span className="mr-2 text-bh-teal" aria-hidden>
+                          ✳
+                        </span>
+                        {v}
+                      </td>
+                    </tr>
+                  ))}
+                  <tr className="border-b border-bh-ink/8">
+                    <td className="px-5 py-3.5 text-bh-ink/40">Брандирана активация в зона</td>
+                    <td className="px-5 py-3.5 text-right text-bh-ink/40">—</td>
+                  </tr>
+                  <tr>
+                    <td className="px-5 py-3.5 text-bh-ink/40">Лектор на сцената</td>
+                    <td className="px-5 py-3.5 text-right text-bh-ink/40">—</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="mt-3 text-right font-mono text-[0.6rem] uppercase tracking-[0.2em] text-bh-ink/40">
+              Цените са без ДДС
+            </p>
+          </Reveal>
+        </div>
+      </Section>
+
+      {/* 14 сравнение */}
+      <Section name="compare" className="border-t border-bh-ink/10">
+        <Reveal>
+          <Eyebrow>Сравнение</Eyebrow>
+          <H2>Какво включва всяко ниво</H2>
+        </Reveal>
+        <Reveal className="mt-12">
+          <div className="overflow-x-auto rounded-[1.4rem] bg-bh-cloud ring-1 ring-bh-ink/8">
+            <table className="w-full min-w-[42rem] text-sm">
+              <thead>
+                <tr className="border-b border-bh-ink/10">
+                  <th className="px-5 py-4 text-left font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bh-ink/45" />
+                  {compareNames.map((n) => (
+                    <th key={n} className="px-5 py-4 text-right font-display text-lg font-[600] tracking-tight">
+                      {n}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {compareRows.map((r) => (
+                  <tr key={r.row} className="border-b border-bh-ink/8">
+                    <td className="px-5 py-3 text-bh-ink/75">{r.row}</td>
+                    {r.cells.map((c, i) => (
+                      <td key={i} className="px-5 py-3 text-right">
+                        {c === true ? (
+                          <span className="text-bh-teal" aria-hidden>
+                            ✳
+                          </span>
+                        ) : c === false ? (
+                          <span className="text-bh-ink/30">—</span>
+                        ) : (
+                          <span className="font-medium">{c}</span>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+                <tr>
+                  <td className="px-5 py-4" />
+                  {comparePrices.map((p) => (
+                    <td key={p} className="px-5 py-4 text-right font-display text-xl font-[500] tracking-tight">
+                      {p}
+                    </td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-3 text-sm font-light text-bh-ink/60">
+            Village щанд без пакет — 2 500 € (до 6 м²), без активация и
+            допълнения
+          </p>
+          <p className="mt-1 font-mono text-[0.6rem] uppercase tracking-[0.2em] text-bh-ink/40">
+            Цените са без ДДС
+          </p>
+        </Reveal>
+      </Section>
+
+      {/* 15 по избор */}
+      <Section name="extras" className="border-t border-bh-ink/10">
+        <Reveal>
+          <Eyebrow>По избор</Eyebrow>
+          <H2>Отделни възможности</H2>
+        </Reveal>
+        <div className="mt-14 grid gap-x-10 gap-y-12 sm:grid-cols-2">
+          {extras.map((e, i) => (
+            <Reveal key={e.h} delay={i * 70}>
+              <div className="border-t border-bh-ink/15 pt-5">
+                <div className="font-display text-4xl font-[300] tracking-[-0.03em] text-bh-teal">{e.price}</div>
+                <h3 className="mt-3 text-xl font-semibold tracking-tight">{e.h}</h3>
+                <p className="mt-2 max-w-md text-sm font-light leading-relaxed text-bh-ink/65">{e.p}</p>
+              </div>
+            </Reveal>
+          ))}
+          <Reveal delay={extras.length * 70}>
+            <div className="border-t border-bh-ink/15 pt-5">
+              <div className="flex items-baseline gap-3">
+                <span className="font-display text-4xl font-[300] tracking-[-0.03em] text-bh-teal">Diamond</span>
+                <span className="font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bh-ink/45">
+                  Единствено · По запитване
+                </span>
+              </div>
+              <p className="mt-2 max-w-md text-sm font-light leading-relaxed text-bh-ink/65">
+                Заглавен партньор на събитието. Име в цялата комуникация и в
+                медиите. Ексклузивност в категорията.
+              </p>
+            </div>
+          </Reveal>
+        </div>
+      </Section>
+
+      {/* 16 след ноември */}
+      <Section name="after" className="border-t border-bh-ink/10">
+        <Reveal>
+          <Eyebrow>След ноември</Eyebrow>
+          <H2>Партньорството не свършва с феста</H2>
+        </Reveal>
+        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {after.map((a, i) => (
+            <Reveal key={a.h} delay={i * 80}>
+              <article className="flex h-full flex-col rounded-[1.4rem] bg-bh-cloud p-6 ring-1 ring-bh-ink/8">
+                <p className="font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bh-teal">{a.t}</p>
+                <h3 className="mt-4 text-lg font-semibold tracking-tight">{a.h}</h3>
+                <p className="mt-2 text-sm font-light leading-relaxed text-bh-ink/65">{a.p}</p>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+      </Section>
+
+      {/* 17 подкрепа */}
+      <Section name="support" className="border-t border-bh-ink/10">
+        <Reveal>
+          <Eyebrow>Подкрепа</Eyebrow>
+          <H2>Партньори и организации</H2>
+          <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-bh-ink/70">
+            Мястото на вашето лого — до организациите, които вече стоят зад
+            събитието.
+          </p>
+        </Reveal>
+        <Reveal className="mt-12">
+          <div className="flex flex-col">
+            {supportRows.map((r) => (
+              <div
+                key={r.l}
+                className="flex flex-col gap-3 border-t border-bh-ink/10 py-5 last:border-b sm:flex-row sm:items-center sm:justify-between"
+              >
+                <span className="font-mono text-[0.66rem] uppercase tracking-[0.25em] text-bh-ink/55">{r.l}</span>
+                {r.names ? (
+                  <span className="text-sm font-medium">{r.names}</span>
+                ) : (
+                  <span className="flex gap-2" aria-label="свободни места">
+                    {[0, 1, 2].map((i) => (
+                      <span key={i} className="h-9 w-24 rounded-lg bg-bh-ink/[0.04] ring-1 ring-bh-ink/8" />
+                    ))}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+          <p className="mt-4 font-mono text-[0.62rem] uppercase leading-relaxed tracking-[0.2em] text-bh-ink/45">
+            Логата се добавят при потвърждение — първите партньори застават
+            най-горе.
+          </p>
+        </Reveal>
+      </Section>
+
+      {/* 18 founding partners */}
+      <Section name="founding" className="border-t border-bh-ink/10">
+        <Reveal>
+          <Eyebrow>Партньори · 2026</Eyebrow>
+          <H2>Първите имена още не са заети</H2>
+        </Reveal>
+        <div className="mt-12 grid gap-6 lg:grid-cols-[1fr_1.4fr]">
+          <Reveal>
+            <article className="flex h-full flex-col rounded-[1.6rem] bg-[#0a3229] p-8 text-white">
+              <p className="font-mono text-[0.62rem] uppercase tracking-[0.3em] text-[#cef870]">
+                Founding Partner 2026
+              </p>
+              <h3 className="mt-5 font-display text-[clamp(1.7rem,3vw,2.4rem)] font-[500] leading-[1.08] tracking-[-0.02em]">
+                Първото име, което България ще свърже с дълголетието.
+              </h3>
+              <ul className="mt-8 flex flex-col gap-3 border-t border-white/15 pt-6 text-sm text-white/85">
+                {foundingPoints.map((p) => (
+                  <li key={p} className="flex items-start gap-2.5">
+                    <span className="mt-0.5 shrink-0 text-[#cef870]" aria-hidden>
+                      ✳
+                    </span>
+                    {p}
+                  </li>
+                ))}
+              </ul>
+            </article>
+          </Reveal>
+          <Reveal delay={100}>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {territories.map((t) => (
+                <div
+                  key={t.h}
+                  className="flex items-center justify-between gap-3 rounded-[1.1rem] bg-bh-cloud px-5 py-4 ring-1 ring-bh-ink/8"
+                >
+                  <div>
+                    <p className="font-semibold tracking-tight">{t.h}</p>
+                    <p className="mt-0.5 font-mono text-[0.58rem] uppercase tracking-[0.15em] text-bh-ink/45">
+                      {t.sub}
+                    </p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-bh-lime-pale px-3 py-1 font-mono text-[0.58rem] font-bold uppercase tracking-[0.15em] text-[#02251f]">
+                    Свободна
+                  </span>
+                </div>
+              ))}
+            </div>
+            <p className="mt-4 font-mono text-[0.62rem] uppercase leading-relaxed tracking-[0.2em] text-bh-ink/45">
+              Една марка на категория. Местата се разпределят по реда на
+              потвърждаване.
+            </p>
+          </Reveal>
+        </div>
+      </Section>
+
+      {/* 19 следваща стъпка */}
+      <Section name="next" className="border-t border-bh-ink/10 pb-24">
+        <Reveal>
+          <Eyebrow>Организатори</Eyebrow>
+          <h2 className="mt-5 font-display text-[clamp(2.6rem,7vw,5.6rem)] font-[300] leading-[0.95] tracking-[-0.04em] text-bh-ink">
+            Заповядайте
+            <br />
+            на борда
+          </h2>
+          <p className="mt-8 max-w-xl text-lg font-light leading-relaxed text-bh-ink/70">
+            Двадесет минути разговор стигат, за да прецените дали форматът
+            работи за вашия бранд.
+          </p>
+          <a
+            href={MAILTO}
+            className="mt-8 inline-block rounded-full bg-bh-ink px-8 py-4 text-base font-semibold text-white transition-transform hover:-translate-y-0.5"
+          >
             {CONTACT}
           </a>
-          <span>07—08 ноември 2026 · Гранд Хотел Милениум, София</span>
-          <span>
-            Biohacking.bg <span className="text-bh-teal">✳</span> Bulgarian Longevity Association
-          </span>
-        </div>
-      </footer>
+          <dl className="mt-14 grid gap-x-8 gap-y-6 border-t border-bh-ink/10 pt-8 sm:grid-cols-3">
+            <div>
+              <dt className="font-mono text-[0.62rem] uppercase tracking-[0.25em] text-bh-ink/45">Дати</dt>
+              <dd className="mt-2 font-medium">07—08 ноември 2026</dd>
+            </div>
+            <div>
+              <dt className="font-mono text-[0.62rem] uppercase tracking-[0.25em] text-bh-ink/45">Място</dt>
+              <dd className="mt-2 font-medium">Гранд Хотел Милениум, София</dd>
+            </div>
+            <div>
+              <dt className="font-mono text-[0.62rem] uppercase tracking-[0.25em] text-bh-ink/45">Партньорства</dt>
+              <dd className="mt-2 font-medium">Мария Варсанова</dd>
+            </div>
+          </dl>
+          <p className="mt-10 font-mono text-[0.68rem] uppercase tracking-[0.3em] text-bh-ink/40">
+            thelongevitysummit.eu
+          </p>
+        </Reveal>
+      </Section>
     </div>
   );
 }
