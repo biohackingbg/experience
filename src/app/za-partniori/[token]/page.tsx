@@ -86,12 +86,12 @@ const concept = [
 
 /* ── 07 зоните ── */
 const activities = [
-  { no: "01", h: "Cold Plunge", p: "Потапяне в студена вода с инструктор и подготовка." },
-  { no: "02", h: "Breathwork", p: "Групови дихателни сесии по 30 минути." },
-  { no: "03", h: "Recovery Zone", p: "Компресия, перкусия и възстановяване след натоварване." },
-  { no: "04", h: "Power Plate Zone", p: "Вибрационна тренировка с демонстрации на живо." },
-  { no: "05", h: "Пилатес — постелка", p: "Групови сесии за начинаещи и напреднали." },
-  { no: "06", h: "Пилатес — реформър", p: "Малки групи с инструктор, със записан час." },
+  { no: "01", h: "Cold Plunge", p: "Потапяне в студена вода с инструктор и подготовка.", img: "/deck/act-cold.jpg" },
+  { no: "02", h: "Breathwork", p: "Групови дихателни сесии по 30 минути.", img: "/deck/act-breathwork.jpg" },
+  { no: "03", h: "Recovery Zone", p: "Компресия, перкусия и възстановяване след натоварване.", img: "/deck/act-recovery.jpg" },
+  { no: "04", h: "Power Plate Zone", p: "Вибрационна тренировка с демонстрации на живо.", img: "/deck/act-powerplate.jpg" },
+  { no: "05", h: "Пилатес — постелка", p: "Групови сесии за начинаещи и напреднали.", img: "/deck/act-pilates-mat.jpg" },
+  { no: "06", h: "Пилатес — реформър", p: "Малки групи с инструктор, със записан час.", img: "/deck/act-pilates-reformer.jpg" },
 ];
 
 /* ── 08 брандирана зона ── */
@@ -584,28 +584,23 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
             тях може да носи името на партньор.
           </p>
         </Reveal>
-        <Reveal className="mt-12">
-          <figure>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/deck/cold.jpg"
-              alt="Cold plunge — потапяне в студена вода"
-              loading="lazy"
-              className="w-full rounded-[1.6rem] object-cover"
-            />
-            <figcaption className="mt-3 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bh-ink/45">
-              Възстановяване · Cold plunge
-            </figcaption>
-          </figure>
-        </Reveal>
-        <div className="mt-12 grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-14 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
           {activities.map((a, i) => (
             <Reveal key={a.no} delay={i * 60}>
-              <div className="border-t border-bh-ink/15 pt-5">
-                <p className="font-mono text-[0.65rem] uppercase tracking-[0.25em] text-bh-teal">/ {a.no}</p>
-                <h3 className="mt-3 text-xl font-semibold tracking-tight">{a.h}</h3>
-                <p className="mt-2 text-sm font-light leading-relaxed text-bh-ink/65">{a.p}</p>
-              </div>
+              <figure>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={a.img}
+                  alt={a.h}
+                  loading="lazy"
+                  className="aspect-[4/3] w-full rounded-[1.4rem] object-cover"
+                />
+                <figcaption className="mt-4 border-t border-bh-ink/15 pt-4">
+                  <p className="font-mono text-[0.65rem] uppercase tracking-[0.25em] text-bh-teal">/ {a.no}</p>
+                  <h3 className="mt-2 text-xl font-semibold tracking-tight">{a.h}</h3>
+                  <p className="mt-2 text-sm font-light leading-relaxed text-bh-ink/65">{a.p}</p>
+                </figcaption>
+              </figure>
             </Reveal>
           ))}
         </div>
