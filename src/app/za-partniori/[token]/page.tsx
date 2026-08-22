@@ -285,8 +285,8 @@ const foundingPoints = [
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <p className="flex items-center gap-3 font-mono text-[0.68rem] uppercase tracking-[0.3em] text-bh-ink/50">
-      <span className="text-bh-teal" aria-hidden>
+    <p className="flex items-center gap-3 font-mono text-[0.68rem] uppercase tracking-[0.3em] text-bh-ink/70">
+      <span className="text-bh-pine" aria-hidden>
         ✳
       </span>
       {children}
@@ -348,7 +348,7 @@ function Section({
 
 function Tick() {
   return (
-    <span className="mt-0.5 shrink-0 text-bh-teal" aria-hidden>
+    <span className="mt-0.5 shrink-0 text-bh-pine" aria-hidden>
       ✳
     </span>
   );
@@ -384,7 +384,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.svg" alt="Biohacking Experience" className="h-7 w-auto" />
           </Link>
-          <p className="font-mono text-[0.68rem] uppercase tracking-[0.3em] text-bh-ink/50">
+          <p className="font-mono text-[0.68rem] uppercase tracking-[0.3em] text-bh-ink/70">
             Партньорска програма 2026
           </p>
         </div>
@@ -419,7 +419,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
               платили посетители тренират, възстановяват се и изпробват продукти
               с ръцете си.
             </p>
-            <p className="mt-4 font-mono text-[0.68rem] uppercase leading-relaxed tracking-[0.2em] text-bh-ink/50">
+            <p className="mt-4 font-mono text-[0.68rem] uppercase leading-relaxed tracking-[0.2em] text-bh-ink/70">
               Организирано съвместно от Bulgarian Longevity Association и
               Biohacking.bg
             </p>
@@ -437,7 +437,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
           {format.map((f, i) => (
             <Reveal key={f.h} delay={i * 90}>
               <div className="border-t border-bh-ink/15 pt-5">
-                <span className="text-bh-teal" aria-hidden>
+                <span className="text-bh-pine" aria-hidden>
                   ✳
                 </span>
                 <h3 className="mt-3 text-2xl font-semibold tracking-tight">{f.h}</h3>
@@ -462,7 +462,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
                   {s.n}
                 </div>
                 <div className="mt-4 h-px w-full bg-bh-ink/15" />
-                <p className="mt-3 font-mono text-[0.66rem] uppercase tracking-[0.2em] text-bh-ink/55">{s.l}</p>
+                <p className="mt-3 font-mono text-[0.66rem] uppercase tracking-[0.2em] text-bh-ink/70">{s.l}</p>
               </div>
             </Reveal>
           ))}
@@ -476,7 +476,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
               loading="lazy"
               className="w-full rounded-[1.6rem] object-cover"
             />
-            <figcaption className="mt-3 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bh-ink/45">
+            <figcaption className="mt-3 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bh-ink/65">
               Залата на Biohacking Experience
             </figcaption>
           </figure>
@@ -491,7 +491,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
               престой около шест часа. Записаните часове за активностите
               задържат посетителя целия ден.
             </p>
-            <p className="mt-4 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bh-teal">
+            <p className="mt-4 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bh-pine">
               ↗ Организира се съвместно с Bulgarian Longevity Association
             </p>
           </div>
@@ -512,10 +512,10 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
           {organizers.map((o, i) => (
             <Reveal key={o.l} delay={i * 70}>
               <div>
-                <div className="font-display text-5xl font-[300] leading-none tracking-[-0.04em] text-bh-teal">
+                <div className="font-display text-5xl font-[300] leading-none tracking-[-0.04em] text-bh-pine">
                   {o.n}
                 </div>
-                <h3 className="mt-4 font-mono text-[0.66rem] uppercase tracking-[0.2em] text-bh-ink/55">{o.l}</h3>
+                <h3 className="mt-4 font-mono text-[0.66rem] uppercase tracking-[0.2em] text-bh-ink/70">{o.l}</h3>
                 <p className="mt-2 text-sm font-light leading-relaxed text-bh-ink/65">{o.p}</p>
               </div>
             </Reveal>
@@ -579,7 +579,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
                   <span className="w-fit rounded-full border border-bh-ink/20 px-3 py-1 font-mono text-[0.62rem] uppercase tracking-[0.15em] text-bh-ink/70">
                     {z.tag}
                   </span>
-                  <span className="text-2xl text-bh-teal/70" aria-hidden>
+                  <span className="text-2xl text-bh-pine/70" aria-hidden>
                     {z.sym}
                   </span>
                 </div>
@@ -616,7 +616,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
                   className="aspect-[4/3] w-full rounded-[1.4rem] object-cover"
                 />
                 <figcaption className="mt-4 border-t border-bh-ink/15 pt-4">
-                  <p className="font-mono text-[0.65rem] uppercase tracking-[0.25em] text-bh-teal">/ {a.no}</p>
+                  <p className="font-mono text-[0.65rem] uppercase tracking-[0.25em] text-bh-pine">/ {a.no}</p>
                   <h3 className="mt-2 text-xl font-semibold tracking-tight">{a.h}</h3>
                   <p className="mt-2 text-sm font-light leading-relaxed text-bh-ink/65">{a.p}</p>
                 </figcaption>
@@ -646,7 +646,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
               <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_0%,rgba(11,180,160,0.22),transparent_65%)]" />
               {/* the LED wall */}
               <div className="relative mx-auto max-w-3xl rounded-2xl border border-white/15 bg-[#04231d] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.45)] sm:p-10">
-                <div className="flex items-center justify-between font-mono text-[0.6rem] uppercase tracking-[0.3em] text-white/45">
+                <div className="flex items-center justify-between font-mono text-[0.6rem] uppercase tracking-[0.3em] text-white/70">
                   <span>Sofia Life Summit 26</span>
                   <span className="flex items-center gap-2">
                     <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-bh-teal" aria-hidden />
@@ -669,7 +669,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
               {/* floor line, to ground the wall in a room */}
               <div aria-hidden className="relative mx-auto mt-6 h-px max-w-4xl bg-white/15" />
             </div>
-            <figcaption className="mt-3 font-mono text-[0.62rem] uppercase leading-relaxed tracking-[0.2em] text-bh-ink/45">
+            <figcaption className="mt-3 font-mono text-[0.62rem] uppercase leading-relaxed tracking-[0.2em] text-bh-ink/65">
               Cold plunge и реформър зоните на Sofia Life Summit — визуализация в
               Гранд Хотел Милениум.
             </figcaption>
@@ -720,7 +720,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
               <div>
                 <div className="font-display text-5xl font-[300] leading-none tracking-[-0.04em]">{s.n}</div>
                 <div className="mt-4 h-px w-full bg-bh-ink/15" />
-                <h3 className="mt-3 font-mono text-[0.66rem] uppercase tracking-[0.2em] text-bh-ink/55">{s.l}</h3>
+                <h3 className="mt-3 font-mono text-[0.66rem] uppercase tracking-[0.2em] text-bh-ink/70">{s.l}</h3>
                 <p className="mt-2 text-sm font-light leading-relaxed text-bh-ink/65">{s.p}</p>
               </div>
             </Reveal>
@@ -749,13 +749,13 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
                     j.brand ? "bg-bh-teal" : "border border-bh-ink/30 bg-white"
                   }`}
                 />
-                <span className="font-mono text-[0.72rem] tabular-nums tracking-[0.15em] text-bh-ink/50 sm:absolute sm:-left-24 sm:top-0.5">
+                <span className="font-mono text-[0.72rem] tabular-nums tracking-[0.15em] text-bh-ink/70 sm:absolute sm:-left-24 sm:top-0.5">
                   {j.t}
                 </span>
                 <div className="mt-1 sm:mt-0">
                   <span className="text-lg font-semibold tracking-tight">{j.h}</span>
                   {j.brand && (
-                    <span className="ml-3 inline-block rounded-full bg-bh-teal/12 px-2.5 py-0.5 align-middle font-mono text-[0.58rem] uppercase tracking-[0.15em] text-bh-teal">
+                    <span className="ml-3 inline-block rounded-full bg-bh-pine/12 px-2.5 py-0.5 align-middle font-mono text-[0.58rem] uppercase tracking-[0.15em] text-bh-pine">
                       Контакт с бранда
                     </span>
                   )}
@@ -787,7 +787,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
           {value.map((v, i) => (
             <Reveal key={v.h} delay={i * 60}>
               <div className="border-t border-bh-ink/15 pt-5">
-                <span className="text-bh-teal" aria-hidden>
+                <span className="text-bh-pine" aria-hidden>
                   ✳
                 </span>
                 <h3 className="mt-3 text-xl font-semibold tracking-tight">{v.h}</h3>
@@ -823,20 +823,20 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
                     Най-добра стойност
                   </span>
                 )}
-                <p className={`font-mono text-[0.62rem] uppercase tracking-[0.25em] ${t.best ? "text-white/50" : "text-bh-ink/45"}`}>
+                <p className={`font-mono text-[0.62rem] uppercase tracking-[0.25em] ${t.best ? "text-white/50" : "text-bh-ink/65"}`}>
                   Ниво {t.no}
                 </p>
                 <h3 className="mt-3 font-display text-3xl font-[600] tracking-[-0.02em]">{t.name}</h3>
                 <p className="mt-4 font-display text-4xl font-[300] tracking-[-0.03em]">
                   {t.price}
-                  <span className={`ml-2 align-middle font-sans text-xs font-normal ${t.best ? "text-white/50" : "text-bh-ink/45"}`}>
+                  <span className={`ml-2 align-middle font-sans text-xs font-normal ${t.best ? "text-white/50" : "text-bh-ink/65"}`}>
                     / без ДДС
                   </span>
                 </p>
                 <ul className={`mt-7 flex flex-col gap-2.5 border-t pt-6 text-sm ${t.best ? "border-white/15" : "border-bh-ink/10"}`}>
                   {t.has.map((f) => (
                     <li key={f} className="flex items-start gap-2.5">
-                      <span className={`mt-0.5 shrink-0 ${t.best ? "text-[#cef870]" : "text-bh-teal"}`} aria-hidden>
+                      <span className={`mt-0.5 shrink-0 ${t.best ? "text-[#cef870]" : "text-bh-pine"}`} aria-hidden>
                         ✳
                       </span>
                       {f}
@@ -866,7 +866,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
             </p>
             <p className="mt-6 font-display text-5xl font-[300] tracking-[-0.03em]">
               2 500 €
-              <span className="ml-2 align-middle font-sans text-xs font-normal text-bh-ink/45">/ без ДДС</span>
+              <span className="ml-2 align-middle font-sans text-xs font-normal text-bh-ink/65">/ без ДДС</span>
             </p>
             <p className="mt-4 max-w-md text-sm font-light leading-relaxed text-bh-ink/65">
               В цената влизат 20 билета за Village зоната, право на дегустация и
@@ -881,7 +881,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
                     <tr key={k} className="border-b border-bh-ink/8 last:border-0">
                       <td className="px-5 py-3.5 text-bh-ink/75">{k}</td>
                       <td className="px-5 py-3.5 text-right font-medium">
-                        <span className="mr-2 text-bh-teal" aria-hidden>
+                        <span className="mr-2 text-bh-pine" aria-hidden>
                           ✳
                         </span>
                         {v}
@@ -917,7 +917,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
             <table className="w-full min-w-[42rem] text-sm">
               <thead>
                 <tr className="border-b border-bh-ink/10">
-                  <th className="px-5 py-4 text-left font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bh-ink/45" />
+                  <th className="px-5 py-4 text-left font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bh-ink/65" />
                   {compareNames.map((n) => (
                     <th key={n} className="px-5 py-4 text-right font-display text-lg font-[600] tracking-tight">
                       {n}
@@ -932,7 +932,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
                     {r.cells.map((c, i) => (
                       <td key={i} className="px-5 py-3 text-right">
                         {c === true ? (
-                          <span className="text-bh-teal" aria-hidden>
+                          <span className="text-bh-pine" aria-hidden>
                             ✳
                           </span>
                         ) : c === false ? (
@@ -955,7 +955,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
               </tbody>
             </table>
           </div>
-          <p className="mt-3 text-sm font-light text-bh-ink/60">
+          <p className="mt-3 text-sm font-light text-bh-ink/70">
             Village щанд без пакет — 2 500 € (до 6 м²), без активация и
             допълнения
           </p>
@@ -975,7 +975,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
           {extras.map((e, i) => (
             <Reveal key={e.h} delay={i * 70}>
               <div className="border-t border-bh-ink/15 pt-5">
-                <div className="font-display text-4xl font-[300] tracking-[-0.03em] text-bh-teal">{e.price}</div>
+                <div className="font-display text-4xl font-[300] tracking-[-0.03em] text-bh-pine">{e.price}</div>
                 <h3 className="mt-3 text-xl font-semibold tracking-tight">{e.h}</h3>
                 <p className="mt-2 max-w-md text-sm font-light leading-relaxed text-bh-ink/65">{e.p}</p>
               </div>
@@ -984,8 +984,8 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
           <Reveal delay={extras.length * 70}>
             <div className="border-t border-bh-ink/15 pt-5">
               <div className="flex items-baseline gap-3">
-                <span className="font-display text-4xl font-[300] tracking-[-0.03em] text-bh-teal">Diamond</span>
-                <span className="font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bh-ink/45">
+                <span className="font-display text-4xl font-[300] tracking-[-0.03em] text-bh-pine">Diamond</span>
+                <span className="font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bh-ink/65">
                   Единствено · По запитване
                 </span>
               </div>
@@ -1008,7 +1008,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
           {after.map((a, i) => (
             <Reveal key={a.h} delay={i * 80}>
               <article className="flex h-full flex-col rounded-[1.4rem] bg-bh-cloud p-6 ring-1 ring-bh-ink/8">
-                <p className="font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bh-teal">{a.t}</p>
+                <p className="font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bh-pine">{a.t}</p>
                 <h3 className="mt-4 text-lg font-semibold tracking-tight">{a.h}</h3>
                 <p className="mt-2 text-sm font-light leading-relaxed text-bh-ink/65">{a.p}</p>
               </article>
@@ -1034,7 +1034,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
                 key={r.l}
                 className="flex flex-col gap-3 border-t border-bh-ink/10 py-5 last:border-b sm:flex-row sm:items-center sm:justify-between"
               >
-                <span className="font-mono text-[0.66rem] uppercase tracking-[0.25em] text-bh-ink/55">{r.l}</span>
+                <span className="font-mono text-[0.66rem] uppercase tracking-[0.25em] text-bh-ink/70">{r.l}</span>
                 {r.names ? (
                   <span className="text-sm font-medium">{r.names}</span>
                 ) : (
@@ -1047,7 +1047,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
               </div>
             ))}
           </div>
-          <p className="mt-4 font-mono text-[0.62rem] uppercase leading-relaxed tracking-[0.2em] text-bh-ink/45">
+          <p className="mt-4 font-mono text-[0.62rem] uppercase leading-relaxed tracking-[0.2em] text-bh-ink/65">
             Логата се добавят при потвърждение — първите партньори застават
             най-горе.
           </p>
@@ -1090,7 +1090,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
                 >
                   <div>
                     <p className="font-semibold tracking-tight">{t.h}</p>
-                    <p className="mt-0.5 font-mono text-[0.58rem] uppercase tracking-[0.15em] text-bh-ink/45">
+                    <p className="mt-0.5 font-mono text-[0.58rem] uppercase tracking-[0.15em] text-bh-ink/65">
                       {t.sub}
                     </p>
                   </div>
@@ -1100,7 +1100,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
                 </div>
               ))}
             </div>
-            <p className="mt-4 font-mono text-[0.62rem] uppercase leading-relaxed tracking-[0.2em] text-bh-ink/45">
+            <p className="mt-4 font-mono text-[0.62rem] uppercase leading-relaxed tracking-[0.2em] text-bh-ink/65">
               Една марка на категория. Местата се разпределят по реда на
               потвърждаване.
             </p>
@@ -1129,15 +1129,15 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
           </a>
           <dl className="mt-14 grid gap-x-8 gap-y-6 border-t border-bh-ink/10 pt-8 sm:grid-cols-3">
             <div>
-              <dt className="font-mono text-[0.62rem] uppercase tracking-[0.25em] text-bh-ink/45">Дати</dt>
+              <dt className="font-mono text-[0.62rem] uppercase tracking-[0.25em] text-bh-ink/65">Дати</dt>
               <dd className="mt-2 font-medium">07—08 ноември 2026</dd>
             </div>
             <div>
-              <dt className="font-mono text-[0.62rem] uppercase tracking-[0.25em] text-bh-ink/45">Място</dt>
+              <dt className="font-mono text-[0.62rem] uppercase tracking-[0.25em] text-bh-ink/65">Място</dt>
               <dd className="mt-2 font-medium">Гранд Хотел Милениум, София</dd>
             </div>
             <div>
-              <dt className="font-mono text-[0.62rem] uppercase tracking-[0.25em] text-bh-ink/45">Партньорства</dt>
+              <dt className="font-mono text-[0.62rem] uppercase tracking-[0.25em] text-bh-ink/65">Партньорства</dt>
               <dd className="mt-2 font-medium">Мария Варсанова</dd>
             </div>
           </dl>
