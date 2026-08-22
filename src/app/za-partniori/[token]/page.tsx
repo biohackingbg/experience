@@ -315,6 +315,10 @@ function H2({ children, className = "" }: { children: React.ReactNode; className
  */
 const DARK_SECTION = {
   backgroundColor: "#0a3229",
+  // Direct color too, not only the token: text without an explicit
+  // text-bh-* class inherits the ROOT's already-resolved dark ink, so the
+  // token flip alone leaves it dark-on-dark.
+  color: "#f2f2ee",
   "--color-bh-ink": "#f2f2ee",
   "--color-bh-paper": "#0a3229",
   "--color-bh-cloud": "#0d3a30",
@@ -705,7 +709,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
                 key={label}
                 className={
                   i % 3 === 0
-                    ? "rounded-full bg-bh-teal px-4 py-2 text-sm font-medium text-white"
+                    ? "rounded-full bg-bh-pine px-4 py-2 text-sm font-medium text-white"
                     : "rounded-full border border-bh-ink/20 px-4 py-2 text-sm text-bh-ink/80"
                 }
               >
