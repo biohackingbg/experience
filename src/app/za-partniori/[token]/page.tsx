@@ -447,7 +447,21 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
             </Reveal>
           ))}
         </div>
-        <Reveal className="mt-14">
+        <Reveal className="mt-12">
+          <figure>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/deck/zala.jpg"
+              alt="Залата на Biohacking Experience, пълна с публика"
+              loading="lazy"
+              className="w-full rounded-[1.6rem] object-cover"
+            />
+            <figcaption className="mt-3 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bh-ink/45">
+              Залата на Biohacking Experience
+            </figcaption>
+          </figure>
+        </Reveal>
+        <Reveal className="mt-10">
           <div className="rounded-[1.4rem] bg-bh-cloud p-7 ring-1 ring-bh-ink/8">
             <h3 className="text-lg font-semibold tracking-tight">
               Платена публика, а не случайни минувачи
@@ -570,7 +584,21 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
             тях може да носи името на партньор.
           </p>
         </Reveal>
-        <div className="mt-14 grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+        <Reveal className="mt-12">
+          <figure>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/deck/cold.jpg"
+              alt="Cold plunge — потапяне в студена вода"
+              loading="lazy"
+              className="w-full rounded-[1.6rem] object-cover"
+            />
+            <figcaption className="mt-3 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bh-ink/45">
+              Възстановяване · Cold plunge
+            </figcaption>
+          </figure>
+        </Reveal>
+        <div className="mt-12 grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
           {activities.map((a, i) => (
             <Reveal key={a.no} delay={i * 60}>
               <div className="border-t border-bh-ink/15 pt-5">
