@@ -12,7 +12,7 @@ import {
 
 /**
  * The station categories. Partners are announced per category as they sign,
- * so a card carries the field rather than a logo — the promise is "you will
+ * so a card carries the field rather than a logo - the promise is "you will
  * try things in this area", which holds before any name is public.
  */
 const stations = [
@@ -40,7 +40,7 @@ export function SummitConcept() {
             </h2>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-bh-ink/60">
-            Не гледаш отстрани — измерваш се, пробваш, питаш. Всяка станция е
+            Не гледаш отстрани - измерваш се, пробваш, питаш. Всяка станция е
             водена от партньор в своята област.
           </p>
         </Reveal>

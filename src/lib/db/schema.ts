@@ -13,7 +13,7 @@ import {
 /**
  * Early-access signups (waitlist for the September ticket release).
  *
- * Data is deliberately minimal — GDPR data minimisation. We do not store IP
+ * Data is deliberately minimal - GDPR data minimisation. We do not store IP
  * addresses or any tracking identifiers. What we do store is *proof of
  * consent*: the exact wording the person agreed to and when, which is what a
  * regulator asks for if the mailing list is ever challenged.
@@ -35,7 +35,7 @@ export const signups = pgTable(
 
     consented: boolean("consented").notNull(),
     consentAt: timestamp("consent_at", { withTimezone: true }).notNull(),
-    /** Verbatim consent copy shown at the time — versioned proof. */
+    /** Verbatim consent copy shown at the time - versioned proof. */
     consentText: text("consent_text").notNull(),
 
     /** Where the signup came from (page section, campaign). Not a tracker. */
@@ -60,7 +60,7 @@ export type NewSignup = typeof signups.$inferInsert;
  *
  * Money and tier details are *snapshotted* onto the order and its items: an
  * order must always show what was actually charged, even after prices or tier
- * names change. The same goes for the VAT rate — rates change by law, and a
+ * names change. The same goes for the VAT rate - rates change by law, and a
  * past invoice has to keep the rate that applied on the day.
  */
 export const orders = pgTable(
@@ -93,7 +93,7 @@ export const orders = pgTable(
 
     /**
      * Invoice number from the site's own series, drawn from a Postgres
-     * sequence the moment the order is paid — never on a pending one, so an
+     * sequence the moment the order is paid - never on a pending one, so an
      * abandoned checkout cannot burn a number and leave a hole in the run.
      */
     invoiceNumber: bigint("invoice_number", { mode: "number" }),
@@ -111,7 +111,7 @@ export const orders = pgTable(
      * Set from Stripe's charge.refunded event. A full refund flips `status`
      * to "refunded", which is what stops the tickets at the door; a partial
      * one only records the amount and leaves the order paid. The invoice
-     * stays as issued — Bulgarian accounting answers a refund with a credit
+     * stays as issued - Bulgarian accounting answers a refund with a credit
      * note, which the accountant raises against this number.
      */
     refundedAt: timestamp("refunded_at", { withTimezone: true }),
@@ -140,7 +140,7 @@ export const orderItems = pgTable(
       .references(() => orders.id, { onDelete: "cascade" }),
 
     tierId: text("tier_id").notNull(),
-    /** Snapshot — the tier may be renamed later. */
+    /** Snapshot - the tier may be renamed later. */
     tierName: text("tier_name").notNull(),
     unitPriceCents: integer("unit_price_cents").notNull(),
     quantity: integer("quantity").notNull(),
@@ -149,7 +149,7 @@ export const orderItems = pgTable(
 );
 
 /**
- * One row per admitted person — an order of three seats produces three, each
+ * One row per admitted person - an order of three seats produces three, each
  * with its own code, so the door scans a person rather than a purchase.
  */
 export const tickets = pgTable(
@@ -198,14 +198,14 @@ export const deckLinks = pgTable(
     revokedAt: timestamp("revoked_at", { withTimezone: true }),
 
     /**
-     * Where the conversation with this partner stands — the link doubles as
+     * Where the conversation with this partner stands - the link doubles as
      * the pipeline row, since there is exactly one per partner anyway.
      * new | contacted | waiting | confirmed | declined (see deck-links.ts).
      */
     stage: text("stage").notNull().default("new"),
     /** Free note: who we spoke to, what they said. */
     note: text("note"),
-    /** What is expected from us next — the thing that must not be forgotten. */
+    /** What is expected from us next - the thing that must not be forgotten. */
     nextStep: text("next_step"),
     /** Who on the team leads this conversation (a first name is enough). */
     owner: text("owner"),
@@ -216,7 +216,7 @@ export const deckLinks = pgTable(
 
 /**
  * One row per opening of a share link. Answers "how often, when, and roughly
- * from where" — nothing that identifies a person: no IP, no user agent, no
+ * from where" - nothing that identifies a person: no IP, no user agent, no
  * cookie. The referrer is kept as a bare hostname so a forwarded link ("came
  * from linkedin.com") can be told from a direct open, and no more.
  */
@@ -228,7 +228,7 @@ export const deckViews = pgTable(
       .notNull()
       .references(() => deckLinks.id, { onDelete: "cascade" }),
     referrerHost: text("referrer_host"),
-    /** "mobile" | "desktop" — coarse, from the viewport, not the UA string. */
+    /** "mobile" | "desktop" - coarse, from the viewport, not the UA string. */
     device: text("device"),
 
     /**
@@ -237,7 +237,7 @@ export const deckViews = pgTable(
      */
     viewId: text("view_id"),
     /**
-     * Random id kept in the visitor's localStorage *for this link only* — it
+     * Random id kept in the visitor's localStorage *for this link only* - it
      * tells "3 openings by 2 people" from "3 people". Not shared across links
      * or with anything else, and it names nobody.
      */

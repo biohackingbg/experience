@@ -49,7 +49,7 @@ export default async function TicketPage({
           <div className="flex justify-center px-7 py-8">
             <div
               className="h-52 w-52 [&>svg]:h-full [&>svg]:w-full"
-              // Generated from the ticket code by the QR library — no user input.
+              // Generated from the ticket code by the QR library - no user input.
               dangerouslySetInnerHTML={{ __html: qr }}
               aria-hidden
             />
@@ -70,7 +70,7 @@ export default async function TicketPage({
                   Кога
                 </dt>
                 <dd className="mt-0.5 font-medium text-bh-ink">
-                  07—08 ноември 2026
+                  07-08 ноември 2026
                 </dd>
               </div>
             </div>

@@ -96,13 +96,13 @@ export async function startCheckout(
           // record cannot disagree. VAT is already inside it.
           unit_amount: order.unitPriceCents,
           product_data: {
-            name: `Sofia Life Summit — ${tier.name}`,
-            description: "07—08 ноември 2026, Гранд Хотел Милениум, София",
+            name: `Sofia Life Summit - ${tier.name}`,
+            description: "07-08 ноември 2026, Гранд Хотел Милениум, София",
           },
         },
       },
     ],
-    // Stripe's minimum session lifetime is 30 minutes — anything shorter is
+    // Stripe's minimum session lifetime is 30 minutes - anything shorter is
     // rejected outright (it broke live sales on 22.08). The pending hold is
     // therefore longer (35 min): a payment landing in the session's final
     // seconds must still find its seat held, or we could oversell by one.

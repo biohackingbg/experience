@@ -22,7 +22,7 @@ export default function Home() {
     <div className="overflow-clip rounded-[1.75rem] bg-bh-paper">
       <script
         type="application/ld+json"
-        // Static, authored object — no user input reaches this.
+        // Static, authored object - no user input reaches this.
         dangerouslySetInnerHTML={{ __html: JSON.stringify(buildEventSchema()) }}
       />
       <SummitNav />

@@ -3,15 +3,15 @@
 :root {
   color-scheme: light;
 
-  /* Biohacking Experience — editorial theme.
+  /* Biohacking Experience - editorial theme.
      `ink` is the foreground: text, and the inverted (contrast) card fills.
      `paper` is the page. Dark mode swaps the two, so every surface built
      from these tokens inverts without touching component markup. */
-  /* Brand palette — exact values from the design mockup. */
+  /* Brand palette - exact values from the design mockup. */
   --color-bh-frame: #02251f; /* outside the rounded page */
   --color-bh-paper: #f2f2ee; /* light page / frame interior */
   --color-bh-cloud: #f8f8f5; /* near-white card */
-  --color-bh-ink: #02251f; /* deep green — text + contrast cards */
+  --color-bh-ink: #02251f; /* deep green - text + contrast cards */
 
   --color-bh-teal: #0bb4a0;
   --color-bh-blue: #51b6eb;
@@ -26,7 +26,7 @@
   --color-bh-lime: #cef870;
   --color-bh-pine: #146455;
 
-  /* Partner accent — the rose from the Bulgarian Longevity Association mark.
+  /* Partner accent - the rose from the Bulgarian Longevity Association mark.
      Used only in the co-branding strip, never as a general site colour. */
   /* Sampled from the association's own logo, so their card carries their
      colours rather than an approximation. Fixed in both themes: a partner's
@@ -71,8 +71,8 @@
   --color-bh-rose: var(--color-bh-rose);
   --color-bh-assoc: var(--color-bh-assoc);
 
-  --font-sans: var(--font-body); /* Geologica — body and UI */
-  --font-display: var(--font-display-sans); /* Sofia Sans — headings */
+  --font-sans: var(--font-body); /* Geologica - body and UI */
+  --font-display: var(--font-display-sans); /* Sofia Sans - headings */
   --font-mono: var(--font-geist-mono);
 }
 
@@ -122,10 +122,10 @@ body {
 }
 
 /*
- * Aurora behind the hero — two temperaments, one idea.
+ * Aurora behind the hero - two temperaments, one idea.
  *
  * Light theme: a gentle wash. Soft cyan and teal blooms over the pale paper,
- * fading down — colour as atmosphere, with the dark ink headline untouched.
+ * fading down - colour as atmosphere, with the dark ink headline untouched.
  *
  * Dark theme: the committed field from the reference. Deep teal owning the
  * top, a bright bloom breaking through, a silky fade into the page. It works
@@ -163,7 +163,7 @@ body {
   /* The accent fill is bright in both themes, so pin the foreground tokens
      locally: descendants using text-bh-ink / bg-bh-ink stay readable on it
      even after dark mode inverts the globals. The accent pair is pinned for
-     the same reason — this surface never inverts, so neither should they. */
+     the same reason - this surface never inverts, so neither should they. */
   --color-bh-ink: #08211d;
   --color-bh-paper: #f1f5f3;
   --color-bh-lime: #cef870;
@@ -188,7 +188,7 @@ body {
   box-shadow: none;
 }
 
-/* On a mint card the padding box has to be mint, not page colour — and the
+/* On a mint card the padding box has to be mint, not page colour - and the
    gradient border replaces the hairline rather than doubling up with it. */
 .bh-mint.bh-gradient-outline {
   background:
@@ -199,7 +199,7 @@ body {
 
 /* The dark twin of .bh-mint, and constant for the same reason. Left to
    `bg-bh-ink` it inverted with the theme, so in dark mode both cards in the
-   two-track diagram came out pale and near-identical — losing the very
+   two-track diagram came out pale and near-identical - losing the very
    distinction the section exists to draw. */
 .bh-forest {
   /* The longevity passport's panel green, not the page ink: at #02251f the
@@ -233,7 +233,7 @@ body {
   }
 }
 
-/* Flat mint card with a hairline edge. Constant in both themes — it carries
+/* Flat mint card with a hairline edge. Constant in both themes - it carries
    the partner's colour, so it should read the same either way. The rule pins
    the foreground tokens for the same reason .bh-gradient does. */
 .bh-mint {
@@ -248,7 +248,7 @@ body {
 }
 
 /* Section eyebrows go neon on the dark page. Only the ones sitting on page or
-   cloud — the label inside the mint card stays muted, since lime on pale mint
+   cloud - the label inside the mint card stays muted, since lime on pale mint
    would be unreadable. Written as a literal because the lime *token* flips to
    dark green in dark mode (it is meant for ink-coloured surfaces). */
 :root[data-theme="dark"] .bh-eyebrow {
@@ -284,5 +284,39 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .hu-rise {
     animation: none;
+  }
+}
+
+/* A comet of the button gradient orbiting a rounded card: the wrapper is a
+   2px frame whose background is a rotating conic gradient; the card sits on
+   top and leaves only the frame visible. Angle animation needs @property. */
+@property --bh-orbit-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.bh-orbit-stroke {
+  background:
+    conic-gradient(
+      from var(--bh-orbit-angle),
+      transparent 0deg,
+      transparent 270deg,
+      #5ecfdd 315deg,
+      #12b39c 345deg,
+      transparent 360deg
+    ),
+    color-mix(in srgb, #08211d 10%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bh-orbit-stroke {
+    animation: bh-orbit-spin 4.5s linear infinite;
+  }
+}
+
+@keyframes bh-orbit-spin {
+  to {
+    --bh-orbit-angle: 360deg;
   }
 }

@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function DoorPage() {
-  // The layout also checks, but a layout is not an auth boundary — the
+  // The layout also checks, but a layout is not an auth boundary - the
   // Next docs are explicit that it may be skipped on RSC navigations.
   if (!(await isAdmin())) redirect("/admin/login");
 

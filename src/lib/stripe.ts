@@ -4,7 +4,7 @@ import Stripe from "stripe";
 
 /**
  * Stripe client. `server-only` keeps the secret key from ever reaching a
- * client bundle — the same guard the database module uses.
+ * client bundle - the same guard the database module uses.
  *
  * Lazy, so importing this file never fails at build time; only an actual call
  * requires the key to be configured.
@@ -30,7 +30,7 @@ export function isStripeConfigured(): boolean {
   return Boolean(process.env.STRIPE_SECRET_KEY);
 }
 
-/** True while the test keys are in use — drives the "test mode" banner. */
+/** True while the test keys are in use - drives the "test mode" banner. */
 export function isTestMode(): boolean {
   return (process.env.STRIPE_SECRET_KEY ?? "").startsWith("sk_test_");
 }

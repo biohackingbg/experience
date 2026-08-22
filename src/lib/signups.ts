@@ -30,7 +30,7 @@ export type SignupInput = z.infer<typeof signupSchema>;
 
 /**
  * Writes the signup. Re-submitting a known address is treated as success and
- * leaves the original consent record untouched — that keeps the endpoint from
+ * leaves the original consent record untouched - that keeps the endpoint from
  * doubling as a way to check whether someone is on the list.
  */
 export async function createSignup(input: SignupInput): Promise<void> {

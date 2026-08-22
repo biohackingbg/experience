@@ -3,7 +3,7 @@
  *
  * Same reasoning as the signup consent: what a person saw is what we keep, so
  * a later change to the text cannot rewrite what past buyers agreed to. Safe
- * for the client bundle — no server-only imports.
+ * for the client bundle - no server-only imports.
  */
 export const PURCHASE_TERMS_VERSION = "v1";
 

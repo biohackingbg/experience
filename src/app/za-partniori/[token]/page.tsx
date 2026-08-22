@@ -12,17 +12,17 @@ import { ViewBeacon } from "./ViewBeacon";
 export const metadata: Metadata = {
   title: "Партньорска програма 2026 | Sofia Life Summit",
   description:
-    "Sofia Life Summit — партньорски пакети за брандове. 1 000+ посетители, 30 места във Village, 07—08 ноември 2026, София.",
+    "Sofia Life Summit - партньорски пакети за брандове. 1 000+ посетители, 30 места във Village, 07-08 ноември 2026, София.",
   // Shared by link with prospective partners, not found by search.
   robots: { index: false, follow: false },
 };
 
-// Every request checks the token — a revoked link must close at once.
+// Every request checks the token - a revoked link must close at once.
 export const dynamic = "force-dynamic";
 
 /*
  * The partner deck as a page. Content mirrors the approved PDF
- * (sofia-life-summit-sponsori-svetla, Aug 2026) word for word — the copy is
+ * (sofia-life-summit-sponsori-svetla, Aug 2026) word for word - the copy is
  * the client's, the layout is the site's. Data sits at the top so the deck
  * can be edited without touching layout.
  */
@@ -34,7 +34,7 @@ const MAILTO = `mailto:${CONTACT}?subject=${encodeURIComponent("Партньор
 const format = [
   {
     h: "Преживяването остава",
-    p: "Продуктът ви става част от момент, който посетителят помни и свързва с вашия бранд — не поредна реклама, покрай която минава.",
+    p: "Продуктът ви става част от момент, който посетителят помни и свързва с вашия бранд - не поредна реклама, покрай която минава.",
   },
   {
     h: "Тридесет минути пълно внимание",
@@ -42,7 +42,7 @@ const format = [
   },
   {
     h: "Пробваното се купува",
-    p: "Когато човек пробва нещо лично, е много по-лесно да го купи. Активностите правят точно това — а Village е на крачка от тях.",
+    p: "Когато човек пробва нещо лично, е много по-лесно да го купи. Активностите правят точно това - а Village е на крачка от тях.",
   },
 ];
 
@@ -61,11 +61,11 @@ const organizers = [
   { n: "10+", l: "Проведени събития", p: "Конференции, корпоративни обучения и ретрийти в България и чужбина." },
   { n: "15+", l: "Корпоративни клиенти", p: "Компании, преминали през wellness програмите и обученията на Biohacking.bg." },
   { n: "400+", l: "Курсисти", p: "Преминали през платените онлайн програми на Biohacking.bg." },
-  { n: "BLA", l: "Медицински гръб", p: "Bulgarian Longevity Association — лекари и изследователи, не инфлуенсър формат." },
+  { n: "BLA", l: "Медицински гръб", p: "Bulgarian Longevity Association - лекари и изследователи, не инфлуенсър формат." },
   { n: "6", l: "Държави в програмата", p: "Karolinska Institutet, Geneva College of Longevity Science, University of Malta и др." },
 ];
 
-/* ── 05 лекторите — the deck's own credential lines, with the site's portraits ── */
+/* ── 05 лекторите - the deck's own credential lines, with the site's portraits ── */
 const speakers = [
   { name: "Д-р Райна Стоянова", line1: "България · Ендокринолог", line2: "Председател, Bulgarian Longevity Association", photo: "/speakers/rayna-stoyanova.jpg" },
   { name: "Д-р Rocio Salas-Whalen", line1: "САЩ · Ендокринология", line2: "Автор на „Weightless“", photo: "/speakers/rocio-salas-whalen.jpg" },
@@ -74,13 +74,13 @@ const speakers = [
   { name: "Д-р Александър Симидчиев", line1: "България · Пулмолог", line2: "Централна клинична болница на МВР", photo: "/speakers/aleksandar-simidchiev.jpg" },
   { name: "Д-р Dean Berman", line1: "Австрия", line2: "Global VP Medical, Alma Lasers", photo: "/speakers/dean-berman.jpg" },
   { name: "Проф. Godfrey Grech", line1: "Малта · Молекулярна онкология", line2: "University of Malta", photo: "/speakers/godfrey-grech.jpg" },
-  { name: "Проф. д-р Виктория Сарафян", line1: "България", line2: "Медицински университет — Пловдив", photo: "/speakers/viktoriya-sarafyan.jpg" },
+  { name: "Проф. д-р Виктория Сарафян", line1: "България", line2: "Медицински университет - Пловдив", photo: "/speakers/viktoriya-sarafyan.jpg" },
 ];
 
 /* ── 06 концепцията ── */
 const concept = [
-  { no: "01", tag: "Знанието", h: "Сцена", sym: "◎", p: "18 лекции и панела — лекари и изследователи на разбираем език." },
-  { no: "02", tag: "Тялото", h: "Движение", sym: "◍", p: "Power Plate зона и пилатес — на постелка и на реформър, със записан час." },
+  { no: "01", tag: "Знанието", h: "Сцена", sym: "◎", p: "18 лекции и панела - лекари и изследователи на разбираем език." },
+  { no: "02", tag: "Тялото", h: "Движение", sym: "◍", p: "Power Plate зона и пилатес - на постелка и на реформър, със записан час." },
   { no: "03", tag: "Балансът", h: "Възстановяване", sym: "≋", p: "Cold plunge, breathwork сесии и Recovery зона, по 30 минути." },
   { no: "04", tag: "Брандовете", h: "Village", sym: "⌂", p: "30 подбрани компании: добавки, устройства, клиники, храна." },
 ];
@@ -91,8 +91,8 @@ const activities = [
   { no: "02", h: "Breathwork", p: "Групови дихателни сесии по 30 минути.", img: "/deck/act-breathwork.jpg" },
   { no: "03", h: "Recovery Zone", p: "Компресия, перкусия и възстановяване след натоварване.", img: "/deck/act-recovery.jpg" },
   { no: "04", h: "Power Plate Zone", p: "Вибрационна тренировка с демонстрации на живо.", img: "/deck/act-powerplate.jpg" },
-  { no: "05", h: "Пилатес — постелка", p: "Групови сесии за начинаещи и напреднали.", img: "/deck/act-pilates-mat.jpg" },
-  { no: "06", h: "Пилатес — реформър", p: "Малки групи с инструктор, със записан час.", img: "/deck/act-pilates-reformer.jpg" },
+  { no: "05", h: "Пилатес - постелка", p: "Групови сесии за начинаещи и напреднали.", img: "/deck/act-pilates-mat.jpg" },
+  { no: "06", h: "Пилатес - реформър", p: "Малки групи с инструктор, със записан час.", img: "/deck/act-pilates-reformer.jpg" },
 ];
 
 /* ── 08 брандирана зона ── */
@@ -108,7 +108,7 @@ const brandZonePoints = [
 const audience = [
   "Предприемачи и мениджъри",
   "Лекари и специалисти",
-  "Жени 35—55 с висок разполагаем доход",
+  "Жени 35-55 с висок разполагаем доход",
   "Инвеститори",
   "Треньори и нутриционисти",
   "Корпоративни екипи",
@@ -120,18 +120,18 @@ const audience = [
 
 const audienceStats = [
   { n: "6 ч.", l: "Среден престой", p: "Ангажирано внимание на място, не импресия от три секунди." },
-  { n: "35—349 €", l: "Платен вход", p: "Всеки вече е инвестирал в здравето си, преди да влезе." },
-  { n: "×3", l: "Минавания през Village", p: "Повторен контакт с бранда — по няколко пъти на ден." },
-  { n: "35—55", l: "Ядро на аудиторията", p: "Активни професионалисти в най-силните си кариерни години." },
+  { n: "35-349 €", l: "Платен вход", p: "Всеки вече е инвестирал в здравето си, преди да влезе." },
+  { n: "×3", l: "Минавания през Village", p: "Повторен контакт с бранда - по няколко пъти на ден." },
+  { n: "35-55", l: "Ядро на аудиторията", p: "Активни професионалисти в най-силните си кариерни години." },
   { n: "~120 €", l: "Среден разход за билет", p: "Изчислен от реалния микс на трите нива билети." },
-  { n: "249 €", l: "Премиум билетът PEAK", p: "Ограничени места с Premium Lounge и Meet & Greet — запълват се първи." },
+  { n: "249 €", l: "Премиум билетът PEAK", p: "Ограничени места с Premium Lounge и Meet & Greet - запълват се първи." },
 ];
 
 /* ── 10 пътуването · brand: does this touchpoint put the visitor at a brand? ── */
 const journey = [
   { t: "10:00", h: "Регистрация и Village", p: "Първи контакт с брандовете още на входа", brand: true },
   { t: "10:30", h: "Лекция на сцената", p: "25 минути наука на разбираем език", brand: false },
-  { t: "11:15", h: "Активация: движение", p: "Power Plate или пилатес — със записан час", brand: true },
+  { t: "11:15", h: "Активация: движение", p: "Power Plate или пилатес - със записан час", brand: true },
   { t: "12:00", h: "Village и обяд", p: "Дегустации и разговори с брандовете", brand: true },
   { t: "13:30", h: "Активация: възстановяване", p: "Cold plunge, breathwork или Recovery", brand: true },
   { t: "14:30", h: "Уъркшоп", p: "Малка група, продукт в ръцете", brand: true },
@@ -141,12 +141,12 @@ const journey = [
 
 /* ── 11 стойността ── */
 const value = [
-  { h: "Квалифицирани контакти", p: "Списък с участниците от вашите активации и лийдове от щанда — хора, които са дали време, не имейл от томбола." },
+  { h: "Квалифицирани контакти", p: "Списък с участниците от вашите активации и лийдове от щанда - хора, които са дали време, не имейл от томбола." },
   { h: "Директен опит с продукта", p: "Качественият разговор започва след пробата, не преди нея. Вашият продукт е в ръцете на посетителя, не на рафт." },
   { h: "Видимост на сцената и в дигитала", p: "Лого пред 1 000 души на място и пред общността на Biohacking.bg преди, по време и след събитието." },
-  { h: "Съдържание за цяла година", p: "Професионални снимки и видео от вашата зона — активи, които маркетингът ви ползва след ноември." },
-  { h: "Отчет след събитието", p: "Посещаемост на зоната, записани сесии, събрани контакти и социален обхват — числа за вашия вътрешен отчет." },
-  { h: "Дългосрочни клиенти", p: "Посетителят свързва бранда ви с преживяване, което помни — основата на повторната покупка." },
+  { h: "Съдържание за цяла година", p: "Професионални снимки и видео от вашата зона - активи, които маркетингът ви ползва след ноември." },
+  { h: "Отчет след събитието", p: "Посещаемост на зоната, записани сесии, събрани контакти и социален обхват - числа за вашия вътрешен отчет." },
+  { h: "Дългосрочни клиенти", p: "Посетителят свързва бранда ви с преживяване, което помни - основата на повторната покупка." },
 ];
 
 /* ── 12 нива ── */
@@ -168,7 +168,7 @@ const tiers: Tier[] = [
       "Щанд до 6 м² на премиум позиция",
       "2 пълни билета",
       "20 билета за Village зоната",
-      "Лого — сайт, дигитал, сцена",
+      "Лого - сайт, дигитал, сцена",
       "Мостра във фестивалната чанта",
       "Видео в Village зоната",
     ],
@@ -224,7 +224,7 @@ const compareRows: { row: string; cells: Cell[] }[] = [
   { row: "Премиум позиция в Village", cells: [true, true, true] },
   { row: "Пълни билети за двата дни", cells: ["2", "4", "6"] },
   { row: "Билети за Village зоната", cells: ["20", "40", "80"] },
-  { row: "Лого — сайт, дигитал, сцена", cells: [true, true, true] },
+  { row: "Лого - сайт, дигитал, сцена", cells: [true, true, true] },
   { row: "Мостра във фестивалната чанта", cells: [true, true, true] },
   { row: "Видео в Village зоната", cells: [true, true, true] },
   { row: "Брандирана активация в зона", cells: [false, true, true] },
@@ -248,7 +248,7 @@ const extras = [
 const after = [
   { t: "До 10 дни", h: "Отчет с данни", p: "Посещаемост на зоната, записани сесии, лийдове и социален обхват." },
   { t: "До 14 дни", h: "Фото и видео активи", p: "Професионално заснет материал от вашата зона, с права за ползване." },
-  { t: "Ноември", h: "Event recap", p: "Обобщение на събитието към цялата общност — с партньорите в него." },
+  { t: "Ноември", h: "Event recap", p: "Обобщение на събитието към цялата общност - с партньорите в него." },
   { t: "До 31 януари", h: "Право на първи отказ", p: "Вашата категория е запазена за 2027 на фиксирана цена, докато не откажете." },
 ];
 
@@ -269,8 +269,8 @@ const territories = [
   { h: "Breathwork", sub: "Активация" },
   { h: "Recovery Zone", sub: "Активация" },
   { h: "Power Plate", sub: "Активация" },
-  { h: "Пилатес — постелка", sub: "Активация" },
-  { h: "Пилатес — реформър", sub: "Активация" },
+  { h: "Пилатес - постелка", sub: "Активация" },
+  { h: "Пилатес - реформър", sub: "Активация" },
   { h: "Networking вечеря", sub: "Вечеря, ден 1" },
   { h: "Фестивална чанта", sub: "Мостра за 1 000 души" },
   { h: "Village", sub: "30 места" },
@@ -312,7 +312,7 @@ function H2({ children, className = "" }: { children: React.ReactNode; className
 /**
  * `dark` flips the section to forest. It works by re-pinning the local
  * colour tokens, so every text-bh-ink/NN and bg-bh-cloud inside simply
- * follows — no per-element dark variants.
+ * follows - no per-element dark variants.
  */
 const DARK_SECTION = {
   backgroundColor: "#0a3229",
@@ -362,7 +362,7 @@ function Tick() {
 function Dash() {
   return (
     <span className="mt-0.5 shrink-0 text-bh-ink/30" aria-hidden>
-      —
+      -
     </span>
   );
 }
@@ -371,7 +371,7 @@ function Dash() {
 
 /**
  * Reachable only through a share link made in the admin. An unknown or
- * revoked token is a plain 404 — the deck does not confirm it exists.
+ * revoked token is a plain 404 - the deck does not confirm it exists.
  */
 export default async function PartnersPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
@@ -397,7 +397,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
 
       {/* 01 cover */}
       <Section name="cover" className="pt-14 sm:pt-20">
-        <Eyebrow>Партньорски възможности · 07—08.11.2026</Eyebrow>
+        <Eyebrow>Партньорски възможности · 07-08.11.2026</Eyebrow>
         <div className="mt-8 grid gap-12 lg:grid-cols-[1.4fr_1fr] lg:items-end">
           <div>
             <h1 className="font-display text-[clamp(3.4rem,10vw,8.4rem)] font-[900] leading-[0.92] tracking-[-0.04em] text-bh-ink">
@@ -534,7 +534,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
           <Eyebrow>Сцената</Eyebrow>
           <H2>50 международни лектори</H2>
           <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-bh-ink/70">
-            Първите обявени имена — лекари и изследователи от шест държави. Нови
+            Първите обявени имена - лекари и изследователи от шест държави. Нови
             лектори всяка седмица.
           </p>
         </Reveal>
@@ -550,7 +550,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
                   className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                 />
                 {/* Ink gradient from the foot so the type stays legible on any
-                    portrait — the photographs range from studio white to dark. */}
+                    portrait - the photographs range from studio white to dark. */}
                 <div
                   aria-hidden
                   className="absolute inset-0 bg-gradient-to-t from-[#02251f]/90 via-[#02251f]/25 via-50% to-transparent"
@@ -631,20 +631,20 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
         </div>
       </Section>
 
-      {/* 08 брандирана зона — the LED-wall visual */}
+      {/* 08 брандирана зона - the LED-wall visual */}
       <Section name="brandzone" dark className="border-t border-bh-ink/10">
         <Reveal>
           <Eyebrow>Как изглежда на място</Eyebrow>
           <H2>Зоната носи вашето име</H2>
           <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-bh-ink/70">
             LED стената, разписанието и инструкторът работят под вашия бранд през
-            целия ден — с ваш продукт в ръцете на всеки участник.
+            целия ден - с ваш продукт в ръцете на всеки участник.
           </p>
         </Reveal>
 
         <Reveal className="mt-12">
           {/* The zone as the visitor sees it: the LED wall over the room. A
-              styled mock rather than a render — honest about being a concept,
+              styled mock rather than a render - honest about being a concept,
               and it puts the buyer's name on the wall. */}
           <figure>
             <div className="relative overflow-hidden rounded-[1.6rem] bg-[#0a3229] p-6 sm:p-10">
@@ -675,7 +675,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
               <div aria-hidden className="relative mx-auto mt-6 h-px max-w-4xl bg-white/15" />
             </div>
             <figcaption className="mt-3 font-mono text-[0.62rem] uppercase leading-relaxed tracking-[0.2em] text-bh-ink/65">
-              Cold plunge и реформър зоните на Sofia Life Summit — визуализация в
+              Cold plunge и реформър зоните на Sofia Life Summit - визуализация в
               Гранд Хотел Милениум.
             </figcaption>
           </figure>
@@ -733,13 +733,13 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
         </div>
       </Section>
 
-      {/* 10 пътуването — timeline infographic */}
+      {/* 10 пътуването - timeline infographic */}
       <Section name="journey" className="border-t border-bh-ink/10">
         <Reveal>
           <Eyebrow>Един ден на място</Eyebrow>
           <H2>Пътуването на посетителя</H2>
           <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-bh-ink/70">
-            Записаните часове разпределят деня между зоните — и връщат всеки
+            Записаните часове разпределят деня между зоните - и връщат всеки
             посетител при брандовете по няколко пъти.
           </p>
         </Reveal>
@@ -747,10 +747,12 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
           <JourneyTimeline steps={journey} />
         </Reveal>
         <Reveal className="mt-10">
-          <p className="rounded-[1.4rem] bg-bh-cloud p-6 text-sm font-medium leading-relaxed text-bh-ink ring-1 ring-bh-ink/8">
-            Осем допирни точки на ден — вашият бранд е на поне три от тях,
-            независимо от пакета.
-          </p>
+          <div className="bh-orbit-stroke rounded-[1.4rem] p-[2px]">
+            <p className="rounded-[calc(1.4rem-2px)] bg-bh-cloud p-6 text-sm font-medium leading-relaxed text-bh-ink">
+              Осем допирни точки на ден - вашият бранд е на поне три от тях,
+              независимо от пакета.
+            </p>
+          </div>
         </Reveal>
       </Section>
 
@@ -786,7 +788,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
           <H2>Три партньорски нива</H2>
           <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-bh-ink/70">
             Местата на всяко ниво са ограничени. Категорийната ексклузивност е
-            запазена за Платинен — една марка в сегмента.
+            запазена за Платинен - една марка в сегмента.
           </p>
         </Reveal>
         <div className="mt-14 grid gap-4 lg:grid-cols-3">
@@ -871,11 +873,11 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
                   ))}
                   <tr className="border-b border-bh-ink/8">
                     <td className="px-5 py-3.5 text-bh-ink/40">Брандирана активация в зона</td>
-                    <td className="px-5 py-3.5 text-right text-bh-ink/40">—</td>
+                    <td className="px-5 py-3.5 text-right text-bh-ink/40">-</td>
                   </tr>
                   <tr>
                     <td className="px-5 py-3.5 text-bh-ink/40">Лектор на сцената</td>
-                    <td className="px-5 py-3.5 text-right text-bh-ink/40">—</td>
+                    <td className="px-5 py-3.5 text-right text-bh-ink/40">-</td>
                   </tr>
                 </tbody>
               </table>
@@ -917,7 +919,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
                             ✳
                           </span>
                         ) : c === false ? (
-                          <span className="text-bh-ink/30">—</span>
+                          <span className="text-bh-ink/30">-</span>
                         ) : (
                           <span className="font-medium">{c}</span>
                         )}
@@ -937,7 +939,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
             </table>
           </div>
           <p className="mt-3 text-sm font-light text-bh-ink/70">
-            Village щанд без пакет — 2 500 € (до 6 м²), без активация и
+            Village щанд без пакет - 2 500 € (до 6 м²), без активация и
             допълнения
           </p>
           <p className="mt-1 font-mono text-[0.6rem] uppercase tracking-[0.2em] text-bh-ink/40">
@@ -1004,7 +1006,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
           <Eyebrow>Подкрепа</Eyebrow>
           <H2>Партньори и организации</H2>
           <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-bh-ink/70">
-            Мястото на вашето лого — до организациите, които вече стоят зад
+            Мястото на вашето лого - до организациите, които вече стоят зад
             събитието.
           </p>
         </Reveal>
@@ -1029,7 +1031,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
             ))}
           </div>
           <p className="mt-4 font-mono text-[0.62rem] uppercase leading-relaxed tracking-[0.2em] text-bh-ink/65">
-            Логата се добавят при потвърждение — първите партньори застават
+            Логата се добавят при потвърждение - първите партньори застават
             най-горе.
           </p>
         </Reveal>
@@ -1111,7 +1113,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
           <dl className="mt-14 grid gap-x-8 gap-y-6 border-t border-bh-ink/10 pt-8 sm:grid-cols-3">
             <div>
               <dt className="font-mono text-[0.62rem] uppercase tracking-[0.25em] text-bh-ink/65">Дати</dt>
-              <dd className="mt-2 font-medium">07—08 ноември 2026</dd>
+              <dd className="mt-2 font-medium">07-08 ноември 2026</dd>
             </div>
             <div>
               <dt className="font-mono text-[0.62rem] uppercase tracking-[0.25em] text-bh-ink/65">Място</dt>

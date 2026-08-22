@@ -22,7 +22,7 @@ function bgDateTime(d: Date): string {
 }
 
 export default async function SignupsPage() {
-  // The layout also checks, but a layout is not an auth boundary — the
+  // The layout also checks, but a layout is not an auth boundary - the
   // Next docs are explicit that it may be skipped on RSC navigations.
   if (!(await isAdmin())) redirect("/admin/login");
 
@@ -110,14 +110,14 @@ export default async function SignupsPage() {
                         </span>
                       )}
                     </td>
-                    <td className="py-3 pr-4 text-bh-ink/70">{r.name ?? "—"}</td>
+                    <td className="py-3 pr-4 text-bh-ink/70">{r.name ?? "-"}</td>
                     <td className="py-3 pr-4 text-bh-ink/70">
                       {r.interestedTier
                         ? (getTier(r.interestedTier)?.name ?? r.interestedTier)
-                        : "—"}
+                        : "-"}
                     </td>
                     <td className="py-3 pr-4 text-bh-ink/50">
-                      {r.source ?? "—"}
+                      {r.source ?? "-"}
                     </td>
                     <td className="py-3 tabular-nums text-bh-ink/60">
                       {bgDateTime(r.createdAt)}

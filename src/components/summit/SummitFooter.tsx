@@ -63,7 +63,7 @@ export function SummitFooter() {
                   </a>
                 </li>
                 <li className="text-bh-ink/70">Гранд Хотел Милениум, София</li>
-                <li className="text-bh-ink/70">07—08 ноември 2026</li>
+                <li className="text-bh-ink/70">07-08 ноември 2026</li>
               </ul>
             </div>
           </div>

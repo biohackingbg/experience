@@ -6,7 +6,7 @@ import { formatPrice } from "@/lib/tickets";
  *
  * A bar per tier rather than a pie: the job is magnitude against a known
  * ceiling, and the remaining track carries that ceiling for free. Each row is
- * named in text, so the hues label nothing on their own — they are validated
+ * named in text, so the hues label nothing on their own - they are validated
  * for colour-vision separation regardless (see the palette note below).
  */
 

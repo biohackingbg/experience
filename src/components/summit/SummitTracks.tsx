@@ -14,7 +14,7 @@ import {
  * to see that the medical conference is a separate event with its own
  * registration, so nobody arrives expecting a session their ticket never
  * covered. The shared band above the columns carries what genuinely is common
- * — dates, venue and the speakers — because that is the part worth selling.
+ * - dates, venue and the speakers - because that is the part worth selling.
  *
  * Each card is dressed in its owner's colours and carries its owner's mark:
  * the association's rose and green on theirs, ours on ours. Two brands sharing
@@ -37,7 +37,7 @@ export function SummitTracks() {
             </h2>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-bh-ink/60">
-            Медицинската конференция е от 6 до 8 ноември, потребителският фест —
+            Медицинската конференция е от 6 до 8 ноември, потребителският фест -
             на 7 и 8. Една сграда, Гранд Хотел Милениум, но отделни събития с
             отделни билети.
           </p>
@@ -68,7 +68,7 @@ export function SummitTracks() {
               </p>
               <p className="mt-4 flex items-center gap-2 font-mono text-[0.7rem] uppercase tracking-[0.12em] text-bh-ink/55">
                 <Calendar className="h-4 w-4 shrink-0 text-bh-assoc" />
-                06—08 ноември 2026
+                06-08 ноември 2026
               </p>
 
               <ul className="mt-6 flex flex-1 flex-col gap-3">
@@ -133,7 +133,7 @@ export function SummitTracks() {
               </p>
               <p className="mt-4 flex items-center gap-2 font-mono text-[0.7rem] uppercase tracking-[0.12em] text-bh-paper/60">
                 <Calendar className="h-4 w-4 shrink-0 text-bh-lime" />
-                07—08 ноември 2026
+                07-08 ноември 2026
               </p>
 
               <ul className="mt-6 flex flex-1 flex-col gap-3">

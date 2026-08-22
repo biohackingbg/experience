@@ -5,7 +5,7 @@ import { Reveal } from "@/components/ui/Reveal";
  *
  * Both marks get the same height and the same weight of surrounding space, so
  * neither reads as a sponsor of the other. The partner's rose is the only
- * place pink appears on the site — enough to tie the two identities together
+ * place pink appears on the site - enough to tie the two identities together
  * without importing a second palette.
  */
 
@@ -19,7 +19,7 @@ export function SummitOrganizers() {
           </p>
 
           <div className="mt-10 flex flex-col items-center justify-center gap-8 sm:flex-row sm:gap-14">
-            {/* Partner — Bulgarian Longevity Association */}
+            {/* Partner - Bulgarian Longevity Association */}
             <div className="flex items-center justify-center">
               {/* Taller than ours on purpose: their lockup spends most of its
                   height on the mark, so matching box heights would leave their
@@ -40,7 +40,7 @@ export function SummitOrganizers() {
               className="hidden h-14 w-px bg-bh-ink/15 sm:block"
             />
 
-            {/* Producer — Biohacking Experience */}
+            {/* Producer - Biohacking Experience */}
             <div className="flex items-center justify-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img

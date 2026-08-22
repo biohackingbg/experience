@@ -19,7 +19,7 @@ export default async function AdminLoginPage() {
           Администрация
         </h1>
         <p className="mt-2 text-sm text-bh-ink/60">
-          Sofia Life Summit — продажби и статистика.
+          Sofia Life Summit - продажби и статистика.
         </p>
         <LoginForm needsTotp={isTotpConfigured()} />
       </div>

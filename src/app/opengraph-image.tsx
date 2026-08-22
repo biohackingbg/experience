@@ -5,7 +5,7 @@ import { ImageResponse } from "next/og";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt =
-  "Sofia Life Summit — 07–08 ноември 2026, Гранд Хотел Милениум, София";
+  "Sofia Life Summit - 07–08 ноември 2026, Гранд Хотел Милениум, София";
 
 async function dataUri(file: string, mime: string) {
   const bytes = await readFile(join(process.cwd(), "public", file));
@@ -13,7 +13,7 @@ async function dataUri(file: string, mime: string) {
 }
 
 /**
- * Satori needs real font data — it cannot synthesise a bold weight, and the
+ * Satori needs real font data - it cannot synthesise a bold weight, and the
  * built-in fallback ships a single regular cut, which left the headline
  * looking light. Google serves TTF (not woff2, which Satori cannot read) when
  * the request looks like an old browser.
@@ -65,7 +65,7 @@ export default async function OpengraphImage() {
               textTransform: "uppercase",
             }}
           >
-            07—08.11.2026
+            07-08.11.2026
           </div>
 
           <div

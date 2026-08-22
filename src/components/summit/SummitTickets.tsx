@@ -134,7 +134,7 @@ export function SummitTickets() {
                         </span>
                       </div>
                       {/* The struck figure is named as the price that starts on
-                          a date, not one that was ever charged — see the note
+                          a date, not one that was ever charged - see the note
                           in lib/tickets.ts. */}
                       <p className={`mt-1.5 text-[0.7rem] leading-snug ${tone.note}`}>
                         редовна цена от {EARLY_ACCESS.regularFrom}
@@ -161,7 +161,7 @@ export function SummitTickets() {
                 </ul>
 
                 {/* Straight to the checkout with the tier pre-selected. This
-                    pointed at the waitlist while sales had not started — a
+                    pointed at the waitlist while sales had not started - a
                     buyer who picked a tier landed on an email form. */}
                 <Link
                   href={`/bilet?nivo=${tier.id}`}
@@ -204,14 +204,14 @@ export function SummitTickets() {
                   ["Цена", early ? "Ранна €35" : "€49", early ? "Ранна €89" : "€129", early ? "Ранна €249" : "€349"],
                   ["Достъп", "1 ден по избор", "И двата дни", "И двата дни"],
                   ["Лекции", "При наличие на места", "Приоритетен достъп", "Гарантиран достъп"],
-                  ["Запазени места", "—", "—", "Премиум зона"],
-                  ["Работилници", "—", "Включени", "Включени с приоритет"],
-                  ["Специални преживявания", "—", "1 по избор", "Всички включени"],
-                  ["Храна и напитки", "—", "Смути + обяд в избран ден", "Смути + обяд и през двата дни"],
-                  ["Goody bag", "—", "Стойност €100+", "Стойност €250+"],
-                  ["Premium Lounge", "—", "—", "Включен"],
-                  ["Meet & Greet с лектори", "—", "—", "Включен"],
-                  ["Приоритетен вход", "—", "—", "Включен"],
+                  ["Запазени места", "-", "-", "Премиум зона"],
+                  ["Работилници", "-", "Включени", "Включени с приоритет"],
+                  ["Специални преживявания", "-", "1 по избор", "Всички включени"],
+                  ["Храна и напитки", "-", "Смути + обяд в избран ден", "Смути + обяд и през двата дни"],
+                  ["Goody bag", "-", "Стойност €100+", "Стойност €250+"],
+                  ["Premium Lounge", "-", "-", "Включен"],
+                  ["Meet & Greet с лектори", "-", "-", "Включен"],
+                  ["Приоритетен вход", "-", "-", "Включен"],
                   ["Партньорски оферти и привилегии", "✓", "✓", "✓"],
                 ].map(([label, ...cells]) => (
                   <tr key={label} className="border-t border-bh-ink/8 align-top">
@@ -219,7 +219,7 @@ export function SummitTickets() {
                     {cells.map((cell, i) => (
                       <td
                         key={i}
-                        className={`py-3 pr-4 ${cell === "—" ? "text-bh-ink/30" : "text-bh-ink/75"}`}
+                        className={`py-3 pr-4 ${cell === "-" ? "text-bh-ink/30" : "text-bh-ink/75"}`}
                       >
                         {cell}
                       </td>

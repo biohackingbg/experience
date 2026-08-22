@@ -48,7 +48,7 @@ export async function getInvoice(reference: string): Promise<InvoiceData | null>
     })
     .from(orders)
     .where(
-      // A refunded order keeps its invoice — the refund is answered with a
+      // A refunded order keeps its invoice - the refund is answered with a
       // credit note, not by making the invoice disappear.
       sql`${orders.reference} = ${reference}
           and ${orders.status} in ('paid', 'refunded')
@@ -93,7 +93,7 @@ export async function listInvoices(limit = 200) {
 }
 
 /**
- * Every issued invoice with its lines, oldest first — the run the accountant
+ * Every issued invoice with its lines, oldest first - the run the accountant
  * gets after the event. Refunded orders are included (their invoice stands)
  * and marked, so the credit notes can be raised against them.
  */

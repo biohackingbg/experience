@@ -13,7 +13,7 @@ type Seen = { code: string; status: ScanState["status"]; name?: string };
  * Text input first, deliberately: a handheld barcode scanner types the code and
  * presses Enter, which this handles with no integration at all, and a person can
  * always read the code aloud from the ticket. Camera scanning is layered on top
- * where the browser supports it — Safari does not, and a door queue is the wrong
+ * where the browser supports it - Safari does not, and a door queue is the wrong
  * place to discover that.
  */
 export function Scanner() {
@@ -100,7 +100,7 @@ export function Scanner() {
         </button>
       </form>
 
-      {/* Result — sized to be readable at arm's length in a busy foyer. */}
+      {/* Result - sized to be readable at arm's length in a busy foyer. */}
       <div
         className={`mt-5 flex min-h-[9rem] flex-col items-center justify-center rounded-3xl px-6 py-8 text-center transition-colors ${tone}`}
         role="status"

@@ -7,7 +7,7 @@ import { useEffect } from "react";
  *
  * Fired from the browser rather than counted on the server so that link
  * previews (Slack, WhatsApp, LinkedIn fetch the page to draw a card) and
- * crawlers do not inflate the number — they do not run scripts. A reload in
+ * crawlers do not inflate the number - they do not run scripts. A reload in
  * the same tab is not a second opening.
  *
  * Two beacons: "open" once, and "progress" whenever the tab is hidden or
@@ -151,7 +151,7 @@ export function ViewBeacon({
   return null;
 }
 
-/** Browser and OS families only — enough to know "opened on an iPhone". */
+/** Browser and OS families only - enough to know "opened on an iPhone". */
 function coarseClient(): { browser: string | null; os: string | null } {
   const ua = navigator.userAgent;
   const os = /iPhone|iPad|iPod/.test(ua)

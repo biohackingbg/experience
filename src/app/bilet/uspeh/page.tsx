@@ -49,7 +49,7 @@ export default async function CheckoutSuccessPage({
         )}
 
         <p className="mt-8 text-xs leading-relaxed text-bh-ink/50">
-          Пази този номер — с него можем да намерим поръчката ти при въпрос.
+          Пази този номер - с него можем да намерим поръчката ти при въпрос.
         </p>
 
         <Link

@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 /**
- * Every invoice on its own sheet, one after another — "Печат → Запази като
+ * Every invoice on its own sheet, one after another - "Печат → Запази като
  * PDF" produces a single file with the whole run. No server-side PDF engine
  * needed, and the document is the very same component the buyer sees.
  */
@@ -37,7 +37,7 @@ export default async function PrintAllInvoicesPage() {
             </Link>
             <p className="mt-2 text-sm text-bh-ink/60">
               {rows.length} фактури, по една на лист. „Печат“ и избери „Запази
-              като PDF“ — получаваш един файл с всички.
+              като PDF“ - получаваш един файл с всички.
             </p>
           </div>
           <PrintButton />
@@ -52,7 +52,7 @@ export default async function PrintAllInvoicesPage() {
             <div key={inv.number} className="mb-10 break-after-page last:mb-0 print:mb-0">
               {inv.status === "refunded" && (
                 <p className="mb-3 rounded-full bg-[#C4607F]/15 px-4 py-1.5 text-center text-xs font-semibold uppercase tracking-wide text-[#9c3d5c] print:hidden">
-                  Върната — очаква кредитно известие
+                  Върната - очаква кредитно известие
                 </p>
               )}
               <InvoiceDocument inv={inv} />

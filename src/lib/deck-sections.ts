@@ -32,5 +32,5 @@ export function sectionIndex(id: string | null | undefined): number {
 }
 
 export function sectionLabel(id: string | null | undefined): string {
-  return DECK_SECTIONS.find((s) => s.id === id)?.label ?? "—";
+  return DECK_SECTIONS.find((s) => s.id === id)?.label ?? "-";
 }

@@ -1,7 +1,7 @@
 /**
  * The issuing company, as it must appear on an invoice.
  *
- * Public information from the commercial register — nothing here is a secret,
+ * Public information from the commercial register - nothing here is a secret,
  * which is why it lives in the repository rather than in the environment.
  *
  * Required by ЗДДС чл. 114: the supplier's name, address, identification
@@ -11,7 +11,7 @@ export const COMPANY = {
   name: "БИОХАКИНГ ООД",
   nameLatin: "Biohacking Ltd.",
   eik: "208570709",
-  /** VAT registered 28.11.2025 under чл. 100 ал. 1 — by choice. */
+  /** VAT registered 28.11.2025 under чл. 100 ал. 1 - by choice. */
   vatNumber: "BG208570709",
   address:
     "гр. София 1113, р-н Изгрев, жк. Изток, ул. „Фредерик Жолио Кюри“ 4",

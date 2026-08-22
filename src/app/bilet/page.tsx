@@ -8,7 +8,7 @@ import { CheckoutForm } from "./CheckoutForm";
 export const metadata: Metadata = {
   title: "Купи билет | Sofia Life Summit 2026",
   description:
-    "Билети за Sofia Life Summit — 07–08 ноември 2026, Гранд Хотел Милениум, София.",
+    "Билети за Sofia Life Summit - 07–08 ноември 2026, Гранд Хотел Милениум, София.",
 };
 
 // Availability changes with every sale, so nothing here may be cached.
@@ -42,7 +42,7 @@ export default async function CheckoutPage({
 
         {otkazano && (
           <p className="mt-6 rounded-2xl bg-bh-cloud px-5 py-3 text-sm text-bh-ink/70 ring-1 ring-bh-ink/10">
-            Плащането беше прекратено. Поръчката не е завършена — можеш да
+            Плащането беше прекратено. Поръчката не е завършена - можеш да
             опиташ отново.
           </p>
         )}
@@ -51,7 +51,7 @@ export default async function CheckoutPage({
           Купи билет
         </h1>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-bh-ink/60">
-          Sofia Life Summit · 07—08 ноември 2026 · Гранд Хотел Милениум, София.
+          Sofia Life Summit · 07-08 ноември 2026 · Гранд Хотел Милениум, София.
           Цените са крайни, с включен ДДС.
         </p>
 
@@ -62,7 +62,7 @@ export default async function CheckoutPage({
             <strong className="font-semibold text-bh-ink">
               Предварителна поръчка
             </strong>{" "}
-            — до {PRE_ORDER.endsLabel} билетите се продават предварително.
+            - до {PRE_ORDER.endsLabel} билетите се продават предварително.
             Плащаш сега, билетът и мястото ти са запазени, а програмата се
             допълва до събитието.
           </p>

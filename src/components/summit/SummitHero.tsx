@@ -9,7 +9,7 @@ import {
 import { SPEAKERS } from "@/lib/speakers";
 
 /**
- * The full line-up size, announced or not — the number is public even while
+ * The full line-up size, announced or not - the number is public even while
  * most of the names are held back. Read from the list, so it stays honest as
  * people are added or drop out.
  */
@@ -76,7 +76,7 @@ export function SummitHero() {
               <span className="block">
                 Два дни,{" "}
                 <span className="mx-1 inline-block -translate-y-[0.32em] whitespace-nowrap rounded-full border border-bh-ink/30 px-[0.5em] py-[0.22em] align-middle font-mono text-[0.3em] font-semibold tracking-[0.16em] text-bh-ink/80">
-                  07—08.11.2026
+                  07-08.11.2026
                 </span>{" "}
                 които могат да
               </span>
@@ -98,7 +98,7 @@ export function SummitHero() {
             </div>
             <p className="text-sm leading-relaxed text-bh-paper/80">
               Не конференция със столове в редици. Науката за дълголетието и
-              биохакинга излиза от лабораторията — на разбираем език, за един
+              биохакинга излиза от лабораторията - на разбираем език, за един
               ден, в който слушаш, измерваш се, изпробваш и си тръгваш с личен
               протокол.
             </p>
@@ -110,7 +110,7 @@ export function SummitHero() {
             left, one large accent card owning the right. */}
         <div className="mt-3 grid gap-3 lg:grid-cols-[1fr_1.5fr]">
           <div className="flex flex-col gap-3">
-            {/* Held back until the passport programme is confirmed — the card
+            {/* Held back until the passport programme is confirmed - the card
                 stays, and carries the claim that is true today. */}
             <article className="bh-mint flex flex-1 flex-col justify-between rounded-3xl p-6 text-bh-ink">
               <div className="flex items-start justify-between">
@@ -125,7 +125,7 @@ export function SummitHero() {
                 </h2>
                 <p className="mt-3 text-sm leading-relaxed text-bh-ink/65">
                   Два дни, в които науката за дълголетието се пипа, пробва и
-                  измерва — не се слуша от стол.
+                  измерва - не се слуша от стол.
                 </p>
               </div>
             </article>
@@ -153,7 +153,7 @@ export function SummitHero() {
             </div>
           </div>
 
-          {/* speakers — the big accent card: tags, headline word, rule, copy,
+          {/* speakers - the big accent card: tags, headline word, rule, copy,
               and the diagonal arrow anchoring the corner. */}
           <article className="bh-mint flex flex-col rounded-3xl p-6 text-bh-ink lg:p-7">
             <div className="flex items-start justify-between">
@@ -173,7 +173,7 @@ export function SummitHero() {
               <div className="mt-6 border-t border-bh-ink/15 pt-5" />
               <div className="flex items-end justify-between gap-6">
                 <p className="max-w-md text-sm leading-relaxed text-bh-ink/70 lg:text-base">
-                  Лекари и изследователи от България и чужбина — на разбираем
+                  Лекари и изследователи от България и чужбина - на разбираем
                   език, по 25 минути. Обявяваме нови имена всяка седмица.
                 </p>
                 <a

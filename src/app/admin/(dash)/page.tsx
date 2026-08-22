@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// Always read live numbers — a cached dashboard is a misleading dashboard.
+// Always read live numbers - a cached dashboard is a misleading dashboard.
 export const dynamic = "force-dynamic";
 
 function Money({ cents }: { cents: number }) {
@@ -45,7 +45,7 @@ function Tile({
 }
 
 export default async function AdminDashboard() {
-  // The layout also checks, but a layout is not an auth boundary — the
+  // The layout also checks, but a layout is not an auth boundary - the
   // Next docs are explicit that it may be skipped on RSC navigations.
   if (!(await isAdmin())) redirect("/admin/login");
 

@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 function bgDateTime(d: Date | null): string {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Intl.DateTimeFormat("bg-BG", {
     day: "2-digit",
     month: "2-digit",
@@ -28,7 +28,7 @@ function bgDateTime(d: Date | null): string {
 }
 
 function fmtSeconds(s: number | null): string {
-  if (s === null) return "—";
+  if (s === null) return "-";
   if (s < 60) return `${s} с`;
   return `${Math.floor(s / 60)} мин ${s % 60 ? `${s % 60} с` : ""}`.trim();
 }
@@ -50,7 +50,7 @@ function Tile({ label, value, sub }: { label: string; value: React.ReactNode; su
  * That is how "who opened it" is answered without asking anyone for an email.
  */
 export default async function DeckPage() {
-  // The layout also checks, but a layout is not an auth boundary — the
+  // The layout also checks, but a layout is not an auth boundary - the
   // Next docs are explicit that it may be skipped on RSC navigations.
   if (!(await isAdmin())) redirect("/admin/login");
 
@@ -82,13 +82,13 @@ export default async function DeckPage() {
         </div>
 
         <p className="mt-4 max-w-2xl text-sm leading-relaxed text-bh-ink/60">
-          Презентацията се отваря само през тези линкове — няма общ адрес и не
+          Презентацията се отваря само през тези линкове - няма общ адрес и не
           е в търсачките. Направи отделен линк за всяка компания (или за пост,
           имейл кампания, екипа) и ще виждаш кой я е отворил и кога, без да
           искаш имейл от никого. Всеки ред е и разговорът с партньора: цъкни
           етапа, за да го смениш, да отбележиш кой от вас води разговора и да
           оставиш бележка и какво се очаква от нас.
-          „Спри“ не трие нищо — линкът спира да се отваря, историята остава.
+          „Спри“ не трие нищо - линкът спира да се отваря, историята остава.
         </p>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -131,7 +131,7 @@ export default async function DeckPage() {
           <h2 className="text-lg font-bold tracking-tight text-bh-ink">Линкове</h2>
           {d.links.length === 0 ? (
             <p className="mt-4 rounded-2xl bg-bh-cloud px-6 py-8 text-center text-sm text-bh-ink/55 ring-1 ring-bh-ink/8">
-              Още няма линкове — направи първия по-горе.
+              Още няма линкове - направи първия по-горе.
             </p>
           ) : (
             <div className="mt-4 overflow-x-auto rounded-2xl bg-bh-cloud ring-1 ring-bh-ink/8">
@@ -194,7 +194,7 @@ export default async function DeckPage() {
                                   {l.people === 1 ? "· 1 човек" : `· ${l.people} души`}
                                 </span>
                                 <span className="block text-xs font-normal text-bh-ink/55">
-                                  {l.avgSeconds !== null ? `ср. ${fmtSeconds(l.avgSeconds)}` : "време —"}
+                                  {l.avgSeconds !== null ? `ср. ${fmtSeconds(l.avgSeconds)}` : "време -"}
                                   {l.reachedPackages ? ` · ${l.reachedPackages}× до пакетите` : ""}
                                   <span className="ml-1 text-bh-ink/40 group-open:hidden">▸ подробно</span>
                                   <span className="ml-1 hidden text-bh-ink/40 group-open:inline">▾ скрий</span>
@@ -216,7 +216,7 @@ export default async function DeckPage() {
                                       <span className="block text-bh-ink/55">
                                         {v.seconds !== null
                                           ? `${fmtSeconds(v.seconds)} · до „${sectionLabel(v.section)}“ (${v.scrollPct ?? 0}%)${reachedPrices ? " · видял цените" : ""}`
-                                          : "само отворено — без данни за четене"}
+                                          : "само отворено - без данни за четене"}
                                       </span>
                                     </li>
                                   );

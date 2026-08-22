@@ -21,18 +21,18 @@ export const CURRENCY = "EUR";
  * The launch window.
  *
  * `endsAt` is a placeholder until the sales dates are fixed with the
- * association — change it here and the page, the checkout, the signup form and
+ * association - change it here and the page, the checkout, the signup form and
  * the structured data all follow.
  *
  * Note on how this is worded on the page: under the Omnibus rules (ЗЗП чл. 64б)
  * an announced *reduction* must show the lowest price charged in the previous
  * 30 days, and these tickets have never been sold at the regular price. So the
- * struck-through figure is labelled as the price that starts on a date — a
+ * struck-through figure is labelled as the price that starts on a date - a
  * forward-looking schedule, not a claim about the past.
  */
 export const EARLY_ACCESS = {
   // Ends with the pre-order window: one deadline, deliberately. After
-  // 31 August there are no further discounts — tickets go to list price.
+  // 31 August there are no further discounts - tickets go to list price.
   endsAt: new Date("2026-08-31T23:59:59+03:00"),
   /** Deadline as it reads in a sentence. */
   endsLabel: "31 август",
@@ -50,7 +50,7 @@ export const EARLY_ACCESS = {
 export const PRE_ORDER = {
   endsAt: new Date("2026-08-31T23:59:59+03:00"),
   endsLabel: "31 август",
-  /** When the offer first became valid — matters to the structured data. */
+  /** When the offer first became valid - matters to the structured data. */
   validFrom: "2026-08-01T00:00:00+03:00",
 };
 

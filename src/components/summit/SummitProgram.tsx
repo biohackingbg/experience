@@ -3,7 +3,7 @@ import { PROGRAM } from "@/lib/program";
 import { announcedSpeakers } from "@/lib/speakers";
 
 /**
- * Hosts and the team — public from day one, not part of the weekly speaker
+ * Hosts and the team - public from day one, not part of the weekly speaker
  * reveals, so the sessions they present keep their names.
  */
 const HOSTS = [
@@ -26,7 +26,7 @@ function bare(name: string): string {
 export function SummitProgram() {
   // The full line-up lives in program.ts, but only announced names render.
   // Printing everyone here would spoil the weekly reveals the speaker section
-  // holds back — the schedule and the announcement have to keep one secret.
+  // holds back - the schedule and the announcement have to keep one secret.
   const allowed = new Set([
     ...announcedSpeakers().map((s) => bare(s.name)),
     ...HOSTS.map(bare),

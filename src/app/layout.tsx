@@ -26,11 +26,11 @@ const monoFont = Geist_Mono({
 
 const SITE = "https://thelongevitysummit.eu";
 const TITLE =
-  "Sofia Life Summit 2026 — дълголетие и биохакинг, София | Biohacking Experience";
+  "Sofia Life Summit 2026 - дълголетие и биохакинг, София | Biohacking Experience";
 function describe(): string {
   const from = Math.min(...TIERS.map((t) => priceCents(t, isEarlyAccess())));
   return (
-    "Фест за дълголетие и биохакинг — 07–08 ноември 2026, Гранд Хотел " +
+    "Фест за дълголетие и биохакинг - 07–08 ноември 2026, Гранд Хотел " +
     "Милениум, София. Четири зони, longevity паспорт, 12 станции за " +
     `измерване, международни лектори. Билети от ${formatPrice(from)} €.`
   );
@@ -53,7 +53,7 @@ export async function generateMetadata(): Promise<Metadata> {
   // Proves ownership to Search Console without touching DNS. The domain sits
   // on SuperHosting's redirect nameservers, which serve a template zone with
   // no TXT records, so the DNS method is not available until the zone moves.
-  // The token is meant to be public — it grants nothing on its own.
+  // The token is meant to be public - it grants nothing on its own.
   verification: { google: "k4X2UcEpwd0cQmdN6bpoZEPUi2zl3UHdxap635lbmUM" },
   openGraph: {
     type: "website",

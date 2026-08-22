@@ -61,7 +61,7 @@ export function SummitPassport() {
             </h2>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-bh-ink/60">
-            „Добре, а аз къде съм“ — тази зона отговаря. Това, което никой друг
+            „Добре, а аз къде съм“ - тази зона отговаря. Това, което никой друг
             wellness формат в България не предлага.
           </p>
         </Reveal>

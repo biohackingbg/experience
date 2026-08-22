@@ -10,7 +10,7 @@ import { TIERS, VAT_RATE, type TierId } from "@/lib/tickets";
 /**
  * Everything the dashboard shows, in one round of queries.
  *
- * Only `paid` orders count towards revenue and sold seats — a pending order is
+ * Only `paid` orders count towards revenue and sold seats - a pending order is
  * an abandoned checkout until Stripe confirms it, and counting those would
  * overstate both the money and how full the room is.
  */
@@ -67,7 +67,7 @@ export async function getDashboardData(): Promise<DashboardData> {
           vat: sql<number>`coalesce(sum(${orders.vatCents}) filter (where ${orders.status} = 'paid'), 0)::int`,
           paid: sql<number>`count(*) filter (where ${orders.status} = 'paid')::int`,
           refunded: sql<number>`count(*) filter (where ${orders.status} = 'refunded')::int`,
-          // Still inside the seat hold — a payment may yet land.
+          // Still inside the seat hold - a payment may yet land.
           pending: sql<number>`count(*) filter (where ${orders.status} = 'pending' and ${orders.createdAt} > now() - interval '${sql.raw(String(PENDING_HOLD_MINUTES))} minutes')::int`,
           // Hold expired without payment: the checkout was closed. Their seats
           // are already free again; kept as a number because a rising count

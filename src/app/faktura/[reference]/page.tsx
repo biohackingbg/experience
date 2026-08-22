@@ -26,7 +26,7 @@ export default async function InvoicePage({
 
   // The reference is the only key to a page full of personal data. The
   // keyspace is ~1e9, which holds only while nobody can try candidates at
-  // machine speed — so lookups are throttled per address, and a throttled
+  // machine speed - so lookups are throttled per address, and a throttled
   // request is indistinguishable from a miss.
   const head = await headers();
   const ip = head.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";

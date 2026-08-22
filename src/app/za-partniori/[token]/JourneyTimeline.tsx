@@ -12,7 +12,7 @@ export type JourneyStep = {
 /**
  * The visitor-journey timeline, driven by scroll position rather than a
  * one-shot reveal: the teal line fills to a "front" at 55% of the viewport,
- * steps wake as the front passes their dot and dim again when it retreats —
+ * steps wake as the front passes their dot and dim again when it retreats -
  * so scrolling back up plays the day in reverse.
  *
  * Under prefers-reduced-motion everything renders in its final, fully

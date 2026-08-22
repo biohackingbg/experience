@@ -11,7 +11,7 @@
  *
  * Both lists start empty and the section renders nothing until a logo exists.
  * An empty partner grid on a page that sells tickets reads as "nobody backs
- * this" — the same trap as a wall of unconfirmed speaker cards.
+ * this" - the same trap as a wall of unconfirmed speaker cards.
  *
  * Never add a name here before the contract is signed.
  */
@@ -23,7 +23,7 @@ export type ZoneSponsor = {
   zone: Zone;
   name: string;
   /**
-   * Path under /public. Full colour — sponsor agreements usually specify how
+   * Path under /public. Full colour - sponsor agreements usually specify how
    * the mark may be shown. Optional: a deal can be signed before the artwork
    * arrives, and the name set large carries the card until it does.
    */
@@ -46,7 +46,7 @@ export const ZONE_BLURB: Record<Zone, string> = {
   Ритуали: "Студ, сауна, дишане, red light, PEMF.",
 };
 
-// Empty until a contract is signed — the section renders nothing until then.
+// Empty until a contract is signed - the section renders nothing until then.
 // (Placeholder names were left here from a layout preview and went live;
 // keep these arrays empty rather than "Вашият бранд".)
 export const ZONE_SPONSORS: ZoneSponsor[] = [];

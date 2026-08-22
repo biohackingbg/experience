@@ -12,7 +12,7 @@ import {
  * Speakers, as schema.org performers.
  *
  * Read from the same list the page renders, so a name can never appear in one
- * place and not the other. Unconfirmed slots are skipped — "Обявява се скоро"
+ * place and not the other. Unconfirmed slots are skipped - "Обявява се скоро"
  * is a placeholder, not a person, and Google would treat it as one.
  */
 const performers = announcedSpeakers().map((s) => ({
@@ -35,7 +35,7 @@ const performers = announcedSpeakers().map((s) => ({
  *
  * A function rather than a constant: the offers depend on whether the early
  * window is open, and a module-level constant would freeze that answer for the
- * life of the server process — advertising a price in search that the checkout
+ * life of the server process - advertising a price in search that the checkout
  * no longer charges.
  */
 export function buildEventSchema() {

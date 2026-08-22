@@ -46,7 +46,7 @@ function connect(): { client: Client; db: Database } {
 
 /**
  * Lazily opens the connection so importing this module never fails at build
- * time — only an actual query requires DATABASE_URL to be present.
+ * time - only an actual query requires DATABASE_URL to be present.
  */
 export function getDb(): Database {
   if (globalForDb.__bhDb) return globalForDb.__bhDb;

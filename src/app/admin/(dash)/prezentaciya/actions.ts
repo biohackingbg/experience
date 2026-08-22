@@ -33,7 +33,7 @@ export async function revokeDeckLink(formData: FormData): Promise<void> {
   revalidatePath("/admin/prezentaciya");
 }
 
-/** Reopens a stopped link. Nothing is ever deleted here — only switched. */
+/** Reopens a stopped link. Nothing is ever deleted here - only switched. */
 export async function reactivateDeckLink(formData: FormData): Promise<void> {
   if (!(await isAdmin())) return;
   const id = String(formData.get("id") ?? "");

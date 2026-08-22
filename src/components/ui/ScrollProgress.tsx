@@ -4,11 +4,11 @@ import { useEffect, useRef } from "react";
 
 /**
  * The accent thread on the very top edge of the screen: fills left to right
- * as the page scrolls, pulls back as it returns — the loader-style line from
+ * as the page scrolls, pulls back as it returns - the loader-style line from
  * the reference. Lives inside the sticky nav, whose top edge is the viewport's
  * top edge while stuck.
  *
- * Driven by scroll position, not by an animation — the bar is a mirror of
+ * Driven by scroll position, not by an animation - the bar is a mirror of
  * where you are, the same information the scrollbar carries, so it stays
  * honest under prefers-reduced-motion too. Written straight to the DOM
  * because putting scroll position into state would re-render on every frame.

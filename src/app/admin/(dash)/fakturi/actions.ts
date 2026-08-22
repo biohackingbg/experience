@@ -13,7 +13,7 @@ export type ResendState = { status: "idle" | "ok" | "error"; message?: string };
  * Sends the ticket email again, optionally to a different address.
  *
  * For the case this exists to solve: someone cannot open their inbox, or gave
- * a typo'd address at checkout. The order is not modified — only the delivery
+ * a typo'd address at checkout. The order is not modified - only the delivery
  * is repeated, so the record of what was sold stays exactly as it was.
  */
 export async function resendTicketEmail(

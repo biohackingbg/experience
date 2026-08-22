@@ -10,14 +10,14 @@ import { Calendar, Pin, TicketIcon } from "@/components/ui/Pictograms";
  *
  * Until sales opened this section collected a waitlist. Now the sale itself is
  * the primary ask, and the email form serves the visitor who is not ready to
- * pay — the hook is the one the page already makes: new speakers announced
+ * pay - the hook is the one the page already makes: new speakers announced
  * every week. Under the v2 consent, that is also exactly what they sign up for.
  */
 export function SummitRegister() {
   const early = isEarlyAccess();
 
   const facts = [
-    { label: "Дати", value: "07—08 ноември 2026", icon: Calendar },
+    { label: "Дати", value: "07-08 ноември 2026", icon: Calendar },
     { label: "Място", value: "Гранд Хотел Милениум, София", icon: Pin },
     {
       label: "Достъп",
@@ -44,7 +44,7 @@ export function SummitRegister() {
               {early && (
                 <>
                   {" "}
-                  — на{" "}
+                  - на{" "}
                   <strong className="font-semibold text-bh-lime">
                     ранни цени до {EARLY_ACCESS.endsLabel}
                   </strong>
@@ -64,7 +64,7 @@ export function SummitRegister() {
 
             {/* The fallback ask, deliberately quieter than the sale. */}
             <p className="mt-12 max-w-xl border-t border-bh-paper/15 pt-8 text-sm leading-relaxed text-bh-paper/65">
-              Още се колебаеш? Обявяваме нови лектори всяка седмица — остави
+              Още се колебаеш? Обявяваме нови лектори всяка седмица - остави
               имейл и няма да пропуснеш нищо от програмата.
             </p>
 

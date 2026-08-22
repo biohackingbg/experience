@@ -7,7 +7,7 @@
  * everywhere.
  *
  * A country with no flag here falls back to its name in text, so adding a
- * speaker from a new country never silently drops the information — see
+ * speaker from a new country never silently drops the information - see
  * CountryMark below.
  */
 
@@ -35,7 +35,7 @@ const FLAGS: Record<string, React.ReactNode> = {
     <>
       <rect width="24" height="18" fill="#B22234" />
       {/* Six white stripes over red gives the thirteen. The stars are dropped
-          on purpose — at 18px wide they collapse into noise. */}
+          on purpose - at 18px wide they collapse into noise. */}
       {[1, 3, 5, 7, 9, 11].map((i) => (
         <rect
           key={i}
@@ -66,7 +66,7 @@ const FLAGS: Record<string, React.ReactNode> = {
 
 /**
  * Shows the flag when one is drawn for that country, otherwise the country
- * name set small — never nothing.
+ * name set small - never nothing.
  */
 export function CountryMark({ country }: { country: string }) {
   const flag = FLAGS[country];

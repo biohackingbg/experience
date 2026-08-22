@@ -19,7 +19,7 @@ export type TicketView = {
 /**
  * Looks up a ticket by its code.
  *
- * Only tickets belonging to a paid order resolve — a ticket row cannot exist
+ * Only tickets belonging to a paid order resolve - a ticket row cannot exist
  * without one, but checking the status here means a refunded order stops
  * admitting people without needing the rows deleted.
  */
@@ -54,7 +54,7 @@ export async function findTicket(code: string): Promise<TicketView | null> {
  * Marks a ticket as used at the door.
  *
  * Returns what happened rather than a boolean, so the scanner can tell "valid,
- * admitted" from "already used" — the second is the case staff actually need
+ * admitted" from "already used" - the second is the case staff actually need
  * to see, and it needs the original time to be useful.
  */
 export type CheckInResult =
@@ -87,7 +87,7 @@ export async function checkInTicket(code: string): Promise<CheckInResult> {
   return { status: "admitted", ticket };
 }
 
-/** All tickets on an order — used by the confirmation email. */
+/** All tickets on an order - used by the confirmation email. */
 export async function getTicketsForOrder(orderId: string) {
   const db = getDb();
   return db

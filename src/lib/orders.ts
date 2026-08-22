@@ -100,8 +100,8 @@ export async function createPendingOrder(
       return { ok: false as const, reason: "sold_out" as const, left: Math.max(left, 0) };
     }
 
-    // Resolved once. Everything downstream — the row, the total and the
-    // Stripe line item — uses this number, so the window closing mid-request
+    // Resolved once. Everything downstream - the row, the total and the
+    // Stripe line item - uses this number, so the window closing mid-request
     // cannot record one price and charge another.
     const unitPriceCents = priceCents(tier, isEarlyAccess());
     const totalCents = unitPriceCents * input.quantity;
@@ -196,7 +196,7 @@ export async function markOrderPaid(
     // The invoice number is drawn here and nowhere else: inside the same
     // transaction that flipped the order to paid, and only on the delivery
     // that won that flip. A sequence rather than max()+1, so two webhooks
-    // arriving together cannot take the same number — and an abandoned
+    // arriving together cannot take the same number - and an abandoned
     // checkout never burns one, which would leave a hole in the run.
     const [invoiced] = await tx.execute<{ invoice_number: string }>(
       sql`update ${orders}
@@ -260,7 +260,7 @@ export async function getRemaining(tierId: string): Promise<number> {
  * Records a refund reported by Stripe (`charge.refunded`).
  *
  * Keyed on the payment intent, which is the only identifier the charge event
- * carries that we also hold. A full refund flips the order to `refunded` —
+ * carries that we also hold. A full refund flips the order to `refunded` -
  * `findTicket` only resolves tickets of paid orders, so the door stops
  * admitting them without any row being touched. A partial refund records the
  * amount and leaves the order paid: which of three seats was given back is

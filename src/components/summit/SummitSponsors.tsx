@@ -78,7 +78,7 @@ export function SummitSponsors() {
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-bh-ink/60">
             Всяка зона има свой партньор, а във Village се събират подбрани
-            компании — добавки, устройства, лаборатории, клиники и храна.
+            компании - добавки, устройства, лаборатории, клиники и храна.
           </p>
         </Reveal>
 

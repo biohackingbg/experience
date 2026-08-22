@@ -8,7 +8,7 @@ import type { Exhibitor } from "@/lib/sponsors";
  * crosses the viewport.
  *
  * Driven by scroll rather than by a timer. That distinction matters for
- * logos — a marquee moves while the visitor is trying to read it, and turns
+ * logos - a marquee moves while the visitor is trying to read it, and turns
  * every logo into a target that has to be chased to be clicked. Here the wall
  * is still whenever the page is still.
  *
@@ -91,7 +91,7 @@ export function SponsorWall({ exhibitors }: { exhibitors: Exhibitor[] }) {
     };
   }, []);
 
-  // Parallax. Writes transforms straight to the DOM — putting scroll position
+  // Parallax. Writes transforms straight to the DOM - putting scroll position
   // into state would re-render the whole wall on every frame.
   useEffect(() => {
     const el = wrap.current;

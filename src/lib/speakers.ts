@@ -2,14 +2,14 @@
  * Speakers.
  *
  * Taken from the organisers' programme document (version 01.08.2026), in the
- * order the programme first introduces each person — which puts the opening
+ * order the programme first introduces each person - which puts the opening
  * panel at the front without anyone having to rank them by hand.
  *
  * Only what the document actually states is recorded here. Titles, specialities
  * and institutions are filled in as they are confirmed; nothing is inferred
  * from a name, least of all a country.
  *
- * DELIBERATELY NOT CARDED — do not "fix" this by adding them back:
+ * DELIBERATELY NOT CARDED - do not "fix" this by adding them back:
  * - Two people the source marks "(не е говорено с нея)". A page that sells
  *   tickets cannot announce someone who has not agreed to appear.
  * - Мария Силвестър, Мария Илиева and Диана Радева. All three are on stage and
@@ -27,12 +27,12 @@ export type Speaker = {
   /** Prefix shown above the name: "Проф. д-р", "Dr.", "PhD" … */
   title?: string;
   name: string;
-  /** Medical or research speciality — the credential that matters most here. */
+  /** Medical or research speciality - the credential that matters most here. */
   specialty?: string;
   /** Country of practice, shown as a small label. */
   country?: string;
   /**
-   * Hospital, university or company — the institution's own name, nothing
+   * Hospital, university or company - the institution's own name, nothing
    * else. A position goes in `role`: the two are joined for display, but the
    * event's structured data emits this as an Organization, and no organisation
    * is called "Председател, Bulgarian Longevity Association".
@@ -138,7 +138,7 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/godfrey-grech.jpg",
   },
   {
-    // Degrees sit after the name, the way Bulgarian academia writes them —
+    // Degrees sit after the name, the way Bulgarian academia writes them -
     // the emblem on her coat turned out to be MU Plovdiv after all.
     id: "viktoriya-sarafyan",
     announced: true,

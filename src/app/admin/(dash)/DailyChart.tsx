@@ -4,7 +4,7 @@ import { formatPrice } from "@/lib/tickets";
 /**
  * Orders per day.
  *
- * One series, so no legend — the heading names it. Bars rather than a line:
+ * One series, so no legend - the heading names it. Bars rather than a line:
  * each day is a discrete count, not a continuous reading. Only the tallest day
  * and the last are labelled directly; a number over every bar is noise.
  */
@@ -59,7 +59,7 @@ export function DailyChart({ data }: { data: DailySales[] }) {
                     }}
                   />
 
-                  {/* Hover detail — the bar alone cannot carry the money. */}
+                  {/* Hover detail - the bar alone cannot carry the money. */}
                   <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-lg bg-bh-ink px-3 py-2 text-xs text-bh-paper group-hover:block">
                     <div className="font-semibold">{formatDay(day.day)}</div>
                     <div className="opacity-80">

@@ -7,7 +7,7 @@ import { formatPrice } from "@/lib/tickets";
 /**
  * Transactional email.
  *
- * Lazy like the other integrations, so a missing key never breaks a build —
+ * Lazy like the other integrations, so a missing key never breaks a build -
  * and, more importantly, never breaks a *payment*. A failed confirmation email
  * must not fail the webhook: the money is taken and the ticket exists either
  * way, so send errors are logged and swallowed.
@@ -31,7 +31,7 @@ const SITE = "https://thelongevitysummit.eu";
 /**
  * The buyer's name is attacker-controlled at checkout and lands inside HTML.
  * Normally that mail goes to the buyer (self-XSS at worst), but the admin
- * resend can deliver the same HTML to any address — without escaping, a €35
+ * resend can deliver the same HTML to any address - without escaping, a €35
  * purchase becomes DKIM-signed phishing from our own domain.
  */
 function esc(s: string): string {
@@ -78,7 +78,7 @@ function ticketRows(input: TicketEmailInput): string {
 }
 
 /**
- * Plain HTML with inline styles on purpose — email clients strip stylesheets,
+ * Plain HTML with inline styles on purpose - email clients strip stylesheets,
  * and Outlook ignores most modern layout. Tables and inline CSS are what
  * actually renders everywhere.
  */
@@ -103,7 +103,7 @@ function ticketEmailHtml(input: TicketEmailInput): string {
       </h1>
       <p style="margin:14px 0 0;font:400 15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251fb3">
         Здравей, ${esc(input.buyerName)}! Плащането е потвърдено. Отвори билета си
-        по-долу и го запази — ще ти трябва на входа.
+        по-долу и го запази - ще ти трябва на входа.
       </p>
 
       <div style="margin-top:26px;height:3px;background:#cef870;border-radius:2px"></div>
@@ -116,7 +116,7 @@ function ticketEmailHtml(input: TicketEmailInput): string {
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:24px">
         <tr>
           <td style="font:400 14px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251fb3">
-            <strong style="color:#02251f">07—08 ноември 2026</strong><br>
+            <strong style="color:#02251f">07-08 ноември 2026</strong><br>
             Гранд Хотел Милениум, София
           </td>
           <td align="right" style="font:400 14px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251fb3">
@@ -153,7 +153,7 @@ function ticketEmailText(input: TicketEmailInput): string {
     "",
     list,
     "",
-    "07—08 ноември 2026, Гранд Хотел Милениум, София",
+    "07-08 ноември 2026, Гранд Хотел Милениум, София",
     `Поръчка ${input.reference} · ${formatPrice(input.totalCents)} €`,
     ...(input.invoiceNumber ? [`Фактура: ${SITE}/faktura/${input.reference}`] : []),
     "",
@@ -166,7 +166,7 @@ export async function sendTicketEmail(input: TicketEmailInput): Promise<boolean>
   const from = process.env.EMAIL_FROM;
 
   if (!resend || !from) {
-    console.warn("[email] not configured — skipping ticket email");
+    console.warn("[email] not configured - skipping ticket email");
     return false;
   }
 

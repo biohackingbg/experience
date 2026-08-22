@@ -1,7 +1,7 @@
 /**
  * Line pictograms drawn to sit beside the asterisk mark: one weight, no fills,
  * a 24 grid, round caps. They read as a family because the stroke never
- * changes — only the geometry does.
+ * changes - only the geometry does.
  */
 
 type Props = { className?: string };
@@ -25,7 +25,7 @@ export function Asterisk({ className }: Props) {
   );
 }
 
-/** Venue. A building with a canopy — abstract enough not to read as a house. */
+/** Venue. A building with a canopy - abstract enough not to read as a house. */
 export function Hotel({ className }: Props) {
   return (
     <svg {...base} className={className}>
@@ -37,7 +37,7 @@ export function Hotel({ className }: Props) {
   );
 }
 
-/** Stage — a mic on its stand. */
+/** Stage - a mic on its stand. */
 export function Stage({ className }: Props) {
   return (
     <svg {...base} className={className}>
@@ -48,7 +48,7 @@ export function Stage({ className }: Props) {
   );
 }
 
-/** Laboratory — a flask. */
+/** Laboratory - a flask. */
 export function Flask({ className }: Props) {
   return (
     <svg {...base} className={className}>
@@ -59,7 +59,7 @@ export function Flask({ className }: Props) {
   );
 }
 
-/** Rituals — heat and water, as rising waves. */
+/** Rituals - heat and water, as rising waves. */
 export function Waves({ className }: Props) {
   return (
     <svg {...base} className={className}>
@@ -70,7 +70,7 @@ export function Waves({ className }: Props) {
   );
 }
 
-/** Village — a market stall under its awning. */
+/** Village - a market stall under its awning. */
 export function Stall({ className }: Props) {
   return (
     <svg {...base} className={className}>
@@ -82,7 +82,7 @@ export function Stall({ className }: Props) {
   );
 }
 
-/* — Longevity passport markers — */
+/* - Longevity passport markers - */
 
 /** Body composition. */
 export function Body({ className }: Props) {
@@ -96,7 +96,7 @@ export function Body({ className }: Props) {
   );
 }
 
-/** Functional screening — gait and strength. */
+/** Functional screening - gait and strength. */
 export function Walk({ className }: Props) {
   return (
     <svg {...base} className={className}>
@@ -108,7 +108,7 @@ export function Walk({ className }: Props) {
   );
 }
 
-/** Nervous system — heart rate variability. */
+/** Nervous system - heart rate variability. */
 export function Pulse({ className }: Props) {
   return (
     <svg {...base} className={className}>
@@ -117,7 +117,7 @@ export function Pulse({ className }: Props) {
   );
 }
 
-/** Metabolic — blood markers. */
+/** Metabolic - blood markers. */
 export function Droplet({ className }: Props) {
   return (
     <svg {...base} className={className}>
@@ -127,7 +127,7 @@ export function Droplet({ className }: Props) {
   );
 }
 
-/** Skin and exposome — sun exposure. */
+/** Skin and exposome - sun exposure. */
 export function SunSkin({ className }: Props) {
   return (
     <svg {...base} className={className}>
@@ -148,7 +148,7 @@ export function Eye({ className }: Props) {
   );
 }
 
-/* — Stats and facts — */
+/* - Stats and facts - */
 
 /** Visitors. */
 export function People({ className }: Props) {
@@ -311,7 +311,7 @@ export function TestTube({ className }: Props) {
 }
 
 /**
- * DNA: the familiar helix — two gentle strands weaving through one and a
+ * DNA: the familiar helix - two gentle strands weaving through one and a
  * half turns, rungs where they part. Wide, soft crossings so it survives at
  * icon size instead of collapsing into an X.
  */
@@ -319,7 +319,7 @@ export function Dna({ className }: Props) {
   return (
     <svg {...base} className={className}>
       {/* Two strands, each a full S: open at the top, crossing twice, open
-          at the bottom — the wide bulge in the middle carries two rungs,
+          at the bottom - the wide bulge in the middle carries two rungs,
           the open ends one each. */}
       <path d="M6.5 2.5C6.5 6.5 17.5 8 17.5 12S6.5 17.5 6.5 21.5" />
       <path d="M17.5 2.5C17.5 6.5 6.5 8 6.5 12S17.5 17.5 17.5 21.5" />

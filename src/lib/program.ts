@@ -1,9 +1,9 @@
 /**
  * The public programme, transcribed from the organisers' document
- * "Sofia Life Summit — Дълголетие за всеки", version 01.08.2026.
+ * "Sofia Life Summit - Дълголетие за всеки", version 01.08.2026.
  *
  * That document is headed PRELIMINARY and closes each day with "Програмата
- * подлежи на финално потвърждение на лектори и часови диапазони" — the page
+ * подлежи на финално потвърждение на лектори и часови диапазони" - the page
  * repeats that, because a visitor reads a published schedule as a promise.
  *
  * Two names carried the note "(не е говорено с нея)" in the source and are
@@ -20,7 +20,7 @@ export type Slot = {
   role?: string;
   /** Names exactly as the programme lists them. */
   people?: string[];
-  /** Registration, coffee, lunch — rendered quietly. */
+  /** Registration, coffee, lunch - rendered quietly. */
   pause?: boolean;
 };
 

@@ -16,7 +16,7 @@ function cell(v: string | number | null | undefined): string {
   return /[";\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
-/** Amounts as 12,34 — the decimal comma Excel expects in this locale. */
+/** Amounts as 12,34 - the decimal comma Excel expects in this locale. */
 function money(cents: number | null): string {
   if (cents === null) return "";
   return (cents / 100).toFixed(2).replace(".", ",");
@@ -28,7 +28,7 @@ function bgDate(d: Date | null): string {
 }
 
 /**
- * The full invoice run as CSV — one row per invoice, for the accountant.
+ * The full invoice run as CSV - one row per invoice, for the accountant.
  * Guarded here too: a route handler is its own entry point.
  */
 export async function GET() {
@@ -70,7 +70,7 @@ export async function GET() {
       money(r.vatCents),
       money(r.totalCents),
       r.currency,
-      r.status === "refunded" ? "върната — кредитно известие" : r.refundedCents ? "частично върната" : "платена",
+      r.status === "refunded" ? "върната - кредитно известие" : r.refundedCents ? "частично върната" : "платена",
       money(r.refundedCents),
       bgDate(r.refundedAt),
     ]

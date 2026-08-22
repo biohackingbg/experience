@@ -6,7 +6,7 @@ import { useState } from "react";
  * Copies the addresses to the clipboard, comma separated, ready to paste into
  * a mail tool's BCC field.
  *
- * Only the ones passed in — the page filters out anyone who unsubscribed
+ * Only the ones passed in - the page filters out anyone who unsubscribed
  * before it gets here, so the button cannot quietly hand back an address that
  * asked to be left alone.
  */

@@ -26,14 +26,14 @@ export function SummitNav() {
   return (
     /* Sticky glass: translucent paper over a backdrop blur, so the page
        stays legible sliding underneath. Works because the page wrapper
-       clips with overflow-clip, not overflow-hidden — hidden would make it
+       clips with overflow-clip, not overflow-hidden - hidden would make it
        the scroll container and quietly kill the stickiness. */
     <header className="sticky top-0 z-40 border-b border-bh-ink/10 bg-bh-paper/70 px-5 backdrop-blur-lg sm:px-8 lg:px-10">
       <ScrollProgress />
       <nav className="flex items-center justify-between py-4">
         <Link
           href="#top"
-          aria-label="Biohacking Experience — начало"
+          aria-label="Biohacking Experience - начало"
           className="flex items-center"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}

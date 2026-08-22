@@ -16,7 +16,7 @@ export function invoiceNo(n: number): string {
 }
 
 /**
- * The invoice itself — one document, no chrome. Used by the buyer's page and
+ * The invoice itself - one document, no chrome. Used by the buyer's page and
  * by the admin's print-everything page, so the two can never drift apart.
  */
 export function InvoiceDocument({ inv }: { inv: InvoiceData }) {
@@ -114,9 +114,9 @@ export function InvoiceDocument({ inv }: { inv: InvoiceData }) {
           className="border-t border-bh-ink/8 align-top"
         >
           <td className="py-3 pr-4">
-            Билет за Sofia Life Summit — {item.tierName}
+            Билет за Sofia Life Summit - {item.tierName}
             <span className="block text-xs text-bh-ink/50">
-              07—08 ноември 2026, Гранд Хотел Милениум, София
+              07-08 ноември 2026, Гранд Хотел Милениум, София
             </span>
           </td>
           <td className="py-3 text-right tabular-nums">

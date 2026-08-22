@@ -1,6 +1,6 @@
 /**
  * Shared between the form (client) and the write path (server), so the wording
- * a person sees is provably the wording we store. No server-only imports here —
+ * a person sees is provably the wording we store. No server-only imports here -
  * this module is safe to pull into the browser bundle.
  */
 import {
@@ -12,7 +12,7 @@ import {
 export const CONSENT_VERSION = "v2";
 
 export const CONSENT_TEXT =
-  "Съгласявам се Biohacking.bg да ми изпраща новини за Sofia Life Summit — " +
+  "Съгласявам се Biohacking.bg да ми изпраща новини за Sofia Life Summit - " +
   "нови лектори, програма и цени на билетите. Мога да оттегля съгласието си " +
   "по всяко време.";
 
@@ -26,7 +26,7 @@ export const TIERS = ["core", "plus", "peak"] as const;
 export function tierLabels(early: boolean): Record<(typeof TIERS)[number], string> {
   const label = (id: (typeof TIERS)[number]) => {
     const tier = TICKET_TIERS.find((t) => t.id === id)!;
-    return `${tier.name} — ${formatPrice(priceCents(tier, early))} €`;
+    return `${tier.name} - ${formatPrice(priceCents(tier, early))} €`;
   };
   return { core: label("core"), plus: label("plus"), peak: label("peak") };
 }

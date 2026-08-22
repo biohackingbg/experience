@@ -5,7 +5,7 @@ import { announcedSpeakers } from "@/lib/speakers";
 /**
  * A grid rather than a horizontal strip. The strip cost less height but hid
  * people: most visitors never swipe, and a line-up of doctors is something you
- * compare — you scan specialities against each other, which only works when
+ * compare - you scan specialities against each other, which only works when
  * they sit side by side. Height is held down by the square crop and by
  * revealing the first eight, the rest on request.
  */
@@ -24,7 +24,7 @@ export function SummitSpeakers() {
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-bh-ink/60">
             Лекари и изследователи от България и чужбина. Програмата се
-            допълва — обявяваме нови имена всяка седмица.
+            допълва - обявяваме нови имена всяка седмица.
           </p>
         </Reveal>
 
@@ -34,7 +34,7 @@ export function SummitSpeakers() {
 
         <Reveal className="mt-8">
           <p className="text-sm leading-relaxed text-bh-ink/60">
-            Това не е целият състав — обявяваме нови лектори всяка седмица.{" "}
+            Това не е целият състав - обявяваме нови лектори всяка седмица.{" "}
             <a
               href="#register"
               className="font-semibold text-bh-pine underline underline-offset-2"

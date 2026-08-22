@@ -4,7 +4,7 @@ import { useSyncExternalStore } from "react";
 
 const STORAGE_KEY = "bh-theme";
 
-/** The <html data-theme> attribute is the source of truth — the pre-paint
+/** The <html data-theme> attribute is the source of truth - the pre-paint
  *  script sets it, so reading it avoids both a hydration mismatch and a
  *  duplicate copy of the theme in React state. */
 function subscribe(onChange: () => void) {
@@ -65,7 +65,7 @@ export function ThemeToggle() {
     try {
       localStorage.setItem(STORAGE_KEY, next ? "dark" : "light");
     } catch {
-      // Private mode — the choice just won't persist.
+      // Private mode - the choice just won't persist.
     }
   }
 

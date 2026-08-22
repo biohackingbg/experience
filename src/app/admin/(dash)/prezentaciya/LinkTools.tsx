@@ -5,7 +5,7 @@ import { useActionState, useState } from "react";
 import { createDeckLink, type LinkFormState } from "./actions";
 
 // Lives here, not in actions.ts: a "use server" module may export only
-// async functions — an exported object fails the build.
+// async functions - an exported object fails the build.
 const initialLinkFormState: LinkFormState = { status: "idle" };
 
 /** New share link: a label for who it is for, nothing else to fill in. */
@@ -20,7 +20,7 @@ export function NewLinkForm() {
         required
         minLength={2}
         maxLength={80}
-        placeholder="за кого е — напр. Alma Lasers"
+        placeholder="за кого е - напр. Alma Lasers"
         className="w-64 rounded-full border border-bh-ink/15 bg-bh-paper px-4 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35"
       />
       <button
@@ -39,7 +39,7 @@ export function NewLinkForm() {
   );
 }
 
-/** Puts the full URL on the clipboard — the thing you actually do with a link. */
+/** Puts the full URL on the clipboard - the thing you actually do with a link. */
 export function CopyLink({ url }: { url: string }) {
   const [done, setDone] = useState(false);
 
@@ -70,7 +70,7 @@ type Stage = { id: string; label: string; hint: string };
 
 /**
  * The pipeline cell: stage pill, note and next step at rest; the same three
- * as a small form when opened. One save per link — the row is the deal.
+ * as a small form when opened. One save per link - the row is the deal.
  */
 export function PipelineEditor({
   id,
@@ -157,7 +157,7 @@ export function PipelineEditor({
         >
           {stages.map((s) => (
             <option key={s.id} value={s.id}>
-              {s.label} — {s.hint}
+              {s.label} - {s.hint}
             </option>
           ))}
         </select>
@@ -181,7 +181,7 @@ export function PipelineEditor({
         defaultValue={note ?? ""}
         rows={5}
         maxLength={1000}
-        placeholder="бележка — с кого говорихме, какво казаха"
+        placeholder="бележка - с кого говорихме, какво казаха"
         className="rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm leading-relaxed text-bh-ink placeholder:text-bh-ink/35"
       />
       <input

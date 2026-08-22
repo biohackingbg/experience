@@ -11,7 +11,7 @@ import { DECK_SECTIONS, sectionIndex } from "@/lib/deck-sections";
 /**
  * The partner deck is reachable only through share links, one per recipient.
  * That is what makes an opening attributable ("Alma Lasers opened it twice,
- * last on Tuesday") without an email gate — the link itself says who.
+ * last on Tuesday") without an email gate - the link itself says who.
  *
  * Tokens are 16 random bytes, base64url: 128 bits, unguessable, and short
  * enough to paste into a chat.
@@ -83,7 +83,7 @@ export async function revokeLink(id: string): Promise<void> {
     .where(and(eq(deckLinks.id, id), isNull(deckLinks.revokedAt)));
 }
 
-/** Pipeline fields — the notes a sales conversation leaves behind. */
+/** Pipeline fields - the notes a sales conversation leaves behind. */
 export async function updateLinkPipeline(
   id: string,
   input: { stage: StageId; note: string | null; nextStep: string | null; owner: string | null },
@@ -94,7 +94,7 @@ export async function updateLinkPipeline(
     .where(eq(deckLinks.id, id));
 }
 
-/** Reopens a stopped link — same token, so an already-sent URL works again. */
+/** Reopens a stopped link - same token, so an already-sent URL works again. */
 export async function reactivateLink(id: string): Promise<void> {
   await getDb().update(deckLinks).set({ revokedAt: null }).where(eq(deckLinks.id, id));
 }
@@ -155,7 +155,7 @@ export type ViewRow = {
   section: string | null;
 };
 
-/** Recent openings across all links, newest first — grouped by the admin. */
+/** Recent openings across all links, newest first - grouped by the admin. */
 export async function listViews(limit = 1000): Promise<ViewRow[]> {
   return getDb()
     .select({
@@ -257,7 +257,7 @@ export async function getDeckStats(): Promise<DeckStats> {
       .from(deckViews),
     db
       .select({
-        place: sql<string>`coalesce(nullif(concat_ws(', ', ${deckViews.city}, ${deckViews.country}), ''), '—')`,
+        place: sql<string>`coalesce(nullif(concat_ws(', ', ${deckViews.city}, ${deckViews.country}), ''), '-')`,
         n: count(),
       })
       .from(deckViews)

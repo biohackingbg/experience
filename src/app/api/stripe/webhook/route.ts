@@ -10,7 +10,7 @@ import { markOrderPaid, markOrderRefunded } from "@/lib/orders";
 import { getStripe } from "@/lib/stripe";
 
 /**
- * Stripe webhook — the only place an order becomes `paid`.
+ * Stripe webhook - the only place an order becomes `paid`.
  *
  * Never trust the browser's return from Checkout: a buyer can close the tab
  * before it loads, and the URL can be visited without paying. Stripe's signed
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
           session.amount_total !== expected.totalCents
         ) {
           console.error(
-            `[stripe] amount mismatch for ${orderId}: session ${session.amount_total} vs order ${expected.totalCents} — not issuing tickets`,
+            `[stripe] amount mismatch for ${orderId}: session ${session.amount_total} vs order ${expected.totalCents} - not issuing tickets`,
           );
           return NextResponse.json({ received: true });
         }
@@ -81,7 +81,7 @@ export async function POST(request: Request) {
 
         // Only the delivery that actually flipped the order returns `order`,
         // so a Stripe retry cannot send the buyer a second copy. A failed send
-        // must not fail the webhook — the money is taken and the tickets exist
+        // must not fail the webhook - the money is taken and the tickets exist
         // either way, and a 500 here would have Stripe retry a paid order.
         if (order) {
           const sent = await sendTicketEmail({
@@ -94,14 +94,14 @@ export async function POST(request: Request) {
           });
           if (!sent) {
             console.error(
-              `[stripe] ticket email NOT sent for ${order.reference} — deliver it manually`,
+              `[stripe] ticket email NOT sent for ${order.reference} - deliver it manually`,
             );
           }
         }
       }
     }
 
-    // A refund made in the Stripe dashboard (or via API) — the only way one
+    // A refund made in the Stripe dashboard (or via API) - the only way one
     // happens; the site itself never refunds. Full refunds close the order
     // and its tickets; partial ones are recorded. The invoice is untouched:
     // the accountant answers it with a credit note against the same number.
@@ -120,7 +120,7 @@ export async function POST(request: Request) {
           console.error(`[stripe] refund for unknown payment intent ${paymentIntent}`);
         } else {
           console.info(
-            `[stripe] order ${outcome.reference} ${outcome.status === "refunded" ? "fully" : "partially"} refunded: ${outcome.refundedCents}/${outcome.totalCents} — invoice ${outcome.invoiceNumber ?? "—"} needs a credit note`,
+            `[stripe] order ${outcome.reference} ${outcome.status === "refunded" ? "fully" : "partially"} refunded: ${outcome.refundedCents}/${outcome.totalCents} - invoice ${outcome.invoiceNumber ?? "-"} needs a credit note`,
           );
         }
       }

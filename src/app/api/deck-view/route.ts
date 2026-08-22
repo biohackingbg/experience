@@ -14,7 +14,7 @@ const int = (v: unknown, max: number): number =>
 
 /**
  * Receives the deck's beacons: one "open" per opening, then "progress" as the
- * reader leaves or hides the tab. Always answers 204 — a beacon has no one to
+ * reader leaves or hides the tab. Always answers 204 - a beacon has no one to
  * report an error to, and refusing loudly would only tell a prober which
  * tokens exist.
  */
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
 
   const ownHost = new URL(request.url).hostname;
   const device = body?.device === "mobile" || body?.device === "desktop" ? body.device : null;
-  // Vercel's edge geo headers — a city, not an address. The IP is not stored.
+  // Vercel's edge geo headers - a city, not an address. The IP is not stored.
   const country = str(request.headers.get("x-vercel-ip-country"), 8);
   const cityRaw = request.headers.get("x-vercel-ip-city");
   let city: string | null = null;

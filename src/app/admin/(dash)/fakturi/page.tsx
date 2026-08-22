@@ -11,7 +11,7 @@ import { formatPrice } from "@/lib/tickets";
 export const dynamic = "force-dynamic";
 
 function bgDate(d: Date | null): string {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Intl.DateTimeFormat("bg-BG", {
     day: "2-digit",
     month: "2-digit",
@@ -20,7 +20,7 @@ function bgDate(d: Date | null): string {
 }
 
 export default async function InvoicesPage() {
-  // The layout also checks, but a layout is not an auth boundary — the
+  // The layout also checks, but a layout is not an auth boundary - the
   // Next docs are explicit that it may be skipped on RSC navigations.
   if (!(await isAdmin())) redirect("/admin/login");
 
@@ -40,7 +40,7 @@ export default async function InvoicesPage() {
           </div>
           <div className="flex flex-wrap items-center gap-3">
             {/* Plain anchors: one is a file download, the other opens a
-                print view — neither wants client-side navigation. */}
+                print view - neither wants client-side navigation. */}
             <a
               href="/admin/fakturi/eksport"
               className="rounded-full border border-bh-ink/20 px-4 py-2 text-xs font-semibold text-bh-ink transition-colors hover:border-bh-ink"
@@ -112,7 +112,7 @@ export default async function InvoicesPage() {
                     <td className="py-3 pr-4 text-right tabular-nums text-bh-ink">
                       {formatPrice(r.totalCents)} €
                       {r.refundedCents ? (
-                        // The invoice itself is not changed by a refund — the
+                        // The invoice itself is not changed by a refund - the
                         // accountant answers it with a credit note, so this
                         // is the reminder that one is owed.
                         <span className="block text-[0.65rem] font-semibold uppercase tracking-wide text-[#9c3d5c]">

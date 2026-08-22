@@ -66,7 +66,7 @@ export function verifySessionToken(token: string | undefined): boolean {
   return Number(expiresAt) > Date.now();
 }
 
-/** Server-side check for layouts and actions — the real gate. */
+/** Server-side check for layouts and actions - the real gate. */
 export async function isAdmin(): Promise<boolean> {
   const store = await cookies();
   return verifySessionToken(store.get(ADMIN_COOKIE)?.value);
@@ -83,12 +83,12 @@ export const sessionCookieOptions = {
 /*
  * ── Second factor: TOTP (RFC 6238) ──────────────────────────────────────
  *
- * Implemented directly on node:crypto rather than pulling a dependency —
+ * Implemented directly on node:crypto rather than pulling a dependency -
  * the whole algorithm is an HMAC and a modulo, and an auth path is the last
  * place to add third-party code.
  *
  * Deliberately optional: with no ADMIN_TOTP_SECRET set, login behaves as
- * before. That makes the rollout safe — deploy the code, enrol the phone,
+ * before. That makes the rollout safe - deploy the code, enrol the phone,
  * verify a login, and only then set the secret in production. Recovery from
  * a lost phone is removing the variable.
  */

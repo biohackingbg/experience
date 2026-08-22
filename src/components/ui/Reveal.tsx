@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 /**
- * Reveals its children once they scroll into view — fade + rise, Apple-style.
+ * Reveals its children once they scroll into view - fade + rise, Apple-style.
  *
  * The hidden state lives behind the `js` class on <html> (set by a blocking
  * inline script in the layout), so content stays visible if scripting never
@@ -25,13 +25,13 @@ export function Reveal({
     const el = ref.current;
     if (!el) return;
 
-    // No observer support — show it on the next frame rather than never.
+    // No observer support - show it on the next frame rather than never.
     if (typeof IntersectionObserver === "undefined") {
       const frame = requestAnimationFrame(() => setShown(true));
       return () => cancelAnimationFrame(frame);
     }
 
-    // Already in view on load (e.g. deep link) — reveal immediately.
+    // Already in view on load (e.g. deep link) - reveal immediately.
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
