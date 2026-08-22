@@ -297,7 +297,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 function H2({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <h2
-      className={`mt-5 max-w-3xl font-display text-[clamp(1.9rem,4.2vw,3.4rem)] font-[600] leading-[1.06] tracking-[-0.025em] text-bh-ink ${className}`}
+      className={`mt-5 max-w-3xl font-display text-[clamp(1.9rem,4.2vw,3.4rem)] font-[900] leading-[1.04] tracking-[-0.025em] text-bh-ink ${className}`}
     >
       {children}
     </h2>
@@ -308,19 +308,39 @@ function H2({ children, className = "" }: { children: React.ReactNode; className
  * `name` marks the section for the reading-progress beacon: the admin sees
  * the deepest section a reader reached, in the order they appear here.
  */
+/**
+ * `dark` flips the section to forest. It works by re-pinning the local
+ * colour tokens, so every text-bh-ink/NN and bg-bh-cloud inside simply
+ * follows — no per-element dark variants.
+ */
+const DARK_SECTION = {
+  backgroundColor: "#0a3229",
+  "--color-bh-ink": "#f2f2ee",
+  "--color-bh-paper": "#0a3229",
+  "--color-bh-cloud": "#0d3a30",
+  "--color-bh-pine": "#cef870",
+} as React.CSSProperties;
+
 function Section({
   name,
   id,
+  dark,
   children,
   className = "",
 }: {
   name: string;
   id?: string;
+  dark?: boolean;
   children: React.ReactNode;
   className?: string;
 }) {
   return (
-    <section data-deck-section={name} id={id} className={`px-6 py-16 sm:px-10 sm:py-24 lg:px-14 ${className}`}>
+    <section
+      data-deck-section={name}
+      id={id}
+      style={dark ? DARK_SECTION : undefined}
+      className={`px-6 py-16 sm:px-10 sm:py-24 lg:px-14 ${className}`}
+    >
       <div className="mx-auto w-full max-w-6xl">{children}</div>
     </section>
   );
@@ -375,7 +395,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
         <Eyebrow>Партньорски възможности · 07—08.11.2026</Eyebrow>
         <div className="mt-8 grid gap-12 lg:grid-cols-[1.4fr_1fr] lg:items-end">
           <div>
-            <h1 className="font-display text-[clamp(3.4rem,10vw,8.4rem)] font-[300] leading-[0.92] tracking-[-0.04em] text-bh-ink">
+            <h1 className="font-display text-[clamp(3.4rem,10vw,8.4rem)] font-[900] leading-[0.92] tracking-[-0.04em] text-bh-ink">
               Стани
               <br />
               партньор
@@ -429,7 +449,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
       </Section>
 
       {/* 03 мащаб */}
-      <Section name="scale" className="border-t border-bh-ink/10">
+      <Section name="scale" dark className="border-t border-bh-ink/10">
         <Reveal>
           <Eyebrow>Мащаб</Eyebrow>
           <H2>Двата дни в числа</H2>
@@ -504,7 +524,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
       </Section>
 
       {/* 05 лекторите */}
-      <Section name="speakers" className="border-t border-bh-ink/10">
+      <Section name="speakers" dark className="border-t border-bh-ink/10">
         <Reveal>
           <Eyebrow>Сцената</Eyebrow>
           <H2>50 международни лектори</H2>
@@ -516,7 +536,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
         <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {speakers.map((s, i) => (
             <Reveal key={s.name} delay={i * 70}>
-              <article className="group relative aspect-[3/4] overflow-hidden rounded-[1.6rem] bg-[#0a3229] text-white">
+              <article className="group relative aspect-[3/4] overflow-hidden rounded-[1.6rem] bg-[#0d3a30] text-white ring-1 ring-white/10">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={s.photo}
@@ -607,7 +627,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
       </Section>
 
       {/* 08 брандирана зона — the LED-wall visual */}
-      <Section name="brandzone" className="border-t border-bh-ink/10">
+      <Section name="brandzone" dark className="border-t border-bh-ink/10">
         <Reveal>
           <Eyebrow>Как изглежда на място</Eyebrow>
           <H2>Зоната носи вашето име</H2>
@@ -754,7 +774,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
       </Section>
 
       {/* 11 стойността */}
-      <Section name="value" className="border-t border-bh-ink/10">
+      <Section name="value" dark className="border-t border-bh-ink/10">
         <Reveal>
           <Eyebrow>Стойността</Eyebrow>
           <H2>Какво получава вашата компания</H2>
@@ -1089,10 +1109,10 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
       </Section>
 
       {/* 19 следваща стъпка */}
-      <Section name="next" className="border-t border-bh-ink/10 pb-24">
+      <Section name="next" dark className="border-t border-bh-ink/10 pb-24">
         <Reveal>
           <Eyebrow>Организатори</Eyebrow>
-          <h2 className="mt-5 font-display text-[clamp(2.6rem,7vw,5.6rem)] font-[300] leading-[0.95] tracking-[-0.04em] text-bh-ink">
+          <h2 className="mt-5 font-display text-[clamp(2.6rem,7vw,5.6rem)] font-[900] leading-[0.95] tracking-[-0.04em] text-bh-ink">
             Заповядайте
             <br />
             на борда
@@ -1103,7 +1123,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
           </p>
           <a
             href={MAILTO}
-            className="mt-8 inline-block rounded-full bg-bh-ink px-8 py-4 text-base font-semibold text-white transition-transform hover:-translate-y-0.5"
+            className="mt-8 inline-block rounded-full bg-bh-ink px-8 py-4 text-base font-semibold text-bh-paper transition-transform hover:-translate-y-0.5"
           >
             {CONTACT}
           </a>
