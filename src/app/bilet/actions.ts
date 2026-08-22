@@ -102,10 +102,11 @@ export async function startCheckout(
         },
       },
     ],
-    // Strictly inside the 30-minute pending hold, not equal to it: a payment
-    // landing in the final seconds of an expired hold could otherwise pair
-    // with a resold seat and oversell by one.
-    expires_at: Math.floor(Date.now() / 1000) + 25 * 60,
+    // Stripe's minimum session lifetime is 30 minutes — anything shorter is
+    // rejected outright (it broke live sales on 22.08). The pending hold is
+    // therefore longer (35 min): a payment landing in the session's final
+    // seconds must still find its seat held, or we could oversell by one.
+    expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
     success_url: `${origin}/bilet/uspeh?ref=${order.reference}`,
     cancel_url: `${origin}/bilet?otkazano=1`,
   });
