@@ -395,42 +395,63 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
         </div>
       </header>
 
-      {/* 01 cover */}
-      <Section name="cover" className="pt-14 sm:pt-20">
-        <Eyebrow>Партньорски възможности · 07-08.11.2026</Eyebrow>
-        <div className="mt-8 grid gap-12 lg:grid-cols-[1.4fr_1fr] lg:items-end">
-          <div>
-            <h1 className="font-display text-[clamp(3.4rem,10vw,8.4rem)] font-[900] leading-[0.92] tracking-[-0.04em] text-bh-ink">
-              Стани
-              <br />
-              партньор
-            </h1>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <span className="rounded-full bg-bh-ink px-5 py-2.5 text-sm font-semibold text-white">
-                Партньорски пакети от 2 500 €
-              </span>
-              <a
-                href="#zonite"
-                className="rounded-full border border-bh-ink/25 px-5 py-2.5 text-sm font-semibold text-bh-ink transition-colors hover:border-bh-ink"
-              >
-                Виж зоните ↓
-              </a>
+      {/* 01 cover - the full hall behind the opening, softened so the type
+          carries; the photograph is the argument, the words are on it. */}
+      <section
+        data-deck-section="cover"
+        className="relative isolate overflow-hidden px-6 py-24 sm:px-10 sm:py-32 lg:px-14 lg:py-40"
+        style={DARK_SECTION}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/deck/hero.jpg"
+          alt=""
+          aria-hidden
+          className="absolute inset-0 -z-20 h-full w-full scale-[1.04] object-cover object-center blur-[3px]"
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-[linear-gradient(to_bottom,rgba(2,37,31,0.55),rgba(2,37,31,0.82))]"
+        />
+        <div className="mx-auto w-full max-w-6xl">
+          <Eyebrow>Партньорски възможности · 07-08.11.2026</Eyebrow>
+          <div className="mt-8 grid gap-12 lg:grid-cols-[1.4fr_1fr] lg:items-end">
+            <div>
+              <h1 className="font-display text-[clamp(3.2rem,9vw,7.6rem)] font-[900] leading-[0.92] tracking-[-0.04em] text-bh-ink">
+                Sofia Life
+                <br />
+                Summit
+              </h1>
+              <p className="mt-6 font-display text-[clamp(1.6rem,3vw,2.4rem)] font-[500] italic tracking-[-0.02em] text-bh-pine">
+                Стани партньор
+              </p>
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <span className="rounded-full bg-bh-ink px-5 py-2.5 text-sm font-semibold text-bh-paper">
+                  Партньорски пакети от 2 500 €
+                </span>
+                <a
+                  href="#zonite"
+                  className="rounded-full border border-bh-ink/40 px-5 py-2.5 text-sm font-semibold text-bh-ink transition-colors hover:border-bh-ink"
+                >
+                  Виж зоните ↓
+                </a>
+              </div>
+            </div>
+            <div>
+              <p className="max-w-md text-lg font-light leading-relaxed text-bh-ink/85">
+                Дълголетието е най-бързо растящата тема в потребителското здраве.
+                Sofia Life Summit я превръща в преживяване: два дни, в които 1 000
+                платили посетители тренират, възстановяват се и изпробват продукти
+                с ръцете си.
+              </p>
+              <p className="mt-4 font-mono text-[0.68rem] uppercase leading-relaxed tracking-[0.2em] text-bh-ink/70">
+                Организирано съвместно от Bulgarian Longevity Association и
+                Biohacking.bg
+              </p>
             </div>
           </div>
-          <div>
-            <p className="max-w-md text-lg font-light leading-relaxed text-bh-ink/70">
-              Дълголетието е най-бързо растящата тема в потребителското здраве.
-              Sofia Life Summit я превръща в преживяване: два дни, в които 1 000
-              платили посетители тренират, възстановяват се и изпробват продукти
-              с ръцете си.
-            </p>
-            <p className="mt-4 font-mono text-[0.68rem] uppercase leading-relaxed tracking-[0.2em] text-bh-ink/70">
-              Организирано съвместно от Bulgarian Longevity Association и
-              Biohacking.bg
-            </p>
-          </div>
         </div>
-      </Section>
+      </section>
 
       {/* 02 форматът */}
       <Section name="format" className="border-t border-bh-ink/10">
