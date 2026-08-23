@@ -379,17 +379,17 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
   if (!link) notFound();
 
   return (
-    <div className="bh-doc min-h-screen text-bh-ink">
+    <div className="bh-doc relative min-h-screen text-bh-ink">
       <ViewBeacon token={token} sections={DECK_SECTIONS} />
 
       {/* header */}
-      <header className="px-6 pt-8 sm:px-10 lg:px-14">
-        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 border-b border-bh-ink/10 pb-6">
+      <header className="absolute inset-x-0 top-0 z-10 px-6 pt-5 sm:px-10 lg:px-14">
+        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 border-b border-white/15 pb-4">
           <Link href="/" className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.svg" alt="Biohacking Experience" className="h-7 w-auto" />
+            <img src="/logo-dark.svg" alt="Biohacking Experience" className="h-6 w-auto" />
           </Link>
-          <p className="font-mono text-[0.68rem] uppercase tracking-[0.3em] text-bh-ink/70">
+          <p className="font-mono text-[0.68rem] uppercase tracking-[0.3em] text-white/75">
             Партньорска програма 2026
           </p>
         </div>
@@ -399,7 +399,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
           carries; the photograph is the argument, the words are on it. */}
       <section
         data-deck-section="cover"
-        className="relative isolate overflow-hidden px-6 py-24 sm:px-10 sm:py-32 lg:px-14 lg:py-40"
+        className="relative isolate overflow-hidden px-6 pb-24 pt-32 sm:px-10 sm:pb-32 sm:pt-40 lg:px-14 lg:pb-40 lg:pt-44"
         style={DARK_SECTION}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
