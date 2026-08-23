@@ -135,7 +135,7 @@ export function SummitHero() {
               <article className="bh-forest rounded-3xl p-5 text-bh-paper">
                 <People className="h-6 w-6 text-bh-lime" />
                 <div className="mt-3 text-3xl font-black tracking-tight">
-                  1 000+
+                  1 000+
                 </div>
                 <div className="mt-1.5 font-mono text-[0.65rem] uppercase tracking-[0.15em] text-bh-paper/50">
                   посетители
