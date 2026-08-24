@@ -11,7 +11,8 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 /**
- * The hourly self-test, run by Vercel Cron.
+ * The daily self-test, run by Vercel Cron (the free plan caps crons at once
+ * a day; hourly needs Pro or an external pinger hitting this endpoint).
  *
  * Checks the three things a buyer's money passes through:
  *
