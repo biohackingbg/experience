@@ -112,12 +112,20 @@ export default async function InvoicesPage() {
                     <td className="py-3 pr-4 text-right tabular-nums text-bh-ink">
                       {formatPrice(r.totalCents)} €
                       {r.refundedCents ? (
-                        // The invoice itself is not changed by a refund - the
-                        // accountant answers it with a credit note, so this
-                        // is the reminder that one is owed.
                         <span className="block text-[0.65rem] font-semibold uppercase tracking-wide text-[#9c3d5c]">
-                          {r.status === "refunded" ? "върната" : `върнати ${formatPrice(r.refundedCents)} €`}{" "}
-                          · кредитно известие
+                          {r.status === "refunded" ? "върната" : `върнати ${formatPrice(r.refundedCents)} €`}
+                          {r.creditNoteNumber ? (
+                            <a
+                              href={`/faktura/${r.reference}/kredit`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="ml-1 underline underline-offset-2"
+                            >
+                              КИ № {String(r.creditNoteNumber).padStart(10, "0")}
+                            </a>
+                          ) : (
+                            " · очаква кредитно известие"
+                          )}
                         </span>
                       ) : null}
                     </td>

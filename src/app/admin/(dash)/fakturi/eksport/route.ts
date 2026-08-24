@@ -53,6 +53,8 @@ export async function GET() {
     "Статус",
     "Върната сума",
     "Дата на връщане",
+    "Кредитно известие №",
+    "КИ дата",
   ];
   const lines = rows.map((r) =>
     [
@@ -73,6 +75,8 @@ export async function GET() {
       r.status === "refunded" ? "върната - кредитно известие" : r.refundedCents ? "частично върната" : "платена",
       money(r.refundedCents),
       bgDate(r.refundedAt),
+      r.creditNoteNumber ? invoiceNo(r.creditNoteNumber) : "",
+      bgDate(r.creditNotedAt),
     ]
       .map(cell)
       .join(SEP),

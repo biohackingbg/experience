@@ -273,6 +273,7 @@ export type RefundOutcome =
   | { status: "not_found" }
   | {
       status: "refunded" | "partial";
+      orderId: string;
       reference: string;
       totalCents: number;
       refundedCents: number;
@@ -311,9 +312,32 @@ export async function markOrderRefunded(
 
   return {
     status: full ? "refunded" : "partial",
+    orderId: order.id,
     reference: order.reference,
     totalCents: order.totalCents,
     refundedCents: amountRefundedCents,
     invoiceNumber: order.invoiceNumber,
   };
+}
+
+/**
+ * Issues the credit note for a fully refunded, invoiced order.
+ *
+ * The number comes from the SAME sequence as invoices - Bulgarian VAT
+ * practice keeps фактури and известия in one ascending run. Guarded so a
+ * Stripe retry (or a second full-refund event) cannot draw a second number:
+ * the update only matches an order that has none yet.
+ */
+export async function issueCreditNote(orderId: string): Promise<number | null> {
+  const db = getDb();
+  const [row] = await db.execute<{ credit_note_number: string }>(
+    sql`update ${orders}
+        set credit_note_number = nextval('invoice_number_seq'), credit_noted_at = now()
+        where ${orders.id} = ${orderId}
+          and ${orders.status} = 'refunded'
+          and ${orders.invoiceNumber} is not null
+          and ${orders.creditNoteNumber} is null
+        returning credit_note_number`,
+  );
+  return row ? Number(row.credit_note_number) : null;
 }

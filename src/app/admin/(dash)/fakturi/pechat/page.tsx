@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { InvoiceDocument } from "@/components/InvoiceDocument";
+import { CreditNoteDocument, InvoiceDocument } from "@/components/InvoiceDocument";
 import { PrintButton } from "@/app/faktura/[reference]/PrintButton";
 import { isAdmin } from "@/lib/admin-auth";
 import { getAllInvoices } from "@/lib/invoices";
@@ -49,13 +49,20 @@ export default async function PrintAllInvoicesPage() {
           </p>
         ) : (
           rows.map((inv) => (
-            <div key={inv.number} className="mb-10 break-after-page last:mb-0 print:mb-0">
-              {inv.status === "refunded" && (
-                <p className="mb-3 rounded-full bg-[#C4607F]/15 px-4 py-1.5 text-center text-xs font-semibold uppercase tracking-wide text-[#9c3d5c] print:hidden">
-                  Върната - очаква кредитно известие
-                </p>
+            <div key={inv.number}>
+              <div className="mb-10 break-after-page print:mb-0">
+                {inv.status === "refunded" && !inv.creditNoteNumber && (
+                  <p className="mb-3 rounded-full bg-[#C4607F]/15 px-4 py-1.5 text-center text-xs font-semibold uppercase tracking-wide text-[#9c3d5c] print:hidden">
+                    Върната - очаква кредитно известие
+                  </p>
+                )}
+                <InvoiceDocument inv={inv} />
+              </div>
+              {inv.creditNoteNumber && (
+                <div className="mb-10 break-after-page print:mb-0">
+                  <CreditNoteDocument inv={inv} />
+                </div>
               )}
-              <InvoiceDocument inv={inv} />
             </div>
           ))
         )}

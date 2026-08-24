@@ -6,7 +6,7 @@ import { sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { orders } from "@/lib/db/schema";
-import { markOrderPaid, markOrderRefunded } from "@/lib/orders";
+import { issueCreditNote, markOrderPaid, markOrderRefunded } from "@/lib/orders";
 import { getStripe } from "@/lib/stripe";
 
 /**
@@ -118,9 +118,16 @@ export async function POST(request: Request) {
         const outcome = await markOrderRefunded(paymentIntent, charge.amount_refunded);
         if (outcome.status === "not_found") {
           console.error(`[stripe] refund for unknown payment intent ${paymentIntent}`);
+        } else if (outcome.status === "refunded") {
+          // The credit note answers the invoice; drawn here, in the same
+          // event that recorded the refund, so it cannot be forgotten.
+          const creditNote = await issueCreditNote(outcome.orderId);
+          console.info(
+            `[stripe] order ${outcome.reference} fully refunded: ${outcome.refundedCents}/${outcome.totalCents} - invoice ${outcome.invoiceNumber ?? "-"}, credit note ${creditNote ?? "already issued"}`,
+          );
         } else {
           console.info(
-            `[stripe] order ${outcome.reference} ${outcome.status === "refunded" ? "fully" : "partially"} refunded: ${outcome.refundedCents}/${outcome.totalCents} - invoice ${outcome.invoiceNumber ?? "-"} needs a credit note`,
+            `[stripe] order ${outcome.reference} partially refunded: ${outcome.refundedCents}/${outcome.totalCents} - credit note is the accountant's call`,
           );
         }
       }

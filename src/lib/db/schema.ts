@@ -117,6 +117,14 @@ export const orders = pgTable(
     refundedAt: timestamp("refunded_at", { withTimezone: true }),
     refundedCents: integer("refunded_cents"),
 
+    /**
+     * Credit note against the invoice, issued when a paid order is fully
+     * refunded. Drawn from the SAME sequence as invoices - the VAT rules
+     * put both document kinds in one ascending run.
+     */
+    creditNoteNumber: bigint("credit_note_number", { mode: "number" }),
+    creditNotedAt: timestamp("credit_noted_at", { withTimezone: true }),
+
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -128,6 +136,7 @@ export const orders = pgTable(
     // Two invoices may never share a number; the database enforces it
     // rather than trusting the code that draws from the sequence.
     uniqueIndex("orders_invoice_number_idx").on(table.invoiceNumber),
+    uniqueIndex("orders_credit_note_number_idx").on(table.creditNoteNumber),
   ],
 );
 

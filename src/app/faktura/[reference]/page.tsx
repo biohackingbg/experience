@@ -46,7 +46,17 @@ export default async function InvoicePage({
           >
             ← Към сайта
           </Link>
-          <PrintButton />
+          <div className="flex items-center gap-4">
+            {inv.creditNoteNumber && (
+              <Link
+                href={`/faktura/${inv.reference}/kredit`}
+                className="font-mono text-xs uppercase tracking-[0.2em] text-[#9c3d5c] transition-colors hover:text-bh-ink"
+              >
+                Кредитно известие →
+              </Link>
+            )}
+            <PrintButton />
+          </div>
         </div>
 
         <InvoiceDocument inv={inv} />

@@ -21,6 +21,9 @@ export type InvoiceData = {
   vatRateBp: number;
   currency: string;
   items: { tierName: string; unitPriceCents: number; quantity: number }[];
+  /** Present once the refund's credit note is issued. */
+  creditNoteNumber: number | null;
+  creditNotedAt: Date | null;
 };
 
 /**
@@ -45,6 +48,8 @@ export async function getInvoice(reference: string): Promise<InvoiceData | null>
       totalCents: orders.totalCents,
       vatRateBp: orders.vatRateBp,
       currency: orders.currency,
+      creditNoteNumber: orders.creditNoteNumber,
+      creditNotedAt: orders.creditNotedAt,
     })
     .from(orders)
     .where(
@@ -85,6 +90,7 @@ export async function listInvoices(limit = 200) {
       totalCents: orders.totalCents,
       refundedCents: orders.refundedCents,
       status: orders.status,
+      creditNoteNumber: orders.creditNoteNumber,
     })
     .from(orders)
     .where(sql`${orders.invoiceNumber} is not null`)
@@ -124,6 +130,8 @@ export async function getAllInvoices(): Promise<InvoiceExportRow[]> {
       status: orders.status,
       refundedCents: orders.refundedCents,
       refundedAt: orders.refundedAt,
+      creditNoteNumber: orders.creditNoteNumber,
+      creditNotedAt: orders.creditNotedAt,
     })
     .from(orders)
     .where(sql`${orders.invoiceNumber} is not null and ${orders.invoicedAt} is not null`)
