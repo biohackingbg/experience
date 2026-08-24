@@ -209,7 +209,17 @@ export function CheckoutForm({
             required
             className="mt-1 h-4 w-4 shrink-0 accent-bh-pine"
           />
-          <span>{PURCHASE_TERMS_TEXT}</span>
+          <span>
+            {PURCHASE_TERMS_TEXT}{" "}
+            <a
+              href="/usloviya"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2"
+            >
+              Пълни условия
+            </a>
+          </span>
         </label>
         <Err>{state.fieldErrors?.terms}</Err>
 

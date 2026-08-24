@@ -71,6 +71,14 @@ export function SummitFooter() {
 
         <div className="mt-12 flex flex-col gap-2 border-t border-bh-ink/10 pt-6 font-mono text-xs uppercase tracking-[0.15em] text-bh-ink/35 sm:flex-row sm:justify-between">
           <span>© 2026 Biohacking.bg</span>
+          <span className="flex flex-wrap gap-x-4 gap-y-1">
+            <a href="/usloviya" className="transition-colors hover:text-bh-ink">
+              Общи условия
+            </a>
+            <a href="/poveritelnost" className="transition-colors hover:text-bh-ink">
+              Поверителност
+            </a>
+          </span>
           <span>Sofia Life Summit · Longevity for everyone</span>
         </div>
       </div>

@@ -18,6 +18,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
+      url: `${SITE}/usloviya`,
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
+    {
       url: `${SITE}/poveritelnost`,
       changeFrequency: "yearly",
       priority: 0.3,

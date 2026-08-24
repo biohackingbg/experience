@@ -189,3 +189,30 @@ export async function sendTicketEmail(input: TicketEmailInput): Promise<boolean>
     return false;
   }
 }
+
+/**
+ * Plain-text alert to the operators - the health check's voice. Deliberately
+ * unstyled: it is an alarm, not a newsletter.
+ */
+export async function sendAlertEmail(subject: string, body: string): Promise<boolean> {
+  const resend = getResend();
+  const from = process.env.EMAIL_FROM;
+  const to = process.env.HEALTH_ALERT_EMAIL;
+
+  if (!resend || !from || !to) {
+    console.warn("[email] alert not configured - skipping");
+    return false;
+  }
+
+  try {
+    const { error } = await resend.emails.send({ from, to, subject, text: body });
+    if (error) {
+      console.error("[email] alert send failed:", error);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("[email] alert send threw:", error);
+    return false;
+  }
+}
