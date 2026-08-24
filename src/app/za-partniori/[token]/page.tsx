@@ -7,6 +7,7 @@ import { findActiveLink } from "@/lib/deck-links";
 import { DECK_SECTIONS } from "@/lib/deck-sections";
 
 import { JourneyTimeline } from "./JourneyTimeline";
+import { ScrollRule } from "./ScrollRule";
 import { ViewBeacon } from "./ViewBeacon";
 
 export const metadata: Metadata = {
@@ -459,19 +460,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
           <Eyebrow>Форматът</Eyebrow>
           <H2>Защо преживяването продава повече от щанда</H2>
         </Reveal>
-        <div className="mt-14 grid gap-10 md:grid-cols-3">
-          {format.map((f, i) => (
-            <Reveal key={f.h} delay={i * 90}>
-              <div className="border-t border-bh-ink/15 pt-5">
-                <span className="text-bh-pine" aria-hidden>
-                  ✳
-                </span>
-                <h3 className="mt-3 text-2xl font-semibold tracking-tight">{f.h}</h3>
-                <p className="mt-3 text-sm font-light leading-relaxed text-bh-ink/65">{f.p}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
+        <ScrollRule items={format} />
       </Section>
 
       {/* 03 мащаб */}
