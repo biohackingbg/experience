@@ -6,7 +6,7 @@ import { isAdmin } from "@/lib/admin-auth";
 import { STAGES, deckUrl, getDeckStats, listViews } from "@/lib/deck-links";
 import { sectionIndex, sectionLabel } from "@/lib/deck-sections";
 
-import { reactivateDeckLink, revokeDeckLink, updateDeckLink } from "./actions";
+import { reactivateDeckLink, regenerateDeckLink, revokeDeckLink, updateDeckLink } from "./actions";
 import { BulkLinkForm, CopyLink, NewLinkForm, PipelineEditor } from "./LinkTools";
 
 export const metadata: Metadata = {
@@ -251,15 +251,27 @@ export default async function DeckPage() {
                               </button>
                             </form>
                           ) : (
-                            <form action={revokeDeckLink}>
-                              <input type="hidden" name="id" value={l.id} />
-                              <button
-                                type="submit"
-                                className="rounded-full border border-bh-ink/20 px-3 py-1.5 text-xs font-semibold text-bh-ink/70 transition-colors hover:border-red-600 hover:text-red-600"
-                              >
-                                Спри
-                              </button>
-                            </form>
+                            <div className="flex items-center justify-end gap-2">
+                              <form action={regenerateDeckLink}>
+                                <input type="hidden" name="id" value={l.id} />
+                                <button
+                                  type="submit"
+                                  title="Издава нов адрес - старият спира да работи, статистиката остава"
+                                  className="rounded-full border border-bh-ink/20 px-3 py-1.5 text-xs font-semibold text-bh-ink/70 transition-colors hover:border-bh-ink hover:text-bh-ink"
+                                >
+                                  Нов адрес
+                                </button>
+                              </form>
+                              <form action={revokeDeckLink}>
+                                <input type="hidden" name="id" value={l.id} />
+                                <button
+                                  type="submit"
+                                  className="rounded-full border border-bh-ink/20 px-3 py-1.5 text-xs font-semibold text-bh-ink/70 transition-colors hover:border-red-600 hover:text-red-600"
+                                >
+                                  Спри
+                                </button>
+                              </form>
+                            </div>
                           )}
                         </td>
                       </tr>

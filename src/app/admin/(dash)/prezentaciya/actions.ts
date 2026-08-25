@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { isAdmin } from "@/lib/admin-auth";
-import { createLink, createLinks, isStage, reactivateLink, revokeLink, updateLinkPipeline } from "@/lib/deck-links";
+import { createLink, createLinks, isStage, reactivateLink, regenerateToken, revokeLink, updateLinkPipeline } from "@/lib/deck-links";
 
 export type LinkFormState = { status: "idle" | "ok" | "error"; message?: string };
 
@@ -98,4 +98,17 @@ export async function createDeckLinksBulk(
       ? `${created.length} нови линка${owner ? ` за ${owner}` : ""} · ${skipped.length} вече съществуваха`
       : `${created.length} нови линка${owner ? ` за ${owner}` : ""}.`,
   };
+}
+
+/**
+ * Issues a fresh address for a link whose old one never reached the partner
+ * (mangled by a messenger, truncated in a mail). Views, stage and notes stay
+ * with the link; only the address changes, so the old one stops working.
+ */
+export async function regenerateDeckLink(formData: FormData): Promise<void> {
+  if (!(await isAdmin())) return;
+  const id = String(formData.get("id") ?? "");
+  if (!/^[0-9a-f-]{36}$/.test(id)) return;
+  await regenerateToken(id);
+  revalidatePath("/admin/prezentaciya");
 }

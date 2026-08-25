@@ -41,8 +41,31 @@ export function deckUrl(token: string, origin = "https://thelongevitysummit.eu")
   return `${origin}${DECK_BASE}/${token}`;
 }
 
+/**
+ * Letters and digits only - no "-" or "_".
+ *
+ * base64url tokens looked fine in the admin and then broke in the wild:
+ * WhatsApp and Viber read _text_ as italics, eat the underscores and hand the
+ * reader a link that 404s. Look-alike characters (0/O, 1/l/I) are out too, so
+ * a token survives being read down the phone or retyped.
+ */
+const TOKEN_ALPHABET = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
 function newToken(): string {
-  return randomBytes(16).toString("base64url");
+  const bytes = randomBytes(24);
+  let out = "";
+  for (const b of bytes) out += TOKEN_ALPHABET[b % TOKEN_ALPHABET.length];
+  return out;
+}
+
+/** Issues a fresh address for a link, keeping its history and notes. */
+export async function regenerateToken(id: string): Promise<string | null> {
+  const [row] = await getDb()
+    .update(deckLinks)
+    .set({ token: newToken() })
+    .where(eq(deckLinks.id, id))
+    .returning({ token: deckLinks.token });
+  return row?.token ?? null;
 }
 
 /** Bare hostname of a referrer, or null when there was none / it was ours. */
@@ -57,8 +80,11 @@ export function referrerHost(referrer: string | null | undefined, ownHost: strin
 }
 
 /** Live link for a token, or null when unknown or revoked. */
-export async function findActiveLink(token: string): Promise<DeckLink | null> {
-  // Tokens are 22 base64url chars; anything else is not worth a query.
+export async function findActiveLink(raw: string): Promise<DeckLink | null> {
+  // Messengers and mail clients like to glue punctuation to a pasted URL, and
+  // some append a stray slash. Forgive that rather than 404 someone who has
+  // the right link.
+  const token = raw.trim().replace(/[).,;:!?"'\u201c\u201d\u00bb\u2019/]+$/, "");
   if (!/^[A-Za-z0-9_-]{16,64}$/.test(token)) return null;
   const [row] = await getDb()
     .select()
