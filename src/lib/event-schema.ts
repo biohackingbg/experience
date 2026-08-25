@@ -81,6 +81,9 @@ export function buildEventSchema() {
       "@type": "Organization",
       name: "Biohacking.bg",
       url: "https://thelongevitysummit.eu",
+      // The company page belongs to the organiser, not the event - so it
+      // hangs here rather than in the event's own sameAs.
+      sameAs: ["https://www.linkedin.com/company/biohacking-bg/"],
     },
   ],
   // No prices in search while the final ones are being settled: a rich

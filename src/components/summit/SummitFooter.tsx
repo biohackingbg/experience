@@ -90,6 +90,28 @@ export function SummitFooter() {
                     @longevitysummit.eu
                   </a>
                 </li>
+                <li>
+                  <a
+                    href="https://www.linkedin.com/company/biohacking-bg/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-bh-ink/70 transition-colors hover:text-bh-ink"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      aria-hidden
+                    >
+                      <rect x="3" y="3" width="18" height="18" rx="3" />
+                      <path d="M7.4 10.2v7M7.4 7.1v.1" strokeLinecap="round" />
+                      <path d="M11.4 17.2v-7M11.4 13.1c0-1.7 1.1-2.9 2.7-2.9s2.5 1.1 2.5 2.9v4.1" strokeLinecap="round" />
+                    </svg>
+                    Biohacking.bg
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
