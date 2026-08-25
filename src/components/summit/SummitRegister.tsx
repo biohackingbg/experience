@@ -1,17 +1,18 @@
 import Link from "next/link";
 
-import { EarlyAccessForm } from "@/components/summit/EarlyAccessForm";
-import { EARLY_ACCESS, isEarlyAccess } from "@/lib/tickets";
+// import { EarlyAccessForm } from "@/components/summit/EarlyAccessForm";
+import { EARLY_ACCESS, TIERS, formatPrice, isEarlyAccess } from "@/lib/tickets";
 import { Reveal } from "@/components/ui/Reveal";
 import { Calendar, Pin, TicketIcon } from "@/components/ui/Pictograms";
 
 /**
  * The closing call to action.
  *
- * Until sales opened this section collected a waitlist. Now the sale itself is
- * the primary ask, and the email form serves the visitor who is not ready to
- * pay - the hook is the one the page already makes: new speakers announced
- * every week. Under the v2 consent, that is also exactly what they sign up for.
+ * Until sales opened this section collected a waitlist; the email form is
+ * hidden for now (24.08.2026) because nothing sends to that list, and with
+ * the early-price deadline days away the quiet slot is better spent naming
+ * what the visitor loses by waiting. The form, its consent copy and the
+ * signups table all stay in place for when there is something to send.
  */
 export function SummitRegister() {
   const early = isEarlyAccess();
@@ -62,13 +63,26 @@ export function SummitRegister() {
               Купи билет{early && <> от 35 €</>}
             </Link>
 
-            {/* The fallback ask, deliberately quieter than the sale. */}
-            <p className="mt-12 max-w-xl border-t border-bh-paper/15 pt-8 text-sm leading-relaxed text-bh-paper/65">
-              Още се колебаеш? Обявяваме нови лектори всяка седмица - остави
-              имейл и няма да пропуснеш нищо от програмата.
-            </p>
+            {/* The quiet slot under the sale: what waiting costs, in the
+                event's own numbers rather than a countdown gimmick. */}
+            {early && (
+              <p className="mt-12 max-w-xl border-t border-bh-paper/15 pt-8 text-sm leading-relaxed text-bh-paper/65">
+                <strong className="font-semibold text-bh-lime">
+                  Ранните цени важат до {EARLY_ACCESS.endsLabel}.
+                </strong>{" "}
+                От {EARLY_ACCESS.regularFrom} билетите минават на редовни цени:{" "}
+                {TIERS.map((t, i) => (
+                  <span key={t.id}>
+                    {i > 0 && ", "}
+                    {t.name} става {formatPrice(t.listPriceCents)} €
+                  </span>
+                ))}
+                .
+              </p>
+            )}
 
-            <EarlyAccessForm early={early} />
+            {/* Hidden while nothing sends to the list - see the note above.
+            <EarlyAccessForm early={early} /> */}
           </div>
 
           <dl className="mt-14 grid gap-8 border-t border-bh-paper/15 pt-8 sm:grid-cols-3">
