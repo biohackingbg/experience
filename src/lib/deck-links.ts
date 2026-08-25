@@ -80,18 +80,41 @@ export function referrerHost(referrer: string | null | undefined, ownHost: strin
 }
 
 /** Live link for a token, or null when unknown or revoked. */
+/**
+ * Folds the ways a token gets mistyped: phone keyboards capitalise the first
+ * letter, and 0/O, 1/l/I look identical in most fonts. Used only as a
+ * fallback, and only when it matches exactly one link.
+ */
+function foldToken(v: string): string {
+  return v
+    .toLowerCase()
+    .replace(/[0o]/g, "0")
+    .replace(/[1li]/g, "1")
+    .replace(/[_-]/g, "");
+}
+
 export async function findActiveLink(raw: string): Promise<DeckLink | null> {
   // Messengers and mail clients like to glue punctuation to a pasted URL, and
   // some append a stray slash. Forgive that rather than 404 someone who has
   // the right link.
   const token = raw.trim().replace(/[).,;:!?"'\u201c\u201d\u00bb\u2019/]+$/, "");
   if (!/^[A-Za-z0-9_-]{16,64}$/.test(token)) return null;
-  const [row] = await getDb()
+  const db = getDb();
+  const [row] = await db
     .select()
     .from(deckLinks)
     .where(and(eq(deckLinks.token, token), isNull(deckLinks.revokedAt)))
     .limit(1);
-  return row ?? null;
+  if (row) return row;
+
+  // Nothing matched exactly. Before turning a partner away, try the folded
+  // form - a link retyped off a phone screen loses to autocapitalisation and
+  // to 1/l and 0/O far more often than anyone admits. Ambiguous matches are
+  // refused rather than guessed.
+  const folded = foldToken(token);
+  const all = await db.select().from(deckLinks).where(isNull(deckLinks.revokedAt));
+  const hits = all.filter((l) => foldToken(l.token) === folded);
+  return hits.length === 1 ? hits[0] : null;
 }
 
 export async function createLink(label: string): Promise<DeckLink> {
