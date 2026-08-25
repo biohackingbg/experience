@@ -2,7 +2,7 @@ import type { Config } from "drizzle-kit";
 
 /**
  * Migrations are generated from the schema and committed to git, then applied
- * deliberately — never auto-pushed to a database holding real signups.
+ * deliberately - never auto-pushed to a database holding real signups.
  */
 export default {
   schema: "./src/lib/db/schema.ts",

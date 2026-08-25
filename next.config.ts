@@ -28,7 +28,7 @@ const nextConfig: NextConfig = {
       {
         // Both hostnames were serving the site with a 200, so every page
         // existed at two addresses at once. The canonical tag told Google
-        // which one counts, but a redirect settles it for everything else —
+        // which one counts, but a redirect settles it for everything else -
         // shared links, analytics, and the cookie/session origin.
         source: "/:path*",
         has: [{ type: "host", value: "www.thelongevitysummit.eu" }],

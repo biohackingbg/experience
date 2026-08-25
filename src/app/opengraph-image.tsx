@@ -5,7 +5,7 @@ import { ImageResponse } from "next/og";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt =
-  "Sofia Life Summit - 07–08 ноември 2026, Гранд Хотел Милениум, София";
+  "Sofia Life Summit - 07-08 ноември 2026, Гранд Хотел Милениум, София";
 
 async function dataUri(file: string, mime: string) {
   const bytes = await readFile(join(process.cwd(), "public", file));

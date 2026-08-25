@@ -30,7 +30,7 @@ const TITLE =
 function describe(): string {
   const from = Math.min(...TIERS.map((t) => priceCents(t, isEarlyAccess())));
   return (
-    "Фест за дълголетие и биохакинг - 07–08 ноември 2026, Гранд Хотел " +
+    "Фест за дълголетие и биохакинг - 07-08 ноември 2026, Гранд Хотел " +
     "Милениум, София. Четири зони, longevity паспорт, 12 станции за " +
     `измерване, международни лектори. Билети от ${formatPrice(from)} €.`
   );

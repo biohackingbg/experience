@@ -286,3 +286,24 @@ export function BulkLinkForm({ owners }: { owners: string[] }) {
     </form>
   );
 }
+
+/**
+ * Reissuing an address breaks the link already in a partner's inbox, so it
+ * asks first. Everything else about the row survives.
+ */
+export function RegenerateButton({ label }: { label: string }) {
+  return (
+    <button
+      type="submit"
+      onClick={(e) => {
+        const ok = window.confirm(
+          `Нов адрес за „${label}"?\n\nСтарият линк спира да работи веднага - използвай това само ако партньорът не е успял да отвори своя. Отварянията, етапът и бележките остават.`,
+        );
+        if (!ok) e.preventDefault();
+      }}
+      className="rounded-full border border-bh-ink/20 px-3 py-1.5 text-xs font-semibold text-bh-ink/70 transition-colors hover:border-bh-ink hover:text-bh-ink"
+    >
+      Нов адрес
+    </button>
+  );
+}

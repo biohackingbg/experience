@@ -7,8 +7,8 @@ deprecation notices.
 
 ## Project
 
-Standalone marketing site for **Biohacking Experience** — the consumer program of
-Sofia Life Summit (07–08 November 2026, Grand Hotel Millennium, Sofia). Single
+Standalone marketing site for **Biohacking Experience** - the consumer program of
+Sofia Life Summit (07-08 November 2026, Grand Hotel Millennium, Sofia). Single
 long-form landing page assembled from section components in
 `src/components/summit/`. Content is in Bulgarian.
 

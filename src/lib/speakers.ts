@@ -144,7 +144,7 @@ export const SPEAKERS: Speaker[] = [
     announced: true,
     title: "Проф. д-р",
     name: "Виктория Сарафян, дм, дмн",
-    affiliation: "Медицински университет – Пловдив",
+    affiliation: "Медицински университет - Пловдив",
     country: "България",
     photo: "/speakers/viktoriya-sarafyan.jpg",
   },

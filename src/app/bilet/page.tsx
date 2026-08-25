@@ -8,7 +8,7 @@ import { CheckoutForm } from "./CheckoutForm";
 export const metadata: Metadata = {
   title: "Купи билет | Sofia Life Summit 2026",
   description:
-    "Билети за Sofia Life Summit - 07–08 ноември 2026, Гранд Хотел Милениум, София.",
+    "Билети за Sofia Life Summit - 07-08 ноември 2026, Гранд Хотел Милениум, София.",
 };
 
 // Availability changes with every sale, so nothing here may be cached.

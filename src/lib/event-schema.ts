@@ -21,7 +21,7 @@ const performers = announcedSpeakers().map((s) => ({
   name: [s.title, s.name].filter(Boolean).join(" "),
   // Speciality first, then the position held. Never the institution: it was
   // standing in as a jobTitle whenever a speaker had no speciality recorded,
-  // which told Google that "Медицински университет – Пловдив" is a job.
+  // which told Google that "Медицински университет - Пловдив" is a job.
   ...(s.specialty ?? s.role ? { jobTitle: s.specialty ?? s.role } : {}),
   ...(s.affiliation
     ? { affiliation: { "@type": "Organization" as const, name: s.affiliation } }
