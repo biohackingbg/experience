@@ -54,6 +54,9 @@ export function buildEventSchema() {
   eventStatus: "https://schema.org/EventScheduled",
   eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
   url: "https://thelongevitysummit.eu",
+  // Ties the event to its Instagram profile, so a search result can show
+  // both and the account gains the site's credibility.
+  sameAs: ["https://www.instagram.com/longevitysummit.eu"],
   image: ["https://thelongevitysummit.eu/opengraph-image"],
   inLanguage: "bg",
   location: {

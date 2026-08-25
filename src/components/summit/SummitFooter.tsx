@@ -64,6 +64,32 @@ export function SummitFooter() {
                 </li>
                 <li className="text-bh-ink/70">Гранд Хотел Милениум, София</li>
                 <li className="text-bh-ink/70">07-08 ноември 2026</li>
+                <li>
+                  {/* Where the weekly speaker reveals actually live - the
+                      site had no way of sending anyone there until now.
+                      The QR tracking parameter is stripped: it belongs on a
+                      printed code, not in a link on our own page. */}
+                  <a
+                    href="https://www.instagram.com/longevitysummit.eu"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-bh-ink/70 transition-colors hover:text-bh-ink"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      aria-hidden
+                    >
+                      <rect x="3" y="3" width="18" height="18" rx="5" />
+                      <circle cx="12" cy="12" r="4" />
+                      <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none" />
+                    </svg>
+                    @longevitysummit.eu
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
