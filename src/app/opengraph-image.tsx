@@ -107,20 +107,12 @@ export default async function OpengraphImage() {
             paddingTop: 30,
           }}
         >
-          {/* Their artwork is fixed dark teal and rose, which all but vanishes
-              on this background. A light plate keeps their colours exact
-              instead of recolouring the mark. */}
-          <div
-            style={{
-              display: "flex",
-              background: "#f6f7f4",
-              borderRadius: 14,
-              padding: "12px 20px",
-            }}
-          >
-            { }
-            <img src={partner} alt="" height={64} />
-          </div>
+          {/* Both marks sit straight on the field: the rose and teal of the
+              association read cleanly against this green, and the white plate
+              they used to sit on was the only thing in the card that looked
+              pasted on. */}
+          { }
+          <img src={partner} alt="" height={64} />
           <div
             style={{
               display: "flex",
