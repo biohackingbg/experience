@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { isTestMode } from "@/lib/stripe";
-import { PRE_ORDER, isEarlyAccess, isPreOrder } from "@/lib/tickets";
+import { PRE_ORDER, SALES_OPEN, isEarlyAccess, isPreOrder } from "@/lib/tickets";
 import { CheckoutForm } from "./CheckoutForm";
 
 export const metadata: Metadata = {
@@ -22,6 +22,47 @@ export default async function CheckoutPage({
   const { nivo, otkazano } = await searchParams;
   const testMode = isTestMode();
   const preOrder = isPreOrder();
+
+  // While sales are closed the page still answers - a shared link should
+  // explain itself rather than 404 - but it carries no prices and no form.
+  if (!SALES_OPEN) {
+    return (
+      <div className="min-h-screen rounded-[1.75rem] bg-bh-paper px-5 py-10 sm:px-8 lg:px-10">
+        <div className="mx-auto w-full max-w-3xl">
+          <Link
+            href="/"
+            className="font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/60 transition-colors hover:text-bh-ink"
+          >
+            ← Обратно към сайта
+          </Link>
+          <h1 className="mt-10 text-[clamp(2.2rem,5vw,3.4rem)] font-display font-[900] uppercase leading-[0.95] tracking-tight text-bh-ink">
+            Билетите отварят скоро
+          </h1>
+          <p className="mt-6 text-lg leading-relaxed text-bh-ink/70">
+            Финализираме нивата и цените за Sofia Life Summit. Обявяваме ги в
+            рамките на дни - заедно с това какво включва всяко ниво.
+          </p>
+          <p className="mt-4 text-lg leading-relaxed text-bh-ink/70">
+            07-08 ноември 2026 · Гранд Хотел Милениум, София
+          </p>
+          <div className="mt-10 flex flex-wrap gap-3">
+            <Link
+              href="/#tickets"
+              className="rounded-full bg-bh-ink px-6 py-3.5 text-sm font-semibold text-bh-paper transition-transform hover:-translate-y-0.5"
+            >
+              Виж какво включват нивата
+            </Link>
+            <a
+              href="mailto:hello@biohacking.bg?subject=Билети%20Sofia%20Life%20Summit"
+              className="rounded-full border border-bh-ink/25 px-6 py-3.5 text-sm font-semibold text-bh-ink transition-colors hover:border-bh-ink"
+            >
+              Пиши ни
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen rounded-[1.75rem] bg-bh-paper px-5 py-10 sm:px-8 lg:px-10">

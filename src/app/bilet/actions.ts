@@ -8,7 +8,7 @@ import { createPendingOrder } from "@/lib/orders";
 import { PURCHASE_TERMS_TEXT, PURCHASE_TERMS_VERSION } from "@/lib/purchase-terms";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
-import { TIERS, getTier } from "@/lib/tickets";
+import { SALES_OPEN, TIERS, getTier } from "@/lib/tickets";
 
 const schema = z.object({
   tierId: z.enum(TIERS.map((t) => t.id) as [string, ...string[]]),
@@ -33,6 +33,12 @@ export async function startCheckout(
   _prev: CheckoutState,
   formData: FormData,
 ): Promise<CheckoutState> {
+  // The switch is checked here, not only in the UI: a bookmarked /bilet or a
+  // cached page must not be able to buy at a price that may still change.
+  if (!SALES_OPEN) {
+    return fail("Билетите още не са в продажба. Отваряме съвсем скоро.");
+  }
+
   if (!isStripeConfigured()) {
     return fail("Плащанията още не са настроени. Опитай отново по-късно.");
   }

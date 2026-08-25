@@ -30,6 +30,22 @@ export const CURRENCY = "EUR";
  * struck-through figure is labelled as the price that starts on a date - a
  * forward-looking schedule, not a claim about the past.
  */
+/**
+ * The master switch for selling.
+ *
+ * Off while the final prices are being worked out (24.08.2026): the site
+ * still describes the tiers and what each includes, but shows no figures and
+ * takes no money. Everything that could quote a price or start a checkout
+ * reads this - including the server action, so a bookmarked /bilet or a
+ * cached page cannot slip an order through at a price we may not honour.
+ *
+ * Turning sales back on is this one constant plus the real numbers in TIERS.
+ */
+export const SALES_OPEN = false;
+
+/** What the page says wherever a price would be. */
+export const SALES_SOON_LABEL = "Очаквайте скоро";
+
 export const EARLY_ACCESS = {
   // Ends with the pre-order window: one deadline, deliberately. After
   // 31 August there are no further discounts - tickets go to list price.

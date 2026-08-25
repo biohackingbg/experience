@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 // import { EarlyAccessForm } from "@/components/summit/EarlyAccessForm";
-import { EARLY_ACCESS, TIERS, formatPrice, isEarlyAccess } from "@/lib/tickets";
+import { EARLY_ACCESS, SALES_OPEN, TIERS, formatPrice, isEarlyAccess } from "@/lib/tickets";
 import { Reveal } from "@/components/ui/Reveal";
 import { Calendar, Pin, TicketIcon } from "@/components/ui/Pictograms";
 
@@ -22,9 +22,11 @@ export function SummitRegister() {
     { label: "Място", value: "Гранд Хотел Милениум, София", icon: Pin },
     {
       label: "Достъп",
-      value: early
-        ? `Ранни цени до ${EARLY_ACCESS.endsLabel}`
-        : "Билетите са в продажба",
+      value: !SALES_OPEN
+        ? "Билетите - съвсем скоро"
+        : early
+          ? `Ранни цени до ${EARLY_ACCESS.endsLabel}`
+          : "Билетите са в продажба",
       icon: TicketIcon,
     },
   ];
@@ -41,6 +43,15 @@ export function SummitRegister() {
               Един ден. Реални числа. Личен план.
             </h2>
             <p className="mt-6 max-w-xl text-base leading-relaxed text-bh-paper/65">
+              {!SALES_OPEN ? (
+                <>
+                  Билетите отварят съвсем скоро. Финализираме нивата и цените,
+                  за да са честни и към теб, и към програмата, която строим.
+                  Местата в работилниците и специалните преживявания са
+                  ограничени и се запазват с реда на купуване.
+                </>
+              ) : (
+                <>
               Билетите са в продажба
               {early && (
                 <>
@@ -54,18 +65,26 @@ export function SummitRegister() {
               )}
               . Местата в работилниците и специалните преживявания са
               ограничени и се запазват с реда на купуване.
+                </>
+              )}
             </p>
 
-            <Link
-              href="/bilet"
-              className="bh-gradient mt-8 inline-flex items-center gap-2 rounded-full px-8 py-4 text-base font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
-            >
-              Купи билет{early && <> от 35 €</>}
-            </Link>
+            {SALES_OPEN ? (
+              <Link
+                href="/bilet"
+                className="bh-gradient mt-8 inline-flex items-center gap-2 rounded-full px-8 py-4 text-base font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
+              >
+                Купи билет{early && <> от 35 €</>}
+              </Link>
+            ) : (
+              <span className="mt-8 inline-flex items-center gap-2 rounded-full border border-bh-paper/30 px-8 py-4 text-base font-semibold text-bh-paper/75">
+                Очаквайте скоро
+              </span>
+            )}
 
             {/* The quiet slot under the sale: what waiting costs, in the
                 event's own numbers rather than a countdown gimmick. */}
-            {early && (
+            {SALES_OPEN && early && (
               <p className="mt-12 max-w-xl border-t border-bh-paper/15 pt-8 text-sm leading-relaxed text-bh-paper/65">
                 <strong className="font-semibold text-bh-lime">
                   Ранните цени важат до {EARLY_ACCESS.endsLabel}.

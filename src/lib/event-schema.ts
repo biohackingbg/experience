@@ -1,5 +1,6 @@
 import { announcedSpeakers } from "@/lib/speakers";
 import {
+  SALES_OPEN,
   CURRENCY,
   EARLY_ACCESS,
   PRE_ORDER,
@@ -79,6 +80,10 @@ export function buildEventSchema() {
       url: "https://thelongevitysummit.eu",
     },
   ],
+  // No prices in search while the final ones are being settled: a rich
+  // result quoting a figure the checkout will not honour is worse than none.
+  ...(SALES_OPEN
+    ? {
   offers: TIERS.map((tier) => ({
       "@type": "Offer",
       name: tier.name,
@@ -93,5 +98,7 @@ export function buildEventSchema() {
         ? { priceValidUntil: EARLY_ACCESS.endsAt.toISOString().slice(0, 10) }
         : {}),
     })),
+      }
+    : {}),
   } as const;
 }

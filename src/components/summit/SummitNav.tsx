@@ -4,6 +4,7 @@ import { ScrollProgress } from "@/components/ui/ScrollProgress";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import {
   TIERS,
+  SALES_OPEN,
   formatPrice,
   isEarlyAccess,
   priceCents,
@@ -69,7 +70,7 @@ export function SummitNav() {
             href="#tickets"
             className="bh-gradient inline-flex items-center whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
           >
-            Купи билет от {formatPrice(cheapest)} €
+            {SALES_OPEN ? <>Купи билет от {formatPrice(cheapest)} €</> : <>Билети - скоро</>}
           </a>
         </div>
       </nav>

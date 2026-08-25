@@ -5,6 +5,8 @@ import {
   EARLY_ACCESS,
   PRE_ORDER,
   TIERS,
+  SALES_OPEN,
+  SALES_SOON_LABEL,
   formatPrice,
   isEarlyAccess,
   isPreOrder,
@@ -34,7 +36,7 @@ function Check({ muted }: { muted?: boolean }) {
 
 export function SummitTickets() {
   const early = isEarlyAccess();
-  const preOrder = isPreOrder();
+  const preOrder = SALES_OPEN && isPreOrder();
 
   return (
     <section id="tickets" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
@@ -114,16 +116,22 @@ export function SummitTickets() {
                 )}
 
                 <div className="mt-6">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-6xl font-black tracking-tight">
-                      {formatPrice(priceCents(tier, early))}
-                    </span>
-                    <span className="text-2xl font-semibold">€</span>
-                  </div>
+                  {SALES_OPEN ? (
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-6xl font-black tracking-tight">
+                        {formatPrice(priceCents(tier, early))}
+                      </span>
+                      <span className="text-2xl font-semibold">€</span>
+                    </div>
+                  ) : (
+                    <div className="text-3xl font-black uppercase leading-tight tracking-tight">
+                      {SALES_SOON_LABEL}
+                    </div>
+                  )}
                   {/* On its own line rather than beside the headline figure:
                       "101,50 €" plus a struck price plus a badge overflows a
                       third of the grid and wraps unevenly between cards. */}
-                  {early && (
+                  {SALES_OPEN && early && (
                     <>
                       <div className="mt-2 flex items-center gap-2.5">
                         <s className={`text-xl font-semibold ${tone.struck}`}>
@@ -163,16 +171,26 @@ export function SummitTickets() {
                 {/* Straight to the checkout with the tier pre-selected. This
                     pointed at the waitlist while sales had not started - a
                     buyer who picked a tier landed on an email form. */}
-                <Link
-                  href={`/bilet?nivo=${tier.id}`}
-                  className={`mt-8 inline-flex items-center justify-center rounded-full px-6 py-3.5 text-sm font-semibold transition-transform hover:-translate-y-0.5 ${
-                    featured
-                      ? "bh-gradient text-bh-ink"
-                      : "bg-bh-ink text-bh-paper"
-                  }`}
-                >
-                  Избери {tier.name}
-                </Link>
+                {SALES_OPEN ? (
+                  <Link
+                    href={`/bilet?nivo=${tier.id}`}
+                    className={`mt-8 inline-flex items-center justify-center rounded-full px-6 py-3.5 text-sm font-semibold transition-transform hover:-translate-y-0.5 ${
+                      featured
+                        ? "bh-gradient text-bh-ink"
+                        : "bg-bh-ink text-bh-paper"
+                    }`}
+                  >
+                    Избери {tier.name}
+                  </Link>
+                ) : (
+                  <span
+                    className={`mt-8 inline-flex items-center justify-center rounded-full border px-6 py-3.5 text-sm font-semibold ${
+                      featured ? "border-bh-paper/30 text-bh-paper/70" : "border-bh-ink/25 text-bh-ink/60"
+                    }`}
+                  >
+                    Скоро в продажба
+                  </span>
+                )}
               </div>
               </Reveal>
             );
@@ -201,7 +219,9 @@ export function SummitTickets() {
               </thead>
               <tbody>
                 {[
-                  ["Цена", early ? "Ранна €35" : "€49", early ? "Ранна €89" : "€129", early ? "Ранна €249" : "€349"],
+                  SALES_OPEN
+                    ? ["Цена", early ? "Ранна €35" : "€49", early ? "Ранна €89" : "€129", early ? "Ранна €249" : "€349"]
+                    : ["Цена", SALES_SOON_LABEL, SALES_SOON_LABEL, SALES_SOON_LABEL],
                   ["Достъп", "1 ден по избор", "И двата дни", "И двата дни"],
                   ["Лекции", "При наличие на места", "Приоритетен достъп", "Гарантиран достъп"],
                   ["Запазени места", "-", "-", "Премиум зона"],
