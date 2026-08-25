@@ -7,7 +7,7 @@ import { STAGES, deckUrl, getDeckStats, listViews } from "@/lib/deck-links";
 import { sectionIndex, sectionLabel } from "@/lib/deck-sections";
 
 import { reactivateDeckLink, revokeDeckLink, updateDeckLink } from "./actions";
-import { CopyLink, NewLinkForm, PipelineEditor } from "./LinkTools";
+import { BulkLinkForm, CopyLink, NewLinkForm, PipelineEditor } from "./LinkTools";
 
 export const metadata: Metadata = {
   title: "Презентация | Администрация",
@@ -124,6 +124,9 @@ export default async function DeckPage() {
           <h2 className="text-sm font-bold tracking-tight text-bh-ink">Нов линк</h2>
           <div className="mt-3">
             <NewLinkForm />
+          </div>
+          <div className="mt-5 border-t border-bh-ink/10 pt-5">
+            <BulkLinkForm owners={d.owners} />
           </div>
         </div>
 

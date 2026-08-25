@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 
-import { createDeckLink, type LinkFormState } from "./actions";
+import { createDeckLink, createDeckLinksBulk, type LinkFormState } from "./actions";
 
 // Lives here, not in actions.ts: a "use server" module may export only
 // async functions - an exported object fails the build.
@@ -208,6 +208,80 @@ export function PipelineEditor({
           Откажи
         </button>
         {state.status === "error" && <span className="text-xs text-red-600">{state.message}</span>}
+      </div>
+    </form>
+  );
+}
+
+/**
+ * Paste a column of company names (straight out of a spreadsheet) and get a
+ * link per line, all assigned to whoever is pasting. Names that already have
+ * a link are skipped, so the same list can be pasted again as it grows.
+ */
+export function BulkLinkForm({ owners }: { owners: string[] }) {
+  const [state, action, pending] = useActionState(createDeckLinksBulk, initialLinkFormState);
+  const [open, setOpen] = useState(false);
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="rounded-full border border-bh-ink/20 px-4 py-2 text-sm font-semibold text-bh-ink transition-colors hover:border-bh-ink"
+      >
+        Добави няколко наведнъж
+      </button>
+    );
+  }
+
+  return (
+    <form action={action} className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <label className="font-mono text-[0.65rem] uppercase tracking-[0.15em] text-bh-ink/70">
+          Кой води
+        </label>
+        <input
+          type="text"
+          name="owner"
+          list="bulk-owners"
+          maxLength={40}
+          placeholder="твоето име"
+          className="w-48 rounded-full border border-bh-ink/15 bg-bh-paper px-4 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35"
+        />
+        <datalist id="bulk-owners">
+          {owners.map((o) => (
+            <option key={o} value={o} />
+          ))}
+        </datalist>
+        <span className="text-xs text-bh-ink/60">- всички от списъка се записват на този човек</span>
+      </div>
+      <textarea
+        name="labels"
+        rows={8}
+        required
+        placeholder={"Постави имената, по едно на ред:\nAlma Lasers\nBENU\nGlycanAge"}
+        className="w-full rounded-2xl border border-bh-ink/15 bg-bh-paper px-4 py-3 text-sm leading-relaxed text-bh-ink placeholder:text-bh-ink/35"
+      />
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="submit"
+          disabled={pending}
+          className="rounded-full bg-bh-ink px-4 py-2 text-sm font-semibold text-bh-paper transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+        >
+          {pending ? "Създава…" : "Създай линковете"}
+        </button>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="rounded-full border border-bh-ink/20 px-4 py-2 text-sm font-semibold text-bh-ink/70"
+        >
+          Затвори
+        </button>
+        {state.status !== "idle" && (
+          <span className={`text-xs ${state.status === "ok" ? "text-bh-pine" : "text-red-600"}`}>
+            {state.message}
+          </span>
+        )}
       </div>
     </form>
   );

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { isAdmin } from "@/lib/admin-auth";
-import { createLink, isStage, reactivateLink, revokeLink, updateLinkPipeline } from "@/lib/deck-links";
+import { createLink, createLinks, isStage, reactivateLink, revokeLink, updateLinkPipeline } from "@/lib/deck-links";
 
 export type LinkFormState = { status: "idle" | "ok" | "error"; message?: string };
 
@@ -67,4 +67,35 @@ export async function updateDeckLink(
   });
   revalidatePath("/admin/prezentaciya");
   return { status: "ok", message: "Записано." };
+}
+
+/** Pasted list of names, one per line, all led by the same person. */
+export async function createDeckLinksBulk(
+  _prev: LinkFormState,
+  formData: FormData,
+): Promise<LinkFormState> {
+  if (!(await isAdmin())) return { status: "error", message: "Няма достъп." };
+
+  const owner = String(formData.get("owner") ?? "").trim().slice(0, 40) || null;
+  const lines = String(formData.get("labels") ?? "")
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean)
+    // A guard, not a real limit: a paste this long is a mistake.
+    .slice(0, 200);
+
+  if (lines.length === 0) return { status: "error", message: "Постави поне едно име." };
+
+  const { created, skipped } = await createLinks(lines, owner);
+  revalidatePath("/admin/prezentaciya");
+
+  if (created.length === 0) {
+    return { status: "error", message: `Нищо ново - всички ${skipped.length} вече имат линк.` };
+  }
+  return {
+    status: "ok",
+    message: skipped.length
+      ? `${created.length} нови линка${owner ? ` за ${owner}` : ""} · ${skipped.length} вече съществуваха`
+      : `${created.length} нови линка${owner ? ` за ${owner}` : ""}.`,
+  };
 }

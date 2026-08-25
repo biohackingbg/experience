@@ -76,6 +76,44 @@ export async function createLink(label: string): Promise<DeckLink> {
   return row;
 }
 
+/**
+ * Creates one link per pasted line, all assigned to whoever is doing the
+ * pasting.
+ *
+ * Names that already have a link are skipped rather than duplicated - the
+ * list gets pasted again as it grows, and a second link for the same company
+ * would split its opening history in two. Matching ignores case and spacing,
+ * so "alma lasers" does not sneak past "Alma Lasers".
+ */
+export async function createLinks(
+  labels: string[],
+  owner: string | null,
+): Promise<{ created: string[]; skipped: string[] }> {
+  const db = getDb();
+  const existing = await db.select({ label: deckLinks.label }).from(deckLinks);
+  const norm = (v: string) => v.trim().toLowerCase().replace(/\s+/g, " ");
+  const taken = new Set(existing.map((r) => norm(r.label)));
+
+  const created: string[] = [];
+  const skipped: string[] = [];
+  const values: { label: string; token: string; owner: string | null }[] = [];
+
+  for (const raw of labels) {
+    const label = raw.trim().replace(/\s+/g, " ").slice(0, 80);
+    if (!label) continue;
+    if (taken.has(norm(label))) {
+      skipped.push(label);
+      continue;
+    }
+    taken.add(norm(label));
+    created.push(label);
+    values.push({ label, token: newToken(), owner });
+  }
+
+  if (values.length) await db.insert(deckLinks).values(values);
+  return { created, skipped };
+}
+
 export async function revokeLink(id: string): Promise<void> {
   await getDb()
     .update(deckLinks)
