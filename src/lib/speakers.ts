@@ -56,6 +56,16 @@ export type Speaker = {
 
 /** What the page and the event schema actually show. */
 export function announcedSpeakers(): Speaker[] {
+  // Local preview switch. Set PREVIEW_ALL_SPEAKERS=1 in .env.local (which is
+  // gitignored and never uploaded) to see every card while their titles and
+  // photos are being filled in. The variable does not exist in Vercel, so
+  // production keeps showing only the announced ones - a half-finished
+  // profile cannot slip out by being committed at the wrong moment.
+  //
+  // Only server components call this, so the flag cannot desync the client.
+  if (process.env.PREVIEW_ALL_SPEAKERS === "1") {
+    return SPEAKERS.filter((s) => !s.pending);
+  }
   return SPEAKERS.filter((s) => s.announced && !s.pending);
 }
 
