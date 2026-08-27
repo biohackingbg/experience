@@ -164,7 +164,7 @@ const tiers: Tier[] = [
   {
     no: "01",
     name: "Сребърен",
-    price: "10 000 €",
+    price: "3 500 €",
     has: [
       "Щанд до 6 м² на премиум позиция",
       "2 пълни билета",
@@ -178,7 +178,7 @@ const tiers: Tier[] = [
   {
     no: "02",
     name: "Златен",
-    price: "12 000 €",
+    price: "5 500 €",
     best: true,
     has: [
       "Щанд до 8 м² на премиум позиция",
@@ -194,7 +194,7 @@ const tiers: Tier[] = [
   {
     no: "03",
     name: "Платинен",
-    price: "17 000 €",
+    price: "9 500 €",
     has: [
       "Щанд до 10 м² на премиум позиция",
       "6 пълни билета",
@@ -235,7 +235,7 @@ const compareRows: { row: string; cells: Cell[] }[] = [
   { row: "Име на брандирана зона", cells: [false, false, true] },
 ];
 const compareNames = ["Сребърен", "Златен", "Платинен"];
-const comparePrices = ["10 000 €", "12 000 €", "17 000 €"];
+const comparePrices = ["3 500 €", "5 500 €", "9 500 €"];
 
 /* ── 15 по избор ── */
 const extras = [
@@ -428,7 +428,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-3">
                 <span className="rounded-full bg-bh-ink px-5 py-2.5 text-sm font-semibold text-bh-paper">
-                  Партньорски пакети от 2 500 €
+                  Партньорски пакети от 2 200 €
                 </span>
                 <a
                   href="#zonite"
@@ -858,7 +858,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
               Присъствие в зоната на брандовете за двата дни, без допълнения.
             </p>
             <p className="mt-6 font-display text-5xl font-[300] tracking-[-0.03em]">
-              2 500 €
+              2 200 €
               <span className="ml-2 align-middle font-sans text-xs font-normal text-bh-ink/65">/ без ДДС</span>
             </p>
             <p className="mt-4 max-w-md text-sm font-light leading-relaxed text-bh-ink/65">
@@ -949,7 +949,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
             </table>
           </div>
           <p className="mt-3 text-sm font-light text-bh-ink/70">
-            Village щанд без пакет - 2 500 € (до 6 м²), без активация и
+            Village щанд без пакет - 2 200 € (до 6 м²), без активация и
             допълнения
           </p>
           <p className="mt-1 font-mono text-[0.6rem] uppercase tracking-[0.2em] text-bh-ink/40">
