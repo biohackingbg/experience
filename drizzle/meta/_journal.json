@@ -64,6 +64,13 @@
       "when": 1787551632803,
       "tag": "0008_credit_notes",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788169227074,
+      "tag": "0009_site_views",
+      "breakpoints": true
     }
   ]
 }

@@ -33,7 +33,15 @@ function keyFor(identifier: string): string {
     .slice(0, 22);
 }
 
-export function checkRateLimit(identifier: string): { allowed: boolean } {
+/**
+ * `max` is per caller per minute. It defaults to the strict form-submission
+ * budget; a page-view beacon passes a bigger one, since somebody reading
+ * quickly through the programme is not abuse.
+ */
+export function checkRateLimit(
+  identifier: string,
+  max: number = MAX_PER_WINDOW,
+): { allowed: boolean } {
   const now = Date.now();
   const key = keyFor(identifier);
   const bucket = buckets.get(key);
@@ -50,5 +58,5 @@ export function checkRateLimit(identifier: string): { allowed: boolean } {
   }
 
   bucket.count += 1;
-  return { allowed: bucket.count <= MAX_PER_WINDOW };
+  return { allowed: bucket.count <= max };
 }

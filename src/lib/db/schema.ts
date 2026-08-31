@@ -275,6 +275,41 @@ export const deckViews = pgTable(
   ],
 );
 
+/**
+ * Visits to the public site, kept ourselves rather than sent to an analytics
+ * company - the numbers stay in our own database and no third party gets a
+ * list of who reads about the event.
+ *
+ * There is no cookie and no identifier on the visitor's device, which is why
+ * the site needs no consent banner for this. Repeat views are recognised by
+ * `visitor`: a hash of address + browser + a secret that changes every day.
+ * After midnight the same person hashes to something different, so the table
+ * can count "how many people today" and can never be turned back into "who".
+ */
+export const siteViews = pgTable(
+  "site_views",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    /** Page path, query string stripped: "/", "/bilet", "/programa". */
+    path: text("path").notNull(),
+    /** Daily-rotating pseudonym, see above. Never an address. */
+    visitor: text("visitor").notNull(),
+    referrerHost: text("referrer_host"),
+    /** "mobile" | "desktop", from the viewport rather than the UA string. */
+    device: text("device"),
+    country: text("country"),
+    city: text("city"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("site_views_created_idx").on(table.createdAt),
+    index("site_views_path_created_idx").on(table.path, table.createdAt),
+    index("site_views_visitor_idx").on(table.visitor, table.createdAt),
+  ],
+);
+
 export type DeckLink = typeof deckLinks.$inferSelect;
 
 export type Order = typeof orders.$inferSelect;

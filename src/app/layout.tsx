@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Sofia_Sans, Geologica, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ViewTracker } from "@/components/ViewTracker";
 import {
   TIERS,
   formatPrice,
@@ -91,6 +92,7 @@ export default function RootLayout({
             __html: `(function(){var d=document.documentElement;try{var t=localStorage.getItem('bh-theme');if(t!=='dark'&&t!=='light'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}d.dataset.theme=t}catch(e){d.dataset.theme='light'}d.classList.add('js')})()`,
           }}
         />
+        <ViewTracker />
         {children}
       </body>
     </html>

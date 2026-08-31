@@ -68,6 +68,7 @@ export default async function AdminDashboard() {
           </div>
           <div className="flex flex-wrap items-center gap-3">
             {[
+              ["/admin/poseshteniya", "Посещения"],
               ["/admin/fakturi", "Фактури"],
               ["/admin/zapisvaniya", "Записвания"],
               ["/admin/prezentaciya", "Презентация"],
