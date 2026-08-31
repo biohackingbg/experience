@@ -209,6 +209,56 @@ const tiers: Tier[] = [
   },
 ];
 
+/* ── 12b двете събития - фест + медицински конгрес ──
+ *
+ * ЧЕРНОВА. Цените са предишните партньорски нива; какво точно получава
+ * спонсорът на конгреса (06-08.11, организиран с Bulgarian Longevity
+ * Association) трябва да се потвърди от организаторите, преди тази секция
+ * да излезе пред партньор. Редовете, отбелязани с DRAFT, са предложение,
+ * не поето задължение.
+ */
+const congressTiers: Tier[] = [
+  {
+    no: "01",
+    name: "Сребърен +",
+    price: "10 000 €",
+    has: [
+      "Всичко от Сребърен на феста",
+      "DRAFT: щанд във фоайето на конгреса, трите дни",
+      "DRAFT: лого в програмата на конгреса",
+      "DRAFT: 2 делегатски места",
+    ],
+    not: ["Сателитен симпозиум", "Материал в делегатската чанта"],
+  },
+  {
+    no: "02",
+    name: "Златен +",
+    price: "12 000 €",
+    best: true,
+    has: [
+      "Всичко от Златен на феста",
+      "DRAFT: щанд във фоайето на конгреса, трите дни",
+      "DRAFT: материал в делегатската чанта",
+      "DRAFT: 4 делегатски места",
+      "DRAFT: лого на сцената на конгреса",
+    ],
+    not: ["Сателитен симпозиум"],
+  },
+  {
+    no: "03",
+    name: "Платинен +",
+    price: "17 000 €",
+    has: [
+      "Всичко от Платинен на феста",
+      "DRAFT: сателитен симпозиум, 30 минути",
+      "DRAFT: щанд на премиум позиция в конгреса",
+      "DRAFT: 6 делегатски места",
+      "DRAFT: категорийна ексклузивност и на двете събития",
+    ],
+    not: [],
+  },
+];
+
 /* ── 13 Village щанд ── */
 const villageRows: [string, string][] = [
   ["Щанд площ за 2 дни", "до 6 м²"],
@@ -897,6 +947,71 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
             </Reveal>
           ))}
         </div>
+      </Section>
+
+      {/* 12b двете събития */}
+      <Section name="congress" dark className="border-t border-bh-ink/10">
+        <Reveal>
+          <Eyebrow>Двете събития</Eyebrow>
+          <H2>Фестът те среща с човека, който купува. Конгресът - с лекаря, който препоръчва.</H2>
+          <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-bh-ink/70">
+            На 06-08 ноември, заедно с феста, се провежда медицинската
+            конференция на Bulgarian Longevity Association. Тези нива дават
+            присъствие и на двете - пред потребителя и пред специалиста.
+          </p>
+        </Reveal>
+        <div className="mt-14 grid gap-4 lg:grid-cols-3">
+          {congressTiers.map((t, i) => (
+            <Reveal key={t.no} delay={i * 80}>
+              <article
+                className={`relative flex h-full flex-col rounded-[1.6rem] p-7 ${
+                  t.best
+                    ? "bg-[#cef870] text-[#02251f] ring-1 ring-[#cef870]"
+                    : "bg-bh-cloud text-bh-ink ring-1 ring-white/10"
+                }`}
+              >
+                {t.best && (
+                  <span className="absolute -top-3 left-7 rounded-full bg-[#02251f] px-3 py-1 font-mono text-[0.58rem] font-bold uppercase tracking-[0.2em] text-[#cef870]">
+                    Най-избиран
+                  </span>
+                )}
+                <p className={`font-mono text-[0.62rem] uppercase tracking-[0.25em] ${t.best ? "text-[#02251f]/60" : "text-bh-ink/65"}`}>
+                  Ниво {t.no} · двете събития
+                </p>
+                <h3 className="mt-3 font-display text-3xl font-[600] tracking-[-0.02em]">{t.name}</h3>
+                <p className="mt-4 font-display text-4xl font-[300] tracking-[-0.03em]">
+                  {t.price}
+                  <span className={`ml-2 align-middle font-sans text-xs font-normal ${t.best ? "text-[#02251f]/60" : "text-bh-ink/65"}`}>
+                    / без ДДС
+                  </span>
+                </p>
+                <ul className={`mt-7 flex flex-col gap-2.5 border-t pt-6 text-sm ${t.best ? "border-[#02251f]/20" : "border-bh-ink/10"}`}>
+                  {t.has.map((f) => (
+                    <li key={f} className="flex items-start gap-2.5">
+                      <span className={`mt-0.5 shrink-0 ${t.best ? "text-[#146455]" : "text-bh-pine"}`} aria-hidden>
+                        ✳
+                      </span>
+                      {f}
+                    </li>
+                  ))}
+                  {t.not.map((f) => (
+                    <li key={f} className={`flex items-start gap-2.5 ${t.best ? "text-[#02251f]/45" : "text-bh-ink/40"}`}>
+                      <Dash />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+        <Reveal className="mt-10">
+          <p className="max-w-3xl text-sm font-light leading-relaxed text-bh-ink/70">
+            Медицинската конференция има собствена регистрация и програма през
+            Bulgarian Longevity Association. Партньорството за нея се
+            договаря и фактурира отделно от фестивалното.
+          </p>
+        </Reveal>
       </Section>
 
       {/* 13 Village щанд */}
