@@ -3,11 +3,14 @@
  *
  * Two commercially different things, deliberately not mixed:
  *
- * - A zone sponsor buys one of the four zones (3 × €8 000 in the proposal).
- *   The card names the zone, which is a stronger thing to sell than "Gold":
- *   it ties the brand to an experience and explains the price.
- * - A Village exhibitor buys a stand (30 × ~€1 250). Equal tier, many of them,
- *   so they share one wall.
+ * - A zone sponsor buys one of the zones the day is built from. The card
+ *   names the zone, which is a stronger thing to sell than "Gold": it ties
+ *   the brand to an experience and explains the price.
+ * - A Village exhibitor buys a stand, one of thirty. Equal tier, many of
+ *   them, so they share one wall.
+ *
+ * Prices live in the partner deck, not here - they have moved once already
+ * and a number in this comment only goes stale.
  *
  * Both lists start empty and the section renders nothing until a logo exists.
  * An empty partner grid on a page that sells tickets reads as "nobody backs
@@ -16,8 +19,15 @@
  * Never add a name here before the contract is signed.
  */
 
-/** The four zones from the concept. Village is sold as stands, not sponsored. */
-export type Zone = "Сцена" | "Лаборатория" | "Ритуали";
+/**
+ * The zones a brand can put its name on: the four the day is built from
+ * (SummitZones.tsx) minus Village, which is sold as stands rather than
+ * sponsored - a sponsor cannot buy the zone the other sponsors are in.
+ *
+ * Spelled exactly as the deck sells them. A partner who paid for "името на
+ * зоната" has to find that name on the public page.
+ */
+export type Zone = "Сцена" | "Движение" | "Възстановяване";
 
 export type ZoneSponsor = {
   zone: Zone;
@@ -41,9 +51,9 @@ export type Exhibitor = {
 
 /** What each zone promises, shown while the sponsor slot is being sold. */
 export const ZONE_BLURB: Record<Zone, string> = {
-  Сцена: "600 места, две сцени, международни лектори.",
-  Лаборатория: "12 станции за измерване, пълен паспорт.",
-  Ритуали: "Студ, сауна, дишане, red light, PEMF.",
+  Сцена: "18 лекции и панела, международни лектори.",
+  Движение: "Power Plate и пилатес, със записан час.",
+  Възстановяване: "Breathwork сесии и Recovery зона, по 30 минути.",
 };
 
 // Empty until a contract is signed - the section renders nothing until then.
