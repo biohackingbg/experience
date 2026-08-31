@@ -30,13 +30,14 @@ export type Partner = {
 };
 
 export const PARTNERS: Partner[] = [
-  { name: "Regina Life Clinic" },
-  { name: "Alpha Life Sciences" },
-  { name: "AgeHack" },
-  { name: "Therabody" },
+  { name: "Regina Life Clinic", logo: "/partners/regina-life-clinic.webp" },
+  // Their own white version, so it goes straight on the green.
+  { name: "Alpha Life Sciences", logoLight: "/partners/alpha-life-sciences-white.png" },
+  { name: "AgeHack", logo: "/partners/agehack.png" },
+  { name: "Therabody", logo: "/partners/therabody.png" },
   // Therabody's own studio brand, confirmed separately from Therabody.
-  { name: "RE START by Therabody" },
-  { name: "Dupissima Aesthetics" },
-  { name: "FITBOX" },
-  { name: "Manchini Coffee" },
+  { name: "RE START by Therabody", logo: "/partners/restart-therabody.png" },
+  { name: "Dupissima Aesthetics", logo: "/partners/dupissima.png" },
+  { name: "FITBOX", logo: "/partners/fitbox.jpg" },
+  { name: "Manchini Coffee", logo: "/partners/manchini-coffee.png" },
 ];

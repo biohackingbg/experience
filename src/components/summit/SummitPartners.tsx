@@ -24,23 +24,21 @@ function tileWidth(count: number): string {
 }
 
 function Tile({ partner, tall }: { partner: Partner; tall: boolean }) {
+  // A fixed-height box the artwork is fitted into, rather than a height cap on
+  // the image itself: marks come in wildly different shapes, and a wide
+  // wordmark next to a square mark must not read as half the brand. Width
+  // binds first for the wide ones, height for the square ones. It also means
+  // the tile is the right size before the file has loaded, which a bare
+  // `w-auto` is not.
+  const fit = `${tall ? "h-16" : "h-12"} w-full max-w-[11rem] object-contain`;
+
   const inner = partner.logoLight ? (
     // Their own white version: straight onto the green, no plate.
     // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={partner.logoLight}
-      alt={partner.name}
-      loading="lazy"
-      className={`w-auto object-contain ${tall ? "max-h-16" : "max-h-12"} max-w-[11rem]`}
-    />
+    <img src={partner.logoLight} alt={partner.name} loading="lazy" className={fit} />
   ) : partner.logo ? (
     // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={partner.logo}
-      alt={partner.name}
-      loading="lazy"
-      className={`w-auto object-contain ${tall ? "max-h-16" : "max-h-12"} max-w-[11rem]`}
-    />
+    <img src={partner.logo} alt={partner.name} loading="lazy" className={fit} />
   ) : (
     // Signed, artwork not in yet. The name set large is a real placeholder,
     // not an apology - it says who, which is the whole point of the section.
@@ -58,14 +56,14 @@ function Tile({ partner, tall }: { partner: Partner; tall: boolean }) {
       } ${
         onPlate
           ? "bg-white text-[#02251F] ring-1 ring-white/60"
-          : "bg-white/5 text-bh-paper ring-1 ring-white/15"
+          : "bg-white/5 text-[#f2f2ee] ring-1 ring-white/15"
       }`}
     >
       {inner}
       {partner.role && (
         <span
           className={`text-center font-mono text-[0.58rem] uppercase tracking-[0.15em] ${
-            onPlate ? "text-[#02251F]/55" : "text-bh-paper/55"
+            onPlate ? "text-[#02251F]/55" : "text-[#f2f2ee]/60"
           }`}
         >
           {partner.role}
@@ -84,17 +82,20 @@ export function SummitPartners() {
 
   return (
     <section id="partniori" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
+      {/* The band is green in both themes, so its text is written out rather
+          than taken from the ink/paper tokens: in dark mode those flip, and
+          the heading came out at 1.17:1 - dark green on dark green. */}
       <div className="mx-auto w-full max-w-7xl overflow-hidden rounded-[2rem] bg-[#0a3229] px-5 py-14 sm:px-10 sm:py-16">
         <Reveal className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="bh-eyebrow font-mono text-xs uppercase tracking-[0.25em] text-bh-paper/50">
+            <p className="bh-eyebrow font-mono text-xs uppercase tracking-[0.25em] !text-[#cef870]">
               Партньорите
             </p>
-            <h2 className="mt-4 max-w-2xl text-[clamp(2rem,4.5vw,3.5rem)] font-display font-[900] uppercase leading-[0.95] tracking-tight text-bh-paper">
+            <h2 className="mt-4 max-w-2xl text-[clamp(2rem,4.5vw,3.5rem)] font-display font-[900] uppercase leading-[0.95] tracking-tight text-[#f2f2ee]">
               Кой стои зад Sofia Life Summit
             </h2>
           </div>
-          <p className="max-w-sm text-sm leading-relaxed text-bh-paper/60">
+          <p className="max-w-sm text-sm leading-relaxed text-[#f2f2ee]/75">
             Брандовете, които вече са потвърдили участие. Списъкът расте до
             ноември.
           </p>
