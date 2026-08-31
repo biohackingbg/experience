@@ -51,7 +51,6 @@ const format = [
 const scale = [
   { n: "1 000+", l: "посетители" },
   { n: "4", l: "зони" },
-  { n: "10", l: "интерактивни станции" },
   { n: "50", l: "международни лектори" },
   { n: "30", l: "подбрани бранда" },
 ];
@@ -82,18 +81,20 @@ const speakers = [
 const concept = [
   { no: "01", tag: "Знанието", h: "Сцена", sym: "◎", p: "18 лекции и панела - лекари и изследователи на разбираем език." },
   { no: "02", tag: "Тялото", h: "Движение", sym: "◍", p: "Power Plate зона и пилатес - на постелка и на реформър, със записан час." },
-  { no: "03", tag: "Балансът", h: "Възстановяване", sym: "≋", p: "Cold plunge, breathwork сесии и Recovery зона, по 30 минути." },
+  { no: "03", tag: "Балансът", h: "Възстановяване", sym: "≋", p: "Breathwork сесии и Recovery зона, по 30 минути." },
   { no: "04", tag: "Брандовете", h: "Village", sym: "⌂", p: "30 подбрани компании: добавки, устройства, клиники, храна." },
 ];
 
 /* ── 07 зоните ── */
 const activities = [
-  { no: "01", h: "Cold Plunge", p: "Потапяне в студена вода с инструктор и подготовка.", img: "/deck/act-cold.jpg" },
-  { no: "02", h: "Breathwork", p: "Групови дихателни сесии по 30 минути.", img: "/deck/act-breathwork.jpg" },
-  { no: "03", h: "Recovery Zone", p: "Компресия, перкусия и възстановяване след натоварване.", img: "/deck/act-recovery.jpg" },
-  { no: "04", h: "Power Plate Zone", p: "Вибрационна тренировка с демонстрации на живо.", img: "/deck/act-powerplate.jpg" },
-  { no: "05", h: "Пилатес - постелка", p: "Групови сесии за начинаещи и напреднали.", img: "/deck/act-pilates-mat.jpg" },
-  { no: "06", h: "Пилатес - реформър", p: "Малки групи с инструктор, със записан час.", img: "/deck/act-pilates-reformer.jpg" },
+  // Cold plunge е свален, докато не се потвърди, че залата може да
+  // осигури вода и ваните (31.08.2026). Върни реда, като се потвърди.
+  // { no: "01", h: "Cold Plunge", p: "Потапяне в студена вода с инструктор и подготовка.", img: "/deck/act-cold.jpg" },
+  { no: "01", h: "Breathwork", p: "Групови дихателни сесии по 30 минути.", img: "/deck/act-breathwork.jpg" },
+  { no: "02", h: "Recovery Zone", p: "Компресия, перкусия и възстановяване след натоварване.", img: "/deck/act-recovery.jpg" },
+  { no: "03", h: "Power Plate Zone", p: "Вибрационна тренировка с демонстрации на живо.", img: "/deck/act-powerplate.jpg" },
+  { no: "04", h: "Пилатес - постелка", p: "Групови сесии за начинаещи и напреднали.", img: "/deck/act-pilates-mat.jpg" },
+  { no: "05", h: "Пилатес - реформър", p: "Малки групи с инструктор, със записан час.", img: "/deck/act-pilates-reformer.jpg" },
 ];
 
 /* ── 08 брандирана зона ── */
@@ -134,7 +135,7 @@ const journey = [
   { t: "10:30", h: "Лекция на сцената", p: "25 минути наука на разбираем език", brand: false },
   { t: "11:15", h: "Активация: движение", p: "Power Plate или пилатес - със записан час", brand: true },
   { t: "12:00", h: "Village и обяд", p: "Дегустации и разговори с брандовете", brand: true },
-  { t: "13:30", h: "Активация: възстановяване", p: "Cold plunge, breathwork или Recovery", brand: true },
+  { t: "13:30", h: "Активация: възстановяване", p: "Breathwork или Recovery", brand: true },
   { t: "14:30", h: "Уъркшоп", p: "Малка група, продукт в ръцете", brand: true },
   { t: "15:30", h: "Отново сцената", p: "Панел и въпроси към лекарите", brand: false },
   { t: "16:30", h: "Village преди тръгване", p: "Покупка и последен разговор", brand: true },
@@ -239,7 +240,7 @@ const comparePrices = ["3 500 €", "5 500 €", "9 500 €"];
 
 /* ── 15 по избор ── */
 const extras = [
-  { price: "4 500 €", h: "Партньор на Recovery", p: "Cold plunge и breathwork зоната носи вашето име. Присъствие при всяка сесия, двата дни. Най-сниманата зона на събитието." },
+  { price: "4 500 €", h: "Партньор на Recovery", p: "Breathwork и Recovery зоната носи вашето име. Присъствие при всяка сесия, двата дни. Най-сниманата зона на събитието." },
   { price: "3 000 €", h: "Партньор на Движение", p: "Power Plate или пилатес зоната с ваше име. Записан час, 30 минути, целодневно. Продуктът се пробва на място." },
   { price: "4 500 €", h: "Презентация / уъркшоп", p: "Сесия до 15 минути с ваш експерт. Запис за вашите канали и място в програмата на сайта." },
   { price: "500 €", h: "Фестивална чанта", p: "Един рекламен материал за 1 000 души, без щанд. Най-бързият вход в събитието." },
@@ -266,7 +267,9 @@ const supportRows = [
 /* ── 18 founding partners ── */
 const territories = [
   { h: "Сцена", sub: "Presenting Partner" },
-  { h: "Cold Plunge", sub: "Активация" },
+  // Cold plunge е свален, докато не се потвърди, че залата може да
+  // осигури вода и ваните (31.08.2026). Върни реда, като се потвърди.
+  // { h: "Cold Plunge", sub: "Активация" },
   { h: "Breathwork", sub: "Активация" },
   { h: "Recovery Zone", sub: "Активация" },
   { h: "Power Plate", sub: "Активация" },
@@ -506,9 +509,26 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
               престой около шест часа. Записаните часове за активностите
               задържат посетителя целия ден.
             </p>
-            <p className="mt-4 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bh-pine">
-              ↗ Организира се съвместно с Bulgarian Longevity Association
-            </p>
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-x-6 gap-y-4">
+              {/* Wraps to two lines rather than claiming the whole row, so the
+                  logo can sit beside it instead of being pushed underneath. */}
+              <p className="max-w-[26rem] font-mono text-[0.62rem] uppercase leading-relaxed tracking-[0.2em] text-bh-pine">
+                ↗ Организира се съвместно с Bulgarian Longevity Association
+              </p>
+              {/* Their own colours on the transparent background, the same way
+                  the public site shows them - measured on this section it sits
+                  between 3.1 and 3.9:1, so a white plate would buy nothing and
+                  would put a light box in the middle of a dark section. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/partner-logo.png"
+                alt="Bulgarian Longevity Association"
+                width={900}
+                height={458}
+                loading="lazy"
+                className="h-11 w-auto shrink-0"
+              />
+            </div>
           </div>
         </Reveal>
       </Section>
@@ -516,12 +536,43 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
       {/* 04 организаторите */}
       <Section name="organizers" className="border-t border-bh-ink/10">
         <Reveal>
-          <Eyebrow>Организаторите</Eyebrow>
-          <H2>Защо Biohacking.bg и BLA</H2>
-          <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-bh-ink/70">
-            Общност, която вече купува в тази категория, и медицинска асоциация,
-            която ѝ дава легитимност.
-          </p>
+          <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-8">
+            <div className="max-w-2xl">
+              <Eyebrow>Организаторите</Eyebrow>
+              <H2>Защо Biohacking.bg и BLA</H2>
+              <p className="mt-6 text-lg font-light leading-relaxed text-bh-ink/70">
+                Общност, която вече купува в тази категория, и медицинска
+                асоциация, която ѝ дава легитимност.
+              </p>
+            </div>
+            {/* In the heading's order, both in their own colours. Theirs is set
+                taller on purpose: their lockup spends most of its height on the
+                mark, so equal boxes would leave their wordmark visibly smaller
+                than ours. */}
+            <div className="flex shrink-0 items-center gap-6">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logo.svg"
+                alt="Biohacking Experience"
+                // Its own aspect ratio, so the box is the right width before
+                // the file has loaded; without it a lazy SVG measures zero wide.
+                width={1412}
+                height={381}
+                loading="lazy"
+                className="h-10 w-auto sm:h-11"
+              />
+              <span aria-hidden className="h-10 w-px bg-bh-ink/15" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/partner-logo.png"
+                alt="Bulgarian Longevity Association"
+                width={900}
+                height={458}
+                loading="lazy"
+                className="h-12 w-auto sm:h-14"
+              />
+            </div>
+          </div>
         </Reveal>
         <div className="mt-14 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
           {organizers.map((o, i) => (
@@ -685,8 +736,8 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
               <div aria-hidden className="relative mx-auto mt-6 h-px max-w-4xl bg-white/15" />
             </div>
             <figcaption className="mt-3 font-mono text-[0.62rem] uppercase leading-relaxed tracking-[0.2em] text-bh-ink/65">
-              Cold plunge и реформър зоните на Sofia Life Summit - визуализация в
-              Гранд Хотел Милениум.
+              Зоните за движение и възстановяване на Sofia Life Summit -
+              визуализация в Гранд Хотел Милениум.
             </figcaption>
           </figure>
         </Reveal>
