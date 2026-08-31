@@ -125,6 +125,18 @@ export function isTotpConfigured(): boolean {
 }
 
 /**
+ * The otpauth:// URI an authenticator app expects, for enrolling another
+ * phone on the same shared account. Null when no second factor is set up.
+ */
+export function totpEnrolmentUri(): string | null {
+  const secret = process.env.ADMIN_TOTP_SECRET;
+  if (!secret) return null;
+  const label = encodeURIComponent("Sofia Life Summit:admin");
+  const issuer = encodeURIComponent("Sofia Life Summit");
+  return `otpauth://totp/${label}?secret=${secret}&issuer=${issuer}&algorithm=SHA1&digits=6&period=30`;
+}
+
+/**
  * Accepts the previous, current and next 30-second step, so a code typed
  * just as it rolls over still works and modest clock drift is tolerated.
  */
