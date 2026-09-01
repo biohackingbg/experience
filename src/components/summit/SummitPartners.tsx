@@ -2,74 +2,48 @@ import { Reveal } from "@/components/ui/Reveal";
 import { PARTNERS, type Partner } from "@/lib/partners";
 
 /**
- * The confirmed partners.
+ * The confirmed partners: white marks on the green, no tiles.
+ *
+ * A wall of little white cards turns eight brands into eight boxes, and the
+ * boxes are what the eye sees. Set in one colour on one ground, they read as
+ * one group of names instead - which is the thing being said.
  *
  * Deliberately count-driven. A grid built for twelve with three logos in it
- * reads as failure, so the tile width comes from how many partners there
- * actually are: one or two get a wide statement row, three fill the row, and
- * only from six does it become a wall. Nothing renders at all until the first
- * signature - an empty partner section on a page selling tickets says "nobody
- * backs this".
- *
- * Dark green section, because a band of logos needs to sit apart from the
- * editorial around it. Marks stay in their own colours on a light tile unless
- * the partner supplied a white version; recolouring somebody else's logo is
- * not ours to do.
+ * reads as failure, so the slot width comes from how many there actually are.
+ * Nothing renders at all until the first signature: an empty partner section
+ * on a page selling tickets says "nobody backs this".
  */
-function tileWidth(count: number): string {
-  if (count <= 2) return "w-full sm:w-[calc(50%-0.5rem)]";
-  if (count === 3) return "w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-0.667rem)]";
-  if (count <= 5) return "w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-0.667rem)] lg:w-[calc(20%-0.8rem)]";
-  return "w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-0.667rem)] lg:w-[calc(25%-0.75rem)]";
+function slotWidth(count: number): string {
+  if (count <= 2) return "w-full sm:w-[calc(50%-1.5rem)]";
+  if (count === 3) return "w-[calc(50%-1.5rem)] sm:w-[calc(33.333%-2rem)]";
+  if (count <= 5) return "w-[calc(50%-1.5rem)] sm:w-[calc(33.333%-2rem)] lg:w-[calc(20%-2.4rem)]";
+  return "w-[calc(50%-1.5rem)] sm:w-[calc(33.333%-2rem)] lg:w-[calc(25%-2.25rem)]";
 }
 
-function Tile({ partner, tall }: { partner: Partner; tall: boolean }) {
-  // A fixed-height box the artwork is fitted into, rather than a height cap on
-  // the image itself: marks come in wildly different shapes, and a wide
-  // wordmark next to a square mark must not read as half the brand. Width
-  // binds first for the wide ones, height for the square ones. It also means
-  // the tile is the right size before the file has loaded, which a bare
-  // `w-auto` is not.
-  const fit = `${tall ? "h-16" : "h-12"} w-full max-w-[11rem] object-contain`;
-
-  const inner = partner.logoLight ? (
-    // Their own white version: straight onto the green, no plate.
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src={partner.logoLight} alt={partner.name} loading="lazy" className={fit} />
-  ) : partner.logo ? (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src={partner.logo} alt={partner.name} loading="lazy" className={fit} />
-  ) : (
+function Mark({ partner, tall }: { partner: Partner; tall: boolean }) {
+  if (!partner.logo) {
     // Signed, artwork not in yet. The name set large is a real placeholder,
     // not an apology - it says who, which is the whole point of the section.
-    <span className="text-center text-lg font-bold leading-tight tracking-tight">
-      {partner.name}
-    </span>
-  );
+    return (
+      <span className="block text-center text-lg font-bold leading-tight tracking-tight text-[#f2f2ee]">
+        {partner.name}
+      </span>
+    );
+  }
 
-  const onPlate = !partner.logoLight;
-
+  // A fixed-height box the artwork is fitted into, rather than a height cap on
+  // the image: marks come in wildly different shapes, and a wide wordmark
+  // beside a square mark must not read as half the brand. Width binds first
+  // for the wide ones, height for the square ones. It also means the slot is
+  // the right size before the file has loaded.
   return (
-    <div
-      className={`flex flex-col items-center justify-center gap-3 rounded-2xl px-5 ${
-        tall ? "min-h-[9rem] py-7" : "min-h-[7rem] py-6"
-      } ${
-        onPlate
-          ? "bg-white text-[#02251F] ring-1 ring-white/60"
-          : "bg-white/5 text-[#f2f2ee] ring-1 ring-white/15"
-      }`}
-    >
-      {inner}
-      {partner.role && (
-        <span
-          className={`text-center font-mono text-[0.58rem] uppercase tracking-[0.15em] ${
-            onPlate ? "text-[#02251F]/55" : "text-[#f2f2ee]/60"
-          }`}
-        >
-          {partner.role}
-        </span>
-      )}
-    </div>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={partner.logo}
+      alt={partner.name}
+      loading="lazy"
+      className={`${tall ? "h-16" : "h-12"} w-full object-contain`}
+    />
   );
 }
 
@@ -77,7 +51,7 @@ export function SummitPartners() {
   const count = PARTNERS.length;
   if (count === 0) return null;
 
-  const width = tileWidth(count);
+  const width = slotWidth(count);
   const tall = count <= 3;
 
   return (
@@ -101,7 +75,9 @@ export function SummitPartners() {
           </p>
         </Reveal>
 
-        <div className="mt-12 flex flex-wrap justify-center gap-4">
+        {/* Roomier gaps than a tiled grid needs: with nothing drawn around a
+            mark, the empty space is the only thing holding two of them apart. */}
+        <div className="mt-14 flex flex-wrap items-center justify-center gap-x-12 gap-y-12">
           {PARTNERS.map((p, i) => (
             <Reveal key={p.name} delay={i * 60} className={width}>
               {p.url ? (
@@ -110,12 +86,12 @@ export function SummitPartners() {
                   target="_blank"
                   rel="sponsored nofollow noopener noreferrer"
                   title={p.name}
-                  className="block h-full transition-transform duration-300 hover:-translate-y-1"
+                  className="block transition-transform duration-300 hover:-translate-y-1"
                 >
-                  <Tile partner={p} tall={tall} />
+                  <Mark partner={p} tall={tall} />
                 </a>
               ) : (
-                <Tile partner={p} tall={tall} />
+                <Mark partner={p} tall={tall} />
               )}
             </Reveal>
           ))}

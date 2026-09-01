@@ -12,32 +12,26 @@
 export type Partner = {
   name: string;
   /**
-   * Path under /public/partners. Optional: a deal is often signed before the
-   * artwork arrives, and the name set in type carries the tile until it does.
+   * Path under /public/partners: the white version of the mark, since the row
+   * sits on the dark green with no tile behind it. Where a partner did not
+   * supply one, it was made from their file - the shape is theirs, only the
+   * colour is dropped. Optional: a deal is often signed before the artwork
+   * arrives, and the name set in type carries the slot until it does.
    */
   logo?: string;
-  /**
-   * A white / single-colour version of the mark, for the dark background.
-   * When a partner supplies one it is used directly on the green; when they
-   * do not, `logo` is shown on a light tile instead, which keeps their own
-   * colours intact rather than inventing a treatment their brand guide may
-   * not permit.
-   */
-  logoLight?: string;
   url?: string;
   /** What they are partnering on, one short line: "Партньор на Възстановяване". */
   role?: string;
 };
 
 export const PARTNERS: Partner[] = [
-  { name: "Regina Life Clinic", logo: "/partners/regina-life-clinic.webp" },
-  // Their own white version, so it goes straight on the green.
-  { name: "Alpha Life Sciences", logoLight: "/partners/alpha-life-sciences-white.png" },
-  { name: "AgeHack", logo: "/partners/agehack.png" },
-  { name: "Therabody", logo: "/partners/therabody.png" },
+  { name: "Regina Life Clinic", logo: "/partners/regina-life-clinic-white.png" },
+  { name: "Alpha Life Sciences", logo: "/partners/alpha-life-sciences-white.png" },
+  { name: "AgeHack", logo: "/partners/agehack-white.png" },
+  { name: "Therabody", logo: "/partners/therabody-white.png" },
   // Therabody's own studio brand, confirmed separately from Therabody.
-  { name: "RE START by Therabody", logo: "/partners/restart-therabody.png" },
-  { name: "Dupissima Aesthetics", logo: "/partners/dupissima.png" },
-  { name: "FITBOX", logo: "/partners/fitbox.jpg" },
-  { name: "Manchini Coffee", logo: "/partners/manchini-coffee.png" },
+  { name: "RE START by Therabody", logo: "/partners/restart-therabody-white.png" },
+  { name: "Dupissima Aesthetics", logo: "/partners/dupissima-white.png" },
+  { name: "FITBOX", logo: "/partners/fitbox-white.png" },
+  { name: "Manchini Coffee", logo: "/partners/manchini-coffee-white.png" },
 ];
