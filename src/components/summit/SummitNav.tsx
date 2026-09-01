@@ -22,7 +22,12 @@ export function SummitNav() {
   // The hero gave up its CTA row for a cleaner composition; the price anchor
   // moves here, onto the one button that is now always on screen.
   const early = isEarlyAccess();
-  const cheapest = Math.min(...TIERS.map((t) => priceCents(t, early)));
+  // The cheapest tier, not just the cheapest number: the button links to it,
+  // so the two must be the same tier.
+  const cheapestTier = TIERS.reduce((a, b) =>
+    priceCents(b, early) < priceCents(a, early) ? b : a,
+  );
+  const cheapest = priceCents(cheapestTier, early);
 
   return (
     /* Sticky glass: translucent paper over a backdrop blur, so the page
@@ -66,12 +71,26 @@ export function SummitNav() {
 
         <div className="flex items-center gap-4">
           <ThemeToggle />
-          <a
-            href="#tickets"
-            className="bh-gradient inline-flex items-center whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
-          >
-            {SALES_OPEN ? <>Купи билет от {formatPrice(cheapest)} €</> : <>Билети - скоро</>}
-          </a>
+          {/* Straight into the checkout, on the tier the button just quoted -
+              the price in the label and the price on the next screen are the
+              same number. Someone who wants to compare tiers has the "Билети"
+              link two items to the left; this button is for the person who
+              has already decided. */}
+          {SALES_OPEN ? (
+            <Link
+              href={`/bilet?nivo=${cheapestTier.id}`}
+              className="bh-gradient inline-flex items-center whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
+            >
+              Купи билет от {formatPrice(cheapest)} €
+            </Link>
+          ) : (
+            <a
+              href="#tickets"
+              className="bh-gradient inline-flex items-center whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
+            >
+              Билети - скоро
+            </a>
+          )}
         </div>
       </nav>
     </header>
