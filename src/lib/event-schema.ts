@@ -2,12 +2,11 @@ import { announcedSpeakers } from "@/lib/speakers";
 import {
   SALES_OPEN,
   CURRENCY,
-  EARLY_ACCESS,
   PRE_ORDER,
   TIERS,
-  isEarlyAccess,
   priceCents,
 } from "@/lib/tickets";
+import { getEarlyState } from "@/lib/early-access";
 
 /**
  * Speakers, as schema.org performers.
@@ -39,8 +38,8 @@ const performers = announcedSpeakers().map((s) => ({
  * life of the server process - advertising a price in search that the checkout
  * no longer charges.
  */
-export function buildEventSchema() {
-  const early = isEarlyAccess();
+export async function buildEventSchema() {
+  const { early } = await getEarlyState();
 
   return {
   "@context": "https://schema.org",
@@ -98,11 +97,9 @@ export function buildEventSchema() {
       availability: "https://schema.org/PreOrder",
       url: "https://thelongevitysummit.eu/bilet",
       validFrom: PRE_ORDER.validFrom,
-      // Tells Google when the advertised price stops being true, so a stale
-      // rich result does not keep showing the launch price.
-      ...(early
-        ? { priceValidUntil: EARLY_ACCESS.endsAt.toISOString().slice(0, 10) }
-        : {}),
+      // No priceValidUntil any more: the launch price ends on a count, not
+      // a date, and inventing a date here would be a promise to Google that
+      // the checkout does not keep.
     })),
       }
     : {}),

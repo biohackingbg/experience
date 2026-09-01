@@ -1,7 +1,8 @@
 import Link from "next/link";
 
 // import { EarlyAccessForm } from "@/components/summit/EarlyAccessForm";
-import { EARLY_ACCESS, SALES_OPEN, TIERS, formatPrice, isEarlyAccess } from "@/lib/tickets";
+import { SALES_OPEN, TIERS, formatPrice } from "@/lib/tickets";
+import { getEarlyState } from "@/lib/early-access";
 import { Reveal } from "@/components/ui/Reveal";
 import { Calendar, Pin, TicketIcon } from "@/components/ui/Pictograms";
 
@@ -14,8 +15,8 @@ import { Calendar, Pin, TicketIcon } from "@/components/ui/Pictograms";
  * what the visitor loses by waiting. The form, its consent copy and the
  * signups table all stay in place for when there is something to send.
  */
-export function SummitRegister() {
-  const early = isEarlyAccess();
+export async function SummitRegister() {
+  const { early, left, limit } = await getEarlyState();
 
   const facts = [
     { label: "Дати", value: "07-08 ноември 2026", icon: Calendar },
@@ -25,7 +26,7 @@ export function SummitRegister() {
       value: !SALES_OPEN
         ? "Билетите - съвсем скоро"
         : early
-          ? `Ранни цени до ${EARLY_ACCESS.endsLabel}`
+          ? `Стартови цени - остават ${left}`
           : "Билетите са в продажба",
       icon: TicketIcon,
     },
@@ -58,9 +59,9 @@ export function SummitRegister() {
                   {" "}
                   - на{" "}
                   <strong className="font-semibold text-bh-lime">
-                    ранни цени до {EARLY_ACCESS.endsLabel}
+                    стартови цени за първите {limit} билета
                   </strong>
-                  , като предварителна поръчка
+                  , от които остават {left}
                 </>
               )}
               . Местата в работилниците и специалните преживявания са
@@ -87,9 +88,10 @@ export function SummitRegister() {
             {SALES_OPEN && early && (
               <p className="mt-12 max-w-xl border-t border-bh-paper/15 pt-8 text-sm leading-relaxed text-bh-paper/65">
                 <strong className="font-semibold text-bh-lime">
-                  Ранните цени важат до {EARLY_ACCESS.endsLabel}.
+                  Стартовите цени важат за първите {limit} билета - остават{" "}
+                  {left}.
                 </strong>{" "}
-                От {EARLY_ACCESS.regularFrom} билетите минават на редовни цени:{" "}
+                След тях билетите минават на редовни цени:{" "}
                 {TIERS.map((t, i) => (
                   <span key={t.id}>
                     {i > 0 && ", "}

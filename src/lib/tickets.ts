@@ -18,42 +18,43 @@ export const VAT_RATE = 0.2;
 export const CURRENCY = "EUR";
 
 /**
- * The launch window.
- *
- * `endsAt` is a placeholder until the sales dates are fixed with the
- * association - change it here and the page, the checkout, the signup form and
- * the structured data all follow.
- *
- * Note on how this is worded on the page: under the Omnibus rules (ЗЗП чл. 64б)
- * an announced *reduction* must show the lowest price charged in the previous
- * 30 days, and these tickets have never been sold at the regular price. So the
- * struck-through figure is labelled as the price that starts on a date - a
- * forward-looking schedule, not a claim about the past.
- */
-/**
  * The master switch for selling.
  *
- * Off while the final prices are being worked out (24.08.2026): the site
- * still describes the tiers and what each includes, but shows no figures and
- * takes no money. Everything that could quote a price or start a checkout
- * reads this - including the server action, so a bookmarked /bilet or a
- * cached page cannot slip an order through at a price we may not honour.
- *
- * Turning sales back on is this one constant plus the real numbers in TIERS.
+ * Everything that could quote a price or start a checkout reads this -
+ * including the server action, so a bookmarked /bilet or a cached page cannot
+ * slip an order through while it is off.
  */
-export const SALES_OPEN = false;
+export const SALES_OPEN = true;
 
 /** What the page says wherever a price would be. */
 export const SALES_SOON_LABEL = "Очаквайте скоро";
 
+/**
+ * The launch window, counted in tickets rather than days (01.09.2026).
+ *
+ * A deadline that has passed makes the whole page lie at midnight, and it
+ * rewards nobody for being early - it only rewards being early *enough*. A
+ * quantity does both jobs: it is honest at every moment, and the number left
+ * is a real thing to say out loud.
+ *
+ * The count is the live one, so it must come from the database: see
+ * `getEarlyState()` in early-access.ts. `isEarlyAccess` stays pure so the
+ * checkout form and the schema can use it without touching the database.
+ *
+ * Note on how this is worded on the page: under the Omnibus rules (ЗЗП чл.
+ * 64б) an announced *reduction* must show the lowest price charged in the
+ * previous 30 days, and these tickets have never been sold at the regular
+ * price. So the struck-through figure is labelled as the price that applies
+ * once the first 200 are gone - a forward-looking condition, not a claim
+ * about the past.
+ */
 export const EARLY_ACCESS = {
-  // Ends with the pre-order window: one deadline, deliberately. After
-  // 31 August there are no further discounts - tickets go to list price.
-  endsAt: new Date("2026-08-31T23:59:59+03:00"),
-  /** Deadline as it reads in a sentence. */
-  endsLabel: "31 август",
+  /** How many tickets are sold at the launch prices, across all tiers. */
+  limit: 200,
+  /** The condition as it reads in a sentence. */
+  label: "първите 200 билета",
   /** Shown wherever the regular price is struck through. */
-  regularFrom: "1 септември",
+  regularAfter: "след първите 200",
 };
 
 /**
@@ -152,14 +153,14 @@ export function getTier(id: string): Tier | undefined {
 }
 
 /**
- * Whether the early window is open.
+ * Whether the launch prices still apply, given how many tickets are gone.
  *
- * Server code calls this and passes the answer down. The browser is never
- * asked, because a device with a wrong clock would then show one price while
- * the server charged another.
+ * Server code resolves the count and passes the answer down. The browser is
+ * never asked: it would be showing one price while the server charged
+ * another.
  */
-export function isEarlyAccess(now: Date = new Date()): boolean {
-  return now <= EARLY_ACCESS.endsAt;
+export function isEarlyAccess(sold: number): boolean {
+  return sold < EARLY_ACCESS.limit;
 }
 
 /** What the buyer pays, VAT included, in cents. */

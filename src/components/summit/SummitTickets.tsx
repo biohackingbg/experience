@@ -3,16 +3,14 @@ import Link from "next/link";
 import { Reveal } from "@/components/ui/Reveal";
 import {
   EARLY_ACCESS,
-  PRE_ORDER,
   TIERS,
   SALES_OPEN,
   SALES_SOON_LABEL,
   formatPrice,
-  isEarlyAccess,
-  isPreOrder,
   priceCents,
   tierDiscountLabel,
 } from "@/lib/tickets";
+import { getEarlyState } from "@/lib/early-access";
 
 
 function Check({ muted }: { muted?: boolean }) {
@@ -34,18 +32,28 @@ function Check({ muted }: { muted?: boolean }) {
   );
 }
 
-export function SummitTickets() {
-  const early = isEarlyAccess();
-  const preOrder = SALES_OPEN && isPreOrder();
+export async function SummitTickets() {
+  const { early, left, limit, urgent } = await getEarlyState();
 
   return (
     <section id="tickets" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
         <Reveal className="flex flex-col gap-6 border-t border-bh-ink/15 pt-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="bh-eyebrow font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">
-              Билети
-            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <p className="bh-eyebrow font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">
+                Билети
+              </p>
+              {SALES_OPEN && early && (
+                <span
+                  className={`rounded-full px-3 py-1 font-mono text-[0.62rem] font-bold uppercase tracking-[0.15em] ${
+                    urgent ? "bg-bh-ink text-bh-paper" : "bg-bh-lime-pale text-bh-ink"
+                  }`}
+                >
+                  Остават {left} от {limit}
+                </span>
+              )}
+            </div>
             <h2 className="mt-4 max-w-2xl text-[clamp(2rem,4.5vw,3.5rem)] font-display font-[900] uppercase leading-[0.95] tracking-tight text-bh-ink">
               Три нива, една логика: колко надълбоко
             </h2>
@@ -53,11 +61,13 @@ export function SummitTickets() {
           <p className="max-w-sm text-sm leading-relaxed text-bh-ink/60">
             Всички билети дават достъп до сцената и Village. Разликата е в
             дните, работилниците и специалните преживявания.
-            {preOrder && (
+            {SALES_OPEN && early && (
               <>
                 {" "}
                 <strong className="font-semibold text-bh-ink">
-                  До {PRE_ORDER.endsLabel} билетите са предварителни поръчки.
+                  {urgent
+                    ? `Остават само ${left} билета на тези цени.`
+                    : `Тези цени важат за първите ${limit} билета - остават ${left}.`}
                 </strong>
               </>
             )}
@@ -145,7 +155,7 @@ export function SummitTickets() {
                           a date, not one that was ever charged - see the note
                           in lib/tickets.ts. */}
                       <p className={`mt-1.5 text-[0.7rem] leading-snug ${tone.note}`}>
-                        редовна цена от {EARLY_ACCESS.regularFrom}
+                        редовна цена {EARLY_ACCESS.regularAfter}
                       </p>
                     </>
                   )}
@@ -255,9 +265,9 @@ export function SummitTickets() {
             section, and this is the moment the money is decided. */}
         <p className="mt-6 max-w-3xl font-mono text-[0.7rem] leading-relaxed uppercase tracking-[0.12em] text-bh-ink/40">
           Билетите тук са за Biohacking Experience · медицинската конференция
-          има отделна регистрация · продажбите започват през август, до{" "}
-          {PRE_ORDER.endsLabel} като предварителна поръчка · групи над 10 души и
-          корпоративни пакети по договаряне · отстъпка за студенти и медицински
+          има отделна регистрация · стартовите цени важат за първите {limit}{" "}
+          билета, независимо от нивото · групи над 10 души и корпоративни
+          пакети по договаряне · отстъпка за студенти и медицински
           специалисти.
         </p>
       </div>

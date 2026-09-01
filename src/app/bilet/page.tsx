@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { isTestMode } from "@/lib/stripe";
-import { PRE_ORDER, SALES_OPEN, isEarlyAccess, isPreOrder } from "@/lib/tickets";
+import { SALES_OPEN } from "@/lib/tickets";
+import { getEarlyState } from "@/lib/early-access";
 import { CheckoutForm } from "./CheckoutForm";
 
 export const metadata: Metadata = {
@@ -21,7 +22,7 @@ export default async function CheckoutPage({
 }) {
   const { nivo, otkazano } = await searchParams;
   const testMode = isTestMode();
-  const preOrder = isPreOrder();
+  const { early, left, limit } = await getEarlyState();
 
   // While sales are closed the page still answers - a shared link should
   // explain itself rather than 404 - but it carries no prices and no form.
@@ -96,20 +97,20 @@ export default async function CheckoutPage({
           Цените са крайни, с включен ДДС.
         </p>
 
-        {preOrder && (
-          /* Said before the money, not after: someone paying in August is
-             paying months ahead of the door opening. */
+        {SALES_OPEN && early && (
+          /* Said before the money, not after: the price on this page depends
+             on a number that is moving while the buyer reads it. */
           <p className="mt-4 max-w-xl rounded-2xl bg-bh-cloud px-5 py-4 text-sm leading-relaxed text-bh-ink/70 ring-1 ring-bh-ink/10">
             <strong className="font-semibold text-bh-ink">
-              Предварителна поръчка
+              Стартова цена
             </strong>{" "}
-            - до {PRE_ORDER.endsLabel} билетите се продават предварително.
-            Плащаш сега, билетът и мястото ти са запазени, а програмата се
-            допълва до събитието.
+            - стартовите цени важат за първите {limit} билета, от които
+            остават {left}. Плащаш сега, билетът и мястото ти са запазени, а
+            програмата се допълва до събитието.
           </p>
         )}
 
-        <CheckoutForm initialTier={nivo} early={isEarlyAccess()} />
+        <CheckoutForm initialTier={nivo} early={early} />
       </div>
     </div>
   );

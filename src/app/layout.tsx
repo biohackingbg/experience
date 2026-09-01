@@ -5,9 +5,9 @@ import { ViewTracker } from "@/components/ViewTracker";
 import {
   TIERS,
   formatPrice,
-  isEarlyAccess,
   priceCents,
 } from "@/lib/tickets";
+import { getEarlyState } from "@/lib/early-access";
 
 /** Both faces carry Cyrillic, so Bulgarian headings no longer fall back. */
 const bodyFont = Geologica({
@@ -28,8 +28,8 @@ const monoFont = Geist_Mono({
 const SITE = "https://thelongevitysummit.eu";
 const TITLE =
   "Sofia Life Summit 2026 - дълголетие и биохакинг, София | Biohacking Experience";
-function describe(): string {
-  const from = Math.min(...TIERS.map((t) => priceCents(t, isEarlyAccess())));
+function describe(early: boolean): string {
+  const from = Math.min(...TIERS.map((t) => priceCents(t, early)));
   return (
     "Фест за дълголетие и биохакинг - 07-08 ноември 2026, Гранд Хотел " +
     "Милениум, София. Четири зони, longevity паспорт, 12 станции за " +
@@ -43,7 +43,8 @@ function describe(): string {
  * after the early window has closed.
  */
 export async function generateMetadata(): Promise<Metadata> {
-  const DESCRIPTION = describe();
+  const { early } = await getEarlyState();
+  const DESCRIPTION = describe(early);
   return {
   // Makes the generated OG image resolve to an absolute URL, which every
   // social crawler requires.
