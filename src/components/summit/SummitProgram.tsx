@@ -1,37 +1,19 @@
 import { Reveal } from "@/components/ui/Reveal";
 import { PROGRAM } from "@/lib/program";
-import { announcedSpeakers } from "@/lib/speakers";
 
 /**
- * Hosts and the team - public from day one, not part of the weekly speaker
- * reveals, so the sessions they present keep their names.
+ * The programme, with every name on it.
+ *
+ * Names used to be filtered against the announced speakers so the weekly
+ * reveals kept their surprise. They are shown in full now: a schedule whose
+ * sessions read "гост, когото обявяваме скоро" is worth less to someone
+ * deciding whether to buy a ticket than the reveal is worth to us.
+ *
+ * This is safe because program.ts is already the filtered list - the two
+ * people the source marks "(не е говорено с нея)" were never transcribed
+ * into it. Nobody is announced here who has not agreed to come.
  */
-const HOSTS = [
-  "Мария Силвестър",
-  "Мария Илиева",
-  "Диана Радева",
-  "Мария Варсанова",
-  "Джулия Димитрова",
-];
-
-/** "проф. Иво Петров" and "Иво Петров" must compare equal. */
-function bare(name: string): string {
-  return name
-    .replace(/^(проф\.|доц\.|д-р)\s+/i, "")
-    .replace(/,.*$/, "")
-    .trim()
-    .toLowerCase();
-}
-
 export function SummitProgram() {
-  // The full line-up lives in program.ts, but only announced names render.
-  // Printing everyone here would spoil the weekly reveals the speaker section
-  // holds back - the schedule and the announcement have to keep one secret.
-  const allowed = new Set([
-    ...announcedSpeakers().map((s) => bare(s.name)),
-    ...HOSTS.map(bare),
-  ]);
-  const isAllowed = (n: string) => allowed.has(bare(n));
 
   return (
     <section id="program" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
@@ -102,33 +84,17 @@ export function SummitProgram() {
                           </p>
                         )}
 
-                        {slot.role &&
-                          (!slot.role.includes(":") ||
-                            isAllowed(slot.role.split(":")[1])) && (
-                            <p className="mt-2 font-mono text-[0.62rem] uppercase tracking-[0.12em] text-bh-ink/40">
-                              {slot.role}
-                            </p>
-                          )}
+                        {slot.role && (
+                          <p className="mt-2 font-mono text-[0.62rem] uppercase tracking-[0.12em] text-bh-ink/40">
+                            {slot.role}
+                          </p>
+                        )}
 
-                        {slot.people &&
-                          (() => {
-                            const shown = slot.people.filter(isAllowed);
-                            const hidden = slot.people.length - shown.length;
-                            if (!shown.length && !hidden) return null;
-                            return (
-                              <p className="mt-1 text-xs font-medium leading-snug text-bh-pine">
-                                {shown.join(" · ")}
-                                {hidden > 0 && (
-                                  <span className="text-bh-ink/40">
-                                    {shown.length > 0 ? " · " : ""}
-                                    {hidden === 1
-                                      ? "гост, когото обявяваме скоро"
-                                      : `${hidden} гости, които обявяваме скоро`}
-                                  </span>
-                                )}
-                              </p>
-                            );
-                          })()}
+                        {slot.people && slot.people.length > 0 && (
+                          <p className="mt-1 text-xs font-medium leading-snug text-bh-pine">
+                            {slot.people.join(" · ")}
+                          </p>
+                        )}
                       </div>
                     </li>
                   ))}
