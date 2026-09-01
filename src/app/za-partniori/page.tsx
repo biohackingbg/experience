@@ -39,7 +39,7 @@ export default function PartnersEntryPage() {
 
         <div className="mt-9 flex flex-wrap gap-3">
           <a
-            href="mailto:hello@biohacking.bg?subject=Линк%20към%20партньорската%20презентация"
+            href="mailto:hi@biohacking.bg?subject=Линк%20към%20партньорската%20презентация"
             className="rounded-full bg-bh-ink px-6 py-3.5 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
           >
             Поискай линк
@@ -55,7 +55,7 @@ export default function PartnersEntryPage() {
         <p className="mt-12 border-t border-bh-ink/10 pt-6 text-sm text-bh-ink/70">
           Sofia Life Summit · 07-08 ноември 2026 · Гранд Хотел Милениум, София
           <br />
-          Партньорства: Мария Варсанова · hello@biohacking.bg
+          Партньорства: Мария Варсанова · hi@biohacking.bg
         </p>
       </div>
     </div>

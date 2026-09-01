@@ -28,7 +28,7 @@ export const dynamic = "force-dynamic";
  * can be edited without touching layout.
  */
 
-const CONTACT = "hello@biohacking.bg";
+const CONTACT = "hi@biohacking.bg";
 const MAILTO = `mailto:${CONTACT}?subject=${encodeURIComponent("Партньорство Sofia Life Summit 2026")}`;
 
 /* ── 02 форматът ── */
