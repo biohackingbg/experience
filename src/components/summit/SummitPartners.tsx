@@ -20,7 +20,7 @@ function slotWidth(count: number): string {
   return "w-[calc(50%-1.5rem)] sm:w-[calc(33.333%-2rem)] lg:w-[calc(25%-2.25rem)]";
 }
 
-function Mark({ partner, tall }: { partner: Partner; tall: boolean }) {
+function Mark({ partner }: { partner: Partner }) {
   if (!partner.logo) {
     // Signed, artwork not in yet. The name set large is a real placeholder,
     // not an apology - it says who, which is the whole point of the section.
@@ -31,18 +31,19 @@ function Mark({ partner, tall }: { partner: Partner; tall: boolean }) {
     );
   }
 
-  // A fixed-height box the artwork is fitted into, rather than a height cap on
-  // the image: marks come in wildly different shapes, and a wide wordmark
-  // beside a square mark must not read as half the brand. Width binds first
-  // for the wide ones, height for the square ones. It also means the slot is
-  // the right size before the file has loaded.
+  // Every file is the same 3:1 canvas with the mark already scaled to match
+  // its neighbours' visual weight, so the slot needs no fitting rules of its
+  // own - and its dimensions state the ratio, so the row does not jump while
+  // the images load.
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src={partner.logo}
       alt={partner.name}
+      width={600}
+      height={200}
       loading="lazy"
-      className={`${tall ? "h-16" : "h-12"} w-full object-contain`}
+      className="w-full"
     />
   );
 }
@@ -52,7 +53,6 @@ export function SummitPartners() {
   if (count === 0) return null;
 
   const width = slotWidth(count);
-  const tall = count <= 3;
 
   return (
     <section id="partniori" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
@@ -88,10 +88,10 @@ export function SummitPartners() {
                   title={p.name}
                   className="block transition-transform duration-300 hover:-translate-y-1"
                 >
-                  <Mark partner={p} tall={tall} />
+                  <Mark partner={p} />
                 </a>
               ) : (
-                <Mark partner={p} tall={tall} />
+                <Mark partner={p} />
               )}
             </Reveal>
           ))}

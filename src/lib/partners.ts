@@ -15,8 +15,11 @@ export type Partner = {
    * Path under /public/partners: the white version of the mark, since the row
    * sits on the dark green with no tile behind it. Where a partner did not
    * supply one, it was made from their file - the shape is theirs, only the
-   * colour is dropped. Optional: a deal is often signed before the artwork
-   * arrives, and the name set in type carries the slot until it does.
+   * colour is dropped. Each file is a 600x200 canvas with the mark centred and
+   * scaled to carry about the same amount of ink as the others, so a square
+   * mark does not read as half the brand of a wide wordmark beside it.
+   * Optional: a deal is often signed before the artwork arrives, and the name
+   * set in type carries the slot until it does.
    */
   logo?: string;
   url?: string;
@@ -34,4 +37,8 @@ export const PARTNERS: Partner[] = [
   { name: "Dupissima Aesthetics", logo: "/partners/dupissima-white.png" },
   { name: "FITBOX", logo: "/partners/fitbox-white.png" },
   { name: "Manchini Coffee", logo: "/partners/manchini-coffee-white.png" },
+  { name: "4+", logo: "/partners/four-plus-white.png" },
+  { name: "Amuse Bouche", logo: "/partners/amuse-bouche-white.png" },
+  { name: "Pulsetto", logo: "/partners/pulsetto-white.png" },
+  { name: "Power Plate", logo: "/partners/power-plate-white.png" },
 ];
