@@ -53,7 +53,7 @@ export default async function CheckoutPage({
               Виж какво включват нивата
             </Link>
             <a
-              href="mailto:hello@biohacking.bg?subject=Билети%20Sofia%20Life%20Summit"
+              href="mailto:hi@biohacking.bg?subject=Билети%20Sofia%20Life%20Summit"
               className="rounded-full border border-bh-ink/25 px-6 py-3.5 text-sm font-semibold text-bh-ink transition-colors hover:border-bh-ink"
             >
               Пиши ни

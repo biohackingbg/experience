@@ -132,7 +132,7 @@ function ticketEmailHtml(input: TicketEmailInput): string {
       </table>
 
       <p style="margin:28px 0 0;font:400 12px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f80">
-        Ако имаш въпрос, отговори на това писмо или пиши на hello@biohacking.bg.
+        Ако имаш въпрос, отговори на това писмо или пиши на hi@biohacking.bg.
         Sofia Life Summit се организира съвместно от Bulgarian Longevity
         Association и Biohacking.bg.
       </p>
@@ -157,7 +157,7 @@ function ticketEmailText(input: TicketEmailInput): string {
     `Поръчка ${input.reference} · ${formatPrice(input.totalCents)} €`,
     ...(input.invoiceNumber ? [`Фактура: ${SITE}/faktura/${input.reference}`] : []),
     "",
-    "Въпроси: hello@biohacking.bg",
+    "Въпроси: hi@biohacking.bg",
   ].join("\n");
 }
 

@@ -17,7 +17,7 @@ export const COMPANY = {
     "гр. София 1113, р-н Изгрев, жк. Изток, ул. „Фредерик Жолио Кюри“ 4",
   country: "България",
   manager: "Мария Александрова Варсанова",
-  email: "hello@biohacking.bg",
+  email: "hi@biohacking.bg",
   site: "thelongevitysummit.eu",
 } as const;
 

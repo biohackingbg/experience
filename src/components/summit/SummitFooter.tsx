@@ -56,10 +56,10 @@ export function SummitFooter() {
               <ul className="mt-4 flex flex-col gap-3 text-sm">
                 <li>
                   <a
-                    href="mailto:hello@biohacking.bg"
+                    href="mailto:hi@biohacking.bg"
                     className="text-bh-ink/70 transition-colors hover:text-bh-ink"
                   >
-                    hello@biohacking.bg
+                    hi@biohacking.bg
                   </a>
                 </li>
                 <li className="text-bh-ink/70">Гранд Хотел Милениум, София</li>

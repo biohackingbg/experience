@@ -64,7 +64,7 @@ export async function submitSignup(
     console.error("signup failed", error);
     return {
       status: "error",
-      message: "Нещо се обърка. Опитай пак или пиши на hello@biohacking.bg.",
+      message: "Нещо се обърка. Опитай пак или пиши на hi@biohacking.bg.",
     };
   }
 
