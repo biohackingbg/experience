@@ -38,7 +38,7 @@ export const PARTNERS: Partner[] = [
   { name: "FITBOX", logo: "/partners/fitbox-white.png" },
   { name: "Manchini Coffee", logo: "/partners/manchini-coffee-white.png" },
   { name: "4+", logo: "/partners/four-plus-white.png" },
-  { name: "Amuse Bouche", logo: "/partners/amuse-bouche-white.png" },
+  { name: "Skabrin property", logo: "/partners/skabrin-white.png" },
   { name: "Pulsetto", logo: "/partners/pulsetto-white.png" },
   { name: "Power Plate", logo: "/partners/power-plate-white.png" },
 ];
