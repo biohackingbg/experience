@@ -7,8 +7,8 @@ import {
   SALES_OPEN,
   formatPrice,
   priceCents,
+  isEarlyAccess,
 } from "@/lib/tickets";
-import { getEarlyState } from "@/lib/early-access";
 
 const links = [
   // Same order the sections appear in on the page.
@@ -18,10 +18,10 @@ const links = [
   { href: "#tickets", label: "Билети" },
 ];
 
-export async function SummitNav() {
+export function SummitNav() {
   // The hero gave up its CTA row for a cleaner composition; the price anchor
   // moves here, onto the one button that is now always on screen.
-  const { early } = await getEarlyState();
+  const early = isEarlyAccess();
   const cheapest = Math.min(...TIERS.map((t) => priceCents(t, early)));
 
   return (

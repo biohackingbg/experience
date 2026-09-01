@@ -15,20 +15,18 @@ import { SummitFooter } from "@/components/summit/SummitFooter";
 import { buildEventSchema } from "@/lib/event-schema";
 
 // Re-rendered periodically so the early-access window can close on its own.
-// A fully static page would keep advertising the launch price, and the number
-// of launch tickets left, until the next deploy. A minute is short enough that
-// the counter on the page and the one the checkout enforces stay in step.
-export const revalidate = 60;
+// A fully static page would keep advertising the launch price until the next
+// deploy - and closing the launch prices is a deploy, so a few minutes of
+// staleness is the whole exposure.
+export const revalidate = 300;
 
-export default async function Home() {
-  const schema = await buildEventSchema();
-
+export default function Home() {
   return (
     <div className="overflow-clip rounded-[1.75rem] bg-bh-paper">
       <script
         type="application/ld+json"
         // Static, authored object - no user input reaches this.
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildEventSchema()) }}
       />
       <SummitNav />
       <main>

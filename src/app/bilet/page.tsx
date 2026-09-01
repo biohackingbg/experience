@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { isTestMode } from "@/lib/stripe";
-import { SALES_OPEN } from "@/lib/tickets";
-import { getEarlyState } from "@/lib/early-access";
+import { EARLY_ACCESS, SALES_OPEN, isEarlyAccess } from "@/lib/tickets";
 import { CheckoutForm } from "./CheckoutForm";
 
 export const metadata: Metadata = {
@@ -22,7 +21,7 @@ export default async function CheckoutPage({
 }) {
   const { nivo, otkazano } = await searchParams;
   const testMode = isTestMode();
-  const { early, left, limit } = await getEarlyState();
+  const early = isEarlyAccess();
 
   // While sales are closed the page still answers - a shared link should
   // explain itself rather than 404 - but it carries no prices and no form.
@@ -104,9 +103,8 @@ export default async function CheckoutPage({
             <strong className="font-semibold text-bh-ink">
               Стартова цена
             </strong>{" "}
-            - стартовите цени важат за първите {limit} билета, от които
-            остават {left}. Плащаш сега, билетът и мястото ти са запазени, а
-            програмата се допълва до събитието.
+            - тази цена важи за {EARLY_ACCESS.label}. Плащаш сега, билетът и
+            мястото ти са запазени, а програмата се допълва до събитието.
           </p>
         )}
 

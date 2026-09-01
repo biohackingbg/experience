@@ -30,31 +30,33 @@ export const SALES_OPEN = true;
 export const SALES_SOON_LABEL = "Очаквайте скоро";
 
 /**
- * The launch window, counted in tickets rather than days (01.09.2026).
+ * The launch window: the first 200 tickets, closed by hand.
  *
- * A deadline that has passed makes the whole page lie at midnight, and it
- * rewards nobody for being early - it only rewards being early *enough*. A
- * quantity does both jobs: it is honest at every moment, and the number left
- * is a real thing to say out loud.
+ * A live counter was tried and taken out. Not for the arithmetic - that
+ * worked - but because a public countdown decides the ending for you: two
+ * people buying the last two tickets at once, or the price flipping mid
+ * evening with nobody watching. The organisers close it themselves, so the
+ * moment is chosen rather than stumbled into.
  *
- * The count is the live one, so it must come from the database: see
- * `getEarlyState()` in early-access.ts. `isEarlyAccess` stays pure so the
- * checkout form and the schema can use it without touching the database.
+ * `open` is the switch. Flip it to false and every price on the site, in the
+ * checkout and in the structured data moves to the list price together.
+ * How many are actually sold is in the admin dashboard, which is where the
+ * decision gets made from.
  *
  * Note on how this is worded on the page: under the Omnibus rules (ЗЗП чл.
  * 64б) an announced *reduction* must show the lowest price charged in the
  * previous 30 days, and these tickets have never been sold at the regular
  * price. So the struck-through figure is labelled as the price that applies
- * once the first 200 are gone - a forward-looking condition, not a claim
+ * once the launch tickets are gone - a forward-looking condition, not a claim
  * about the past.
  */
 export const EARLY_ACCESS = {
-  /** How many tickets are sold at the launch prices, across all tiers. */
-  limit: 200,
-  /** The condition as it reads in a sentence. */
+  /** The switch. False moves the whole site to the list prices. */
+  open: true,
+  /** How the offer is described, everywhere it is described. */
   label: "първите 200 билета",
   /** Shown wherever the regular price is struck through. */
-  regularAfter: "след първите 200",
+  regularAfter: "след първите 200 билета",
 };
 
 /**
@@ -152,15 +154,9 @@ export function getTier(id: string): Tier | undefined {
   return TIERS.find((t) => t.id === id);
 }
 
-/**
- * Whether the launch prices still apply, given how many tickets are gone.
- *
- * Server code resolves the count and passes the answer down. The browser is
- * never asked: it would be showing one price while the server charged
- * another.
- */
-export function isEarlyAccess(sold: number): boolean {
-  return sold < EARLY_ACCESS.limit;
+/** Whether the launch prices still apply. */
+export function isEarlyAccess(): boolean {
+  return SALES_OPEN && EARLY_ACCESS.open;
 }
 
 /** What the buyer pays, VAT included, in cents. */

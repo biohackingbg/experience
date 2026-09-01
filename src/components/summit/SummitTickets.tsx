@@ -7,10 +7,10 @@ import {
   SALES_OPEN,
   SALES_SOON_LABEL,
   formatPrice,
+  isEarlyAccess,
   priceCents,
   tierDiscountLabel,
 } from "@/lib/tickets";
-import { getEarlyState } from "@/lib/early-access";
 
 
 function Check({ muted }: { muted?: boolean }) {
@@ -32,8 +32,8 @@ function Check({ muted }: { muted?: boolean }) {
   );
 }
 
-export async function SummitTickets() {
-  const { early, left, limit, urgent } = await getEarlyState();
+export function SummitTickets() {
+  const early = isEarlyAccess();
 
   return (
     <section id="tickets" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
@@ -44,13 +44,11 @@ export async function SummitTickets() {
               <p className="bh-eyebrow font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">
                 Билети
               </p>
-              {SALES_OPEN && early && (
-                <span
-                  className={`rounded-full px-3 py-1 font-mono text-[0.62rem] font-bold uppercase tracking-[0.15em] ${
-                    urgent ? "bg-bh-ink text-bh-paper" : "bg-bh-lime-pale text-bh-ink"
-                  }`}
-                >
-                  Остават {left} от {limit}
+              {early && (
+                /* Colours written out, not tokens: bh-ink flips in dark mode,
+                   and this pill came out pale-on-pale there. */
+                <span className="rounded-full bg-[#cef870] px-3.5 py-1.5 text-[0.72rem] font-bold tracking-tight text-[#02251f]">
+                  Стартови цени за {EARLY_ACCESS.label}
                 </span>
               )}
             </div>
@@ -61,13 +59,11 @@ export async function SummitTickets() {
           <p className="max-w-sm text-sm leading-relaxed text-bh-ink/60">
             Всички билети дават достъп до сцената и Village. Разликата е в
             дните, работилниците и специалните преживявания.
-            {SALES_OPEN && early && (
+            {early && (
               <>
                 {" "}
                 <strong className="font-semibold text-bh-ink">
-                  {urgent
-                    ? `Остават само ${left} билета на тези цени.`
-                    : `Тези цени важат за първите ${limit} билета - остават ${left}.`}
+                  Тези цени важат за {EARLY_ACCESS.label}.
                 </strong>
               </>
             )}
@@ -265,10 +261,9 @@ export async function SummitTickets() {
             section, and this is the moment the money is decided. */}
         <p className="mt-6 max-w-3xl font-mono text-[0.7rem] leading-relaxed uppercase tracking-[0.12em] text-bh-ink/40">
           Билетите тук са за Biohacking Experience · медицинската конференция
-          има отделна регистрация · стартовите цени важат за първите {limit}{" "}
-          билета, независимо от нивото · групи над 10 души и корпоративни
-          пакети по договаряне · отстъпка за студенти и медицински
-          специалисти.
+          има отделна регистрация · стартовите цени важат за {EARLY_ACCESS.label},
+          независимо от нивото · групи над 10 души и корпоративни пакети по
+          договаряне · отстъпка за студенти и медицински специалисти.
         </p>
       </div>
     </section>

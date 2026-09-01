@@ -6,8 +6,8 @@ import {
   TIERS,
   formatPrice,
   priceCents,
+  isEarlyAccess,
 } from "@/lib/tickets";
-import { getEarlyState } from "@/lib/early-access";
 
 /** Both faces carry Cyrillic, so Bulgarian headings no longer fall back. */
 const bodyFont = Geologica({
@@ -43,8 +43,7 @@ function describe(early: boolean): string {
  * after the early window has closed.
  */
 export async function generateMetadata(): Promise<Metadata> {
-  const { early } = await getEarlyState();
-  const DESCRIPTION = describe(early);
+  const DESCRIPTION = describe(isEarlyAccess());
   return {
   // Makes the generated OG image resolve to an absolute URL, which every
   // social crawler requires.

@@ -76,10 +76,7 @@ export async function createPendingOrder(
   const db = getDb();
 
   return db.transaction(async (tx) => {
-    // Two locks, always in this order so two concurrent buys of different
-    // tiers cannot deadlock against each other: first the global launch
-    // counter, then the tier's own seats.
-    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${"early"}))`);
+    // Serialise everyone buying this tier for the rest of the transaction.
     await tx.execute(
       sql`select pg_advisory_xact_lock(hashtext(${"tier:" + tier.id}))`,
     );
@@ -103,27 +100,10 @@ export async function createPendingOrder(
       return { ok: false as const, reason: "sold_out" as const, left: Math.max(left, 0) };
     }
 
-    // How many launch-priced tickets are gone, counted inside the same lock
-    // as the price decision - so the 200th and the 201st buyer cannot both
-    // read "199 sold" and both be charged the launch price.
-    const [early] = await tx
-      .select({ n: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int` })
-      .from(orderItems)
-      .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
-      .where(
-        sql`${orders.status} = 'paid'
-          or (${orders.status} = 'pending'
-              and ${orders.createdAt} > now() - interval '${sql.raw(String(PENDING_HOLD_MINUTES))} minutes')`,
-      );
-
-    // The whole order takes one price: an order that straddles the 200th
-    // ticket is charged at the launch price, rather than being split into two
-    // figures the invoice would then have to explain.
-    //
     // Resolved once. Everything downstream - the row, the total and the
-    // Stripe line item - uses this number, so the counter moving mid-request
-    // cannot record one price and charge another.
-    const unitPriceCents = priceCents(tier, isEarlyAccess(early?.n ?? 0));
+    // Stripe line item - uses this number, so the launch prices being closed
+    // mid-request cannot record one price and charge another.
+    const unitPriceCents = priceCents(tier, isEarlyAccess());
     const totalCents = unitPriceCents * input.quantity;
     const { netCents, vatCents } = splitVat(totalCents);
     const reference = `SLS-${randomCode(6)}`;
