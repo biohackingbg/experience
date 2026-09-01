@@ -41,4 +41,5 @@ export const PARTNERS: Partner[] = [
   { name: "Skabrin property", logo: "/partners/skabrin-white.png" },
   { name: "Pulsetto", logo: "/partners/pulsetto-white.png" },
   { name: "Power Plate", logo: "/partners/power-plate-white.png" },
+  { name: "bodyspace", logo: "/partners/bodyspace-white.png" },
 ];
