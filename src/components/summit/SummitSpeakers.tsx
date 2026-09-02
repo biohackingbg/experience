@@ -32,18 +32,6 @@ export function SummitSpeakers() {
           <SpeakerGrid speakers={announcedSpeakers()} />
         </Reveal>
 
-        <Reveal className="mt-8">
-          <p className="text-sm leading-relaxed text-bh-ink/60">
-            Това не е целият състав - обявяваме нови лектори всяка седмица.{" "}
-            <a
-              href="#register"
-              className="font-semibold text-bh-pine underline underline-offset-2"
-            >
-              Остави имейл
-            </a>
-            , за да не пропуснеш следващите имена.
-          </p>
-        </Reveal>
       </div>
     </section>
   );
