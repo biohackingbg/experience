@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Reveal } from "@/components/ui/Reveal";
 import { findActiveLink } from "@/lib/deck-links";
 import { DECK_SECTIONS } from "@/lib/deck-sections";
+import { PARTNERS } from "@/lib/partners";
 
 import { JourneyTimeline } from "./JourneyTimeline";
 import { ScrollRule } from "./ScrollRule";
@@ -892,6 +893,51 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
       </Section>
 
       {/* 12 нива */}
+      {/* 11b кой вече е вътре - точно преди цената */}
+      <Section name="partners" className="border-t border-bh-ink/10">
+        <Reveal>
+          <Eyebrow>Кой вече е вътре</Eyebrow>
+          <H2>{PARTNERS.length} бранда вече са потвърдили</H2>
+          <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-bh-ink/70">
+            Диагностика, устройства, възстановяване, движение, клиники и храна.
+            Village се пълни отвътре навън - и категориите се заемат по реда на
+            подписване.
+          </p>
+        </Reveal>
+        {/* A green band inside a light section rather than a dark section of
+            its own: the marks are white, and the section before this one is
+            already dark. Same treatment as the public page, same files. */}
+        <Reveal className="mt-12">
+          <div className="overflow-hidden rounded-[1.6rem] bg-[#0a3229] px-6 py-12 sm:px-10">
+            <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-10">
+              {PARTNERS.map((p) => (
+                <div key={p.name} className="w-[calc(50%-1.25rem)] sm:w-[calc(33.333%-1.7rem)] lg:w-[calc(25%-1.9rem)]">
+                  {p.logo ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={p.logo}
+                      alt={p.name}
+                      width={600}
+                      height={200}
+                      loading="lazy"
+                      className="w-full"
+                    />
+                  ) : (
+                    <span className="block text-center text-base font-semibold text-white">{p.name}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </Reveal>
+        <Reveal className="mt-8">
+          <p className="max-w-2xl text-sm font-light leading-relaxed text-bh-ink/65">
+            Категорийна ексклузивност се дава само на Платинен - и само докато
+            категорията е свободна.
+          </p>
+        </Reveal>
+      </Section>
+
       <Section name="packages" className="border-t border-bh-ink/10">
         <Reveal>
           <Eyebrow>Партньорства</Eyebrow>

@@ -15,6 +15,7 @@ export const DECK_SECTIONS = [
   { id: "audience", label: "публиката" },
   { id: "journey", label: "пътуването" },
   { id: "value", label: "стойността" },
+  { id: "partners", label: "кой вече е вътре" },
   { id: "packages", label: "пакетите" },
   { id: "congress", label: "двете събития" },
   { id: "village", label: "Village щанд" },
