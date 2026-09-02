@@ -15,9 +15,10 @@ export type Partner = {
    * Path under /public/partners: the white version of the mark, since the row
    * sits on the dark green with no tile behind it. Where a partner did not
    * supply one, it was made from their file - the shape is theirs, only the
-   * colour is dropped. Each file is a 600x200 canvas with the mark centred and
-   * scaled to carry about the same amount of ink as the others, so a square
-   * mark does not read as half the brand of a wide wordmark beside it.
+   * colour is dropped. Each file is a 600x300 canvas with the mark centred and
+   * scaled so its footprint matches the others'. Balancing by ink instead
+   * inverted the wall: dense square marks came out small and sparse wide
+   * ones came out large.
    * Optional: a deal is often signed before the artwork arrives, and the name
    * set in type carries the slot until it does.
    */

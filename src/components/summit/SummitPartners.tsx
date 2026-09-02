@@ -31,17 +31,17 @@ function Mark({ partner }: { partner: Partner }) {
     );
   }
 
-  // Every file is the same 3:1 canvas with the mark already scaled to match
-  // its neighbours' visual weight, so the slot needs no fitting rules of its
-  // own - and its dimensions state the ratio, so the row does not jump while
-  // the images load.
+  // Every file is the same 2:1 canvas with the mark already scaled so its
+  // footprint matches its neighbours', so the slot needs no fitting rules of
+  // its own - and its dimensions state the ratio, so the row does not jump
+  // while the images load.
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src={partner.logo}
       alt={partner.name}
       width={600}
-      height={200}
+      height={300}
       loading="lazy"
       className="w-full"
     />

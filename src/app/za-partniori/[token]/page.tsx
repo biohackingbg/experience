@@ -918,7 +918,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
                       src={p.logo}
                       alt={p.name}
                       width={600}
-                      height={200}
+                      height={300}
                       loading="lazy"
                       className="w-full"
                     />
