@@ -258,7 +258,7 @@ export async function searchOrders(q: string): Promise<FoundOrder[]> {
       .from(tickets)
       .where(inArray(tickets.orderId, ids)),
   ]);
-  const tierName = new Map(TIERS.map((t) => [t.id, t.name]));
+  const tierName = new Map<string, string>(TIERS.map((t) => [t.id, t.name]));
 
   return rows.map((o) => ({
     reference: o.reference,
