@@ -42,4 +42,6 @@ export const PARTNERS: Partner[] = [
   { name: "Pulsetto", logo: "/partners/pulsetto-white.png" },
   { name: "Power Plate", logo: "/partners/power-plate-white.png" },
   { name: "bodyspace", logo: "/partners/bodyspace-white.png" },
+  { name: "Genova Diagnostics", logo: "/partners/genova-white.png" },
+  { name: "Dr. Bastet", logo: "/partners/dr-bastet-white.png" },
 ];
