@@ -164,6 +164,7 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/viktoriya-sarafyan.jpg",
   },
   {
+    announced: true,
     id: "tsvetomir-lukanov",
     title: "Проф. д-р",
     name: "Цветомир Луканов, дм",
@@ -174,6 +175,7 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/tsvetomir-lukanov.jpg",
   },
   {
+    announced: true,
     id: "krasimira-hristova",
     title: "Доц. д-р",
     name: "Красимира Христова, дм",
@@ -185,6 +187,7 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/krasimira-hristova.jpg",
   },
   {
+    announced: true,
     id: "ivo-petrov",
     title: "Член-кор. проф. д-р",
     name: "Иво Петров, дмн",
@@ -199,6 +202,7 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/ivo-petrov.jpg",
   },
   {
+    announced: true,
     id: "nikolay-gabrovski",
     title: "Чл.-кор. проф. д-р",
     name: "Николай Габровски, дмн",
@@ -209,6 +213,7 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/nikolay-gabrovski.jpg",
   },
   {
+    announced: true,
     id: "lachezar-traykov",
     title: "Акад. проф. д-р",
     name: "Лъчезар Трайков, дмн",
@@ -221,6 +226,7 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/lachezar-traykov.jpg",
   },
   {
+    announced: true,
     id: "shima-mehrabiyan",
     title: "Доц. д-р",
     name: "Шима Мехрабиан-Спасова, дмн",
@@ -231,6 +237,7 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/shima-mehrabiyan.jpg",
   },
   {
+    announced: true,
     id: "ivan-koychev",
     title: "Д-р",
     name: "Иван Койчев, MD, PhD",
@@ -243,6 +250,7 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/ivan-koychev.jpg",
   },
   {
+    announced: true,
     id: "kiril-terziyski",
     title: "Доц. д-р",
     name: "Кирил Терзийски, дм",
@@ -255,6 +263,7 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/kiril-terziyski.jpg",
   },
   {
+    announced: true,
     id: "desislava-dimova",
     title: "Д-р",
     name: "Десислава Димова",
@@ -265,6 +274,7 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/desislava-dimova.jpg",
   },
   {
+    announced: true,
     id: "ivan-sigridov",
     title: "Д-р",
     name: "Иван Сигридов",
@@ -276,6 +286,7 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/ivan-sigridov.jpg",
   },
   {
+    announced: true,
     id: "krasimir-balakov",
     name: "Красимир Балъков",
     specialty: "Спортно дълголетие и високо представяне",
@@ -286,6 +297,7 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/krasimir-balakov.jpg",
   },
   {
+    announced: true,
     id: "milena-hadzhiivanova",
     title: "Д-р",
     name: "Милена Хаджииванова, PhD",
@@ -297,6 +309,7 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/milena-hadzhiivanova.jpg",
   },
   {
+    announced: true,
     id: "daniela-ilieva",
     title: "Проф. д-р",
     name: "Даниела Илиева, PhD",
@@ -308,6 +321,7 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/daniela-ilieva.jpg",
   },
   {
+    announced: true,
     id: "yana-balnikova",
     name: "Яна Балникова",
     specialty: "(Пери)менопауза и женско здраве",
@@ -318,6 +332,7 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/yana-balnikova.jpg",
   },
   {
+    announced: true,
     id: "maria-marinova",
     name: "Мария Маринова",
     specialty: "Психология, психотерапия и емоционално здраве",
@@ -328,6 +343,7 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/maria-marinova.jpg",
   },
   {
+    announced: true,
     id: "louise-newson",
     title: "Dr",
     name: "Louise Newson, BSc, MBChB, MRCP, FRCGP, DHealth",
@@ -340,6 +356,7 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/louise-newson.jpg",
   },
   {
+    announced: true,
     id: "maria-yunakova",
     title: "Проф. д-р",
     name: "Мария Юнакова, дм",
@@ -351,6 +368,7 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/maria-yunakova.jpg",
   },
   {
+    announced: true,
     id: "malina-petkova",
     title: "Доц. д-р",
     name: "Малина Петкова, дм",
@@ -363,6 +381,7 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/malina-petkova.jpg",
   },
   {
+    announced: true,
     id: "tyana-presolska",
     name: "Тяна Пресолска",
     specialty: "Перименопауза, менопауза и женско метаболитно здраве",
@@ -373,6 +392,7 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/tyana-presolska.jpg",
   },
   {
+    announced: true,
     id: "zdravko-kamenov",
     title: "Проф. д-р",
     name: "Здравко Каменов, дмн",
@@ -385,6 +405,7 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/zdravko-kamenov.jpg",
   },
   {
+    announced: true,
     id: "branimir-raduilov",
     title: "Д-р",
     name: "Бранимир Радуилов",
@@ -396,6 +417,7 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/branimir-raduilov.jpg",
   },
   {
+    announced: true,
     id: "aleksandar-shinkov",
     title: "Доц. д-р",
     name: "Александър Шинков, дм",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { initials, type Speaker } from "@/lib/speakers";
 import { CountryMark } from "@/components/ui/Flags";
 
@@ -86,14 +86,55 @@ function SpeakerCard({ s }: { s: Speaker }) {
   );
 }
 
+/**
+ * The front row rotates: every load starts the line-up at a different point,
+ * so over a week each speaker gets their turn above the fold instead of the
+ * same eight owning it.
+ *
+ * It rotates rather than shuffles. The order is the programme's, with the
+ * opening panel first, and that ordering is worth keeping - only the window
+ * onto it moves. Wrapping around means the last cards are not stranded.
+ *
+ * The server always renders offset 0 (the page is cached, so it could not
+ * pick per visitor anyway); the browser picks once per load. Done through
+ * useSyncExternalStore so React hydrates against the server value and then
+ * re-renders with the browser's - no mismatch, no effect, no setState. The
+ * crossfade keeps the move from reading as a glitch; reduced-motion users
+ * get the swap alone.
+ */
+let pick: number | null = null;
+const noSubscribe = () => () => {};
+function useFrontRowOffset(count: number): { offset: number; settled: boolean } {
+  const offset = useSyncExternalStore(
+    noSubscribe,
+    () => {
+      if (pick === null) pick = Math.random();
+      return count > INITIAL ? Math.floor(pick * count) : 0;
+    },
+    () => 0,
+  );
+  const settled = useSyncExternalStore(noSubscribe, () => true, () => false);
+  return { offset, settled };
+}
+
+function rotate<T>(list: T[], offset: number, n: number): T[] {
+  if (list.length <= n) return list;
+  return Array.from({ length: n }, (_, i) => list[(offset + i) % list.length]);
+}
+
 export function SpeakerGrid({ speakers }: { speakers: Speaker[] }) {
   const [expanded, setExpanded] = useState(false);
+  const { offset, settled } = useFrontRowOffset(speakers.length);
   const hidden = speakers.length - INITIAL;
-  const shown = expanded ? speakers : speakers.slice(0, INITIAL);
+  const shown = expanded ? speakers : rotate(speakers, offset, INITIAL);
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+      <div
+        className={`grid grid-cols-2 gap-3 transition-opacity duration-500 motion-reduce:transition-none sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 ${
+          settled ? "opacity-100" : "opacity-0"
+        }`}
+      >
         {shown.map((s) => (
           <SpeakerCard key={s.id} s={s} />
         ))}
