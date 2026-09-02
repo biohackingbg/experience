@@ -1,6 +1,6 @@
 import "server-only";
 
-import { desc, inArray, sql } from "drizzle-orm";
+import { desc, inArray, or, sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { orderItems, orders, signups, tickets } from "@/lib/db/schema";
@@ -49,6 +49,10 @@ export type DashboardData = {
   refundedOrders: number;
   ticketsSold: number;
   capacityTotal: number;
+  /** Paid tickets in the last seven days - the pace the room is filling at. */
+  soldLast7Days: number;
+  /** Whole days until doors open, never below one - the pace line divides by it. */
+  daysToEvent: number;
   signupCount: number;
   checkedIn: number;
   perTier: TierSales[];
@@ -56,10 +60,16 @@ export type DashboardData = {
   recent: RecentOrder[];
 };
 
+/** Doors open on the first festival morning. */
+const EVENT_DAY = new Date("2026-11-07T09:00:00+02:00");
+
 export async function getDashboardData(): Promise<DashboardData> {
   const db = getDb();
+  // Read once here, on the server, rather than in the page's render - React
+  // treats a clock read during render as impure, and it is right to.
+  const daysToEvent = Math.max(1, Math.ceil((EVENT_DAY.getTime() - Date.now()) / 86_400_000));
 
-  const [totals, perTierRows, dailyRows, recentRows, signupRow, checkedInRow] =
+  const [totals, perTierRows, dailyRows, recentRows, signupRow, last7Row, checkedInRow] =
     await Promise.all([
       db
         .select({
@@ -113,6 +123,12 @@ export async function getDashboardData(): Promise<DashboardData> {
         .limit(25),
 
       db.select({ n: sql<number>`count(*)::int` }).from(signups),
+
+      db
+        .select({ n: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int` })
+        .from(orderItems)
+        .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
+        .where(sql`${orders.status} = 'paid' and ${orders.paidAt} > now() - interval '7 days'`),
 
       db
         .select({
@@ -170,6 +186,8 @@ export async function getDashboardData(): Promise<DashboardData> {
     refundedOrders: totals[0]?.refunded ?? 0,
     ticketsSold: perTier.reduce((sum, t) => sum + t.sold, 0),
     capacityTotal: TIERS.reduce((sum, t) => sum + t.capacity, 0),
+    soldLast7Days: last7Row[0]?.n ?? 0,
+    daysToEvent,
     signupCount: signupRow[0]?.n ?? 0,
     checkedIn: checkedInRow[0]?.n ?? 0,
     perTier,
@@ -191,3 +209,67 @@ export async function getDashboardData(): Promise<DashboardData> {
 }
 
 export { VAT_RATE };
+
+export type FoundOrder = RecentOrder & {
+  tickets: { code: string; tierName: string; checkedIn: boolean }[];
+};
+
+/**
+ * The question that arrives by email: "I paid and have no ticket". Matches
+ * an order number, an email or a name, and brings the tickets with it so the
+ * answer - and the resend button - is one screen away.
+ */
+export async function searchOrders(q: string): Promise<FoundOrder[]> {
+  const term = q.trim();
+  if (term.length < 2) return [];
+  const db = getDb();
+  const like = `%${term.replace(/[%_]/g, "")}%`;
+
+  const rows = await db
+    .select({
+      id: orders.id,
+      reference: orders.reference,
+      name: orders.name,
+      email: orders.email,
+      status: orders.status,
+      totalCents: orders.totalCents,
+      createdAt: orders.createdAt,
+    })
+    .from(orders)
+    .where(
+      or(
+        sql`${orders.reference} ilike ${like}`,
+        sql`${orders.email} ilike ${like}`,
+        sql`${orders.name} ilike ${like}`,
+      ),
+    )
+    .orderBy(desc(orders.createdAt))
+    .limit(20);
+  if (rows.length === 0) return [];
+
+  const ids = rows.map((r) => r.id);
+  const [items, tix] = await Promise.all([
+    db
+      .select({ orderId: orderItems.orderId, tierName: orderItems.tierName, quantity: orderItems.quantity })
+      .from(orderItems)
+      .where(inArray(orderItems.orderId, ids)),
+    db
+      .select({ orderId: tickets.orderId, code: tickets.code, tierId: tickets.tierId, checkedInAt: tickets.checkedInAt })
+      .from(tickets)
+      .where(inArray(tickets.orderId, ids)),
+  ]);
+  const tierName = new Map(TIERS.map((t) => [t.id, t.name]));
+
+  return rows.map((o) => ({
+    reference: o.reference,
+    name: o.name,
+    email: o.email,
+    status: o.status,
+    totalCents: o.totalCents,
+    createdAt: o.createdAt,
+    items: items.filter((i) => i.orderId === o.id).map((i) => `${i.quantity}× ${i.tierName}`).join(", "),
+    tickets: tix
+      .filter((t) => t.orderId === o.id)
+      .map((t) => ({ code: t.code, tierName: tierName.get(t.tierId) ?? t.tierId, checkedIn: !!t.checkedInAt })),
+  }));
+}
