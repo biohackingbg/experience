@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { isAdmin } from "@/lib/admin-auth";
@@ -7,6 +6,7 @@ import { ResendForm } from "./ResendForm";
 import { INVOICE_SERIES_START } from "@/lib/company";
 import { listInvoices } from "@/lib/invoices";
 import { formatPrice } from "@/lib/tickets";
+import { HomeLink } from "@/components/admin/HomeLink";
 
 export const dynamic = "force-dynamic";
 
@@ -55,12 +55,7 @@ export default async function InvoicesPage() {
             >
               Всички за печат (PDF)
             </a>
-            <Link
-              href="/admin"
-              className="font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/50 transition-colors hover:text-bh-ink"
-            >
-              ← Табло
-            </Link>
+            <HomeLink />
           </div>
         </div>
 

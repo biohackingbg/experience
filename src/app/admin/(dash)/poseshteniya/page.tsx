@@ -6,6 +6,7 @@ import { isAdmin } from "@/lib/admin-auth";
 import { getTrafficData } from "@/lib/site-views";
 
 import { Funnel } from "./Funnel";
+import { HomeLink } from "@/components/admin/HomeLink";
 
 export const metadata: Metadata = {
   title: "Посещения | Администрация",
@@ -141,12 +142,7 @@ export default async function TrafficPage({
                 {r} дни
               </Link>
             ))}
-            <Link
-              href="/admin"
-              className="ml-2 font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/50 transition-colors hover:text-bh-ink"
-            >
-              ← Табло
-            </Link>
+            <HomeLink />
           </div>
         </div>
 

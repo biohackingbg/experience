@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { isAdmin } from "@/lib/admin-auth";
@@ -8,6 +7,7 @@ import { CopyEmails } from "./CopyEmails";
 import { getDb } from "@/lib/db";
 import { signups } from "@/lib/db/schema";
 import { getTier } from "@/lib/tickets";
+import { HomeLink } from "@/components/admin/HomeLink";
 
 export const dynamic = "force-dynamic";
 
@@ -54,12 +54,7 @@ export default async function SignupsPage() {
               Записвания
             </h1>
           </div>
-          <Link
-            href="/admin"
-            className="font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/50 transition-colors hover:text-bh-ink"
-          >
-            ← Табло
-          </Link>
+          <HomeLink />
         </div>
 
         <div className="mt-6 flex flex-wrap items-center gap-4">

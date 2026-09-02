@@ -8,6 +8,7 @@ import { sectionIndex, sectionLabel } from "@/lib/deck-sections";
 
 import { reactivateDeckLink, regenerateDeckLink, revokeDeckLink, updateDeckLink } from "./actions";
 import { BulkLinkForm, CopyLink, NewLinkForm, PipelineEditor, RegenerateButton } from "./LinkTools";
+import { HomeLink } from "@/components/admin/HomeLink";
 
 export const metadata: Metadata = {
   title: "Презентация | Администрация",
@@ -73,12 +74,7 @@ export default async function DeckPage() {
               Партньорска презентация
             </h1>
           </div>
-          <Link
-            href="/admin"
-            className="font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/50 transition-colors hover:text-bh-ink"
-          >
-            ← Табло
-          </Link>
+          <HomeLink />
         </div>
 
         <p className="mt-4 max-w-2xl text-sm leading-relaxed text-bh-ink/60">

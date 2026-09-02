@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import QRCode from "qrcode";
 
 import { isAdmin, isTotpConfigured, totpEnrolmentUri } from "@/lib/admin-auth";
+import { HomeLink } from "@/components/admin/HomeLink";
 
 export const metadata: Metadata = {
   title: "Достъп | Администрация",
@@ -49,12 +49,7 @@ export default async function AccessPage() {
               Достъп за колега
             </h1>
           </div>
-          <Link
-            href="/admin"
-            className="font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/50 transition-colors hover:text-bh-ink"
-          >
-            ← Табло
-          </Link>
+          <HomeLink />
         </div>
 
         {!isTotpConfigured() ? (
