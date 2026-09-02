@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { isAdmin } from "@/lib/admin-auth";
-import { createLink, createLinks, isStage, reactivateLink, regenerateToken, revokeLink, updateLinkPipeline } from "@/lib/deck-links";
+import { createLink, createLinks, isMoney, isStage, isTier, reactivateLink, regenerateToken, revokeLink, updateLinkPipeline } from "@/lib/deck-links";
 
 export type LinkFormState = { status: "idle" | "ok" | "error"; message?: string };
 
@@ -59,11 +59,23 @@ export async function updateDeckLink(
     return t.length ? t : null;
   };
 
+  // Money is typed in euros, whole or with a comma; stored net, in cents.
+  const amountRaw = String(formData.get("amount") ?? "").replace(/\s/g, "").replace(",", ".");
+  const amountCents = amountRaw ? Math.round(Number(amountRaw) * 100) : null;
+  if (amountCents !== null && (!Number.isFinite(amountCents) || amountCents < 0)) {
+    return { status: "error", message: "Сумата не е число." };
+  }
+  const tier = formData.get("tier");
+  const money = formData.get("money");
+
   await updateLinkPipeline(id, {
     stage,
     note: clean(formData.get("note"), 1000),
     nextStep: clean(formData.get("nextStep"), 300),
     owner: clean(formData.get("owner"), 40),
+    tier: isTier(tier) ? tier : null,
+    amountCents,
+    money: isMoney(money) ? money : null,
   });
   revalidatePath("/admin/prezentaciya");
   return { status: "ok", message: "Записано." };

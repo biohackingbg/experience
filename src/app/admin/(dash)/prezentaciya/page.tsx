@@ -163,6 +163,9 @@ export default async function DeckPage() {
                             note={l.note}
                             nextStep={l.nextStep}
                             owner={l.owner}
+                            tier={l.tier}
+                            amountCents={l.amountCents}
+                            money={l.money}
                             owners={d.owners}
                             stages={STAGES}
                             action={updateDeckLink}

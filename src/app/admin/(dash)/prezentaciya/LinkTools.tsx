@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 
 import { createDeckLink, createDeckLinksBulk, type LinkFormState } from "./actions";
+import { MONEY, TIERS } from "@/lib/deck-links";
 
 // Lives here, not in actions.ts: a "use server" module may export only
 // async functions - an exported object fails the build.
@@ -78,6 +79,9 @@ export function PipelineEditor({
   note,
   nextStep,
   owner,
+  tier,
+  amountCents,
+  money,
   owners,
   stages,
   action,
@@ -87,6 +91,9 @@ export function PipelineEditor({
   note: string | null;
   nextStep: string | null;
   owner: string | null;
+  tier: string | null;
+  amountCents: number | null;
+  money: string | null;
   /** Names already in use, offered as suggestions. */
   owners: string[];
   stages: readonly Stage[];
@@ -135,6 +142,19 @@ export function PipelineEditor({
             </button>
           )}
         </div>
+        {(amountCents !== null || tier) && (
+          <p className="text-sm text-bh-ink">
+            {tier && <span className="text-bh-ink/60">{TIERS.find((t) => t.id === tier)?.label ?? tier} · </span>}
+            {amountCents !== null && (
+              <span className="font-semibold">{(amountCents / 100).toLocaleString("bg-BG")} €</span>
+            )}
+            {money && (
+              <span className="ml-2 rounded-full bg-bh-ink/8 px-2 py-0.5 text-[0.62rem] font-semibold uppercase tracking-wide text-bh-ink/70">
+                {MONEY.find((m) => m.id === money)?.label ?? money}
+              </span>
+            )}
+          </p>
+        )}
         {note && <p className="whitespace-pre-line text-sm leading-relaxed text-bh-ink/80">{note}</p>}
         {nextStep && (
           <p className="rounded-xl bg-bh-lime-pale/40 px-3 py-2 text-sm leading-snug text-bh-ink">
@@ -184,6 +204,42 @@ export function PipelineEditor({
         placeholder="бележка - с кого говорихме, какво казаха"
         className="rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm leading-relaxed text-bh-ink placeholder:text-bh-ink/35"
       />
+      {/* The deal itself. Net of VAT, in euros - the accountant's number,
+          not the invoice total. */}
+      <div className="grid grid-cols-[1fr_7rem_1fr] gap-2">
+        <select
+          name="tier"
+          defaultValue={tier ?? ""}
+          className="rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink"
+        >
+          <option value="">пакет</option>
+          {TIERS.map((t) => (
+            <option key={t.id} value={t.id}>
+              {t.label}
+            </option>
+          ))}
+        </select>
+        <input
+          type="text"
+          inputMode="decimal"
+          name="amount"
+          defaultValue={amountCents === null ? "" : String(amountCents / 100)}
+          placeholder="€ без ДДС"
+          className="rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35"
+        />
+        <select
+          name="money"
+          defaultValue={money ?? ""}
+          className="rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink"
+        >
+          <option value="">парите</option>
+          {MONEY.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.label}
+            </option>
+          ))}
+        </select>
+      </div>
       <input
         type="text"
         name="nextStep"

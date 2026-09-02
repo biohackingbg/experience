@@ -71,6 +71,13 @@
       "when": 1788169227074,
       "tag": "0009_site_views",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1788387029685,
+      "tag": "0010_finances",
+      "breakpoints": true
     }
   ]
 }

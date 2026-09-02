@@ -29,6 +29,28 @@ export const STAGES = [
 ] as const;
 export type StageId = (typeof STAGES)[number]["id"];
 
+/** The packages as the deck sells them; "extra" covers the à-la-carte items. */
+export const TIERS = [
+  { id: "village", label: "Village щанд" },
+  { id: "silver", label: "Сребърен" },
+  { id: "gold", label: "Златен" },
+  { id: "platinum", label: "Платинен" },
+  { id: "both", label: "Двете събития" },
+  { id: "extra", label: "Екстра" },
+  { id: "media", label: "Медиен / бартер" },
+] as const;
+export type TierId = (typeof TIERS)[number]["id"];
+export const isTier = (v: unknown): v is TierId => TIERS.some((t) => t.id === v);
+
+/** Where the cash is. Agreed money is a promise; paid money is in the bank. */
+export const MONEY = [
+  { id: "agreed", label: "договорено" },
+  { id: "invoiced", label: "фактурирано" },
+  { id: "paid", label: "платено" },
+] as const;
+export type MoneyId = (typeof MONEY)[number]["id"];
+export const isMoney = (v: unknown): v is MoneyId => MONEY.some((m) => m.id === v);
+
 export function isStage(v: unknown): v is StageId {
   return typeof v === "string" && STAGES.some((s) => s.id === v);
 }
@@ -173,7 +195,15 @@ export async function revokeLink(id: string): Promise<void> {
 /** Pipeline fields - the notes a sales conversation leaves behind. */
 export async function updateLinkPipeline(
   id: string,
-  input: { stage: StageId; note: string | null; nextStep: string | null; owner: string | null },
+  input: {
+    stage: StageId;
+    note: string | null;
+    nextStep: string | null;
+    owner: string | null;
+    tier: TierId | null;
+    amountCents: number | null;
+    money: MoneyId | null;
+  },
 ): Promise<void> {
   await getDb()
     .update(deckLinks)
@@ -314,6 +344,9 @@ export async function getDeckStats(): Promise<DeckStats> {
         note: deckLinks.note,
         nextStep: deckLinks.nextStep,
         owner: deckLinks.owner,
+        tier: deckLinks.tier,
+        amountCents: deckLinks.amountCents,
+        money: deckLinks.money,
         updatedAt: deckLinks.updatedAt,
         views: count(deckViews.id),
         people: sql<number>`(count(distinct ${deckViews.visitor}) + count(*) filter (where ${deckViews.visitor} is null))::int`,

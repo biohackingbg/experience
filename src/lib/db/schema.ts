@@ -219,9 +219,51 @@ export const deckLinks = pgTable(
     /** Who on the team leads this conversation (a first name is enough). */
     owner: text("owner"),
     updatedAt: timestamp("updated_at", { withTimezone: true }),
+
+    /**
+     * The money side of the same row. The pipeline row *is* the deal, so the
+     * amount lives here rather than in a second list that would drift from
+     * this one. Net of VAT, in cents; `money` is where the cash is:
+     * agreed | invoiced | paid.
+     */
+    tier: text("tier"),
+    amountCents: integer("amount_cents"),
+    money: text("money"),
   },
   (table) => [uniqueIndex("deck_links_token_idx").on(table.token)],
 );
+
+/**
+ * The expense ledger - one row per cost, net of VAT. Not accounting: the
+ * accountant's books are the truth; this is the organisers' live view of
+ * where the money goes. Nothing is deleted, a row is marked cancelled.
+ */
+export const expenses = pgTable(
+  "expenses",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    /** When the cost falls - invoice date, or the planned date. */
+    date: timestamp("date", { withTimezone: true }).notNull(),
+    /** One of a fixed list (finances.ts), so "Зала" and "зала" cannot split. */
+    category: text("category").notNull(),
+    supplier: text("supplier").notNull(),
+    description: text("description"),
+    amountCents: integer("amount_cents").notNull(),
+    /** planned | invoiced | paid | cancelled */
+    status: text("status").notNull().default("planned"),
+    invoiceNo: text("invoice_no"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }),
+  },
+  (table) => [index("expenses_category_idx").on(table.category)],
+);
+
+/** Budget per expense category, net of VAT - what "over budget" is measured against. */
+export const budgets = pgTable("budgets", {
+  category: text("category").primaryKey(),
+  amountCents: integer("amount_cents").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }),
+});
 
 /**
  * One row per opening of a share link. Answers "how often, when, and roughly

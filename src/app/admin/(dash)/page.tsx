@@ -6,6 +6,7 @@ import { isAdmin } from "@/lib/admin-auth";
 
 import { getDashboardData, searchOrders } from "@/lib/admin-stats";
 import { getTrafficData } from "@/lib/site-views";
+import { getFinances } from "@/lib/finances";
 import { ResendForm } from "./fakturi/ResendForm";
 import { formatPrice } from "@/lib/tickets";
 import { logout } from "../actions";
@@ -56,10 +57,11 @@ export default async function AdminDashboard({
   if (!(await isAdmin())) redirect("/admin/login");
 
   const { q = "" } = await searchParams;
-  const [d, traffic, found] = await Promise.all([
+  const [d, traffic, found, fin] = await Promise.all([
     getDashboardData(),
     getTrafficData(30),
     searchOrders(q),
+    getFinances(),
   ]);
   const soldPct = d.capacityTotal
     ? Math.round((d.ticketsSold / d.capacityTotal) * 100)
@@ -92,6 +94,7 @@ export default async function AdminDashboard({
           </div>
           <div className="flex flex-wrap items-center gap-3">
             {[
+              ["/admin/finansi", "Финанси"],
               ["/admin/poseshteniya", "Посещения"],
               ["/admin/dostap", "Достъп"],
               ["/admin/fakturi", "Фактури"],
@@ -141,7 +144,7 @@ export default async function AdminDashboard({
           </p>
         </div>
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <Tile
             label="Приходи"
             value={<Money cents={d.grossCents} />}
@@ -164,6 +167,11 @@ export default async function AdminDashboard({
                 .filter(Boolean)
                 .join(" · ") || "няма незавършени"
             }
+          />
+          <Tile
+            label="Финанси"
+            value={<span className={fin.result.actualCents < 0 ? "text-[#9c3d5c]" : ""}>{fin.result.actualCents >= 0 ? "+" : ""}{formatPrice(fin.result.actualCents)} €</span>}
+            sub={`прогноза ${fin.result.forecastCents >= 0 ? "+" : ""}${formatPrice(fin.result.forecastCents)} € · нето, без ДДС`}
           />
           <Tile
             label="Отворили билетите → купили"
