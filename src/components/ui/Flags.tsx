@@ -62,6 +62,27 @@ const FLAGS: Record<string, React.ReactNode> = {
       <rect x="6.6" y="7.2" width="10.8" height="3.6" fill="#fff" />
     </>
   ),
+  Германия: (
+    <>
+      <rect width="24" height="6" fill="#000" />
+      <rect y="6" width="24" height="6" fill="#DD0000" />
+      <rect y="12" width="24" height="6" fill="#FFCE00" />
+    </>
+  ),
+  Великобритания: (
+    <>
+      <rect width="24" height="18" fill="#012169" />
+      {/* Diagonals as strokes: white underneath, red on top, thinner. The
+          counter-changed offset of the real flag is dropped - at this size
+          it reads as a smudge, not as heraldry. */}
+      <path d="M0 0 L24 18 M24 0 L0 18" stroke="#fff" strokeWidth="3.6" />
+      <path d="M0 0 L24 18 M24 0 L0 18" stroke="#C8102E" strokeWidth="1.4" />
+      <rect x="9" width="6" height="18" fill="#fff" />
+      <rect y="6" width="24" height="6" fill="#fff" />
+      <rect x="10.2" width="3.6" height="18" fill="#C8102E" />
+      <rect y="7.2" width="24" height="3.6" fill="#C8102E" />
+    </>
+  ),
 };
 
 /**
