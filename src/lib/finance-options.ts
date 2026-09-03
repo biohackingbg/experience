@@ -51,3 +51,29 @@ export const EXPENSE_STATUS = [
 export type ExpenseStatus = (typeof EXPENSE_STATUS)[number]["id"];
 export const isExpenseStatus = (v: unknown): v is ExpenseStatus =>
   EXPENSE_STATUS.some((s) => s.id === v);
+
+/**
+ * What a sponsor delivers. Fixed ids rather than free text: the note field
+ * carries the conversation, this carries what has to be built, collected or
+ * scheduled - and only a fixed list can be counted across all partners.
+ */
+export const DELIVERABLES = [
+  { id: "stand", label: "Щанд", short: "щанд" },
+  { id: "activation", label: "Активация в зона", short: "активация" },
+  { id: "workshop", label: "Уъркшоп", short: "уъркшоп" },
+  { id: "speaker", label: "Лектор на сцената", short: "лектор" },
+  { id: "logo", label: "Лого на сайта и сцената", short: "лого" },
+  { id: "bag", label: "Материал в чантата", short: "чанта" },
+  { id: "goody", label: "Продукт за goody bag", short: "продукт" },
+] as const;
+export type DeliverableId = (typeof DELIVERABLES)[number]["id"];
+export const isDeliverable = (v: unknown): v is DeliverableId =>
+  DELIVERABLES.some((d) => d.id === v);
+export const deliverableShort = (id: string) =>
+  DELIVERABLES.find((d) => d.id === id)?.short ?? id;
+
+/** "stand,bag" -> ["stand", "bag"], ignoring anything unrecognised. */
+export function parseDeliverables(v: string | null): DeliverableId[] {
+  if (!v) return [];
+  return v.split(",").map((x) => x.trim()).filter(isDeliverable);
+}

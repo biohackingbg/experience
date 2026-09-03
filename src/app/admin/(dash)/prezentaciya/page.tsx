@@ -166,6 +166,9 @@ export default async function DeckPage() {
                             tier={l.tier}
                             amountCents={l.amountCents}
                             money={l.money}
+                            inKindCents={l.inKindCents}
+                            deliverables={l.deliverables}
+                            ticketsCount={l.ticketsCount}
                             owners={d.owners}
                             stages={STAGES}
                             action={updateDeckLink}

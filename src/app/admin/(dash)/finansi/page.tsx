@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { HomeLink } from "@/components/admin/HomeLink";
 import { isAdmin } from "@/lib/admin-auth";
 import { MONEY, TIERS } from "@/lib/deck-links";
+import { deliverableShort } from "@/lib/finance-options";
 import { getFinances } from "@/lib/finances";
 import { formatPrice } from "@/lib/tickets";
 
@@ -95,7 +96,10 @@ export default async function FinancesPage() {
             <div className="rounded-2xl bg-bh-cloud p-5 ring-1 ring-bh-ink/8">
               <div className="font-mono text-[0.62rem] uppercase tracking-[0.18em] text-bh-ink/50">Спонсори · договорено</div>
               <div className="mt-2 text-2xl font-black text-bh-ink"><Eur cents={f.sponsors.totalCents} /></div>
-              <div className="mt-1 text-xs text-bh-ink/55">{f.sponsors.rows.length} сделки</div>
+              <div className="mt-1 text-xs text-bh-ink/55">
+                {f.sponsors.rows.length} сделки
+                {f.sponsors.inKindCents > 0 && <> · плюс бартер <Eur cents={f.sponsors.inKindCents} /></>}
+              </div>
             </div>
             <div className="rounded-2xl bg-bh-cloud p-5 ring-1 ring-bh-ink/8">
               <div className="font-mono text-[0.62rem] uppercase tracking-[0.18em] text-bh-ink/50">Спонсори · в сметката</div>
@@ -110,7 +114,7 @@ export default async function FinancesPage() {
                 Още няма сделка със сума. В „Презентация“ сложи етап „потвърдил“ и сума на партньора - и се появява тук.
               </p>
             ) : (
-              <table className="w-full min-w-[40rem] text-left text-sm">
+              <table className="w-full min-w-[56rem] text-left text-sm">
                 <thead>
                   <tr className="border-b border-bh-ink/10 font-mono text-[0.65rem] uppercase tracking-[0.15em] text-bh-ink/50">
                     <th className="px-5 py-3 font-medium">Спонсор</th>
@@ -118,6 +122,8 @@ export default async function FinancesPage() {
                     <th className="px-5 py-3 font-medium">Води</th>
                     <th className="px-5 py-3 font-medium">Парите</th>
                     <th className="px-5 py-3 text-right font-medium">Сума</th>
+                    <th className="px-5 py-3 text-right font-medium">Бартер</th>
+                    <th className="px-5 py-3 font-medium">Какво дава</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -133,13 +139,33 @@ export default async function FinancesPage() {
                           {MONEY.find((m) => m.id === s.money)?.label ?? "договорено"}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-right font-semibold text-bh-ink"><Eur cents={s.amountCents} /></td>
+                      <td className="px-5 py-3 text-right font-semibold text-bh-ink">{s.amountCents ? <Eur cents={s.amountCents} /> : <span className="text-bh-ink/35">-</span>}</td>
+                      <td className="px-5 py-3 text-right text-[#7a5b00]">{s.inKindCents ? <Eur cents={s.inKindCents} /> : <span className="text-bh-ink/35">-</span>}</td>
+                      <td className="px-5 py-3">
+                        <div className="flex flex-wrap gap-1">
+                          {s.deliverables.map((d) => (
+                            <span key={d} className="rounded-full bg-bh-ink/8 px-2 py-0.5 text-[0.68rem] text-bh-ink/75">{deliverableShort(d)}</span>
+                          ))}
+                          {s.ticketsCount > 0 && (
+                            <span className="rounded-full bg-bh-ink/8 px-2 py-0.5 text-[0.68rem] text-bh-ink/75">{s.ticketsCount} билета</span>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             )}
           </div>
+          {(f.sponsors.deliverableCounts.length > 0 || f.sponsors.ticketsTotal > 0) && (
+            /* The October question, answered in one line: what has to be built,
+               collected or scheduled, across every confirmed partner. */
+            <p className="mt-3 text-sm text-bh-ink/70">
+              <span className="font-mono text-[0.62rem] uppercase tracking-[0.18em] text-bh-ink/50">За подготовка · </span>
+              {f.sponsors.deliverableCounts.map((d) => `${d.n} × ${d.label.toLowerCase()}`).join(" · ")}
+              {f.sponsors.ticketsTotal > 0 && ` · ${f.sponsors.ticketsTotal} билета за партньори`}
+            </p>
+          )}
         </section>
 
         {/* Expenses by category, against budget */}

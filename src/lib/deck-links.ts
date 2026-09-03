@@ -189,6 +189,9 @@ export async function updateLinkPipeline(
     tier: TierId | null;
     amountCents: number | null;
     money: MoneyId | null;
+    inKindCents: number | null;
+    deliverables: string | null;
+    ticketsCount: number | null;
   },
 ): Promise<void> {
   await getDb()
@@ -333,6 +336,9 @@ export async function getDeckStats(): Promise<DeckStats> {
         tier: deckLinks.tier,
         amountCents: deckLinks.amountCents,
         money: deckLinks.money,
+        inKindCents: deckLinks.inKindCents,
+        deliverables: deckLinks.deliverables,
+        ticketsCount: deckLinks.ticketsCount,
         updatedAt: deckLinks.updatedAt,
         views: count(deckViews.id),
         people: sql<number>`(count(distinct ${deckViews.visitor}) + count(*) filter (where ${deckViews.visitor} is null))::int`,

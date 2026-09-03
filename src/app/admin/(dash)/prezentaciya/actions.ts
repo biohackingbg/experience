@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { isAdmin } from "@/lib/admin-auth";
 import { createLink, createLinks, isMoney, isStage, isTier, reactivateLink, regenerateToken, revokeLink, updateLinkPipeline } from "@/lib/deck-links";
+import { isDeliverable } from "@/lib/finance-options";
 
 export type LinkFormState = { status: "idle" | "ok" | "error"; message?: string };
 
@@ -68,6 +69,19 @@ export async function updateDeckLink(
   const tier = formData.get("tier");
   const money = formData.get("money");
 
+  // Barter is valued the same way as cash but stored apart from it.
+  const inKindRaw = String(formData.get("inKind") ?? "").replace(/\s/g, "").replace(",", ".");
+  const inKindCents = inKindRaw ? Math.round(Number(inKindRaw) * 100) : null;
+  if (inKindCents !== null && (!Number.isFinite(inKindCents) || inKindCents < 0)) {
+    return { status: "error", message: "Стойността на бартера не е число." };
+  }
+  const deliverables = formData.getAll("deliverables").filter(isDeliverable);
+  const ticketsRaw = String(formData.get("tickets") ?? "").trim();
+  const ticketsCount = ticketsRaw ? Number.parseInt(ticketsRaw, 10) : null;
+  if (ticketsCount !== null && (!Number.isInteger(ticketsCount) || ticketsCount < 0)) {
+    return { status: "error", message: "Билетите трябва да са цяло число." };
+  }
+
   await updateLinkPipeline(id, {
     stage,
     note: clean(formData.get("note"), 1000),
@@ -76,6 +90,9 @@ export async function updateDeckLink(
     tier: isTier(tier) ? tier : null,
     amountCents,
     money: isMoney(money) ? money : null,
+    inKindCents,
+    deliverables: deliverables.length ? deliverables.join(",") : null,
+    ticketsCount,
   });
   revalidatePath("/admin/prezentaciya");
   return { status: "ok", message: "Записано." };

@@ -78,6 +78,13 @@
       "when": 1788387029685,
       "tag": "0010_finances",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1788464414789,
+      "tag": "0011_sponsor_deliverables",
+      "breakpoints": true
     }
   ]
 }

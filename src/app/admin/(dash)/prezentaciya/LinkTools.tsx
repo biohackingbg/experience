@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 
 import { createDeckLink, createDeckLinksBulk, type LinkFormState } from "./actions";
 import { MONEY, TIERS } from "@/lib/finance-options";
+import { DELIVERABLES, deliverableShort, parseDeliverables } from "@/lib/finance-options";
 
 // Lives here, not in actions.ts: a "use server" module may export only
 // async functions - an exported object fails the build.
@@ -82,6 +83,9 @@ export function PipelineEditor({
   tier,
   amountCents,
   money,
+  inKindCents,
+  deliverables,
+  ticketsCount,
   owners,
   stages,
   action,
@@ -94,6 +98,9 @@ export function PipelineEditor({
   tier: string | null;
   amountCents: number | null;
   money: string | null;
+  inKindCents: number | null;
+  deliverables: string | null;
+  ticketsCount: number | null;
   /** Names already in use, offered as suggestions. */
   owners: string[];
   stages: readonly Stage[];
@@ -152,6 +159,21 @@ export function PipelineEditor({
               <span className="ml-2 rounded-full bg-bh-ink/8 px-2 py-0.5 text-[0.62rem] font-semibold uppercase tracking-wide text-bh-ink/70">
                 {MONEY.find((m) => m.id === money)?.label ?? money}
               </span>
+            )}
+          </p>
+        )}
+        {(inKindCents !== null || deliverables || ticketsCount !== null) && (
+          <p className="flex flex-wrap items-center gap-1.5 text-xs text-bh-ink/70">
+            {inKindCents !== null && (
+              <span className="rounded-full bg-[#d0a11a]/15 px-2 py-0.5 font-semibold text-[#7a5b00]">
+                бартер {(inKindCents / 100).toLocaleString("bg-BG")} €
+              </span>
+            )}
+            {parseDeliverables(deliverables).map((d) => (
+              <span key={d} className="rounded-full bg-bh-ink/8 px-2 py-0.5">{deliverableShort(d)}</span>
+            ))}
+            {ticketsCount !== null && ticketsCount > 0 && (
+              <span className="rounded-full bg-bh-ink/8 px-2 py-0.5">{ticketsCount} билета</span>
             )}
           </p>
         )}
@@ -240,6 +262,41 @@ export function PipelineEditor({
           ))}
         </select>
       </div>
+      {/* Product is valued but never counted as income - see finances.ts. */}
+      <div className="grid grid-cols-[1fr_7rem] gap-2">
+        <input
+          type="text"
+          inputMode="decimal"
+          name="inKind"
+          defaultValue={inKindCents === null ? "" : String(inKindCents / 100)}
+          placeholder="бартер / продукти, € без ДДС"
+          className="rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35"
+        />
+        <input
+          type="number"
+          inputMode="numeric"
+          min={0}
+          name="tickets"
+          defaultValue={ticketsCount ?? ""}
+          placeholder="билети"
+          className="rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35"
+        />
+      </div>
+      <fieldset className="flex flex-wrap gap-x-4 gap-y-1.5 rounded-xl border border-bh-ink/15 px-3 py-2">
+        <legend className="px-1 font-mono text-[0.6rem] uppercase tracking-[0.15em] text-bh-ink/55">Какво дава</legend>
+        {DELIVERABLES.map((d) => (
+          <label key={d.id} className="flex items-center gap-1.5 text-xs text-bh-ink">
+            <input
+              type="checkbox"
+              name="deliverables"
+              value={d.id}
+              defaultChecked={parseDeliverables(deliverables).includes(d.id)}
+              className="h-3.5 w-3.5 accent-[#146455]"
+            />
+            {d.label}
+          </label>
+        ))}
+      </fieldset>
       <input
         type="text"
         name="nextStep"

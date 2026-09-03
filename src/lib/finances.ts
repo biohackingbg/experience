@@ -5,6 +5,7 @@ import { desc, eq, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { budgets, deckLinks, expenses, orders } from "@/lib/db/schema";
 import { CATEGORIES, EXPENSE_STATUS, MONEY, TIERS, categoryLabel, type CategoryId, type ExpenseStatus } from "@/lib/finance-options";
+import { DELIVERABLES, parseDeliverables, type DeliverableId } from "@/lib/finance-options";
 
 /**
  * The organisers' view of the money - not the books.
@@ -27,6 +28,10 @@ export type SponsorRow = {
   amountCents: number;
   money: string | null;
   owner: string | null;
+  /** Barter, valued - shown beside the cash, never added to it. */
+  inKindCents: number;
+  deliverables: DeliverableId[];
+  ticketsCount: number;
 };
 
 export type ExpenseRow = {
@@ -49,6 +54,11 @@ export type Finances = {
     paidCents: number;
     /** All three stages together: the money that is promised. */
     totalCents: number;
+    /** Product and services, valued. Not income - it never reaches the bank. */
+    inKindCents: number;
+    /** How many partners deliver each thing - the October question. */
+    deliverableCounts: { id: DeliverableId; label: string; n: number }[];
+    ticketsTotal: number;
   };
   expenses: {
     rows: ExpenseRow[];
@@ -86,17 +96,26 @@ export async function getFinances(): Promise<Finances> {
         amountCents: deckLinks.amountCents,
         money: deckLinks.money,
         owner: deckLinks.owner,
+        inKindCents: deckLinks.inKindCents,
+        deliverables: deckLinks.deliverables,
+        ticketsCount: deckLinks.ticketsCount,
       })
       .from(deckLinks)
       // A deal is a confirmed partner with a number on it. Declined rows and
       // links made for a post or the team never carry an amount.
-      .where(sql`${deckLinks.stage} = 'confirmed' and ${deckLinks.amountCents} is not null`)
+      .where(sql`${deckLinks.stage} = 'confirmed' and (${deckLinks.amountCents} is not null or ${deckLinks.inKindCents} is not null)`)
       .orderBy(desc(deckLinks.amountCents)),
     db.select().from(expenses).orderBy(desc(expenses.date)),
     db.select().from(budgets),
   ]);
 
-  const sponsors = sponsorRows.map((r) => ({ ...r, amountCents: r.amountCents ?? 0 }));
+  const sponsors: SponsorRow[] = sponsorRows.map((r) => ({
+    ...r,
+    amountCents: r.amountCents ?? 0,
+    inKindCents: r.inKindCents ?? 0,
+    deliverables: parseDeliverables(r.deliverables),
+    ticketsCount: r.ticketsCount ?? 0,
+  }));
   const sumWhere = (m: string) => sponsors.filter((r) => r.money === m).reduce((a, r) => a + r.amountCents, 0);
   const sAgreed = sumWhere("agreed") + sponsors.filter((r) => !r.money).reduce((a, r) => a + r.amountCents, 0);
   const sInvoiced = sumWhere("invoiced");
@@ -127,6 +146,13 @@ export async function getFinances(): Promise<Finances> {
       invoicedCents: sInvoiced,
       paidCents: sPaid,
       totalCents: sAgreed + sInvoiced + sPaid,
+      inKindCents: sponsors.reduce((a, r) => a + r.inKindCents, 0),
+      deliverableCounts: DELIVERABLES.map((d) => ({
+        id: d.id,
+        label: d.label,
+        n: sponsors.filter((r) => r.deliverables.includes(d.id)).length,
+      })).filter((d) => d.n > 0),
+      ticketsTotal: sponsors.reduce((a, r) => a + r.ticketsCount, 0),
     },
     expenses: {
       rows: expenseRows,
@@ -198,7 +224,14 @@ export function financesCsv(f: Finances): string {
   const lines = ["тип;дата;категория;контрагент;описание;пакет;статус;сума без ДДС (EUR)"];
   lines.push(["приход", "", "билети", "", `${f.tickets.orders} платени поръчки`, "", "платено", eur(f.tickets.netCents)].map(q).join(";"));
   for (const s of f.sponsors.rows) {
-    lines.push(["приход", "", "спонсор", s.label, "", TIERS.find((t) => t.id === s.tier)?.label ?? s.tier ?? "", MONEY.find((m) => m.id === s.money)?.label ?? "договорено", eur(s.amountCents)].map(q).join(";"));
+    const pkg = TIERS.find((t) => t.id === s.tier)?.label ?? s.tier ?? "";
+    if (s.amountCents) {
+      lines.push(["приход", "", "спонсор", s.label, "", pkg, MONEY.find((m) => m.id === s.money)?.label ?? "договорено", eur(s.amountCents)].map(q).join(";"));
+    }
+    // Barter on its own line, under its own type, so nobody sums it into cash.
+    if (s.inKindCents) {
+      lines.push(["бартер", "", "спонсор", s.label, s.deliverables.join(", "), pkg, "продукти / услуги", eur(s.inKindCents)].map(q).join(";"));
+    }
   }
   for (const e of f.expenses.rows) {
     lines.push(["разход", e.date.toISOString().slice(0, 10), categoryLabel(e.category), e.supplier, e.description ?? "", e.invoiceNo ?? "", EXPENSE_STATUS.find((s) => s.id === e.status)?.label ?? e.status, eur(e.amountCents)].map(q).join(";"));

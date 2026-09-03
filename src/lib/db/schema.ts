@@ -229,6 +229,22 @@ export const deckLinks = pgTable(
     tier: text("tier"),
     amountCents: integer("amount_cents"),
     money: text("money"),
+
+    /**
+     * Barter, valued in cents. Kept apart from `amountCents` on purpose:
+     * product never reaches the bank, so counting it as income would make
+     * the result wrong. It is summed separately and shown beside the cash.
+     */
+    inKindCents: integer("in_kind_cents"),
+    /**
+     * What the partner actually delivers, as a comma-separated list of ids
+     * from DELIVERABLES (finance-options.ts). A list rather than free text
+     * because the question in October is countable: how many stands to
+     * build, how many bag inserts to collect.
+     */
+    deliverables: text("deliverables"),
+    /** Tickets included in the package - the one deliverable with a number. */
+    ticketsCount: integer("tickets_count"),
   },
   (table) => [uniqueIndex("deck_links_token_idx").on(table.token)],
 );
