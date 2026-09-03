@@ -155,6 +155,26 @@ export async function addExpense(input: {
   await getDb().insert(expenses).values(input);
 }
 
+/**
+ * Correcting a row rather than replacing it: a mistyped amount or supplier
+ * would otherwise have to be cancelled and re-entered, which leaves two rows
+ * where the ledger should show one.
+ */
+export async function updateExpense(
+  id: string,
+  input: {
+    date: Date;
+    category: CategoryId;
+    supplier: string;
+    description: string | null;
+    amountCents: number;
+    status: ExpenseStatus;
+    invoiceNo: string | null;
+  },
+): Promise<void> {
+  await getDb().update(expenses).set({ ...input, updatedAt: new Date() }).where(eq(expenses.id, id));
+}
+
 export async function setExpenseStatus(id: string, status: ExpenseStatus): Promise<void> {
   await getDb().update(expenses).set({ status, updatedAt: new Date() }).where(eq(expenses.id, id));
 }

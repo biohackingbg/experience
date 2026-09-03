@@ -4,11 +4,10 @@ import { redirect } from "next/navigation";
 import { HomeLink } from "@/components/admin/HomeLink";
 import { isAdmin } from "@/lib/admin-auth";
 import { MONEY, TIERS } from "@/lib/deck-links";
-import { EXPENSE_STATUS, categoryLabel, getFinances } from "@/lib/finances";
+import { getFinances } from "@/lib/finances";
 import { formatPrice } from "@/lib/tickets";
 
-import { changeExpenseStatus } from "./actions";
-import { BudgetForm, ExpenseForm } from "./Forms";
+import { BudgetForm, ExpenseForm, ExpenseRow } from "./Forms";
 
 export const metadata: Metadata = {
   title: "Финанси | Администрация",
@@ -26,9 +25,6 @@ function Eur({ cents, signed = false }: { cents: number; signed?: boolean }) {
   );
 }
 
-function bgDate(d: Date): string {
-  return new Intl.DateTimeFormat("bg-BG", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "Europe/Sofia" }).format(d);
-}
 
 const STATUS_TONE: Record<string, string> = {
   planned: "bg-bh-ink/10 text-bh-ink/60",
@@ -223,33 +219,7 @@ export default async function FinancesPage() {
                 </thead>
                 <tbody>
                   {f.expenses.rows.map((e) => (
-                    <tr key={e.id} className={`border-b border-bh-ink/8 last:border-0 ${e.status === "cancelled" ? "text-bh-ink/40" : ""}`}>
-                      <td className="px-5 py-3 font-mono text-xs">{bgDate(e.date)}</td>
-                      <td className="px-5 py-3">{categoryLabel(e.category)}</td>
-                      <td className="px-5 py-3">
-                        <div className="font-medium text-bh-ink">{e.supplier}</div>
-                        {e.description && <div className="text-xs text-bh-ink/55">{e.description}</div>}
-                      </td>
-                      <td className="px-5 py-3 font-mono text-xs text-bh-ink/70">{e.invoiceNo ?? "-"}</td>
-                      <td className="px-5 py-3">
-                        {/* Status is the only thing that changes on a row; a
-                            delete would erase history, so "cancelled" is the way out. */}
-                        <form action={changeExpenseStatus} className="flex items-center gap-2">
-                          <input type="hidden" name="id" value={e.id} />
-                          <select
-                            name="status"
-                            defaultValue={e.status}
-                            className={`rounded-full px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide ${STATUS_TONE[e.status] ?? STATUS_TONE.planned}`}
-                          >
-                            {EXPENSE_STATUS.map((s) => (
-                              <option key={s.id} value={s.id}>{s.label}</option>
-                            ))}
-                          </select>
-                          <button type="submit" className="text-xs text-bh-ink/50 hover:text-bh-ink">запиши</button>
-                        </form>
-                      </td>
-                      <td className="px-5 py-3 text-right font-semibold text-bh-ink"><Eur cents={e.amountCents} /></td>
-                    </tr>
+                    <ExpenseRow key={e.id} e={e} />
                   ))}
                 </tbody>
               </table>
