@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { HomeLink } from "@/components/admin/HomeLink";
@@ -161,7 +162,7 @@ export default async function FinancesPage() {
             /* The October question, answered in one line: what has to be built,
                collected or scheduled, across every confirmed partner. */
             <p className="mt-3 text-sm text-bh-ink/70">
-              <span className="font-mono text-[0.62rem] uppercase tracking-[0.18em] text-bh-ink/50">За подготовка · </span>
+              <Link href="/admin/podgotovka" className="font-mono text-[0.62rem] uppercase tracking-[0.18em] text-bh-ink/50 underline underline-offset-2 hover:text-bh-ink">За подготовка</Link><span className="font-mono text-[0.62rem] uppercase tracking-[0.18em] text-bh-ink/50"> · </span>
               {f.sponsors.deliverableCounts.map((d) => `${d.n} × ${d.label.toLowerCase()}`).join(" · ")}
               {f.sponsors.ticketsTotal > 0 && ` · ${f.sponsors.ticketsTotal} билета за партньори`}
             </p>

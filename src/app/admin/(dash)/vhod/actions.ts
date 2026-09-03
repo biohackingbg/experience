@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import { isAdmin } from "@/lib/admin-auth";
 import type { ScanState } from "@/lib/scan-state";
 import { checkInTicket } from "@/lib/tickets-lookup";
@@ -10,6 +12,14 @@ import { checkInTicket } from "@/lib/tickets-lookup";
  * Re-checks the session on every call: a Server Action is a public POST
  * endpoint, and the layout that guards the page does not guard the action.
  */
+/** The "Пусни" button beside a name found by search - same check as a scan. */
+export async function admitTicket(formData: FormData): Promise<void> {
+  if (!(await isAdmin())) return;
+  const code = String(formData.get("code") ?? "").trim();
+  if (code) await checkInTicket(code);
+  revalidatePath("/admin/vhod");
+}
+
 export async function scanTicket(
   _prev: ScanState,
   formData: FormData,

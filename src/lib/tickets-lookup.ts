@@ -101,18 +101,79 @@ export async function getTicketsForOrder(orderId: string) {
 
 export { orderItems };
 
-/** Counters for the door screen. */
+export type DoorRecent = { code: string; name: string; tierName: string; at: Date };
+
+/** Counters for the door screen, plus who came in last - across every device. */
 export async function getDoorStats(): Promise<{
   total: number;
   checkedIn: number;
+  /** Sofia's today: the event has two days and each morning starts at zero. */
+  today: number;
+  recent: DoorRecent[];
 }> {
   const db = getDb();
-  const [row] = await db
-    .select({
-      total: sql<number>`count(*)::int`,
-      checkedIn: sql<number>`count(*) filter (where ${tickets.checkedInAt} is not null)::int`,
-    })
-    .from(tickets);
+  const [[row], recentRows] = await Promise.all([
+    db
+      .select({
+        total: sql<number>`count(*)::int`,
+        checkedIn: sql<number>`count(*) filter (where ${tickets.checkedInAt} is not null)::int`,
+        today: sql<number>`count(*) filter (where (${tickets.checkedInAt} at time zone 'Europe/Sofia')::date = (now() at time zone 'Europe/Sofia')::date)::int`,
+      })
+      .from(tickets),
+    db
+      .select({
+        code: tickets.code,
+        tierId: tickets.tierId,
+        attendeeName: tickets.attendeeName,
+        buyerName: orders.name,
+        at: tickets.checkedInAt,
+      })
+      .from(tickets)
+      .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
+      .where(sql`${tickets.checkedInAt} is not null`)
+      .orderBy(sql`${tickets.checkedInAt} desc`)
+      .limit(12),
+  ]);
 
-  return { total: row?.total ?? 0, checkedIn: row?.checkedIn ?? 0 };
+  return {
+    total: row?.total ?? 0,
+    checkedIn: row?.checkedIn ?? 0,
+    today: row?.today ?? 0,
+    recent: recentRows.flatMap((r) =>
+      r.at ? [{ code: r.code, name: r.attendeeName ?? r.buyerName, tierName: getTier(r.tierId)?.name ?? r.tierId, at: r.at }] : [],
+    ),
+  };
+}
+
+/**
+ * The door's name lookup, for the person whose phone is dead. Matches the
+ * buyer, the attendee, the email, the order number or the ticket code, and
+ * only over paid orders - the same rule the scanner applies.
+ */
+export async function searchTickets(q: string): Promise<(TicketView & { email: string })[]> {
+  const term = q.trim();
+  if (term.length < 2) return [];
+  const like = `%${term.replace(/[%_]/g, "")}%`;
+  const rows = await getDb()
+    .select({
+      code: tickets.code,
+      tierId: tickets.tierId,
+      attendeeName: tickets.attendeeName,
+      checkedInAt: tickets.checkedInAt,
+      buyerName: orders.name,
+      reference: orders.reference,
+      email: orders.email,
+    })
+    .from(tickets)
+    .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
+    .where(
+      sql`${orders.status} = 'paid' and (
+        ${orders.name} ilike ${like} or ${orders.email} ilike ${like}
+        or ${orders.reference} ilike ${like} or ${tickets.code} ilike ${like}
+        or coalesce(${tickets.attendeeName}, '') ilike ${like}
+      )`,
+    )
+    .orderBy(orders.name, tickets.code)
+    .limit(30);
+  return rows.map((r) => ({ ...r, tierName: getTier(r.tierId)?.name ?? r.tierId }));
 }

@@ -1,9 +1,11 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useActionState, useCallback, useEffect, useRef, useState } from "react";
 
 import { initialScanState, type ScanState } from "@/lib/scan-state";
 import { scanTicket } from "./actions";
+import { Camera } from "./Camera";
 
 type Seen = { code: string; status: ScanState["status"]; name?: string };
 
@@ -12,9 +14,8 @@ type Seen = { code: string; status: ScanState["status"]; name?: string };
  *
  * Text input first, deliberately: a handheld barcode scanner types the code and
  * presses Enter, which this handles with no integration at all, and a person can
- * always read the code aloud from the ticket. Camera scanning is layered on top
- * where the browser supports it - Safari does not, and a door queue is the wrong
- * place to discover that.
+ * always read the code aloud from the ticket. The camera (Camera.tsx) sits on
+ * top and simply types into the same field, so every path ends in one check.
  */
 export function Scanner() {
   const [state, formAction, pending] = useActionState(
@@ -27,6 +28,14 @@ export function Scanner() {
   const [recent, setRecent] = useState<Seen[]>([]);
   const [admitted, setAdmitted] = useState(0);
   const lastHandled = useRef<number | undefined>(undefined);
+  const router = useRouter();
+
+  // A decoded QR is submitted exactly as a typed code would be.
+  const onCode = useCallback((code: string) => {
+    if (!inputRef.current || !formRef.current) return;
+    inputRef.current.value = code;
+    formRef.current.requestSubmit();
+  }, []);
 
   // Keep the caret in the field: staff never tap it, the scanner just types.
   useEffect(() => {
@@ -59,10 +68,13 @@ export function Scanner() {
       if (navigator.vibrate) {
         navigator.vibrate(state.status === "ok" ? 60 : [60, 60, 60]);
       }
+      // The counters and the recent list are server-rendered; pull them in
+      // so a second device at the door sees this admission too.
+      router.refresh();
     });
 
     return () => cancelAnimationFrame(frame);
-  }, [state]);
+  }, [state, router]);
 
   const tone =
     state.status === "ok"
@@ -99,6 +111,8 @@ export function Scanner() {
           Провери
         </button>
       </form>
+
+      <Camera onCode={onCode} />
 
       {/* Result - sized to be readable at arm's length in a busy foyer. */}
       <div

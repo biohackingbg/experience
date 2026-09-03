@@ -1,9 +1,11 @@
 import {
   bigint,
   boolean,
+  date,
   index,
   integer,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -252,8 +254,35 @@ export const deckLinks = pgTable(
     deliverables: text("deliverables"),
     /** Tickets included in the package - the one deliverable with a number. */
     ticketsCount: integer("tickets_count"),
+
+    /** Who to call when a stand or a box of product is late. */
+    contactName: text("contact_name"),
+    contactEmail: text("contact_email"),
+    contactPhone: text("contact_phone"),
   },
   (table) => [uniqueIndex("deck_links_token_idx").on(table.token)],
+);
+
+/**
+ * Whether each thing a partner promised has arrived. One row per
+ * (partner, kind), created the first time someone ticks or dates it; a
+ * promise with no row is simply "waiting, no date". The promise itself
+ * stays on deck_links.deliverables - this table only records its fate.
+ */
+export const deliverableStatus = pgTable(
+  "deliverable_status",
+  {
+    linkId: uuid("link_id")
+      .notNull()
+      .references(() => deckLinks.id, { onDelete: "cascade" }),
+    /** A DELIVERABLES id, or "tickets" for the ticket allocation. */
+    kind: text("kind").notNull(),
+    receivedAt: timestamp("received_at", { withTimezone: true }),
+    dueDate: date("due_date"),
+    note: text("note"),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [primaryKey({ columns: [table.linkId, table.kind] })],
 );
 
 /**

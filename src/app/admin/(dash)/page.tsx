@@ -122,6 +122,7 @@ export default async function AdminDashboard({
               ["/admin/fakturi", "Фактури"],
               ["/admin/zapisvaniya", "Записвания"],
               ["/admin/prezentaciya", "Презентация"],
+              ["/admin/podgotovka", "Подготовка"],
               ["/admin/vhod", "Вход на събитието"],
             ].map(([href, label]) => (
               <Link
