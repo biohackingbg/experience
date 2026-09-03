@@ -87,6 +87,68 @@ export async function checkInTicket(code: string): Promise<CheckInResult> {
   return { status: "admitted", ticket };
 }
 
+/**
+ * The name on a ticket, written by the buyer from the ticket page - so a
+ * ticket bought for someone else carries that person's name at the door
+ * and on the badge. Locked once the ticket has been used: after that the
+ * name is a record, not a setting.
+ */
+export async function setAttendeeName(code: string, name: string): Promise<"ok" | "not_found" | "used"> {
+  const ticket = await findTicket(code);
+  if (!ticket) return "not_found";
+  if (ticket.checkedInAt) return "used";
+  await getDb()
+    .update(tickets)
+    .set({ attendeeName: name.trim().replace(/\s+/g, " ").slice(0, 80) || null })
+    .where(sql`${tickets.code} = ${ticket.code}`);
+  return "ok";
+}
+
+export type AttendeeRow = {
+  code: string;
+  /** The attendee's name if given, else the buyer's. */
+  name: string;
+  /** Whether that name was written for this ticket, or is the buyer's by default. */
+  named: boolean;
+  tierName: string;
+  reference: string;
+  buyerName: string;
+  email: string;
+  company: string | null;
+  checkedInAt: Date | null;
+};
+
+/** Every expected person, alphabetically - the badge list. */
+export async function listAttendees(): Promise<AttendeeRow[]> {
+  const rows = await getDb()
+    .select({
+      code: tickets.code,
+      tierId: tickets.tierId,
+      attendeeName: tickets.attendeeName,
+      checkedInAt: tickets.checkedInAt,
+      buyerName: orders.name,
+      reference: orders.reference,
+      email: orders.email,
+      company: orders.invoiceCompany,
+    })
+    .from(tickets)
+    .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
+    .where(sql`${orders.status} = 'paid' and not ${orders.isTest}`);
+  return rows
+    .map((r) => ({
+      code: r.code,
+      name: r.attendeeName ?? r.buyerName,
+      named: !!r.attendeeName,
+      tierName: getTier(r.tierId)?.name ?? r.tierId,
+      reference: r.reference,
+      buyerName: r.buyerName,
+      email: r.email,
+      company: r.company,
+      checkedInAt: r.checkedInAt,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name, "bg") || a.code.localeCompare(b.code));
+}
+
 /** All tickets on an order - used by the confirmation email. */
 export async function getTicketsForOrder(orderId: string) {
   const db = getDb();

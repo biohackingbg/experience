@@ -113,6 +113,13 @@
       "when": 1788530000000,
       "tag": "0015_reminder_tracking",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1788540000000,
+      "tag": "0016_attendees_info_mail",
+      "breakpoints": true
     }
   ]
 }

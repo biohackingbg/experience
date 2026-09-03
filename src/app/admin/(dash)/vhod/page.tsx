@@ -49,10 +49,10 @@ export default async function DoorPage({
             </h1>
           </div>
           <Link
-            href="/admin"
-            className="font-mono text-xs uppercase tracking-[0.15em] text-bh-ink/50 transition-colors hover:text-bh-ink"
+            href="/admin/vhod/uchastnici"
+            className="rounded-full border border-bh-ink/20 px-4 py-2 text-xs font-semibold text-bh-ink transition-colors hover:border-bh-ink"
           >
-            Продажби →
+            Списък и баджове
           </Link>
         </div>
 

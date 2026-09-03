@@ -115,6 +115,8 @@ export const orders = pgTable(
      * their numbers are in the sequence and the accountant must see them.
      */
     isTest: boolean("is_test").notNull().default(false),
+    /** When the "see you next week" mail went to this buyer. Once per order. */
+    infoSentAt: timestamp("info_sent_at", { withTimezone: true }),
 
     /**
      * When the "you did not finish" email went out, for an abandoned checkout.

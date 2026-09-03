@@ -5,6 +5,8 @@ import QRCode from "qrcode";
 import { Calendar, Pin, TicketIcon } from "@/components/ui/Pictograms";
 import { findTicket } from "@/lib/tickets-lookup";
 
+import { AttendeeForm } from "./AttendeeForm";
+
 export const metadata: Metadata = {
   title: "Твоят билет | Sofia Life Summit 2026",
   // The code is the only thing guarding this page, so keep it out of search.
@@ -85,6 +87,19 @@ export default async function TicketPage({
                 </dd>
               </div>
             </div>
+            {ticket.attendeeName && (
+              <div className="flex items-center gap-4 px-7 py-4">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-bh-pine text-[0.6rem] font-bold text-white">
+                  {ticket.attendeeName.charAt(0).toUpperCase()}
+                </span>
+                <div>
+                  <dt className="font-mono text-[0.62rem] uppercase tracking-[0.18em] text-bh-ink/45">
+                    Участник
+                  </dt>
+                  <dd className="mt-0.5 font-medium text-bh-ink">{ticket.attendeeName}</dd>
+                </div>
+              </div>
+            )}
             <div className="flex items-center gap-4 px-7 py-4">
               <TicketIcon className="h-5 w-5 shrink-0 text-bh-pine" />
               <div>
@@ -97,6 +112,10 @@ export default async function TicketPage({
               </div>
             </div>
           </dl>
+
+          {!ticket.checkedInAt && (
+            <AttendeeForm code={ticket.code} current={ticket.attendeeName} />
+          )}
 
           {ticket.checkedInAt && (
             <p className="border-t border-bh-ink/8 bg-amber-100 px-7 py-4 text-center text-sm text-amber-900">
