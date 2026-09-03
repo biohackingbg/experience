@@ -36,6 +36,11 @@ export type RecentOrder = {
   status: string;
   totalCents: number;
   createdAt: Date;
+  /** When the money landed; null until it does. The date shown for a sale. */
+  paidAt: Date | null;
+  /** Set when the buyer asked for a company invoice - the accountant's flag. */
+  company: string | null;
+  phone: string | null;
   items: string;
 };
 
@@ -51,6 +56,9 @@ export type DashboardData = {
   capacityTotal: number;
   /** Paid tickets in the last seven days - the pace the room is filling at. */
   soldLast7Days: number;
+  /** Sofia calendar days, so "today" is the team's today. */
+  soldToday: number;
+  soldYesterday: number;
   /** Whole days until doors open, never below one - the pace line divides by it. */
   daysToEvent: number;
   signupCount: number;
@@ -69,7 +77,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   // treats a clock read during render as impure, and it is right to.
   const daysToEvent = Math.max(1, Math.ceil((EVENT_DAY.getTime() - Date.now()) / 86_400_000));
 
-  const [totals, perTierRows, dailyRows, recentRows, signupRow, last7Row, checkedInRow] =
+  const [totals, perTierRows, dailyRows, recentRows, signupRow, last7Row, checkedInRow, dayRow] =
     await Promise.all([
       db
         .select({
@@ -117,6 +125,9 @@ export async function getDashboardData(): Promise<DashboardData> {
           status: orders.status,
           totalCents: orders.totalCents,
           createdAt: orders.createdAt,
+          paidAt: orders.paidAt,
+          company: orders.invoiceCompany,
+          phone: orders.phone,
         })
         .from(orders)
         .orderBy(desc(orders.createdAt))
@@ -135,6 +146,15 @@ export async function getDashboardData(): Promise<DashboardData> {
           n: sql<number>`count(*) filter (where ${tickets.checkedInAt} is not null)::int`,
         })
         .from(tickets),
+
+      db
+        .select({
+          today: sql<number>`coalesce(sum(${orderItems.quantity}) filter (where (${orders.paidAt} at time zone 'Europe/Sofia')::date = (now() at time zone 'Europe/Sofia')::date), 0)::int`,
+          yesterday: sql<number>`coalesce(sum(${orderItems.quantity}) filter (where (${orders.paidAt} at time zone 'Europe/Sofia')::date = (now() at time zone 'Europe/Sofia')::date - 1), 0)::int`,
+        })
+        .from(orderItems)
+        .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
+        .where(sql`${orders.status} = 'paid'`),
     ]);
 
   // Items for the listed orders, fetched separately and stitched in JS. A
@@ -187,6 +207,8 @@ export async function getDashboardData(): Promise<DashboardData> {
     ticketsSold: perTier.reduce((sum, t) => sum + t.sold, 0),
     capacityTotal: TIERS.reduce((sum, t) => sum + t.capacity, 0),
     soldLast7Days: last7Row[0]?.n ?? 0,
+    soldToday: dayRow[0]?.today ?? 0,
+    soldYesterday: dayRow[0]?.yesterday ?? 0,
     daysToEvent,
     signupCount: signupRow[0]?.n ?? 0,
     checkedIn: checkedInRow[0]?.n ?? 0,
@@ -203,6 +225,9 @@ export async function getDashboardData(): Promise<DashboardData> {
       status: o.status,
       totalCents: o.totalCents,
       createdAt: o.createdAt,
+      paidAt: o.paidAt,
+      company: o.company,
+      phone: o.phone,
       items: (itemsByOrder.get(o.id) ?? []).join(", "),
     })),
   };
@@ -234,6 +259,9 @@ export async function searchOrders(q: string): Promise<FoundOrder[]> {
       status: orders.status,
       totalCents: orders.totalCents,
       createdAt: orders.createdAt,
+      paidAt: orders.paidAt,
+      company: orders.invoiceCompany,
+      phone: orders.phone,
     })
     .from(orders)
     .where(
@@ -267,6 +295,9 @@ export async function searchOrders(q: string): Promise<FoundOrder[]> {
     status: o.status,
     totalCents: o.totalCents,
     createdAt: o.createdAt,
+    paidAt: o.paidAt,
+    company: o.company,
+    phone: o.phone,
     items: items.filter((i) => i.orderId === o.id).map((i) => `${i.quantity}× ${i.tierName}`).join(", "),
     tickets: tix
       .filter((t) => t.orderId === o.id)

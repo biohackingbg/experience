@@ -29,6 +29,22 @@ function Money({ cents }: { cents: number }) {
   return <>{formatPrice(cents)} €</>;
 }
 
+/** "03.09 · 23:04", Sofia time. A sale is dated by its payment, not its start. */
+function when(o: { paidAt: Date | null; createdAt: Date }): string {
+  const t = o.paidAt ?? o.createdAt;
+  const opts = { timeZone: "Europe/Sofia" } as const;
+  return `${t.toLocaleDateString("bg-BG", { ...opts, day: "2-digit", month: "2-digit" })} · ${t.toLocaleTimeString("bg-BG", { ...opts, hour: "2-digit", minute: "2-digit" })}`;
+}
+
+function CompanyChip({ company }: { company: string | null }) {
+  if (!company) return null;
+  return (
+    <span className="ml-2 rounded-full bg-[#d0a11a]/15 px-2 py-0.5 text-[0.62rem] font-semibold uppercase tracking-wide text-[#7a5c05]" title={company}>
+      фирма
+    </span>
+  );
+}
+
 function Tile({
   label,
   value,
@@ -161,7 +177,7 @@ export default async function AdminDashboard({
           <Tile
             label="Продадени билета"
             value={d.ticketsSold}
-            sub={`${soldPct}% от ${d.capacityTotal} места`}
+            sub={`${soldPct}% от ${d.capacityTotal} места · днес ${d.soldToday} · вчера ${d.soldYesterday}`}
           />
           <Tile
             label="Поръчки"
@@ -228,7 +244,9 @@ export default async function AdminDashboard({
                       <div>
                         <span className="font-mono text-xs text-bh-ink/70">{o.reference}</span>
                         <span className="ml-3 font-medium text-bh-ink">{o.name}</span>
-                        <span className="ml-2 text-xs text-bh-ink/55">{o.email}</span>
+                        <CompanyChip company={o.company} />
+                        <span className="ml-2 text-xs text-bh-ink/55">{o.email}{o.phone ? ` · ${o.phone}` : ""}</span>
+                        <div className="mt-0.5 text-xs text-bh-ink/55">{when(o)}</div>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-xs text-bh-ink/60">{o.items} · <Money cents={o.totalCents} /></span>
@@ -310,10 +328,11 @@ export default async function AdminDashboard({
             </p>
           ) : (
             <div className="mt-4 overflow-x-auto rounded-2xl bg-bh-cloud ring-1 ring-bh-ink/8">
-              <table className="w-full min-w-[46rem] text-left text-sm">
+              <table className="w-full min-w-[52rem] text-left text-sm">
                 <thead>
                   <tr className="border-b border-bh-ink/10 font-mono text-[0.65rem] uppercase tracking-[0.15em] text-bh-ink/50">
                     <th className="px-5 py-3 font-medium">Номер</th>
+                    <th className="px-5 py-3 font-medium">Кога</th>
                     <th className="px-5 py-3 font-medium">Купувач</th>
                     <th className="px-5 py-3 font-medium">Билети</th>
                     <th className="px-5 py-3 font-medium">Статус</th>
@@ -328,10 +347,19 @@ export default async function AdminDashboard({
                     >
                       <td className="px-5 py-3 font-mono text-xs text-bh-ink/70">
                         {o.reference}
+                        {o.status === "paid" && (
+                          <Link href={`/faktura/${o.reference}`} className="ml-2 font-sans text-[0.65rem] text-bh-ink/50 underline underline-offset-2 hover:text-bh-ink">
+                            фактура
+                          </Link>
+                        )}
                       </td>
+                      <td className="px-5 py-3 whitespace-nowrap text-xs text-bh-ink/70">{when(o)}</td>
                       <td className="px-5 py-3">
-                        <div className="font-medium text-bh-ink">{o.name}</div>
-                        <div className="text-xs text-bh-ink/55">{o.email}</div>
+                        <div className="font-medium text-bh-ink">
+                          {o.name}
+                          <CompanyChip company={o.company} />
+                        </div>
+                        <div className="text-xs text-bh-ink/55">{o.email}{o.phone ? ` · ${o.phone}` : ""}</div>
                       </td>
                       <td className="px-5 py-3 text-bh-ink/75">{o.items}</td>
                       <td className="px-5 py-3">
