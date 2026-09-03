@@ -38,7 +38,7 @@ export async function buildDigest(): Promise<Digest> {
       })
       .from(orders)
       .innerJoin(orderItems, sql`${orderItems.orderId} = ${orders.id}`)
-      .where(sql`${orders.status} = 'paid' and ${localDay(orders.paidAt)} = ${yesterday}`),
+      .where(sql`${orders.status} = 'paid' and not ${orders.isTest} and ${localDay(orders.paidAt)} = ${yesterday}`),
     db
       .select({
         visitors: sql<number>`count(distinct ${siteViews.visitor})::int`,

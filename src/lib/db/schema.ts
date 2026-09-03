@@ -110,6 +110,13 @@ export const orders = pgTable(
     paidAt: timestamp("paid_at", { withTimezone: true }),
 
     /**
+     * A real purchase made to test the flow, marked by the team afterwards.
+     * Every statistic skips it; the invoice and any credit note stay, because
+     * their numbers are in the sequence and the accountant must see them.
+     */
+    isTest: boolean("is_test").notNull().default(false),
+
+    /**
      * When the "you did not finish" email went out, for an abandoned checkout.
      * One reminder per order, ever - a buyer who walked away is not to be
      * chased, only told once that the door is still open.

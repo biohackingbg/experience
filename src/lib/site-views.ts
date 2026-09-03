@@ -115,7 +115,7 @@ export async function getTrafficData(days = 30): Promise<TrafficData> {
       db
         .select({
           started: sql<number>`count(*)::int`,
-          paid: sql<number>`count(*) filter (where ${orders.status} in ('paid', 'refunded'))::int`,
+          paid: sql<number>`count(*) filter (where ${orders.status} in ('paid', 'refunded') and not ${orders.isTest})::int`,
         })
         .from(orders)
         .where(sql`${orders.createdAt} >= ${since}`),

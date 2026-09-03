@@ -36,6 +36,8 @@ export type RecentOrder = {
   status: string;
   totalCents: number;
   createdAt: Date;
+  /** Marked by the team as a test purchase - skipped by every statistic. */
+  isTest: boolean;
   /** When the money landed; null until it does. The date shown for a sale. */
   paidAt: Date | null;
   /** Set when the buyer asked for a company invoice - the accountant's flag. */
@@ -81,16 +83,16 @@ export async function getDashboardData(): Promise<DashboardData> {
     await Promise.all([
       db
         .select({
-          gross: sql<number>`coalesce(sum(${orders.totalCents}) filter (where ${orders.status} = 'paid'), 0)::int`,
-          vat: sql<number>`coalesce(sum(${orders.vatCents}) filter (where ${orders.status} = 'paid'), 0)::int`,
-          paid: sql<number>`count(*) filter (where ${orders.status} = 'paid')::int`,
-          refunded: sql<number>`count(*) filter (where ${orders.status} = 'refunded')::int`,
+          gross: sql<number>`coalesce(sum(${orders.totalCents}) filter (where ${orders.status} = 'paid' and not ${orders.isTest}), 0)::int`,
+          vat: sql<number>`coalesce(sum(${orders.vatCents}) filter (where ${orders.status} = 'paid' and not ${orders.isTest}), 0)::int`,
+          paid: sql<number>`count(*) filter (where ${orders.status} = 'paid' and not ${orders.isTest})::int`,
+          refunded: sql<number>`count(*) filter (where ${orders.status} = 'refunded' and not ${orders.isTest})::int`,
           // Still inside the seat hold - a payment may yet land.
-          pending: sql<number>`count(*) filter (where ${orders.status} = 'pending' and ${orders.createdAt} > now() - interval '${sql.raw(String(PENDING_HOLD_MINUTES))} minutes')::int`,
+          pending: sql<number>`count(*) filter (where ${orders.status} = 'pending' and not ${orders.isTest} and ${orders.createdAt} > now() - interval '${sql.raw(String(PENDING_HOLD_MINUTES))} minutes')::int`,
           // Hold expired without payment: the checkout was closed. Their seats
           // are already free again; kept as a number because a rising count
           // is a signal about the checkout, not a to-do.
-          abandoned: sql<number>`count(*) filter (where ${orders.status} = 'pending' and ${orders.createdAt} <= now() - interval '${sql.raw(String(PENDING_HOLD_MINUTES))} minutes')::int`,
+          abandoned: sql<number>`count(*) filter (where ${orders.status} = 'pending' and not ${orders.isTest} and ${orders.createdAt} <= now() - interval '${sql.raw(String(PENDING_HOLD_MINUTES))} minutes')::int`,
         })
         .from(orders),
 
@@ -102,7 +104,7 @@ export async function getDashboardData(): Promise<DashboardData> {
         })
         .from(orderItems)
         .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
-        .where(sql`${orders.status} = 'paid'`)
+        .where(sql`${orders.status} = 'paid' and not ${orders.isTest}`)
         .groupBy(orderItems.tierId),
 
       db
@@ -112,7 +114,7 @@ export async function getDashboardData(): Promise<DashboardData> {
           gross: sql<number>`coalesce(sum(${orders.totalCents}), 0)::int`,
         })
         .from(orders)
-        .where(sql`${orders.status} = 'paid' and ${orders.paidAt} is not null`)
+        .where(sql`${orders.status} = 'paid' and not ${orders.isTest} and ${orders.paidAt} is not null`)
         .groupBy(sql`to_char(${orders.paidAt}, 'YYYY-MM-DD')`)
         .orderBy(sql`to_char(${orders.paidAt}, 'YYYY-MM-DD')`),
 
@@ -128,8 +130,11 @@ export async function getDashboardData(): Promise<DashboardData> {
           paidAt: orders.paidAt,
           company: orders.invoiceCompany,
           phone: orders.phone,
+          isTest: orders.isTest,
         })
         .from(orders)
+        // Test purchases are found by search, never listed.
+        .where(sql`not ${orders.isTest}`)
         .orderBy(desc(orders.createdAt))
         .limit(25),
 
@@ -139,7 +144,7 @@ export async function getDashboardData(): Promise<DashboardData> {
         .select({ n: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int` })
         .from(orderItems)
         .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
-        .where(sql`${orders.status} = 'paid' and ${orders.paidAt} > now() - interval '7 days'`),
+        .where(sql`${orders.status} = 'paid' and not ${orders.isTest} and ${orders.paidAt} > now() - interval '7 days'`),
 
       db
         .select({
@@ -154,7 +159,7 @@ export async function getDashboardData(): Promise<DashboardData> {
         })
         .from(orderItems)
         .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
-        .where(sql`${orders.status} = 'paid'`),
+        .where(sql`${orders.status} = 'paid' and not ${orders.isTest}`),
     ]);
 
   // Items for the listed orders, fetched separately and stitched in JS. A
@@ -228,6 +233,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       paidAt: o.paidAt,
       company: o.company,
       phone: o.phone,
+      isTest: o.isTest,
       items: (itemsByOrder.get(o.id) ?? []).join(", "),
     })),
   };
@@ -262,6 +268,7 @@ export async function searchOrders(q: string): Promise<FoundOrder[]> {
       paidAt: orders.paidAt,
       company: orders.invoiceCompany,
       phone: orders.phone,
+      isTest: orders.isTest,
     })
     .from(orders)
     .where(
@@ -298,6 +305,7 @@ export async function searchOrders(q: string): Promise<FoundOrder[]> {
     paidAt: o.paidAt,
     company: o.company,
     phone: o.phone,
+    isTest: o.isTest,
     items: items.filter((i) => i.orderId === o.id).map((i) => `${i.quantity}× ${i.tierName}`).join(", "),
     tickets: tix
       .filter((t) => t.orderId === o.id)

@@ -2,7 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 
+import { sql } from "drizzle-orm";
+
 import { remindAbandonedOrder } from "@/lib/abandoned";
+import { getDb } from "@/lib/db";
+import { orders } from "@/lib/db/schema";
 import { isAdmin } from "@/lib/admin-auth";
 import { setSetting } from "@/lib/settings";
 
@@ -28,6 +32,22 @@ export async function setEarlyAccess(_prev: ActionState, formData: FormData): Pr
     status: "ok",
     message: to === "off" ? "Сайтът е на редовни цени." : "Сайтът е на стартови цени.",
   };
+}
+
+/**
+ * Marks an order as a test purchase, or un-marks it. Nothing is deleted:
+ * the statistics skip it, the invoice keeps its number.
+ */
+export async function setTestOrder(formData: FormData): Promise<void> {
+  if (!(await isAdmin())) return;
+  const reference = String(formData.get("reference") ?? "").trim().toUpperCase();
+  const to = formData.get("to") === "1";
+  if (!/^SLS-[A-Z0-9]{6}$/.test(reference)) return;
+  await getDb().update(orders).set({ isTest: to }).where(sql`${orders.reference} = ${reference}`);
+  revalidatePath("/admin");
+  revalidatePath("/admin/vhod");
+  revalidatePath("/admin/finansi");
+  revalidatePath("/admin/poseshteniya");
 }
 
 export async function remindOrder(_prev: ActionState, formData: FormData): Promise<ActionState> {

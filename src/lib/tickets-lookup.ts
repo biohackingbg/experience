@@ -119,7 +119,10 @@ export async function getDoorStats(): Promise<{
         checkedIn: sql<number>`count(*) filter (where ${tickets.checkedInAt} is not null)::int`,
         today: sql<number>`count(*) filter (where (${tickets.checkedInAt} at time zone 'Europe/Sofia')::date = (now() at time zone 'Europe/Sofia')::date)::int`,
       })
-      .from(tickets),
+      .from(tickets)
+      .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
+      // A refunded or test order's tickets are not expected at the door.
+      .where(sql`${orders.status} = 'paid' and not ${orders.isTest}`),
     db
       .select({
         code: tickets.code,

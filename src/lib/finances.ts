@@ -87,7 +87,7 @@ export async function getFinances(): Promise<Finances> {
         n: sql<number>`count(*)::int`,
       })
       .from(orders)
-      .where(eq(orders.status, "paid")),
+      .where(sql`${orders.status} = 'paid' and not ${orders.isTest}`),
     db
       .select({
         id: deckLinks.id,

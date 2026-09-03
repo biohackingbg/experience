@@ -13,6 +13,7 @@ import { ResendForm } from "./fakturi/ResendForm";
 import { formatPrice } from "@/lib/tickets";
 import { logout } from "../actions";
 import { DailyChart } from "./DailyChart";
+import { setTestOrder } from "./actions";
 import { PriceSwitch } from "./PriceSwitch";
 import { ReminderForm } from "./ReminderForm";
 import { TierBars } from "./TierBars";
@@ -263,6 +264,23 @@ export default async function AdminDashboard({
                           {o.status === "paid" ? "платена" : o.status === "pending" ? "незавършена" : o.status === "refunded" ? "върната" : o.status}
                         </span>
                         {o.status === "paid" && <ResendForm reference={o.reference} />}
+                        {/* One click hides a test purchase from every figure; the
+                            invoice stays. The same button brings it back. */}
+                        <form action={setTestOrder}>
+                          <input type="hidden" name="reference" value={o.reference} />
+                          <input type="hidden" name="to" value={o.isTest ? "0" : "1"} />
+                          <button
+                            type="submit"
+                            title={o.isTest ? "Върни в статистиката" : "Скрий от статистиката като тестова поръчка"}
+                            className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+                              o.isTest
+                                ? "bg-[#d0a11a]/20 text-[#7a5c05] hover:bg-[#d0a11a]/35"
+                                : "border border-bh-ink/20 text-bh-ink/70 hover:border-bh-ink hover:text-bh-ink"
+                            }`}
+                          >
+                            {o.isTest ? "тестова · покажи" : "тестова"}
+                          </button>
+                        </form>
                       </div>
                     </div>
                     {o.tickets.length > 0 && (
