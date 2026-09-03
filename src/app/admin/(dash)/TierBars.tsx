@@ -21,15 +21,11 @@ export function TierBars({ tiers }: { tiers: TierSales[] }) {
   const anySold = tiers.some((t) => t.sold > 0);
 
   return (
-    <section className="mt-12">
-      <h2 className="text-lg font-bold tracking-tight text-bh-ink">
-        По нива
-      </h2>
-      <p className="mt-1 text-sm text-bh-ink/55">
-        Продадени срещу капацитет.
-      </p>
+    <section id="niva" className="rounded-3xl bg-bh-cloud p-6 ring-1 ring-bh-ink/6">
+      <h2 className="text-lg font-bold tracking-tight text-bh-ink">По нива</h2>
+      <p className="mt-1 text-sm text-bh-ink/55">Продадени срещу капацитет.</p>
 
-      <div className="mt-5 flex flex-col gap-5 rounded-2xl bg-bh-cloud p-6 ring-1 ring-bh-ink/8">
+      <div className="mt-5 flex flex-col gap-5">
         {tiers.map((tier) => {
           const pct = tier.capacity
             ? Math.min(100, (tier.sold / tier.capacity) * 100)

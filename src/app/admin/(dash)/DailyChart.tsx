@@ -20,15 +20,11 @@ export function DailyChart({ data }: { data: DailySales[] }) {
   const peakIndex = data.findIndex((d) => d.orders === max);
 
   return (
-    <section className="mt-12">
-      <h2 className="text-lg font-bold tracking-tight text-bh-ink">
-        Поръчки по дни
-      </h2>
-      <p className="mt-1 text-sm text-bh-ink/55">
-        Само платени поръчки, по деня на плащането.
-      </p>
+    <section className="rounded-3xl bg-bh-cloud p-6 ring-1 ring-bh-ink/6">
+      <h2 className="text-lg font-bold tracking-tight text-bh-ink">Поръчки по дни</h2>
+      <p className="mt-1 text-sm text-bh-ink/55">Само платени поръчки, по деня на плащането.</p>
 
-      <div className="mt-5 rounded-2xl bg-bh-cloud p-6 ring-1 ring-bh-ink/8">
+      <div className="mt-5">
         {data.length === 0 ? (
           <p className="py-10 text-center text-sm text-bh-ink/50">
             Графиката ще се появи с първата платена поръчка.

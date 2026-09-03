@@ -46,7 +46,11 @@ export type RecentOrder = {
   items: string;
 };
 
+/** One of the last seven Sofia days, zero-filled - the week strip on the dashboard. */
+export type WeekDay = { day: string; label: string; orders: number; grossCents: number; today: boolean };
+
 export type DashboardData = {
+  week: WeekDay[];
   grossCents: number;
   netCents: number;
   vatCents: number;
@@ -78,6 +82,9 @@ export async function getDashboardData(): Promise<DashboardData> {
   // Read once here, on the server, rather than in the page's render - React
   // treats a clock read during render as impure, and it is right to.
   const daysToEvent = Math.max(1, Math.ceil((EVENT_DAY.getTime() - Date.now()) / 86_400_000));
+  // The last seven Sofia calendar days, oldest first, for the week strip.
+  const sofiaDay = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia" });
+  const weekDays = Array.from({ length: 7 }, (_, i) => sofiaDay.format(new Date(Date.now() - (6 - i) * 86_400_000)));
 
   const [totals, perTierRows, dailyRows, recentRows, signupRow, last7Row, checkedInRow, dayRow] =
     await Promise.all([
@@ -223,6 +230,17 @@ export async function getDashboardData(): Promise<DashboardData> {
       orders: r.count,
       grossCents: r.gross,
     })),
+    week: weekDays.map((day, i) => {
+      const row = dailyRows.find((r) => r.day === day);
+      const weekday = new Date(`${day}T12:00:00+03:00`).getDay();
+      return {
+        day,
+        label: ["Н", "П", "В", "С", "Ч", "П", "С"][weekday],
+        orders: row?.count ?? 0,
+        grossCents: row?.gross ?? 0,
+        today: i === 6,
+      };
+    }),
     recent: recentRows.map((o) => ({
       reference: o.reference,
       name: o.name,
