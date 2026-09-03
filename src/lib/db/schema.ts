@@ -122,6 +122,11 @@ export const orders = pgTable(
      * chased, only told once that the door is still open.
      */
     reminderSentAt: timestamp("reminder_sent_at", { withTimezone: true }),
+    /** Resend's id for that email - the key its opened/clicked events carry. */
+    reminderEmailId: text("reminder_email_id"),
+    /** From Resend's webhook. An open is a hint (mail apps prefetch), a click is a person. */
+    reminderOpenedAt: timestamp("reminder_opened_at", { withTimezone: true }),
+    reminderClickedAt: timestamp("reminder_clicked_at", { withTimezone: true }),
 
     /**
      * Set from Stripe's charge.refunded event. A full refund flips `status`
@@ -149,6 +154,7 @@ export const orders = pgTable(
     index("orders_status_idx").on(table.status),
     index("orders_email_idx").on(table.email),
     index("orders_created_at_idx").on(table.createdAt),
+    index("orders_reminder_email_id_idx").on(table.reminderEmailId),
     // Two invoices may never share a number; the database enforces it
     // rather than trusting the code that draws from the sequence.
     uniqueIndex("orders_invoice_number_idx").on(table.invoiceNumber),

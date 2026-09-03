@@ -266,15 +266,16 @@ function reminderEmailText(input: ReminderEmailInput): string {
   ].join("\n");
 }
 
-export async function sendReminderEmail(input: ReminderEmailInput): Promise<boolean> {
+/** Resolves to Resend's id for the message (the key for its later events), or null if it did not go. */
+export async function sendReminderEmail(input: ReminderEmailInput): Promise<string | null> {
   const resend = getResend();
   const from = process.env.EMAIL_FROM;
   if (!resend || !from) {
     console.warn("[email] not configured - skipping reminder email");
-    return false;
+    return null;
   }
   try {
-    const { error } = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from,
       to: input.to,
       subject: `Билетът ти за Sofia Life Summit чака · ${input.reference}`,
@@ -283,12 +284,12 @@ export async function sendReminderEmail(input: ReminderEmailInput): Promise<bool
     });
     if (error) {
       console.error("[email] reminder send failed:", error);
-      return false;
+      return null;
     }
-    return true;
+    return data?.id ?? "";
   } catch (error) {
     console.error("[email] reminder send threw:", error);
-    return false;
+    return null;
   }
 }
 

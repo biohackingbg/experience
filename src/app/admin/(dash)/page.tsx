@@ -305,7 +305,7 @@ export default async function AdminDashboard({
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="text-sm font-bold tracking-tight text-bh-ink">Недовършени поръчки</h2>
             <p className="text-xs text-bh-ink/55">
-              последните 14 дни · без хората, които после са купили · едно напомняне на поръчка, най-рано след денонощие
+              последните 14 дни · без хората, които после са купили · едно напомняне на поръчка, най-рано след денонощие · „кликнал“ е сигурно, „отворено“ е само знак
             </p>
           </div>
           {abandoned.length === 0 ? (
@@ -325,7 +325,13 @@ export default async function AdminDashboard({
                   <ReminderForm
                     reference={o.reference}
                     canRemind={o.canRemind}
-                    note={o.remindedAgo ? `напомнено ${o.remindedAgo}` : "може от утре"}
+                    note={
+                      o.remindedAgo
+                        ? `напомнено ${o.remindedAgo}${
+                            o.reminderClickedAt ? " · кликнал" : o.reminderOpenedAt ? " · отворено" : ""
+                          }`
+                        : "може от утре"
+                    }
                   />
                 </li>
               ))}

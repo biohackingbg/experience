@@ -29,6 +29,9 @@ export type AbandonedOrder = {
   createdAt: Date;
   items: string;
   reminderSentAt: Date | null;
+  /** What Resend saw afterwards. A click is a person; an open is a maybe. */
+  reminderOpenedAt: Date | null;
+  reminderClickedAt: Date | null;
   /** Old enough for the nudge, and not nudged before. */
   canRemind: boolean;
   /** "преди 3 ч" - worded here, on the server, where reading the clock is allowed. */
@@ -63,6 +66,8 @@ export async function getAbandonedOrders(limit = 30): Promise<AbandonedOrder[]> 
       totalCents: orders.totalCents,
       createdAt: orders.createdAt,
       reminderSentAt: orders.reminderSentAt,
+      reminderOpenedAt: orders.reminderOpenedAt,
+      reminderClickedAt: orders.reminderClickedAt,
     })
     .from(orders)
     .where(abandonedWhere())
@@ -87,6 +92,8 @@ export async function getAbandonedOrders(limit = 30): Promise<AbandonedOrder[]> 
     createdAt: o.createdAt,
     items: items.filter((i) => i.orderId === o.id).map((i) => `${i.quantity}× ${i.tierName}`).join(", "),
     reminderSentAt: o.reminderSentAt,
+    reminderOpenedAt: o.reminderOpenedAt,
+    reminderClickedAt: o.reminderClickedAt,
     canRemind: !o.reminderSentAt && o.createdAt.getTime() <= cutoff,
   }));
 }
@@ -131,7 +138,7 @@ export async function remindAbandonedOrder(reference: string): Promise<RemindRes
     .from(orderItems)
     .where(sql`${orderItems.orderId} = ${order.id}`);
 
-  const sent = await sendReminderEmail({
+  const emailId = await sendReminderEmail({
     to: order.email,
     buyerName: order.name,
     reference: order.reference,
@@ -139,11 +146,11 @@ export async function remindAbandonedOrder(reference: string): Promise<RemindRes
     resumePath: items[0] ? `/bilet?nivo=${items[0].tierId}` : "/bilet",
     early: await getEarlyAccess(),
   });
-  if (!sent) return { ok: false, reason: "send_failed" };
+  if (emailId === null) return { ok: false, reason: "send_failed" };
 
   await db
     .update(orders)
-    .set({ reminderSentAt: new Date() })
+    .set({ reminderSentAt: new Date(), reminderEmailId: emailId || null })
     .where(sql`${orders.id} = ${order.id}`);
   return { ok: true, to: order.email };
 }
