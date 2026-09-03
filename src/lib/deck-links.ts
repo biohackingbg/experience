@@ -29,27 +29,13 @@ export const STAGES = [
 ] as const;
 export type StageId = (typeof STAGES)[number]["id"];
 
-/** The packages as the deck sells them; "extra" covers the à-la-carte items. */
-export const TIERS = [
-  { id: "village", label: "Village щанд" },
-  { id: "silver", label: "Сребърен" },
-  { id: "gold", label: "Златен" },
-  { id: "platinum", label: "Платинен" },
-  { id: "both", label: "Двете събития" },
-  { id: "extra", label: "Екстра" },
-  { id: "media", label: "Медиен / бартер" },
-] as const;
-export type TierId = (typeof TIERS)[number]["id"];
-export const isTier = (v: unknown): v is TierId => TIERS.some((t) => t.id === v);
-
-/** Where the cash is. Agreed money is a promise; paid money is in the bank. */
-export const MONEY = [
-  { id: "agreed", label: "договорено" },
-  { id: "invoiced", label: "фактурирано" },
-  { id: "paid", label: "платено" },
-] as const;
-export type MoneyId = (typeof MONEY)[number]["id"];
-export const isMoney = (v: unknown): v is MoneyId => MONEY.some((m) => m.id === v);
+// Option lists live in finance-options.ts, which client forms may import.
+// Re-exported here so existing callers keep their import, and imported for
+// the local signatures below - a re-export alone does not bring a name into
+// this module's scope.
+import type { MoneyId, TierId } from "@/lib/finance-options";
+export { TIERS, MONEY, isTier, isMoney } from "@/lib/finance-options";
+export type { TierId, MoneyId } from "@/lib/finance-options";
 
 export function isStage(v: unknown): v is StageId {
   return typeof v === "string" && STAGES.some((s) => s.id === v);

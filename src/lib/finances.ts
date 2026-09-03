@@ -4,7 +4,7 @@ import { desc, eq, sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { budgets, deckLinks, expenses, orders } from "@/lib/db/schema";
-import { MONEY, TIERS } from "@/lib/deck-links";
+import { CATEGORIES, EXPENSE_STATUS, MONEY, TIERS, categoryLabel, type CategoryId, type ExpenseStatus } from "@/lib/finance-options";
 
 /**
  * The organisers' view of the money - not the books.
@@ -17,29 +17,8 @@ import { MONEY, TIERS } from "@/lib/deck-links";
  * more that matters for an event: how much of it is actually in the bank.
  */
 
-export const CATEGORIES = [
-  { id: "venue", label: "Зала" },
-  { id: "catering", label: "Кетъринг" },
-  { id: "tech", label: "Техника и сцена" },
-  { id: "speakers", label: "Лектори и пътувания" },
-  { id: "marketing", label: "Маркетинг" },
-  { id: "production", label: "Продукция и печат" },
-  { id: "team", label: "Екип" },
-  { id: "other", label: "Други" },
-] as const;
-export type CategoryId = (typeof CATEGORIES)[number]["id"];
-export const isCategory = (v: unknown): v is CategoryId => CATEGORIES.some((c) => c.id === v);
-export const categoryLabel = (id: string) => CATEGORIES.find((c) => c.id === id)?.label ?? id;
-
-export const EXPENSE_STATUS = [
-  { id: "planned", label: "планиран" },
-  { id: "invoiced", label: "фактуриран" },
-  { id: "paid", label: "платен" },
-  { id: "cancelled", label: "отменен" },
-] as const;
-export type ExpenseStatus = (typeof EXPENSE_STATUS)[number]["id"];
-export const isExpenseStatus = (v: unknown): v is ExpenseStatus =>
-  EXPENSE_STATUS.some((s) => s.id === v);
+export { CATEGORIES, EXPENSE_STATUS, isCategory, isExpenseStatus, categoryLabel } from "@/lib/finance-options";
+export type { CategoryId, ExpenseStatus } from "@/lib/finance-options";
 
 export type SponsorRow = {
   id: string;

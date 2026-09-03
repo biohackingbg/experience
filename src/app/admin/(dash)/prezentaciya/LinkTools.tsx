@@ -3,7 +3,7 @@
 import { useActionState, useState } from "react";
 
 import { createDeckLink, createDeckLinksBulk, type LinkFormState } from "./actions";
-import { MONEY, TIERS } from "@/lib/deck-links";
+import { MONEY, TIERS } from "@/lib/finance-options";
 
 // Lives here, not in actions.ts: a "use server" module may export only
 // async functions - an exported object fails the build.

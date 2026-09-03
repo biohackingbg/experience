@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 
-import { CATEGORIES, EXPENSE_STATUS } from "@/lib/finances";
+import { CATEGORIES, EXPENSE_STATUS } from "@/lib/finance-options";
 import { createExpense, saveBudget, type FormState } from "./actions";
 
 const idle: FormState = { status: "idle" };
