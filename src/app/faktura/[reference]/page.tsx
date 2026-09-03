@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { InvoiceDocument } from "@/components/InvoiceDocument";
+import { isAdmin } from "@/lib/admin-auth";
 import { PrintButton } from "./PrintButton";
 import { getInvoice } from "@/lib/invoices";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -35,16 +36,21 @@ export default async function InvoicePage({
   const inv = await getInvoice(decodeURIComponent(reference).toUpperCase());
   if (!inv) notFound();
 
+  // The same page serves the buyer and the team. The buyer's way back is
+  // the site; the team's is the dashboard they came from. Decided by the
+  // admin cookie, which the buyer does not have.
+  const admin = await isAdmin();
+
   return (
     <div className="bh-doc min-h-screen px-5 py-10 text-bh-ink sm:px-8 print:p-0">
       <div className="mx-auto w-full max-w-3xl">
         {/* Hidden on paper: the sheet should carry nothing but the document. */}
         <div className="mb-6 flex items-center justify-between gap-4 print:hidden">
           <Link
-            href="/"
+            href={admin ? "/admin" : "/"}
             className="font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/50 transition-colors hover:text-bh-ink"
           >
-            ← Към сайта
+            {admin ? "← Към таблото" : "← Към сайта"}
           </Link>
           <div className="flex items-center gap-4">
             {inv.creditNoteNumber && (
