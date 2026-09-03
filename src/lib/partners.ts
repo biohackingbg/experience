@@ -29,6 +29,8 @@ export type Partner = {
 };
 
 export const PARTNERS: Partner[] = [
+  { name: "Health Upgrade", logo: "/partners/health-upgrade-white.png" },
+  { name: "Amuse Bouche", logo: "/partners/amuse-bouche-white.png" },
   { name: "Regina Life Clinic", logo: "/partners/regina-life-clinic-white.png" },
   { name: "Alpha Life Sciences", logo: "/partners/alpha-life-sciences-white.png" },
   { name: "AgeHack", logo: "/partners/agehack-white.png" },
