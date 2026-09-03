@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { isAdmin } from "@/lib/admin-auth";
-import { addExpense, isCategory, isExpenseStatus, setBudget, setExpenseStatus } from "@/lib/finances";
+import { addExpense, isCategory, isExpenseStatus, removeBudget, setBudget, setExpenseStatus } from "@/lib/finances";
 
 export type FormState = { status: "idle" | "ok" | "error"; message?: string };
 
@@ -58,9 +58,19 @@ export async function changeExpenseStatus(formData: FormData): Promise<void> {
 export async function saveBudget(_prev: FormState, formData: FormData): Promise<FormState> {
   if (!(await isAdmin())) return { status: "error", message: "Няма достъп." };
   const category = formData.get("category");
+  if (!isCategory(category)) return { status: "error", message: "Невалидна категория." };
+
+  // An emptied field means "no budget for this category", not a typo.
+  const raw = String(formData.get("amount") ?? "").trim();
+  if (!raw) {
+    await removeBudget(category);
+    revalidatePath("/admin/finansi");
+    return { status: "ok", message: "Махнат" };
+  }
+
   const amountCents = cents(formData.get("amount"));
-  if (!isCategory(category) || amountCents === null) return { status: "error", message: "Невалидни данни." };
+  if (amountCents === null) return { status: "error", message: "Не е число" };
   await setBudget(category, amountCents);
   revalidatePath("/admin/finansi");
-  return { status: "ok", message: "Бюджетът е записан." };
+  return { status: "ok", message: "Записан" };
 }

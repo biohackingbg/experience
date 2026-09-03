@@ -159,6 +159,11 @@ export async function setExpenseStatus(id: string, status: ExpenseStatus): Promi
   await getDb().update(expenses).set({ status, updatedAt: new Date() }).where(eq(expenses.id, id));
 }
 
+/** Clearing the field removes the budget - the category then reads "няма бюджет". */
+export async function removeBudget(category: CategoryId): Promise<void> {
+  await getDb().delete(budgets).where(eq(budgets.category, category));
+}
+
 export async function setBudget(category: CategoryId, amountCents: number): Promise<void> {
   await getDb()
     .insert(budgets)
