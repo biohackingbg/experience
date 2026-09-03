@@ -2,12 +2,8 @@ import type { Metadata } from "next";
 import { Sofia_Sans, Geologica, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ViewTracker } from "@/components/ViewTracker";
-import {
-  TIERS,
-  formatPrice,
-  priceCents,
-  isEarlyAccess,
-} from "@/lib/tickets";
+import { getEarlyAccess } from "@/lib/settings";
+import { TIERS, formatPrice, priceCents } from "@/lib/tickets";
 
 /** Both faces carry Cyrillic, so Bulgarian headings no longer fall back. */
 const bodyFont = Geologica({
@@ -43,7 +39,7 @@ function describe(early: boolean): string {
  * after the early window has closed.
  */
 export async function generateMetadata(): Promise<Metadata> {
-  const DESCRIPTION = describe(isEarlyAccess());
+  const DESCRIPTION = describe(await getEarlyAccess());
   return {
   // Makes the generated OG image resolve to an absolute URL, which every
   // social crawler requires.

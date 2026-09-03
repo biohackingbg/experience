@@ -4,13 +4,17 @@ import { redirect } from "next/navigation";
 
 import { isAdmin } from "@/lib/admin-auth";
 
+import { getAbandonedOrders } from "@/lib/abandoned";
 import { getDashboardData, searchOrders } from "@/lib/admin-stats";
 import { getTrafficData } from "@/lib/site-views";
 import { getFinances } from "@/lib/finances";
+import { getEarlyAccessState } from "@/lib/settings";
 import { ResendForm } from "./fakturi/ResendForm";
 import { formatPrice } from "@/lib/tickets";
 import { logout } from "../actions";
 import { DailyChart } from "./DailyChart";
+import { PriceSwitch } from "./PriceSwitch";
+import { ReminderForm } from "./ReminderForm";
 import { TierBars } from "./TierBars";
 
 export const metadata: Metadata = {
@@ -57,11 +61,13 @@ export default async function AdminDashboard({
   if (!(await isAdmin())) redirect("/admin/login");
 
   const { q = "" } = await searchParams;
-  const [d, traffic, found, fin] = await Promise.all([
+  const [d, traffic, found, fin, early, abandoned] = await Promise.all([
     getDashboardData(),
     getTrafficData(30),
     searchOrders(q),
     getFinances(),
+    getEarlyAccessState(),
+    getAbandonedOrders(),
   ]);
   const soldPct = d.capacityTotal
     ? Math.round((d.ticketsSold / d.capacityTotal) * 100)
@@ -143,6 +149,8 @@ export default async function AdminDashboard({
                 : `С това темпо до ноември ще се продадат още около ${Math.round(pacePerDay * daysLeft)} - остават ${seatsLeft} места. Смятано по последните 7 дни.`}
           </p>
         </div>
+
+        <PriceSwitch open={early.open} changedAt={early.changedAt} sold={d.ticketsSold} />
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <Tile
@@ -251,6 +259,40 @@ export default async function AdminDashboard({
                 ))}
               </ul>
             )
+          )}
+        </section>
+
+        {/* Money that got as far as the checkout and stopped. One nudge each,
+            by hand, a day later - never automatic, never twice. */}
+        <section className="mt-6 rounded-2xl bg-bh-cloud p-6 ring-1 ring-bh-ink/8">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="text-sm font-bold tracking-tight text-bh-ink">Недовършени поръчки</h2>
+            <p className="text-xs text-bh-ink/55">
+              последните 14 дни · без хората, които после са купили · едно напомняне на поръчка, най-рано след денонощие
+            </p>
+          </div>
+          {abandoned.length === 0 ? (
+            <p className="mt-4 text-sm text-bh-ink/55">Няма недовършени поръчки.</p>
+          ) : (
+            <ul className="mt-4 flex flex-col gap-2">
+              {abandoned.map((o) => (
+                <li key={o.reference} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-bh-paper px-4 py-3 ring-1 ring-bh-ink/8">
+                  <div className="min-w-0">
+                    <span className="font-mono text-xs text-bh-ink/70">{o.reference}</span>
+                    <span className="ml-3 font-medium text-bh-ink">{o.name}</span>
+                    <span className="ml-2 text-xs text-bh-ink/55">{o.email}</span>
+                    <div className="mt-0.5 text-xs text-bh-ink/60">
+                      {o.items} · <Money cents={o.totalCents} /> · {o.ago}
+                    </div>
+                  </div>
+                  <ReminderForm
+                    reference={o.reference}
+                    canRemind={o.canRemind}
+                    note={o.remindedAgo ? `напомнено ${o.remindedAgo}` : "може от утре"}
+                  />
+                </li>
+              ))}
+            </ul>
           )}
         </section>
 

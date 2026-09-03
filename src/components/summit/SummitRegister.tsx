@@ -1,7 +1,8 @@
 import Link from "next/link";
 
 // import { EarlyAccessForm } from "@/components/summit/EarlyAccessForm";
-import { EARLY_ACCESS, SALES_OPEN, TIERS, formatPrice, isEarlyAccess } from "@/lib/tickets";
+import { getEarlyAccess } from "@/lib/settings";
+import { EARLY_ACCESS, SALES_OPEN, TIERS, formatPrice } from "@/lib/tickets";
 import { Reveal } from "@/components/ui/Reveal";
 import { Calendar, Pin, TicketIcon } from "@/components/ui/Pictograms";
 
@@ -14,8 +15,8 @@ import { Calendar, Pin, TicketIcon } from "@/components/ui/Pictograms";
  * what the visitor loses by waiting. The form, its consent copy and the
  * signups table all stay in place for when there is something to send.
  */
-export function SummitRegister() {
-  const early = isEarlyAccess();
+export async function SummitRegister() {
+  const early = await getEarlyAccess();
 
   const facts = [
     { label: "Дати", value: "07-08 ноември 2026", icon: Calendar },

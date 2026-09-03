@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { isTestMode } from "@/lib/stripe";
-import { EARLY_ACCESS, SALES_OPEN, isEarlyAccess } from "@/lib/tickets";
+import { getEarlyAccess } from "@/lib/settings";
+import { EARLY_ACCESS, SALES_OPEN } from "@/lib/tickets";
 import { CheckoutForm } from "./CheckoutForm";
 
 export const metadata: Metadata = {
@@ -21,7 +22,7 @@ export default async function CheckoutPage({
 }) {
   const { nivo, otkazano } = await searchParams;
   const testMode = isTestMode();
-  const early = isEarlyAccess();
+  const early = await getEarlyAccess();
 
   // While sales are closed the page still answers - a shared link should
   // explain itself rather than 404 - but it carries no prices and no form.

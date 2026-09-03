@@ -1,12 +1,6 @@
+import { getEarlyAccess } from "@/lib/settings";
 import { announcedSpeakers } from "@/lib/speakers";
-import {
-  SALES_OPEN,
-  CURRENCY,
-  PRE_ORDER,
-  TIERS,
-  priceCents,
-  isEarlyAccess,
-} from "@/lib/tickets";
+import { SALES_OPEN, CURRENCY, PRE_ORDER, TIERS, priceCents } from "@/lib/tickets";
 
 /**
  * Speakers, as schema.org performers.
@@ -38,8 +32,8 @@ const performers = announcedSpeakers().map((s) => ({
  * life of the server process - advertising a price in search that the checkout
  * no longer charges.
  */
-export function buildEventSchema() {
-  const early = isEarlyAccess();
+export async function buildEventSchema() {
+  const early = await getEarlyAccess();
 
   return {
   "@context": "https://schema.org",

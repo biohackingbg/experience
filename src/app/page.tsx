@@ -14,19 +14,19 @@ import { SummitOrganizers } from "@/components/summit/SummitOrganizers";
 import { SummitFooter } from "@/components/summit/SummitFooter";
 import { buildEventSchema } from "@/lib/event-schema";
 
-// Re-rendered periodically so the early-access window can close on its own.
-// A fully static page would keep advertising the launch price until the next
-// deploy - and closing the launch prices is a deploy, so a few minutes of
-// staleness is the whole exposure.
+// Re-rendered periodically as a safety net. Closing the launch prices is a
+// switch in the admin, and that switch revalidates this page on the spot;
+// this interval only covers a flip that somehow did not.
 export const revalidate = 300;
 
-export default function Home() {
+export default async function Home() {
+  const eventSchema = await buildEventSchema();
   return (
     <div className="overflow-clip rounded-[1.75rem] bg-bh-paper">
       <script
         type="application/ld+json"
-        // Static, authored object - no user input reaches this.
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildEventSchema()) }}
+        // Authored object - no user input reaches this.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }}
       />
       <SummitNav />
       <main>

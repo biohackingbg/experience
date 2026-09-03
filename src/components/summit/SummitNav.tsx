@@ -2,13 +2,8 @@ import Link from "next/link";
 
 import { ScrollProgress } from "@/components/ui/ScrollProgress";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import {
-  TIERS,
-  SALES_OPEN,
-  formatPrice,
-  priceCents,
-  isEarlyAccess,
-} from "@/lib/tickets";
+import { getEarlyAccess } from "@/lib/settings";
+import { TIERS, SALES_OPEN, formatPrice, priceCents } from "@/lib/tickets";
 
 const links = [
   // Same order the sections appear in on the page.
@@ -18,10 +13,10 @@ const links = [
   { href: "#tickets", label: "Билети" },
 ];
 
-export function SummitNav() {
+export async function SummitNav() {
   // The hero gave up its CTA row for a cleaner composition; the price anchor
   // moves here, onto the one button that is now always on screen.
-  const early = isEarlyAccess();
+  const early = await getEarlyAccess();
   // The cheapest tier, not just the cheapest number: the button links to it,
   // so the two must be the same tier.
   const cheapestTier = TIERS.reduce((a, b) =>

@@ -108,6 +108,13 @@ export const orders = pgTable(
     paidAt: timestamp("paid_at", { withTimezone: true }),
 
     /**
+     * When the "you did not finish" email went out, for an abandoned checkout.
+     * One reminder per order, ever - a buyer who walked away is not to be
+     * chased, only told once that the door is still open.
+     */
+    reminderSentAt: timestamp("reminder_sent_at", { withTimezone: true }),
+
+    /**
      * Set from Stripe's charge.refunded event. A full refund flips `status`
      * to "refunded", which is what stops the tickets at the door; a partial
      * one only records the amount and leaves the order paid. The invoice
@@ -367,6 +374,18 @@ export const siteViews = pgTable(
     index("site_views_visitor_idx").on(table.visitor, table.createdAt),
   ],
 );
+
+/**
+ * The handful of switches the organisers flip themselves - today only whether
+ * the launch prices are on. A key-value table rather than a column somewhere:
+ * these are decisions, not data, and there will be two or three of them ever.
+ * The code keeps a default for each key, so an empty table is a valid state.
+ */
+export const settings = pgTable("settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
 
 export type DeckLink = typeof deckLinks.$inferSelect;
 

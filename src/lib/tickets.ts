@@ -38,10 +38,11 @@ export const SALES_SOON_LABEL = "Очаквайте скоро";
  * evening with nobody watching. The organisers close it themselves, so the
  * moment is chosen rather than stumbled into.
  *
- * `open` is the switch. Flip it to false and every price on the site, in the
- * checkout and in the structured data moves to the list price together.
- * How many are actually sold is in the admin dashboard, which is where the
- * decision gets made from.
+ * `open` is the default. The live switch is in the admin dashboard and lives
+ * in the database (`getEarlyAccess` in lib/settings.ts); flipping it moves
+ * every price on the site, in the checkout and in the structured data to the
+ * list price together, without a deploy. This constant only answers while
+ * nobody has touched the switch yet.
  *
  * Note on how this is worded on the page: under the Omnibus rules (ЗЗП чл.
  * 64б) an announced *reduction* must show the lowest price charged in the
@@ -155,9 +156,8 @@ export function getTier(id: string): Tier | undefined {
 }
 
 /** Whether the launch prices still apply. */
-export function isEarlyAccess(): boolean {
-  return SALES_OPEN && EARLY_ACCESS.open;
-}
+// Whether the launch prices apply is answered by `getEarlyAccess` in
+// lib/settings.ts - it reads the organisers' switch, this file cannot.
 
 /** What the buyer pays, VAT included, in cents. */
 export function priceCents(tier: Tier, early: boolean): number {

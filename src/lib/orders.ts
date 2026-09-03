@@ -5,14 +5,8 @@ import { sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { orderItems, orders, tickets } from "@/lib/db/schema";
-import {
-  CURRENCY,
-  VAT_RATE,
-  getTier,
-  isEarlyAccess,
-  priceCents,
-  splitVat,
-} from "@/lib/tickets";
+import { getEarlyAccess } from "@/lib/settings";
+import { CURRENCY, VAT_RATE, getTier, priceCents, splitVat } from "@/lib/tickets";
 
 /**
  * How long an unpaid order keeps holding a seat. Must stay LONGER than the
@@ -74,6 +68,10 @@ export async function createPendingOrder(
   }
 
   const db = getDb();
+  // Resolved once, before the lock is taken. Everything downstream - the row,
+  // the total and the Stripe line item - uses this answer, so the launch
+  // prices being closed mid-request cannot record one price and charge another.
+  const early = await getEarlyAccess();
 
   return db.transaction(async (tx) => {
     // Serialise everyone buying this tier for the rest of the transaction.
@@ -100,10 +98,7 @@ export async function createPendingOrder(
       return { ok: false as const, reason: "sold_out" as const, left: Math.max(left, 0) };
     }
 
-    // Resolved once. Everything downstream - the row, the total and the
-    // Stripe line item - uses this number, so the launch prices being closed
-    // mid-request cannot record one price and charge another.
-    const unitPriceCents = priceCents(tier, isEarlyAccess());
+    const unitPriceCents = priceCents(tier, early);
     const totalCents = unitPriceCents * input.quantity;
     const { netCents, vatCents } = splitVat(totalCents);
     const reference = `SLS-${randomCode(6)}`;

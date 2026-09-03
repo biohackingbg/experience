@@ -1,13 +1,13 @@
 import Link from "next/link";
 
 import { Reveal } from "@/components/ui/Reveal";
+import { getEarlyAccess } from "@/lib/settings";
 import {
   EARLY_ACCESS,
   TIERS,
   SALES_OPEN,
   SALES_SOON_LABEL,
   formatPrice,
-  isEarlyAccess,
   priceCents,
   tierDiscountLabel,
 } from "@/lib/tickets";
@@ -32,8 +32,8 @@ function Check({ muted }: { muted?: boolean }) {
   );
 }
 
-export function SummitTickets() {
-  const early = isEarlyAccess();
+export async function SummitTickets() {
+  const early = await getEarlyAccess();
 
   return (
     <section id="tickets" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
