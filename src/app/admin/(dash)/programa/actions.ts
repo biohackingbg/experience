@@ -24,7 +24,18 @@ function parse(formData: FormData): { ok: true; input: SessionInput } | { ok: fa
   const s = (k: string, max: number) => String(formData.get(k) ?? "").trim().slice(0, max) || null;
   return {
     ok: true,
-    input: { day, time, title, note: s("note", 600), role: s("role", 160), people: s("people", 600), pause: formData.get("pause") === "on" },
+    input: {
+      day,
+      time,
+      title,
+      note: s("note", 600),
+      role: s("role", 160),
+      people: s("people", 600),
+      pause: formData.get("pause") === "on",
+      titleEn: s("titleEn", 200),
+      noteEn: s("noteEn", 600),
+      roleEn: s("roleEn", 160),
+    },
   };
 }
 

@@ -32,6 +32,14 @@ function Fields({ day, s }: { day: number; s?: SessionRow }) {
         <input type="checkbox" name="pause" defaultChecked={s?.pause} className="h-3.5 w-3.5 accent-[#146455]" />
         пауза (регистрация, кафе, обяд) - показва се по-тихо
       </label>
+      {/* Optional: the English site falls back to the Bulgarian text where
+          these are empty, so a half-translated programme still reads. */}
+      <details className="mt-2" open={!!(s?.titleEn || s?.noteEn || s?.roleEn)}>
+        <summary className="cursor-pointer text-xs font-semibold text-bh-ink/60">На английски (по избор)</summary>
+        <input name="titleEn" defaultValue={s?.titleEn ?? ""} placeholder="title in English" className={`${field} mt-2`} />
+        <textarea name="noteEn" defaultValue={s?.noteEn ?? ""} rows={2} placeholder="what it is about, in English" className={`${field} mt-2`} />
+        <input name="roleEn" defaultValue={s?.roleEn ?? ""} placeholder="e.g. Moderator: Diana Radeva" className={`${field} mt-2`} />
+      </details>
     </>
   );
 }

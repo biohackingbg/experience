@@ -540,6 +540,10 @@ export const sessions = pgTable(
     note: text("note"),
     /** "Модератор: Диана Радева" - how the people below are billed. */
     role: text("role"),
+    /** The English page falls back to the Bulgarian text where these are empty. */
+    titleEn: text("title_en"),
+    noteEn: text("note_en"),
+    roleEn: text("role_en"),
     /** Names, one per line. */
     people: text("people"),
     /** Registration, coffee, lunch - rendered quietly. */
@@ -579,6 +583,11 @@ export const speakers = pgTable(
     affiliation: text("affiliation"),
     role: text("role"),
     topic: text("topic"),
+    /** English versions; the English page falls back to the Bulgarian ones. */
+    titleEn: text("title_en"),
+    specialtyEn: text("specialty_en"),
+    roleEn: text("role_en"),
+    topicEn: text("topic_en"),
     photo: bytea("photo"),
     photoMime: text("photo_mime"),
     /** Bumped on every upload; part of the image URL, so caches move on. */
@@ -618,6 +627,8 @@ export const workshops = pgTable("workshops", {
   kind: text("kind").notNull(),
   title: text("title").notNull(),
   description: text("description"),
+  titleEn: text("title_en"),
+  descriptionEn: text("description_en"),
   /** Who runs it, as it should read on the page. */
   host: text("host"),
   /** Room or zone, for the person looking for it on the day. */

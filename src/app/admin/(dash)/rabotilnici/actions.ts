@@ -33,7 +33,20 @@ function parse(formData: FormData): { ok: true; input: WorkshopInput } | { ok: f
 
   return {
     ok: true,
-    input: { kind, title, description: s("description", 600), host: s("host", 160), location: s("location", 120), day, startsAt, endsAt, capacity, active: formData.get("active") !== null },
+    input: {
+      kind,
+      title,
+      description: s("description", 600),
+      titleEn: s("titleEn", 200),
+      descriptionEn: s("descriptionEn", 600),
+      host: s("host", 160),
+      location: s("location", 120),
+      day,
+      startsAt,
+      endsAt,
+      capacity,
+      active: formData.get("active") !== null,
+    },
   };
 }
 

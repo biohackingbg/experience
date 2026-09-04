@@ -6,6 +6,7 @@ import { asc, eq, sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { speakers } from "@/lib/db/schema";
+import type { Lang } from "@/lib/i18n";
 import { SPEAKERS, type Speaker } from "@/lib/speakers";
 
 /**
@@ -27,6 +28,10 @@ export type SpeakerRow = {
   affiliation: string | null;
   role: string | null;
   topic: string | null;
+  titleEn: string | null;
+  specialtyEn: string | null;
+  roleEn: string | null;
+  topicEn: string | null;
   hasPhoto: boolean;
   photoUpdatedAt: Date | null;
   updatedAt: Date | null;
@@ -44,6 +49,10 @@ const cols = {
   affiliation: speakers.affiliation,
   role: speakers.role,
   topic: speakers.topic,
+  titleEn: speakers.titleEn,
+  specialtyEn: speakers.specialtyEn,
+  roleEn: speakers.roleEn,
+  topicEn: speakers.topicEn,
   hasPhoto: sql<boolean>`${speakers.photo} is not null`,
   photoUpdatedAt: speakers.photoUpdatedAt,
   updatedAt: speakers.updatedAt,
@@ -56,16 +65,18 @@ export async function listSpeakers(): Promise<SpeakerRow[]> {
 export const photoUrl = (r: { id: string; hasPhoto: boolean; photoUpdatedAt: Date | null }) =>
   r.hasPhoto ? `/api/lektor/${r.id}?v=${r.photoUpdatedAt?.getTime() ?? 0}` : undefined;
 
-function toSpeaker(r: SpeakerRow): Speaker {
+function toSpeaker(r: SpeakerRow, lang: Lang = "bg"): Speaker {
+  // English where it has been filled in, the Bulgarian original otherwise.
+  const en = lang === "en";
   return {
     id: r.id,
     name: r.name,
-    title: r.title ?? undefined,
-    specialty: r.specialty ?? undefined,
+    title: (en ? r.titleEn : null) || r.title || undefined,
+    specialty: (en ? r.specialtyEn : null) || r.specialty || undefined,
     country: r.country ?? undefined,
     affiliation: r.affiliation ?? undefined,
-    role: r.role ?? undefined,
-    topic: r.topic ?? undefined,
+    role: (en ? r.roleEn : null) || r.role || undefined,
+    topic: (en ? r.topicEn : null) || r.topic || undefined,
     photo: photoUrl(r),
     pending: r.pending || undefined,
     announced: r.announced,
@@ -73,7 +84,7 @@ function toSpeaker(r: SpeakerRow): Speaker {
 }
 
 /** What the page and the structured data show. */
-export async function getAnnouncedSpeakers(): Promise<Speaker[]> {
+export async function getAnnouncedSpeakers(lang: Lang = "bg"): Promise<Speaker[]> {
   let rows: SpeakerRow[] = [];
   try {
     rows = await listSpeakers();
@@ -85,7 +96,7 @@ export async function getAnnouncedSpeakers(): Promise<Speaker[]> {
     const all = process.env.PREVIEW_ALL_SPEAKERS === "1";
     return SPEAKERS.filter((s) => !s.pending && (all || s.announced));
   }
-  return rows.filter((r) => !r.pending && r.announced).map(toSpeaker);
+  return rows.filter((r) => !r.pending && r.announced).map((r) => toSpeaker(r, lang));
 }
 
 async function readPublicPhoto(p: string): Promise<{ bytes: Buffer; mime: string } | null> {
@@ -133,7 +144,10 @@ export async function importSpeakers(): Promise<number> {
   return n;
 }
 
-export type SpeakerInput = Pick<SpeakerRow, "name" | "title" | "specialty" | "country" | "affiliation" | "role" | "topic" | "announced" | "pending">;
+export type SpeakerInput = Pick<
+  SpeakerRow,
+  "name" | "title" | "specialty" | "country" | "affiliation" | "role" | "topic" | "titleEn" | "specialtyEn" | "roleEn" | "topicEn" | "announced" | "pending"
+>;
 
 /** "Д-р Мария Иванова" -> "mariya-ivanova"; unique by suffix if taken. */
 export async function slugFor(name: string): Promise<string> {

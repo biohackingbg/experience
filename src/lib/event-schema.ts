@@ -34,6 +34,7 @@ const performersOf = (list: Awaited<ReturnType<typeof getAnnouncedSpeakers>>) =>
  */
 export async function buildEventSchema() {
   const [pricing, speakers] = await Promise.all([getPricing(), getAnnouncedSpeakers()]);
+  // The schema stays Bulgarian: it describes the event once, not per page.
   const performers = performersOf(speakers);
 
   return {

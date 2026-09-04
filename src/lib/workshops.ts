@@ -23,6 +23,8 @@ export type Workshop = {
   kind: WorkshopKind;
   title: string;
   description: string | null;
+  titleEn: string | null;
+  descriptionEn: string | null;
   host: string | null;
   location: string | null;
   day: number;
@@ -48,6 +50,8 @@ export async function listWorkshops(includeInactive = false): Promise<Workshop[]
       kind: workshops.kind,
       title: workshops.title,
       description: workshops.description,
+      titleEn: workshops.titleEn,
+      descriptionEn: workshops.descriptionEn,
       host: workshops.host,
       location: workshops.location,
       day: workshops.day,
@@ -197,6 +201,8 @@ export type WorkshopInput = {
   kind: WorkshopKind;
   title: string;
   description: string | null;
+  titleEn: string | null;
+  descriptionEn: string | null;
   host: string | null;
   location: string | null;
   day: number;

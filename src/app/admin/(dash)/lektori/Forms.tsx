@@ -29,6 +29,15 @@ function Fields({ s }: { s?: SpeakerRow }) {
         <input name="role" defaultValue={s?.role ?? ""} placeholder="позиция (напр. Председател)" className={field} />
         <input name="affiliation" defaultValue={s?.affiliation ?? ""} placeholder="институция / компания" className={field} />
       </div>
+      <details className="mt-2" open={!!(s?.titleEn || s?.specialtyEn || s?.roleEn || s?.topicEn)}>
+        <summary className="cursor-pointer text-xs font-semibold text-bh-ink/60">На английски (по избор)</summary>
+        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+          <input name="titleEn" defaultValue={s?.titleEn ?? ""} placeholder="Prof. Dr." className={field} />
+          <input name="specialtyEn" defaultValue={s?.specialtyEn ?? ""} placeholder="speciality in English" className={field} />
+          <input name="roleEn" defaultValue={s?.roleEn ?? ""} placeholder="position in English" className={field} />
+          <input name="topicEn" defaultValue={s?.topicEn ?? ""} placeholder="topic in English" className={field} />
+        </div>
+      </details>
       <div className="mt-2 flex flex-wrap gap-4 text-xs text-bh-ink/70">
         <label className="flex items-center gap-2">
           <input type="checkbox" name="announced" defaultChecked={s?.announced ?? false} className="h-3.5 w-3.5 accent-[#146455]" />

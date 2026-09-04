@@ -37,6 +37,9 @@ export type SessionRow = {
   role: string | null;
   people: string | null;
   pause: boolean;
+  titleEn: string | null;
+  noteEn: string | null;
+  roleEn: string | null;
 };
 
 export async function listSessions(): Promise<SessionRow[]> {
@@ -60,9 +63,11 @@ export async function getProgram(lang: Lang = "bg"): Promise<Day[]> {
       .filter((r) => r.day === i + 1)
       .map<Slot>((r) => ({
         time: r.time,
-        title: r.title,
-        note: r.note ?? undefined,
-        role: r.role ?? undefined,
+        // English where it exists, the Bulgarian original where it does not:
+        // a half-translated programme should read as a programme, not as gaps.
+        title: (lang === "en" ? r.titleEn : null) || r.title,
+        note: (lang === "en" ? r.noteEn : null) || r.note || undefined,
+        role: (lang === "en" ? r.roleEn : null) || r.role || undefined,
         people: peopleList(r.people).length ? peopleList(r.people) : undefined,
         pause: r.pause || undefined,
       })),

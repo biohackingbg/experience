@@ -142,8 +142,8 @@ export default async function TicketPage({
             sessions={sessions.map((w) => ({
               id: w.id,
               kind: w.kind,
-              title: w.title,
-              description: w.description,
+              title: (ticket.lang === "en" ? w.titleEn : null) || w.title,
+              description: (ticket.lang === "en" ? w.descriptionEn : null) || w.description,
               host: w.host,
               location: w.location,
               day: w.day,

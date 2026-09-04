@@ -39,6 +39,11 @@ function Fields({ w }: { w?: Workshop }) {
         <input name="endsAt" type="time" defaultValue={w?.endsAt ?? "12:00"} required className={field} />
         <input name="capacity" type="number" min={1} max={2000} defaultValue={w?.capacity ?? 20} required className={field} title="места" />
       </div>
+      <details className="mt-2" open={!!(w?.titleEn || w?.descriptionEn)}>
+        <summary className="cursor-pointer text-xs font-semibold text-bh-ink/60">На английски (по избор)</summary>
+        <input name="titleEn" defaultValue={w?.titleEn ?? ""} placeholder="title in English" className={`${field} mt-2`} />
+        <textarea name="descriptionEn" defaultValue={w?.descriptionEn ?? ""} rows={2} placeholder="what it is about, in English" className={`${field} mt-2`} />
+      </details>
       <label className="mt-2 flex items-center gap-2 text-xs text-bh-ink/70">
         <input type="checkbox" name="active" defaultChecked={w?.active ?? true} className="h-3.5 w-3.5 accent-[#146455]" />
         отворена за записване

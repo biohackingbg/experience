@@ -12,7 +12,7 @@ import { getAnnouncedSpeakers } from "@/lib/speakers-data";
  * revealing the first eight, the rest on request.
  */
 export async function SummitSpeakers({ lang = "bg" }: { lang?: Lang }) {
-  const speakers = await getAnnouncedSpeakers();
+  const speakers = await getAnnouncedSpeakers(lang);
   const c = SPEAKERS_SECTION[lang];
   return (
     <section id="lektori" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
