@@ -58,6 +58,8 @@ export type DashboardData = {
   pendingOrders: number;
   abandonedOrders: number;
   refundedOrders: number;
+  /** Orders marked as the team's own tests - skipped by every figure here. */
+  testOrders: number;
   ticketsSold: number;
   capacityTotal: number;
   /** Paid tickets in the last seven days - the pace the room is filling at. */
@@ -94,6 +96,7 @@ export async function getDashboardData(): Promise<DashboardData> {
           vat: sql<number>`coalesce(sum(${orders.vatCents}) filter (where ${orders.status} = 'paid' and not ${orders.isTest}), 0)::int`,
           paid: sql<number>`count(*) filter (where ${orders.status} = 'paid' and not ${orders.isTest})::int`,
           refunded: sql<number>`count(*) filter (where ${orders.status} = 'refunded' and not ${orders.isTest})::int`,
+          test: sql<number>`count(*) filter (where ${orders.isTest})::int`,
           // Still inside the seat hold - a payment may yet land.
           pending: sql<number>`count(*) filter (where ${orders.status} = 'pending' and not ${orders.isTest} and ${orders.createdAt} > now() - interval '${sql.raw(String(PENDING_HOLD_MINUTES))} minutes')::int`,
           // Hold expired without payment: the checkout was closed. Their seats
@@ -140,8 +143,6 @@ export async function getDashboardData(): Promise<DashboardData> {
           isTest: orders.isTest,
         })
         .from(orders)
-        // Test purchases are found by search, never listed.
-        .where(sql`not ${orders.isTest}`)
         .orderBy(desc(orders.createdAt))
         .limit(25),
 
@@ -216,6 +217,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     pendingOrders: totals[0]?.pending ?? 0,
     abandonedOrders: totals[0]?.abandoned ?? 0,
     refundedOrders: totals[0]?.refunded ?? 0,
+    testOrders: totals[0]?.test ?? 0,
     ticketsSold: perTier.reduce((sum, t) => sum + t.sold, 0),
     capacityTotal: TIERS.reduce((sum, t) => sum + t.capacity, 0),
     soldLast7Days: last7Row[0]?.n ?? 0,

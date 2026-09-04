@@ -60,6 +60,25 @@ function StatusChip({ status }: { status: string }) {
   return <span className={`rounded-full px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide ${tone}`}>{label}</span>;
 }
 
+/** One click hides a test purchase from every figure; the invoice stays. The same button brings it back. */
+function TestToggle({ reference, isTest }: { reference: string; isTest: boolean }) {
+  return (
+    <form action={setTestOrder}>
+      <input type="hidden" name="reference" value={reference} />
+      <input type="hidden" name="to" value={isTest ? "0" : "1"} />
+      <button
+        type="submit"
+        title={isTest ? "Върни в статистиката" : "Скрий от статистиката като тестова поръчка"}
+        className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+          isTest ? "bg-[#d0a11a]/20 text-[#7a5c05] hover:bg-[#d0a11a]/35" : "border border-[#0b2a22]/20 text-[#0b2a22]/70 hover:border-[#0b2a22] hover:text-[#0b2a22]"
+        }`}
+      >
+        {isTest ? "тестова · покажи" : "тестова"}
+      </button>
+    </form>
+  );
+}
+
 /** The arrow-in-a-ring every stat tile carries, pointing at its detail. */
 function Arrow({ href, dark }: { href: string; dark?: boolean }) {
   return (
@@ -246,9 +265,10 @@ export default async function AdminDashboard({
           value={d.ticketsSold}
           href="#niva"
           sub={
-            <span className="inline-flex items-center gap-2">
+            <span className="inline-flex flex-wrap items-center gap-2">
               <span className="rounded-md bg-white/15 px-1.5 py-0.5 font-mono text-[0.62rem]">{soldPct}%</span>
               днес {d.soldToday} · вчера {d.soldYesterday} · от {d.capacityTotal} места
+              {d.testOrders ? ` · ${d.testOrders} тестови скрити` : ""}
             </span>
           }
         />
@@ -305,20 +325,7 @@ export default async function AdminDashboard({
                       <span className="text-xs text-[#0b2a22]/60">{o.items} · <Money cents={o.totalCents} /></span>
                       <StatusChip status={o.status} />
                       {o.status === "paid" && <ResendForm reference={o.reference} />}
-                      {/* One click hides a test purchase from every figure; the invoice stays. */}
-                      <form action={setTestOrder}>
-                        <input type="hidden" name="reference" value={o.reference} />
-                        <input type="hidden" name="to" value={o.isTest ? "0" : "1"} />
-                        <button
-                          type="submit"
-                          title={o.isTest ? "Върни в статистиката" : "Скрий от статистиката като тестова поръчка"}
-                          className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
-                            o.isTest ? "bg-[#d0a11a]/20 text-[#7a5c05] hover:bg-[#d0a11a]/35" : "border border-[#0b2a22]/20 text-[#0b2a22]/70 hover:border-[#0b2a22] hover:text-[#0b2a22]"
-                          }`}
-                        >
-                          {o.isTest ? "тестова · покажи" : "тестова"}
-                        </button>
-                      </form>
+                      <TestToggle reference={o.reference} isTest={o.isTest} />
                     </div>
                   </div>
                   {o.tickets.length > 0 && (
@@ -361,7 +368,7 @@ export default async function AdminDashboard({
               <p className="mt-5 text-sm text-[#0b2a22]/55">Още няма поръчки.</p>
             ) : (
               <ul className="mt-5 flex flex-col gap-4">
-                {d.recent.slice(0, 5).map((o) => (
+                {d.recent.filter((o) => !o.isTest).slice(0, 5).map((o) => (
                   <li key={o.reference} className="flex items-start gap-3">
                     <span
                       className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${
@@ -490,7 +497,7 @@ export default async function AdminDashboard({
           <p className="mt-4 py-6 text-center text-sm text-[#0b2a22]/55">Още няма поръчки. Тук ще се появят веднага щом продажбите тръгнат.</p>
         ) : (
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[52rem] text-left text-sm">
+            <table className="w-full min-w-[58rem] text-left text-sm">
               <thead>
                 <tr className="border-b border-[#0b2a22]/8 font-mono text-[0.65rem] uppercase tracking-[0.15em] text-[#0b2a22]/50">
                   <th className="px-4 py-3 font-medium">Номер</th>
@@ -499,11 +506,12 @@ export default async function AdminDashboard({
                   <th className="px-4 py-3 font-medium">Билети</th>
                   <th className="px-4 py-3 font-medium">Статус</th>
                   <th className="px-4 py-3 text-right font-medium">Сума</th>
+                  <th className="px-4 py-3" />
                 </tr>
               </thead>
               <tbody>
                 {d.recent.map((o) => (
-                  <tr key={o.reference} className="border-b border-[#0b2a22]/6 last:border-0">
+                  <tr key={o.reference} className={`border-b border-[#0b2a22]/6 last:border-0 ${o.isTest ? "opacity-50" : ""}`}>
                     <td className="px-4 py-3 font-mono text-xs text-[#0b2a22]/70">
                       {o.reference}
                       {o.status === "paid" && (
@@ -521,8 +529,12 @@ export default async function AdminDashboard({
                       <div className="text-xs text-[#0b2a22]/55">{o.email}{o.phone ? ` · ${o.phone}` : ""}</div>
                     </td>
                     <td className="px-4 py-3 text-[#0b2a22]/75">{o.items}</td>
-                    <td className="px-4 py-3"><StatusChip status={o.status} /></td>
+                    <td className="px-4 py-3">
+                      <StatusChip status={o.status} />
+                      {o.isTest && <span className="ml-1.5 rounded-full bg-[#d0a11a]/15 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide text-[#7a5c05]">тест</span>}
+                    </td>
                     <td className="px-4 py-3 text-right font-semibold"><Money cents={o.totalCents} /></td>
+                    <td className="px-4 py-3 text-right"><TestToggle reference={o.reference} isTest={o.isTest} /></td>
                   </tr>
                 ))}
               </tbody>
