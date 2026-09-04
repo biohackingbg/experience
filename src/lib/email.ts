@@ -87,8 +87,8 @@ function ticketRows(input: TicketEmailInput, open = "Отвори билета",
 export function ticketEmailHtml(input: TicketEmailInput): string {
   const en = input.lang === "en";
   const w = en
-    ? { ready: "Your ticket is ready", hi: `Hi ${esc(input.buyerName)}! ${input.totalCents > 0 ? "Your payment is confirmed. " : ""}Open your ticket below and keep it - you will need it at the entrance.`, open: "Open ticket", code: "Code", dates: "7-8 November 2026", venue: "Grand Hotel Millennium, Sofia", order: "Order", invoice: "Invoice", noPay: "no payment", other: "Is a ticket for someone else? Open it and write their name - that is how we find them at the entrance and print their badge.", foot: "Questions? Reply to this email or write to hi@biohacking.bg. Sofia Life Summit is organised jointly by the Bulgarian Longevity Association and Biohacking.bg." }
-    : { ready: "Билетът ти е готов", hi: `Здравей, ${esc(input.buyerName)}! ${input.totalCents > 0 ? "Плащането е потвърдено. " : ""}Отвори билета си по-долу и го запази - ще ти трябва на входа.`, open: "Отвори билета", code: "Код", dates: "07-08 ноември 2026", venue: "Гранд Хотел Милениум, София", order: "Поръчка", invoice: "Фактура", noPay: "без заплащане", other: "Билет за друг човек? Отвори го и напиши името му - така ще го намерим на входа и баджът ще е с неговото име.", foot: "Ако имаш въпрос, отговори на това писмо или пиши на hi@biohacking.bg. Sofia Life Summit се организира съвместно от Bulgarian Longevity Association и Biohacking.bg." };
+    ? { lost: `Lost this email later? Get your tickets again: ${SITE}/bilet/moite?lang=en`, ready: "Your ticket is ready", hi: `Hi ${esc(input.buyerName)}! ${input.totalCents > 0 ? "Your payment is confirmed. " : ""}Open your ticket below and keep it - you will need it at the entrance.`, open: "Open ticket", code: "Code", dates: "7-8 November 2026", venue: "Grand Hotel Millennium, Sofia", order: "Order", invoice: "Invoice", noPay: "no payment", other: "Is a ticket for someone else? Open it and write their name - that is how we find them at the entrance and print their badge.", foot: "Questions? Reply to this email or write to hi@biohacking.bg. Sofia Life Summit is organised jointly by the Bulgarian Longevity Association and Biohacking.bg." }
+    : { lost: `Изгуби писмото? Билетите се изпращат наново оттук: ${SITE}/bilet/moite`, ready: "Билетът ти е готов", hi: `Здравей, ${esc(input.buyerName)}! ${input.totalCents > 0 ? "Плащането е потвърдено. " : ""}Отвори билета си по-долу и го запази - ще ти трябва на входа.`, open: "Отвори билета", code: "Код", dates: "07-08 ноември 2026", venue: "Гранд Хотел Милениум, София", order: "Поръчка", invoice: "Фактура", noPay: "без заплащане", other: "Билет за друг човек? Отвори го и напиши името му - така ще го намерим на входа и баджът ще е с неговото име.", foot: "Ако имаш въпрос, отговори на това писмо или пиши на hi@biohacking.bg. Sofia Life Summit се организира съвместно от Bulgarian Longevity Association и Biohacking.bg." };
   return `<!doctype html>
 <html lang="${en ? "en" : "bg"}"><body style="margin:0;padding:24px;background:#f2f2ee">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
@@ -141,7 +141,7 @@ export function ticketEmailHtml(input: TicketEmailInput): string {
       </p>
 
       <p style="margin:24px 0 0;font:400 12px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f80">
-        ${w.foot}
+        ${w.lost}<br><br>${w.foot}
       </p>
     </td></tr>
   </table>
@@ -588,6 +588,41 @@ export async function sendWaitlistEmail(input: { to: string; tierName: string; t
   ].join("\n");
   try {
     const { error } = await resend.emails.send({ from, to: input.to, subject: `Освободи се място от ${input.tierName} · Sofia Life Summit`, html, text });
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+/** One line to the team when money lands. Deliberately plain: it is a nudge, not a report. */
+export async function sendSaleAlert(input: {
+  reference: string;
+  buyerName: string;
+  items: string;
+  totalCents: number;
+  method: "card" | "bank" | "admin";
+  soldTotal: number;
+  capacity: number;
+}): Promise<boolean> {
+  const resend = getResend();
+  const from = process.env.EMAIL_FROM;
+  const to = process.env.SALES_ALERT_EMAIL ?? process.env.DIGEST_EMAIL ?? "hi@biohacking.bg";
+  if (!resend || !from) return false;
+  const how = input.method === "card" ? "с карта" : input.method === "bank" ? "по банков път" : "издаден от екипа";
+  const money = input.totalCents > 0 ? `${formatPrice(input.totalCents)} €` : "безплатен";
+  try {
+    const { error } = await resend.emails.send({
+      from,
+      to,
+      subject: `Продажба: ${input.items} · ${money}`,
+      text: [
+        `${input.items} за ${input.buyerName} - ${money} (${how}).`,
+        `Поръчка ${input.reference}.`,
+        "",
+        `Продадени общо: ${input.soldTotal} от ${input.capacity}.`,
+        "https://thelongevitysummit.eu/admin",
+      ].join("\n"),
+    });
     return !error;
   } catch {
     return false;

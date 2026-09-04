@@ -93,6 +93,33 @@ export const TICKET_PAGE = {
     whoTitle: "Attendee name", whoAsk: "Who is this ticket for?", whoHint: "If the ticket is for someone else, write their name - that is how we find them at the entrance and print their badge. If it is for you, leave it empty.", whoPlaceholder: "Full name", save: "Save", saving: "Saving…" },
 } as const;
 
+export const RESEND_PAGE = {
+  bg: {
+    title: "Изгубих билета си",
+    intro: "Напиши имейла, с който си купувал/а. Ако има поръчка на този адрес, изпращаме билетите наново - веднага.",
+    email: "Имейл",
+    send: "Изпрати ми билетите",
+    sending: "Изпраща…",
+    done: "Ако има поръчка с този адрес, билетите вече пътуват към него. Провери и папката със спам.",
+    tooMany: "Твърде много опити. Опитай след няколко минути.",
+    invalid: "Провери имейл адреса.",
+    back: "← Към сайта",
+    help: "Ако не пристигне нищо, пиши на hi@biohacking.bg и ще намерим поръчката по име.",
+  },
+  en: {
+    title: "I lost my ticket",
+    intro: "Enter the email you bought with. If there is an order on that address, we send the tickets again - right away.",
+    email: "Email",
+    send: "Send me my tickets",
+    sending: "Sending…",
+    done: "If there is an order with that address, the tickets are already on their way. Check your spam folder too.",
+    tooMany: "Too many attempts. Try again in a few minutes.",
+    invalid: "Check the email address.",
+    back: "← Back to the site",
+    help: "If nothing arrives, write to hi@biohacking.bg and we will find the order by name.",
+  },
+} as const;
+
 export const BOOKING = {
   bg: {
     title: "Работилници и преживявания",

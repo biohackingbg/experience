@@ -53,6 +53,12 @@ export default async function CheckoutSuccessPage({
           {t.keep}
         </p>
 
+        <p className="mt-3 text-xs text-bh-ink/50">
+          <Link href={`/bilet/moite?lang=${langOf(lang)}`} className="underline underline-offset-2">
+            {langOf(lang) === "en" ? "Ticket did not arrive?" : "Билетът не пристигна?"}
+          </Link>
+        </p>
+
         <Link
           href="/"
           className="bh-gradient mt-8 inline-flex rounded-full px-7 py-3.5 text-sm font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"

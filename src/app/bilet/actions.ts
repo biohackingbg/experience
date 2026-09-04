@@ -7,6 +7,7 @@ import type { CheckoutState } from "@/lib/checkout-state";
 import { langOf } from "@/lib/i18n";
 import { sendTicketEmail } from "@/lib/email";
 import { createPendingOrder, markOrderPaid } from "@/lib/orders";
+import { alertSale } from "@/lib/sale-alert";
 import { createWaitlistSignup } from "@/lib/signups";
 import { discountFor, promoReasonText, resolvePromo } from "@/lib/promo";
 import { PURCHASE_TERMS_TEXT, PURCHASE_TERMS_TEXT_EN, PURCHASE_TERMS_VERSION } from "@/lib/purchase-terms";
@@ -143,6 +144,7 @@ export async function startCheckout(
   if (order.totalCents === 0) {
     const paid = await markOrderPaid(order.orderId, null);
     if (paid.order) {
+      await alertSale(paid.order.reference);
       await sendTicketEmail({
         to: paid.order.email,
         buyerName: paid.order.name,

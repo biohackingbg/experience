@@ -7,6 +7,7 @@ import { getDb } from "@/lib/db";
 import { orderItems, orders } from "@/lib/db/schema";
 import { sendProformaEmail, sendTicketEmail } from "@/lib/email";
 import { PENDING_HOLD_MINUTES } from "@/lib/orders-const";
+import { alertSale } from "@/lib/sale-alert";
 import { markOrderPaid } from "@/lib/orders";
 import { getPricing, priceOf } from "@/lib/pricing";
 import { getSetting, setSetting } from "@/lib/settings";
@@ -125,6 +126,7 @@ export async function createManualOrder(input: ManualOrderInput): Promise<Manual
   if (free) {
     const paid = await markOrderPaid(created.id, null);
     if (paid.order) {
+      await alertSale(paid.order.reference);
       await sendTicketEmail({
         to: paid.order.email,
         buyerName: paid.order.name,
@@ -194,6 +196,7 @@ export async function markBankOrderPaid(reference: string): Promise<"ok" | "not_
   if (!o) return "not_found";
   const paid = await markOrderPaid(o.id, null);
   if (paid.order) {
+    await alertSale(paid.order.reference);
     await sendTicketEmail({
       to: paid.order.email,
       buyerName: paid.order.name,

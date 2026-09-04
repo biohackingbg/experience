@@ -9,6 +9,7 @@ import { getDb } from "@/lib/db";
 import { orders } from "@/lib/db/schema";
 import { issueCreditNote, markOrderPaid, markOrderRefunded } from "@/lib/orders";
 import { orderItems } from "@/lib/db/schema";
+import { alertSale } from "@/lib/sale-alert";
 import { notifyWaitlist } from "@/lib/waitlist";
 import { getStripe } from "@/lib/stripe";
 
@@ -90,6 +91,7 @@ export async function POST(request: Request) {
         // must not fail the webhook - the money is taken and the tickets exist
         // either way, and a 500 here would have Stripe retry a paid order.
         if (order) {
+          await alertSale(order.reference);
           const sent = await sendTicketEmail({
             to: order.email,
             buyerName: order.name,
