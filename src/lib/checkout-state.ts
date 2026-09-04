@@ -7,6 +7,7 @@
 export type CheckoutField =
   | "tierId"
   | "quantity"
+  | "promo"
   | "name"
   | "email"
   | "phone"

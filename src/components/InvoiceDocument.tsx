@@ -130,6 +130,14 @@ export function InvoiceDocument({ inv }: { inv: InvoiceData }) {
           </td>
         </tr>
       ))}
+      {inv.discountCents > 0 && (
+        <tr className="border-t border-bh-ink/8">
+          <td className="py-3 pr-4" colSpan={3}>
+            Отстъпка{inv.promoCode ? ` (код ${inv.promoCode})` : ""}
+          </td>
+          <td className="py-3 text-right tabular-nums">-{formatPrice(inv.discountCents)}</td>
+        </tr>
+      )}
     </tbody>
   </table>
 
@@ -282,6 +290,14 @@ export function CreditNoteDocument({ inv }: { inv: InvoiceData }) {
               </td>
             </tr>
           ))}
+          {inv.discountCents > 0 && (
+            <tr className="border-t border-bh-ink/8">
+              <td className="py-3 pr-4" colSpan={3}>
+                Отстъпка{inv.promoCode ? ` (код ${inv.promoCode})` : ""}
+              </td>
+              <td className="py-3 text-right tabular-nums">{formatPrice(inv.discountCents)}</td>
+            </tr>
+          )}
         </tbody>
       </table>
 

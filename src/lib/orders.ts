@@ -5,16 +5,12 @@ import { sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { orderItems, orders, tickets } from "@/lib/db/schema";
+import { PENDING_HOLD_MINUTES } from "@/lib/orders-const";
+import { resolvePromo } from "@/lib/promo";
 import { getEarlyAccess } from "@/lib/settings";
 import { CURRENCY, VAT_RATE, getTier, priceCents, splitVat } from "@/lib/tickets";
 
-/**
- * How long an unpaid order keeps holding a seat. Must stay LONGER than the
- * Checkout session's lifetime (30 min, Stripe's minimum) so a payment in the
- * session's final seconds still finds its seat held; short enough that
- * abandoned checkouts do not lock up the room.
- */
-export const PENDING_HOLD_MINUTES = 35;
+export { PENDING_HOLD_MINUTES };
 
 /** Ambiguous characters left out so codes survive being read aloud. */
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -39,6 +35,8 @@ export type CreateOrderInput = {
   termsText: string;
   utmSource?: string;
   utmCampaign?: string;
+  /** A discount code as typed; resolved here, against the real gross. */
+  promoCode?: string;
 };
 
 export type CreateOrderResult =
@@ -46,11 +44,14 @@ export type CreateOrderResult =
       ok: true;
       orderId: string;
       reference: string;
+      /** What is charged: gross less the discount. Zero means a free order. */
       totalCents: number;
       /** Charged per ticket. Stripe bills this, so it cannot diverge. */
       unitPriceCents: number;
+      discountCents: number;
+      promoCode: string | null;
     }
-  | { ok: false; reason: "sold_out" | "unknown_tier" | "bad_quantity"; left?: number };
+  | { ok: false; reason: "sold_out" | "unknown_tier" | "bad_quantity" | "bad_promo"; left?: number; message?: string };
 
 /**
  * Creates a pending order, refusing to oversell.
@@ -74,6 +75,20 @@ export async function createPendingOrder(
   // the total and the Stripe line item - uses this answer, so the launch
   // prices being closed mid-request cannot record one price and charge another.
   const early = await getEarlyAccess();
+  const unitPriceCents = priceCents(tier, early);
+  const grossCents = unitPriceCents * input.quantity;
+
+  // The code is resolved before the seat is taken: a refused code must not
+  // burn a hold, and the discount must be settled before any number is
+  // written down.
+  let discountCents = 0;
+  let promoCode: string | null = null;
+  if (input.promoCode?.trim()) {
+    const promo = await resolvePromo(input.promoCode, grossCents);
+    if (!promo.ok) return { ok: false, reason: "bad_promo", message: promo.reason };
+    discountCents = promo.discountCents;
+    promoCode = promo.code;
+  }
 
   return db.transaction(async (tx) => {
     // Serialise everyone buying this tier for the rest of the transaction.
@@ -100,8 +115,7 @@ export async function createPendingOrder(
       return { ok: false as const, reason: "sold_out" as const, left: Math.max(left, 0) };
     }
 
-    const unitPriceCents = priceCents(tier, early);
-    const totalCents = unitPriceCents * input.quantity;
+    const totalCents = grossCents - discountCents;
     const { netCents, vatCents } = splitVat(totalCents);
     const reference = `SLS-${randomCode(6)}`;
 
@@ -125,6 +139,8 @@ export async function createPendingOrder(
         termsText: input.termsText,
         utmSource: input.utmSource?.replace(/[^a-z0-9_.-]/g, "") || null,
         utmCampaign: input.utmCampaign?.replace(/[^a-z0-9_.-]/g, "") || null,
+        promoCode,
+        discountCents,
       })
       .returning({ id: orders.id });
 
@@ -142,6 +158,8 @@ export async function createPendingOrder(
       reference,
       totalCents,
       unitPriceCents,
+      discountCents,
+      promoCode,
     };
   });
 }
@@ -201,6 +219,7 @@ export async function markOrderPaid(
       sql`update ${orders}
           set invoice_number = nextval('invoice_number_seq'), invoiced_at = now()
           where ${orders.id} = ${orderId} and ${orders.invoiceNumber} is null
+            and ${orders.totalCents} > 0
           returning invoice_number`,
     );
 

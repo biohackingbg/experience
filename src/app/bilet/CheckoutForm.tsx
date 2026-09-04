@@ -5,7 +5,7 @@ import { useActionState, useEffect, useState } from "react";
 import { initialCheckoutState } from "@/lib/checkout-state";
 import { PURCHASE_TERMS_TEXT } from "@/lib/purchase-terms";
 import { TIERS, formatPrice, priceCents, splitVat } from "@/lib/tickets";
-import { startCheckout } from "./actions";
+import { type PromoPreview, checkPromo, startCheckout } from "./actions";
 
 const fieldBase =
   "mt-2 w-full rounded-2xl border border-bh-ink/15 bg-bh-cloud px-4 py-3 text-bh-ink outline-none focus:border-bh-pine";
@@ -63,10 +63,33 @@ export function CheckoutForm({
   );
   const [quantity, setQuantity] = useState(1);
   const [wantsInvoice, setWantsInvoice] = useState(false);
+  const [promoInput, setPromoInput] = useState("");
+  const [promo, setPromo] = useState<PromoPreview | null>(null);
+  const [checking, setChecking] = useState(false);
 
   const tier = TIERS.find((t) => t.id === tierId)!;
-  const total = priceCents(tier, early) * quantity;
+  const gross = priceCents(tier, early) * quantity;
+  // Preview only - the server resolves the code again when the order is made.
+  const discount =
+    promo?.ok
+      ? Math.max(0, Math.min(gross, promo.kind === "percent" ? Math.round((gross * promo.value) / 100) : promo.value))
+      : 0;
+  const total = gross - discount;
   const { netCents, vatCents } = splitVat(total);
+
+  const applyPromo = async () => {
+    const code = promoInput.trim();
+    if (!code) {
+      setPromo(null);
+      return;
+    }
+    setChecking(true);
+    try {
+      setPromo(await checkPromo(code));
+    } finally {
+      setChecking(false);
+    }
+  };
 
   return (
     <form action={formAction} className="mt-10 grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
@@ -149,6 +172,40 @@ export function CheckoutForm({
           <input id="phone" name="phone" autoComplete="tel" className={fieldBase} />
         </div>
 
+        <div className="mt-5">
+          <Label htmlFor="promo">Промо код (ако имаш)</Label>
+          <div className="mt-2 flex gap-2">
+            <input
+              id="promo"
+              name="promo"
+              value={promoInput}
+              onChange={(e) => {
+                setPromoInput(e.target.value.toUpperCase());
+                if (promo) setPromo(null);
+              }}
+              onBlur={applyPromo}
+              autoCapitalize="characters"
+              autoComplete="off"
+              placeholder="напр. STUDENT"
+              className={`${fieldBase} mt-0 uppercase`}
+            />
+            <button
+              type="button"
+              onClick={applyPromo}
+              disabled={checking}
+              className="shrink-0 rounded-full border border-bh-ink/25 px-4 text-sm font-semibold text-bh-ink disabled:opacity-50"
+            >
+              {checking ? "Проверява…" : "Приложи"}
+            </button>
+          </div>
+          {promo && (
+            <p className={`mt-1.5 text-xs ${promo.ok ? "text-bh-pine" : "text-red-700"}`}>
+              {promo.ok ? `Кодът ${promo.code} важи: ${promo.label}.` : promo.message}
+            </p>
+          )}
+          <Err>{state.fieldErrors?.promo}</Err>
+        </div>
+
         <label className="mt-6 flex cursor-pointer items-center gap-3 text-sm text-bh-ink/75">
           <input
             type="checkbox"
@@ -188,8 +245,14 @@ export function CheckoutForm({
             <dt className="text-bh-ink/65">
               {tier.name} × {quantity}
             </dt>
-            <dd className="text-bh-ink">{formatPrice(total)} €</dd>
+            <dd className="text-bh-ink">{formatPrice(gross)} €</dd>
           </div>
+          {discount > 0 && promo?.ok && (
+            <div className="flex justify-between text-bh-pine">
+              <dt>Отстъпка · {promo.code}</dt>
+              <dd>-{formatPrice(discount)} €</dd>
+            </div>
+          )}
           <div className="flex justify-between text-bh-ink/55">
             <dt>Данъчна основа</dt>
             <dd>{formatPrice(netCents)} €</dd>
@@ -240,8 +303,8 @@ export function CheckoutForm({
           className="bh-gradient mt-6 w-full rounded-full px-6 py-4 text-sm font-semibold text-bh-ink transition-transform hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0"
         >
           {pending || state.status === "redirect"
-            ? "Пренасочвам към плащане…"
-            : `Плати ${formatPrice(total)} €`}
+            ? total === 0 ? "Издавам билета…" : "Пренасочвам към плащане…"
+            : total === 0 ? "Вземи билета безплатно" : `Плати ${formatPrice(total)} €`}
         </button>
 
         <p className="mt-3 text-center text-xs text-bh-ink/50">

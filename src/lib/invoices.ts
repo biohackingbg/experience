@@ -21,6 +21,9 @@ export type InvoiceData = {
   vatRateBp: number;
   currency: string;
   items: { tierName: string; unitPriceCents: number; quantity: number }[];
+  /** Taken off the items' sum before VAT was worked out; zero for most orders. */
+  discountCents: number;
+  promoCode: string | null;
   /** Present once the refund's credit note is issued. */
   creditNoteNumber: number | null;
   creditNotedAt: Date | null;
@@ -46,6 +49,8 @@ export async function getInvoice(reference: string): Promise<InvoiceData | null>
       subtotalCents: orders.subtotalCents,
       vatCents: orders.vatCents,
       totalCents: orders.totalCents,
+      discountCents: orders.discountCents,
+      promoCode: orders.promoCode,
       vatRateBp: orders.vatRateBp,
       currency: orders.currency,
       creditNoteNumber: orders.creditNoteNumber,
@@ -88,6 +93,8 @@ export async function listInvoices(limit = 200) {
       email: orders.email,
       company: orders.invoiceCompany,
       totalCents: orders.totalCents,
+      discountCents: orders.discountCents,
+      promoCode: orders.promoCode,
       refundedCents: orders.refundedCents,
       status: orders.status,
       creditNoteNumber: orders.creditNoteNumber,
@@ -125,6 +132,8 @@ export async function getAllInvoices(): Promise<InvoiceExportRow[]> {
       subtotalCents: orders.subtotalCents,
       vatCents: orders.vatCents,
       totalCents: orders.totalCents,
+      discountCents: orders.discountCents,
+      promoCode: orders.promoCode,
       vatRateBp: orders.vatRateBp,
       currency: orders.currency,
       status: orders.status,

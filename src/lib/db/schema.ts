@@ -128,6 +128,14 @@ export const orders = pgTable(
     utmCampaign: text("utm_campaign"),
 
     /**
+     * The promo code used, and what it took off the gross. The order's
+     * totals are already net of it; the invoice shows it as its own line so
+     * the items and the total still add up in front of an accountant.
+     */
+    promoCode: text("promo_code"),
+    discountCents: integer("discount_cents").notNull().default(0),
+
+    /**
      * When the "you did not finish" email went out, for an abandoned checkout.
      * One reminder per order, ever - a buyer who walked away is not to be
      * chased, only told once that the door is still open.
@@ -166,6 +174,7 @@ export const orders = pgTable(
     index("orders_email_idx").on(table.email),
     index("orders_created_at_idx").on(table.createdAt),
     index("orders_reminder_email_id_idx").on(table.reminderEmailId),
+    index("orders_promo_code_idx").on(table.promoCode),
     // Two invoices may never share a number; the database enforces it
     // rather than trusting the code that draws from the sequence.
     uniqueIndex("orders_invoice_number_idx").on(table.invoiceNumber),
@@ -476,6 +485,26 @@ export const campaigns = pgTable(
   },
   (table) => [index("campaigns_posted_at_idx").on(table.postedAt)],
 );
+
+/**
+ * Discount codes: students, medical staff, partners' guests, a campaign.
+ * `kind` percent takes `value` % off the gross; fixed takes `value` cents
+ * off. A 100 % code makes a free order, which is paid without Stripe and
+ * gets no invoice. Uses are counted from orders, never stored here.
+ */
+export const promoCodes = pgTable("promo_codes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  /** Uppercase, letters and digits, unique. */
+  code: text("code").notNull().unique(),
+  /** percent | fixed */
+  kind: text("kind").notNull(),
+  value: integer("value").notNull(),
+  maxUses: integer("max_uses"),
+  validUntil: timestamp("valid_until", { withTimezone: true }),
+  note: text("note"),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
 
 export type DeckLink = typeof deckLinks.$inferSelect;
 

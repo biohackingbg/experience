@@ -4,7 +4,9 @@ import { headers } from "next/headers";
 import { z } from "zod";
 
 import type { CheckoutState } from "@/lib/checkout-state";
-import { createPendingOrder } from "@/lib/orders";
+import { sendTicketEmail } from "@/lib/email";
+import { createPendingOrder, markOrderPaid } from "@/lib/orders";
+import { discountFor, promoReasonText, resolvePromo } from "@/lib/promo";
 import { PURCHASE_TERMS_TEXT, PURCHASE_TERMS_VERSION } from "@/lib/purchase-terms";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
@@ -24,7 +26,27 @@ const schema = z.object({
   // so anything but plain characters is dropped rather than refused.
   utmSource: z.string().trim().toLowerCase().max(60).optional(),
   utmCampaign: z.string().trim().toLowerCase().max(60).optional(),
+  promo: z.string().trim().max(32).optional(),
 });
+
+export type PromoPreview =
+  | { ok: true; code: string; kind: "percent" | "fixed"; value: number; label: string }
+  | { ok: false; message: string };
+
+/**
+ * What a code is worth, for the summary on the page. The order creation
+ * resolves it again against the real gross, so this can only inform, never
+ * decide.
+ */
+export async function checkPromo(raw: string): Promise<PromoPreview> {
+  const head = await headers();
+  const ip = head.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  if (!checkRateLimit(`promo:${ip}`, 30).allowed) return { ok: false, message: "Твърде много опити." };
+  const r = await resolvePromo(raw, 100_00);
+  if (!r.ok) return { ok: false, message: promoReasonText[r.reason] };
+  void discountFor; // the client computes the amount from kind + value
+  return { ok: true, code: r.code, kind: r.kind, value: r.value, label: r.label };
+}
 
 function fail(
   message: string,
@@ -71,10 +93,15 @@ export async function startCheckout(
 
   const order = await createPendingOrder({
     ...input,
+    promoCode: input.promo,
     termsText: `${PURCHASE_TERMS_VERSION}: ${PURCHASE_TERMS_TEXT}`,
   });
 
   if (!order.ok) {
+    if (order.reason === "bad_promo") {
+      const why = promoReasonText[(order.message as keyof typeof promoReasonText) ?? "unknown"] ?? "Кодът не важи.";
+      return fail(why, { promo: why });
+    }
     if (order.reason === "sold_out") {
       return fail(
         order.left
@@ -91,6 +118,23 @@ export async function startCheckout(
   // config away from attacker influence.
   const origin = "https://thelongevitysummit.eu";
 
+  // A 100 % code: nothing to charge, so no Stripe. The order is paid on the
+  // spot, tickets issued, the mail sent - the same path the webhook takes.
+  if (order.totalCents === 0) {
+    const paid = await markOrderPaid(order.orderId, null);
+    if (paid.order) {
+      await sendTicketEmail({
+        to: paid.order.email,
+        buyerName: paid.order.name,
+        reference: paid.order.reference,
+        totalCents: paid.order.totalCents,
+        invoiceNumber: paid.order.invoiceNumber,
+        tickets: paid.order.tickets,
+      });
+    }
+    return { status: "redirect", redirectUrl: `${origin}/bilet/uspeh?ref=${order.reference}` };
+  }
+
   const session = await getStripe().checkout.sessions.create({
     mode: "payment",
     customer_email: input.email,
@@ -98,19 +142,34 @@ export async function startCheckout(
     // The webhook needs this to find the order it must mark paid.
     metadata: { orderId: order.orderId, reference: order.reference },
     line_items: [
-      {
-        quantity: input.quantity,
-        price_data: {
-          currency: "eur",
-          // The price already written to the order, so the charge and the
-          // record cannot disagree. VAT is already inside it.
-          unit_amount: order.unitPriceCents,
-          product_data: {
-            name: `Sofia Life Summit - ${tier.name}`,
-            description: "07-08 ноември 2026, Гранд Хотел Милениум, София",
+      order.discountCents > 0
+        ? {
+            // With a discount the tickets are billed as one line at the
+            // order's total: a percentage split per ticket need not land on
+            // whole cents, and the charge must equal the record exactly.
+            quantity: 1,
+            price_data: {
+              currency: "eur",
+              unit_amount: order.totalCents,
+              product_data: {
+                name: `Sofia Life Summit - ${tier.name} × ${input.quantity}`,
+                description: `07-08 ноември 2026, Гранд Хотел Милениум, София · код ${order.promoCode}`,
+              },
+            },
+          }
+        : {
+            quantity: input.quantity,
+            price_data: {
+              currency: "eur",
+              // The price already written to the order, so the charge and the
+              // record cannot disagree. VAT is already inside it.
+              unit_amount: order.unitPriceCents,
+              product_data: {
+                name: `Sofia Life Summit - ${tier.name}`,
+                description: "07-08 ноември 2026, Гранд Хотел Милениум, София",
+              },
+            },
           },
-        },
-      },
     ],
     // Stripe's minimum session lifetime is 30 minutes - anything shorter is
     // rejected outright (it broke live sales on 22.08). The pending hold is
