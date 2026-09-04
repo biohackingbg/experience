@@ -44,9 +44,9 @@ function ago(t: Date, now: number): string {
   return h < 1 ? "преди по-малко от час" : h < 24 ? `преди ${h} ч` : `преди ${Math.floor(h / 24)} д`;
 }
 
-/** Pending, past the hold, no paid order on the same address. */
+/** Pending, past the hold, not a test, no paid order on the same address. */
 function abandonedWhere() {
-  return sql`${orders.status} = 'pending'
+  return sql`${orders.status} = 'pending' and not ${orders.isTest}
     and ${orders.createdAt} <= now() - interval '${sql.raw(String(PENDING_HOLD_MINUTES))} minutes'
     and ${orders.createdAt} > now() - interval '${sql.raw(String(DAYS_KEPT))} days'
     and not exists (
@@ -95,6 +95,39 @@ export async function getAbandonedOrders(limit = 30): Promise<AbandonedOrder[]> 
     reminderOpenedAt: o.reminderOpenedAt,
     reminderClickedAt: o.reminderClickedAt,
     canRemind: !o.reminderSentAt && o.createdAt.getTime() <= cutoff,
+  }));
+}
+
+export type PendingOrder = { reference: string; name: string; email: string; items: string; totalCents: number; minutesAgo: number };
+
+/**
+ * Checkouts opened in the last 35 minutes and not yet paid: the buyer may
+ * still be on Stripe's page. Shown so a checkout started a moment ago is
+ * visible at once, rather than appearing only after the hold expires.
+ */
+export async function getPendingOrders(): Promise<PendingOrder[]> {
+  const db = getDb();
+  const rows = await db
+    .select({ id: orders.id, reference: orders.reference, name: orders.name, email: orders.email, totalCents: orders.totalCents, createdAt: orders.createdAt })
+    .from(orders)
+    .where(
+      sql`${orders.status} = 'pending' and not ${orders.isTest}
+        and ${orders.createdAt} > now() - interval '${sql.raw(String(PENDING_HOLD_MINUTES))} minutes'`,
+    )
+    .orderBy(desc(orders.createdAt));
+  if (rows.length === 0) return [];
+  const items = await db
+    .select({ orderId: orderItems.orderId, tierName: orderItems.tierName, quantity: orderItems.quantity })
+    .from(orderItems)
+    .where(inArray(orderItems.orderId, rows.map((r) => r.id)));
+  const now = Date.now();
+  return rows.map((o) => ({
+    reference: o.reference,
+    name: o.name,
+    email: o.email,
+    totalCents: o.totalCents,
+    items: items.filter((i) => i.orderId === o.id).map((i) => `${i.quantity}× ${i.tierName}`).join(", "),
+    minutesAgo: Math.max(0, Math.floor((now - o.createdAt.getTime()) / 60_000)),
   }));
 }
 

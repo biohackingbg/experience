@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { getAbandonedOrders } from "@/lib/abandoned";
+import { getAbandonedOrders, getPendingOrders } from "@/lib/abandoned";
 import { isAdmin } from "@/lib/admin-auth";
 import { getDashboardData, searchOrders } from "@/lib/admin-stats";
 import { getFinances } from "@/lib/finances";
@@ -188,13 +188,14 @@ export default async function AdminDashboard({
   if (!(await isAdmin())) redirect("/admin/login");
 
   const { q = "" } = await searchParams;
-  const [d, traffic, found, fin, early, abandoned] = await Promise.all([
+  const [d, traffic, found, fin, early, abandoned, pendingNow] = await Promise.all([
     getDashboardData(),
     getTrafficData(30),
     searchOrders(q),
     getFinances(),
     getEarlyAccessState(),
     getAbandonedOrders(),
+    getPendingOrders(),
   ]);
   const soldPct = d.capacityTotal ? Math.round((d.ticketsSold / d.capacityTotal) * 100) : 0;
 
@@ -398,6 +399,27 @@ export default async function AdminDashboard({
               14 дни · без купилите после · едно напомняне, най-рано след денонощие · „кликнал“ е сигурно, „отворено“ е знак
             </p>
           </div>
+          {pendingNow.length > 0 && (
+            <div className="mt-4 rounded-2xl bg-[#f6f7f5] px-4 py-3">
+              <p className="font-mono text-[0.62rem] uppercase tracking-[0.15em] text-[#0b2a22]/50">
+                В процес на плащане · последните 35 минути
+              </p>
+              <ul className="mt-2 flex flex-col gap-1.5 text-sm">
+                {pendingNow.map((o) => (
+                  <li key={o.reference} className="flex flex-wrap items-baseline justify-between gap-2">
+                    <span>
+                      <span className="font-medium">{o.name}</span>
+                      <span className="ml-2 font-mono text-xs text-[#0b2a22]/50">{o.reference}</span>
+                      <span className="ml-2 text-xs text-[#0b2a22]/55">{o.items} · <Money cents={o.totalCents} /> · {o.email}</span>
+                    </span>
+                    <span className="text-xs text-[#0b2a22]/50">
+                      преди {o.minutesAgo} мин · ако не плати, ще се появи долу след 35 мин
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           {abandoned.length === 0 ? (
             <p className="mt-5 text-sm text-[#0b2a22]/55">Няма недовършени поръчки.</p>
           ) : (
@@ -417,15 +439,29 @@ export default async function AdminDashboard({
                       </div>
                     </div>
                   </div>
-                  <ReminderForm
-                    reference={o.reference}
-                    canRemind={o.canRemind}
-                    note={
-                      o.remindedAgo
-                        ? `напомнено ${o.remindedAgo}${o.reminderClickedAt ? " · кликнал" : o.reminderOpenedAt ? " · отворено" : ""}`
-                        : "може от утре"
-                    }
-                  />
+                  <div className="flex items-center gap-2">
+                    <ReminderForm
+                      reference={o.reference}
+                      canRemind={o.canRemind}
+                      note={
+                        o.remindedAgo
+                          ? `напомнено ${o.remindedAgo}${o.reminderClickedAt ? " · кликнал" : o.reminderOpenedAt ? " · отворено" : ""}`
+                          : "може от утре"
+                      }
+                    />
+                    {/* A test checkout by the team is hidden the same way a test sale is. */}
+                    <form action={setTestOrder}>
+                      <input type="hidden" name="reference" value={o.reference} />
+                      <input type="hidden" name="to" value="1" />
+                      <button
+                        type="submit"
+                        title="Скрий - това е тестова поръчка на екипа"
+                        className="rounded-full border border-[#0b2a22]/15 px-2.5 py-1.5 text-xs text-[#0b2a22]/50 transition-colors hover:border-[#0b2a22] hover:text-[#0b2a22]"
+                      >
+                        тестова
+                      </button>
+                    </form>
+                  </div>
                 </li>
               ))}
             </ul>
