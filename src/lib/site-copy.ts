@@ -20,8 +20,11 @@ export const NAV: Copy<{
   links: { href: string; label: string }[];
   home: string;
   buy: (price: string) => string;
+  buyShort: (price: string) => string;
   soon: string;
+  soonShort: string;
   otherLang: string;
+  otherLangShort: string;
 }> = {
   bg: {
     links: [
@@ -32,8 +35,12 @@ export const NAV: Copy<{
     ],
     home: "Biohacking Experience - начало",
     buy: (price) => `Купи билет от ${price} €`,
+    /** What fits on a phone: the price stays, the verb goes. */
+    buyShort: (price) => `Билети от ${price} €`,
     soon: "Билети - скоро",
+    soonShort: "Билети",
     otherLang: "English",
+    otherLangShort: "EN",
   },
   en: {
     links: [
@@ -44,8 +51,11 @@ export const NAV: Copy<{
     ],
     home: "Biohacking Experience - home",
     buy: (price) => `Tickets from €${price}`,
+    buyShort: (price) => `€${price}+`,
     soon: "Tickets - soon",
+    soonShort: "Tickets",
     otherLang: "Български",
+    otherLangShort: "БГ",
   },
 };
 
@@ -66,6 +76,10 @@ export const HERO: Copy<{
   speakersLabel: string;
   speakersBody: string;
   toSpeakers: string;
+  ctaTickets: (price: string) => string;
+  ctaTicketsPlain: string;
+  ctaProgramme: string;
+  forWhom: string;
 }> = {
   bg: {
     line1a: "Два дни,",
@@ -75,7 +89,7 @@ export const HERO: Copy<{
     line3: "следващите 20 години.",
     venue: "Гранд Хотел Милениум",
     welcome:
-      "Не конференция със столове в редици. Науката за дълголетието и биохакинга излиза от лабораторията - на разбираем език, за един ден, в който слушаш, измерваш се, изпробваш и си тръгваш с личен протокол.",
+      "Не конференция със столове в редици. Науката за дълголетието и биохакинга излиза от лабораторията - на разбираем език, за два дни, в които слушаш, измерваш се, изпробваш и си тръгваш с личен протокол.",
     firstTag: "Първото",
     firstTitle: "Първото по рода си биохакинг изживяване в България.",
     firstBody: "Два дни, в които науката за дълголетието се пипа, пробва и измерва - не се слуша от стол.",
@@ -86,6 +100,10 @@ export const HERO: Copy<{
     speakersBody:
       "Лекари и изследователи от България и чужбина - на разбираем език, по 25 минути.",
     toSpeakers: "Към лекторите",
+    ctaTickets: (price) => `Виж билетите от ${price} €`,
+    ctaTicketsPlain: "Виж билетите",
+    ctaProgramme: "Виж програмата по часове",
+    forWhom: "За всички, без медицинско образование",
   },
   en: {
     line1a: "Two days",
@@ -95,7 +113,7 @@ export const HERO: Copy<{
     line3: "next twenty years.",
     venue: "Grand Hotel Millennium",
     welcome:
-      "Not a conference with chairs in rows. The science of longevity and biohacking leaves the laboratory - in plain language, for a day in which you listen, measure yourself, try things and leave with a protocol of your own.",
+      "Not a conference with chairs in rows. The science of longevity and biohacking leaves the laboratory - in plain language, for two days in which you listen, measure yourself, try things and leave with a protocol of your own.",
     firstTag: "The first",
     firstTitle: "The first biohacking experience of its kind in Bulgaria.",
     firstBody: "Two days in which the science of longevity is handled, tried and measured - not heard from a chair.",
@@ -106,6 +124,10 @@ export const HERO: Copy<{
     speakersBody:
       "Doctors and researchers from Bulgaria and abroad - in plain language, 25 minutes each.",
     toSpeakers: "To the speakers",
+    ctaTickets: (price) => `See the tickets - from €${price}`,
+    ctaTicketsPlain: "See the tickets",
+    ctaProgramme: "See the programme, hour by hour",
+    forWhom: "For everyone, no medical background needed",
   },
 };
 
@@ -193,9 +215,9 @@ export const ZONES: Copy<{
 }> = {
   bg: {
     eyebrow: "Концепцията",
-    title: "Четири зони, един ден в тялото ти",
+    title: "Четири зони, два дни в тялото ти",
     intro:
-      "Един ден се движи през четирите - знание, движение, възстановяване и брандовете, които стоят зад тях.",
+      "Денят ти минава през четирите - знание, движение, възстановяване и брандовете, които стоят зад тях.",
     items: [
       { tag: "Знанието", title: "Сцена", text: "18 лекции и панела - лекари и изследователи на разбираем език." },
       { tag: "Тялото", title: "Движение", text: "Power Plate зона и пилатес - на постелка и на реформър, със записан час." },
@@ -205,8 +227,8 @@ export const ZONES: Copy<{
   },
   en: {
     eyebrow: "The concept",
-    title: "Four zones, one day inside your body",
-    intro: "A day moves through all four - knowledge, movement, recovery, and the brands behind them.",
+    title: "Four zones, two days inside your body",
+    intro: "Your day moves through all four - knowledge, movement, recovery, and the brands behind them.",
     items: [
       { tag: "Knowledge", title: "Stage", text: "18 talks and panels - doctors and researchers in plain language." },
       { tag: "The body", title: "Movement", text: "A Power Plate zone and pilates - on the mat and on the reformer, by appointment." },
@@ -218,14 +240,15 @@ export const ZONES: Copy<{
 
 export const CONCEPT: Copy<{
   eyebrow: string;
-  title: string;
+  /** Counted from the cards, so the headline cannot promise more than it shows. */
+  title: (n: number) => string;
   intro: string;
   stations: string[];
   partnersSoon: string;
 }> = {
   bg: {
     eyebrow: "Станциите",
-    title: "10 интерактивни станции",
+    title: (n) => `${n} интерактивни станции`,
     intro: "Не гледаш отстрани - измерваш се, пробваш, питаш. Всяка станция е водена от партньор в своята област.",
     stations: [
       "Диагностика",
@@ -241,7 +264,7 @@ export const CONCEPT: Copy<{
   },
   en: {
     eyebrow: "The stations",
-    title: "10 interactive stations",
+    title: (n) => `${n} interactive stations`,
     intro: "You do not watch from the side - you measure, try and ask. Each station is run by a partner in its field.",
     stations: [
       "Diagnostics",
@@ -399,12 +422,22 @@ export const TICKETS_SECTION: Copy<{
 export const TIER_FEATURES: Record<string, Copy<{ features: string[]; absent: string[]; tagline?: string }>> = {
   core: {
     bg: {
-      features: ["Един ден по избор", "Лекции при наличие на места", "Партньорски оферти и привилегии"],
-      absent: ["Без работилници", "Без специални преживявания"],
+      features: [
+        "Един ден по избор - събота или неделя, казваш го на входа",
+        "Сцената: 18 лекции по 25 минути, на разбираем език",
+        "Станциите за измерване и Village с 30 бранда",
+        "Партньорски оферти и привилегии",
+      ],
+      absent: ["Работилниците и преживяванията са в PLUS и PEAK"],
     },
     en: {
-      features: ["One day of your choice", "Talks subject to seats", "Partner offers and privileges"],
-      absent: ["No workshops", "No special experiences"],
+      features: [
+        "One day of your choice - Saturday or Sunday, you say which at the door",
+        "The stage: 18 talks of 25 minutes, in plain language",
+        "The measuring stations and the Village of 30 brands",
+        "Partner offers and privileges",
+      ],
+      absent: ["Workshops and experiences come with PLUS and PEAK"],
     },
   },
   plus: {
@@ -453,7 +486,7 @@ export const REGISTER: Copy<{
 }> = {
   bg: {
     eyebrow: "Запази мястото си",
-    title: "Един ден. Реални числа. Личен план.",
+    title: "Два дни. Реални числа. Личен план.",
     bodyOpen: "Билетите са в продажба",
     bodyClosed:
       "Билетите отварят съвсем скоро. Финализираме нивата и цените, за да са честни и към теб, и към програмата, която строим. Местата в работилниците и специалните преживявания са ограничени и се запазват с реда на купуване.",
@@ -474,7 +507,7 @@ export const REGISTER: Copy<{
   },
   en: {
     eyebrow: "Save your place",
-    title: "One day. Real numbers. A plan of your own.",
+    title: "Two days. Real numbers. A plan of your own.",
     bodyOpen: "Tickets are on sale",
     bodyClosed:
       "Tickets open very soon. We are finalising the levels and the prices so they are fair both to you and to the programme we are building. Places in the workshops and the special experiences are limited and go in the order people buy.",
@@ -603,14 +636,14 @@ export const META: Copy<{ title: string; describe: (from: string) => string }> =
     title: "Sofia Life Summit 2026 - дълголетие и биохакинг, София | Biohacking Experience",
     describe: (from) =>
       "Фест за дълголетие и биохакинг - 07-08 ноември 2026, Гранд Хотел " +
-      "Милениум, София. Четири зони, longevity паспорт, 12 станции за " +
+      "Милениум, София. Четири зони, longevity паспорт, станции за " +
       `измерване, международни лектори. Билети от ${from} €.`,
   },
   en: {
     title: "Sofia Life Summit 2026 - longevity and biohacking in Sofia | Biohacking Experience",
     describe: (from) =>
       "A festival of longevity and biohacking - 7-8 November 2026, Grand Hotel " +
-      "Millennium, Sofia. Four zones, a longevity passport, 12 measuring " +
+      "Millennium, Sofia. Four zones, a longevity passport, measuring " +
       `stations, international speakers. Tickets from €${from}.`,
   },
 };

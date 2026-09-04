@@ -23,14 +23,14 @@ export async function SummitNav({ lang = "bg" }: { lang?: Lang }) {
        stays legible sliding underneath. Works because the page wrapper
        clips with overflow-clip, not overflow-hidden - hidden would make it
        the scroll container and quietly kill the stickiness. */
-    <header className="sticky top-0 z-40 border-b border-bh-ink/10 bg-bh-paper/70 px-5 backdrop-blur-lg sm:px-8 lg:px-10">
+    <header className="sticky top-0 z-40 border-b border-bh-ink/10 bg-bh-paper/70 px-4 backdrop-blur-lg sm:px-8 lg:px-10">
       <ScrollProgress />
       <nav className="flex items-center justify-between py-4">
         <Link href="#top" aria-label={c.home} className="flex items-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt="Biohacking Experience" className="bh-logo-light-bg h-7 w-auto sm:h-8" />
+          <img src="/logo.svg" alt="Biohacking Experience" className="bh-logo-light-bg h-6 w-auto sm:h-8" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo-dark.svg" alt="" aria-hidden className="bh-logo-dark-bg h-7 w-auto sm:h-8" />
+          <img src="/logo-dark.svg" alt="" aria-hidden className="bh-logo-dark-bg h-6 w-auto sm:h-8" />
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">
@@ -41,15 +41,16 @@ export async function SummitNav({ lang = "bg" }: { lang?: Lang }) {
           ))}
         </div>
 
-        <div className="flex items-center gap-3 sm:gap-4">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           {/* The whole site exists in both languages; the switch is a link,
               so it works with JavaScript off and can be shared as a URL. */}
           <Link
             href={en ? "/" : "/en"}
             hrefLang={en ? "bg" : "en"}
-            className="rounded-full border border-bh-ink/20 px-3 py-1.5 text-xs font-semibold text-bh-ink/80 transition-colors hover:border-bh-ink hover:text-bh-ink"
+            className="rounded-full border border-bh-ink/20 px-2.5 py-1.5 text-xs font-semibold text-bh-ink/80 transition-colors hover:border-bh-ink hover:text-bh-ink sm:px-3"
           >
-            {c.otherLang}
+            <span className="sm:hidden">{c.otherLangShort}</span>
+            <span className="hidden sm:inline">{c.otherLang}</span>
           </Link>
           <ThemeToggle />
           {/* Straight into the checkout, on the tier the button just quoted -
@@ -58,16 +59,18 @@ export async function SummitNav({ lang = "bg" }: { lang?: Lang }) {
           {SALES_OPEN ? (
             <Link
               href={`/bilet?nivo=${cheapestTier.id}${en ? "&lang=en" : ""}`}
-              className="bh-gradient inline-flex items-center whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
+              className="bh-gradient inline-flex items-center whitespace-nowrap rounded-full px-3.5 py-2.5 text-[0.8rem] font-semibold text-bh-ink transition-transform hover:-translate-y-0.5 sm:px-5 sm:text-sm"
             >
-              {c.buy(formatPrice(cheapest))}
+              <span className="sm:hidden">{c.buyShort(formatPrice(cheapest))}</span>
+              <span className="hidden sm:inline">{c.buy(formatPrice(cheapest))}</span>
             </Link>
           ) : (
             <a
               href="#tickets"
-              className="bh-gradient inline-flex items-center whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
+              className="bh-gradient inline-flex items-center whitespace-nowrap rounded-full px-3.5 py-2.5 text-[0.8rem] font-semibold text-bh-ink transition-transform hover:-translate-y-0.5 sm:px-5 sm:text-sm"
             >
-              {c.soon}
+              <span className="sm:hidden">{c.soonShort}</span>
+              <span className="hidden sm:inline">{c.soon}</span>
             </a>
           )}
         </div>

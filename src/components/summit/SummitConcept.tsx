@@ -32,7 +32,7 @@ export function SummitConcept({ lang = "bg" }: { lang?: Lang }) {
               {c.eyebrow}
             </p>
             <h2 className="mt-4 max-w-2xl text-[clamp(2rem,4.5vw,3.5rem)] font-display font-[900] uppercase leading-[0.95] tracking-tight text-bh-ink">
-              {c.title}
+              {c.title(stations.length)}
             </h2>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-bh-ink/60">

@@ -15,6 +15,7 @@ import { SummitSponsors } from "@/components/summit/SummitSponsors";
 import { SummitOrganizers } from "@/components/summit/SummitOrganizers";
 import { SummitFooter } from "@/components/summit/SummitFooter";
 import { buildEventSchema } from "@/lib/event-schema";
+import { getAnnouncedSpeakers } from "@/lib/speakers-data";
 import { cheapestOf, getPricing, priceOf } from "@/lib/pricing";
 import { META } from "@/lib/site-copy";
 import { formatPrice } from "@/lib/tickets";
@@ -39,14 +40,22 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomeEn() {
-  const eventSchema = await buildEventSchema();
+  // The hero quotes two numbers that also appear further down the page - the
+  // line-up size and the cheapest ticket - so both are read once here and
+  // handed down, rather than counted twice and disagreeing.
+  const [eventSchema, speakers, pricing] = await Promise.all([
+    buildEventSchema(),
+    getAnnouncedSpeakers(),
+    getPricing(),
+  ]);
+  const from = formatPrice(priceOf(pricing, cheapestOf(pricing)));
   return (
     <div className="overflow-clip rounded-[1.75rem] bg-bh-paper">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }} />
       <SiteNotice lang="en" />
       <SummitNav lang="en" />
       <main>
-        <SummitHero lang="en" />
+        <SummitHero lang="en" speakerCount={speakers.length} from={from} />
         <SummitSpeakers lang="en" />
         <SummitTracks lang="en" />
         <SummitZones lang="en" />

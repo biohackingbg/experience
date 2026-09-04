@@ -71,7 +71,7 @@ export function ThemeToggle() {
 
   return (
     <div className="flex items-center gap-2 text-bh-ink/55">
-      <Sun className="h-4 w-4" />
+      <Sun className="hidden h-4 w-4 sm:block" />
       <button
         type="button"
         role="switch"
@@ -86,7 +86,7 @@ export function ThemeToggle() {
           }`}
         />
       </button>
-      <Moon className="h-4 w-4" />
+      <Moon className="hidden h-4 w-4 sm:block" />
     </div>
   );
 }

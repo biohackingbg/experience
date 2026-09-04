@@ -7,15 +7,8 @@ import {
   Stage,
 } from "@/components/ui/Pictograms";
 import type { Lang } from "@/lib/i18n";
-import { SPEAKERS } from "@/lib/speakers";
 import { HERO } from "@/lib/site-copy";
-
-/**
- * The full line-up size, announced or not - the number is public even while
- * most of the names are held back. Read from the list, so it stays honest as
- * people are added or drop out.
- */
-const speakerCount = SPEAKERS.filter((s) => !s.pending).length;
+import { SALES_OPEN } from "@/lib/tickets";
 
 /**
  * Editorial signature from the reference: circular type slowly orbiting a
@@ -51,8 +44,23 @@ function OrbitBadge() {
   );
 }
 
-export function SummitHero({ lang = "bg" }: { lang?: Lang }) {
+/**
+ * `speakerCount` is passed in rather than counted here: the page below shows
+ * the announced line-up, and the two numbers on one screen must be the same
+ * number. `from` is the cheapest ticket, so the button quotes the price the
+ * next screen charges.
+ */
+export function SummitHero({
+  lang = "bg",
+  speakerCount,
+  from,
+}: {
+  lang?: Lang;
+  speakerCount: number;
+  from: string;
+}) {
   const c = HERO[lang];
+  const en = lang === "en";
   return (
     <section
       id="top"
@@ -86,6 +94,32 @@ export function SummitHero({ lang = "bg" }: { lang?: Lang }) {
               <span className="block">{c.line2}</span>
               <span className="block lg:pl-[24%]">{c.line3}</span>
             </h1>
+
+            {/* The first screen used to offer no way forward at all: the only
+                buy button was the pill in the sticky bar, which reads as
+                navigation. These two say where they lead, and the line under
+                them answers the question the page otherwise answers halfway
+                down - whether this event is for someone without a medical
+                degree. */}
+            <div className="hu-rise" style={{ animationDelay: "120ms" }}>
+              <div className="flex flex-wrap items-center gap-3">
+                <a
+                  href="#tickets"
+                  className="bh-gradient inline-flex items-center rounded-full px-6 py-3 text-sm font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
+                >
+                  {SALES_OPEN ? c.ctaTickets(from) : c.ctaTicketsPlain}
+                </a>
+                <a
+                  href="#program"
+                  className="inline-flex items-center rounded-full border border-bh-ink/25 px-6 py-3 text-sm font-semibold text-bh-ink transition-colors hover:border-bh-ink"
+                >
+                  {c.ctaProgramme}
+                </a>
+              </div>
+              <p className="mt-3 font-mono text-[0.68rem] uppercase tracking-[0.14em] text-bh-ink/50">
+                {en ? "7-8 November 2026" : "07-08 ноември 2026"} · {c.venue} · {c.forWhom}
+              </p>
+            </div>
           </div>
 
           {/* The dark welcome card from the reference, in our forest. */}
