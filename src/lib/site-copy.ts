@@ -84,7 +84,7 @@ export const HERO: Copy<{
     stageTag: "Сцената",
     speakersLabel: "международни лектори",
     speakersBody:
-      "Лекари и изследователи от България и чужбина - на разбираем език, по 25 минути. Обявяваме нови имена всяка седмица.",
+      "Лекари и изследователи от България и чужбина - на разбираем език, по 25 минути.",
     toSpeakers: "Към лекторите",
   },
   en: {
@@ -104,7 +104,7 @@ export const HERO: Copy<{
     stageTag: "The stage",
     speakersLabel: "international speakers",
     speakersBody:
-      "Doctors and researchers from Bulgaria and abroad - in plain language, 25 minutes each. New names announced every week.",
+      "Doctors and researchers from Bulgaria and abroad - in plain language, 25 minutes each.",
     toSpeakers: "To the speakers",
   },
 };
@@ -261,13 +261,13 @@ export const SPEAKERS_SECTION: Copy<{ eyebrow: string; title: string; intro: str
   bg: {
     eyebrow: "Лектори",
     title: "Международни имена, на разбираем език",
-    intro: "Лекари и изследователи от България и чужбина. Програмата се допълва - обявяваме нови имена всяка седмица.",
+    intro: "Лекари и изследователи от България и чужбина, на една сцена през двата дни.",
     showAll: (n) => `Виж всички ${n} лектори`,
   },
   en: {
     eyebrow: "Speakers",
     title: "International names, in plain language",
-    intro: "Doctors and researchers from Bulgaria and abroad. The programme fills in - new names every week.",
+    intro: "Doctors and researchers from Bulgaria and abroad, on one stage across the two days.",
     showAll: (n) => `See all ${n} speakers`,
   },
 };

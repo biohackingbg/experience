@@ -47,9 +47,9 @@ export type Speaker = {
   pending?: boolean;
   /**
    * Only announced speakers render on the page and in the structured data.
-   * The rest of the line-up is deliberately held back: new names are released
-   * week by week, and that weekly reveal is the reason to leave an email.
-   * Announcing someone = flipping this to true.
+   * The weekly reveal is over - the line-up went up in full - but the flag
+   * stays: someone whose details are still being confirmed should not appear
+   * as a half-empty card. Announcing someone = flipping this to true.
    */
   announced?: boolean;
 };

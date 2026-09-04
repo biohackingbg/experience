@@ -645,8 +645,8 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
           <Eyebrow>Сцената</Eyebrow>
           <H2>50 международни лектори</H2>
           <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-bh-ink/70">
-            Първите обявени имена - лекари и изследователи от шест държави. Нови
-            лектори всяка седмица.
+            Лекари и изследователи от шест държави, на една сцена през двата
+            дни.
           </p>
         </Reveal>
         <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
