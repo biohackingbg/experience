@@ -139,34 +139,42 @@ function WeekStrip({ week }: { week: { day: string; label: string; orders: numbe
   );
 }
 
-/** Half-ring: sold share of the room, the rest hatched. */
+/**
+ * Half-ring: sold share of the room, the rest hatched. Number and caption
+ * are SVG text, so they scale with the ring and never collide with it on a
+ * phone. A tiny share is drawn with flat ends: a 26-wide round cap on a
+ * 2% arc is a blob, not an arc.
+ */
 function Gauge({ pct }: { pct: number }) {
   const r = 80;
   const c = Math.PI * r; // half circumference
-  const filled = (Math.min(100, Math.max(0, pct)) / 100) * c;
+  const share = Math.min(100, Math.max(0, pct)) / 100;
+  const filled = share * c;
   return (
-    <div className="relative mx-auto mt-2 w-full max-w-[16rem]">
-      <svg viewBox="0 0 200 110" className="w-full">
-        <defs>
-          <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-            <rect width="3" height="7" fill="#c9cfca" />
-          </pattern>
-        </defs>
-        <path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="url(#hatch)" strokeWidth="26" strokeLinecap="round" />
+    <svg viewBox="0 0 200 118" className="mx-auto mt-2 w-full max-w-[17rem]" role="img" aria-label={`${pct}% от залата е продадена`}>
+      <defs>
+        <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <rect width="3" height="7" fill="#c9cfca" />
+        </pattern>
+      </defs>
+      <path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="url(#hatch)" strokeWidth="26" strokeLinecap="round" />
+      {share > 0 && (
         <path
           d="M20 100 A80 80 0 0 1 180 100"
           fill="none"
           stroke={GREEN}
           strokeWidth="26"
-          strokeLinecap="round"
-          strokeDasharray={`${filled} ${c}`}
+          strokeLinecap={share < 0.08 ? "butt" : "round"}
+          strokeDasharray={`${filled} ${c + 30}`}
         />
-      </svg>
-      <div className="absolute inset-x-0 bottom-0 text-center">
-        <div className="text-4xl font-black tracking-tight text-[#0b2a22]">{pct}%</div>
-        <div className="text-xs text-[#0b2a22]/55">от залата е продадена</div>
-      </div>
-    </div>
+      )}
+      <text x="100" y="88" textAnchor="middle" fontSize="34" fontWeight="900" fill="#0b2a22" fontFamily="inherit" letterSpacing="-1">
+        {pct}%
+      </text>
+      <text x="100" y="106" textAnchor="middle" fontSize="9" fill="#0b2a22" fillOpacity=".55" fontFamily="inherit">
+        от залата е продадена
+      </text>
+    </svg>
   );
 }
 
@@ -429,7 +437,7 @@ export default async function AdminDashboard({
           <Gauge pct={soldPct} />
           <div className="mt-5 flex flex-wrap justify-center gap-4 text-xs text-[#0b2a22]/65">
             <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-[#146455]" />продадени {d.ticketsSold}</span>
-            <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-full" style={{ background: HATCH }} />свободни {seatsLeft}</span>
+            <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-[#c9cfca]" />свободни {seatsLeft}</span>
           </div>
         </section>
       </div>
