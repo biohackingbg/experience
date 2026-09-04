@@ -82,7 +82,7 @@ function ticketRows(input: TicketEmailInput): string {
  * and Outlook ignores most modern layout. Tables and inline CSS are what
  * actually renders everywhere.
  */
-function ticketEmailHtml(input: TicketEmailInput): string {
+export function ticketEmailHtml(input: TicketEmailInput): string {
   return `<!doctype html>
 <html lang="bg"><body style="margin:0;padding:24px;background:#f2f2ee">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
@@ -146,7 +146,7 @@ function ticketEmailHtml(input: TicketEmailInput): string {
 </body></html>`;
 }
 
-function ticketEmailText(input: TicketEmailInput): string {
+export function ticketEmailText(input: TicketEmailInput): string {
   const list = input.tickets
     .map((t) => `- ${t.tierName} · ${t.code}\n  ${SITE}/bilet/${t.code}`)
     .join("\n");
@@ -213,7 +213,7 @@ export type ReminderEmailInput = {
  * charged and nothing is held, offers the door, and promises not to write
  * again - which the reminder_sent_at column then enforces.
  */
-function reminderEmailHtml(input: ReminderEmailInput): string {
+export function reminderEmailHtml(input: ReminderEmailInput): string {
   const p = `font:400 15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251fb3`;
   return `<!doctype html>
 <html lang="bg"><body style="margin:0;padding:24px;background:#f2f2ee">
@@ -256,7 +256,7 @@ function reminderEmailHtml(input: ReminderEmailInput): string {
 </body></html>`;
 }
 
-function reminderEmailText(input: ReminderEmailInput): string {
+export function reminderEmailText(input: ReminderEmailInput): string {
   return [
     `Здравей, ${input.buyerName}!`,
     "",
@@ -315,7 +315,7 @@ const VENUE_MAPS = "https://maps.google.com/?q=Grand+Hotel+Millennium+Sofia";
  * ask that saves the door queue - name the person on each ticket. Sent to
  * every buyer once, by hand, from the admin.
  */
-function eventInfoHtml(input: EventInfoInput): string {
+export function eventInfoHtml(input: EventInfoInput): string {
   const f = "-apple-system,Segoe UI,Roboto,sans-serif";
   const p = `font:400 15px/1.6 ${f};color:#02251fb3`;
   const rows = input.tickets

@@ -57,11 +57,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     >
       <div className="mx-auto flex min-h-[calc(100vh-2.5rem)] max-w-[110rem] gap-4 rounded-[2rem] bg-white p-3 shadow-[0_20px_60px_-30px_rgba(2,37,31,.35)] sm:p-4">
         <aside className="hidden w-64 shrink-0 flex-col rounded-[1.5rem] bg-[#f6f7f5] px-4 py-6 lg:flex">
-          <Link href="/admin" className="flex items-center gap-3 px-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#146455] text-[#cef870]">
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="h-5 w-5"><path d="M4 11l4 4 8-9"/></svg>
-            </span>
-            <span className="text-lg font-black tracking-tight">Sofia Life Summit</span>
+          <Link href="/admin" className="block px-2" aria-label="Biohacking Experience - табло">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.svg" alt="Biohacking Experience" className="h-9 w-auto max-w-full" />
+            <span className="mt-2 block font-mono text-[0.62rem] uppercase tracking-[0.2em] text-[#0b2a22]/45">Sofia Life Summit · админ</span>
           </Link>
 
           <p className="mt-8 px-3 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-[#0b2a22]/45">Меню</p>

@@ -14,7 +14,7 @@ export function ExpenseForm() {
   const [state, action, pending] = useActionState(createExpense, idle);
   const today = new Date().toISOString().slice(0, 10);
   return (
-    <form action={action} className="grid gap-2 sm:grid-cols-[8.5rem_1fr_1fr_7rem] lg:grid-cols-[8.5rem_10rem_1fr_1fr_7rem_8rem_8rem]">
+    <form action={action} className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-[8.5rem_10rem_1fr_1fr_7rem_8rem_auto]">
       <input type="date" name="date" defaultValue={today} className={field} />
       <select name="category" required className={field} defaultValue="">
         <option value="" disabled>категория</option>
