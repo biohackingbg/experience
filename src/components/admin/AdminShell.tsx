@@ -125,9 +125,14 @@ export function AdminShell({ access, children }: { access: Access; children: Rea
               ))}
             </div>
             <div className="hidden items-center gap-3 sm:flex">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#146455] text-sm font-bold text-[#cef870]">
-                {admin ? "SL" : access.label.trim().slice(0, 2).toUpperCase()}
-              </span>
+              {admin ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src="/team-avatar.jpg" alt="" width={40} height={40} className="h-10 w-10 rounded-full object-cover ring-2 ring-[#146455]/30" />
+              ) : (
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#146455] text-sm font-bold text-[#cef870]">
+                  {access.label.trim().slice(0, 2).toUpperCase()}
+                </span>
+              )}
               <div className="leading-tight">
                 <div className="text-sm font-semibold">{access.label}</div>
                 <div className="text-xs text-[#0b2a22]/55">{admin ? "hi@biohacking.bg" : `достъп до ${menu.length} ${menu.length === 1 ? "страница" : "страници"}`}</div>

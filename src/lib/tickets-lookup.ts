@@ -4,6 +4,7 @@ import { sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { orderItems, orders, tickets } from "@/lib/db/schema";
+import { SOLD } from "@/lib/sold";
 import { getTier } from "@/lib/tickets";
 
 export type TicketView = {
@@ -39,7 +40,7 @@ export async function findTicket(code: string): Promise<TicketView | null> {
     })
     .from(tickets)
     .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
-    .where(sql`${tickets.code} = ${normalised} and ${orders.status} = 'paid'`)
+    .where(sql`${tickets.code} = ${normalised} and ${SOLD}`)
     .limit(1);
 
   if (!row) return null;
@@ -133,7 +134,7 @@ export async function listAttendees(): Promise<AttendeeRow[]> {
     })
     .from(tickets)
     .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
-    .where(sql`${orders.status} = 'paid' and not ${orders.isTest}`);
+    .where(SOLD);
   return rows
     .map((r) => ({
       code: r.code,
@@ -184,7 +185,7 @@ export async function getDoorStats(): Promise<{
       .from(tickets)
       .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
       // A refunded or test order's tickets are not expected at the door.
-      .where(sql`${orders.status} = 'paid' and not ${orders.isTest}`),
+      .where(SOLD),
     db
       .select({
         code: tickets.code,
@@ -232,7 +233,7 @@ export async function searchTickets(q: string): Promise<(TicketView & { email: s
     .from(tickets)
     .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
     .where(
-      sql`${orders.status} = 'paid' and (
+      sql`${SOLD} and (
         ${orders.name} ilike ${like} or ${orders.email} ilike ${like}
         or ${orders.reference} ilike ${like} or ${tickets.code} ilike ${like}
         or coalesce(${tickets.attendeeName}, '') ilike ${like}

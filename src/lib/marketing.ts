@@ -5,6 +5,7 @@ import { desc, eq, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { campaigns, orderItems, orders, siteViews } from "@/lib/db/schema";
 import { PLATFORMS } from "@/lib/marketing-options";
+import { SOLD } from "@/lib/sold";
 
 /**
  * What marketing did and what it brought.
@@ -90,7 +91,7 @@ export async function getMarketing(): Promise<Marketing> {
       })
       .from(orders)
       .innerJoin(orderItems, sql`${orderItems.orderId} = ${orders.id}`)
-      .where(sql`${orders.status} = 'paid' and not ${orders.isTest} and (${orders.utmCampaign} is not null or ${orders.utmSource} is not null)`)
+      .where(sql`${SOLD} and (${orders.utmCampaign} is not null or ${orders.utmSource} is not null)`)
       .groupBy(orders.utmCampaign, orders.utmSource),
     db
       .select({ campaign: siteViews.utmCampaign, n: sql<number>`count(distinct ${siteViews.visitor})::int` })
@@ -110,7 +111,7 @@ export async function getMarketing(): Promise<Marketing> {
       .select({ tickets: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int` })
       .from(orders)
       .innerJoin(orderItems, sql`${orderItems.orderId} = ${orders.id}`)
-      .where(sql`${orders.status} = 'paid' and not ${orders.isTest} and ${orders.paidAt} >= now() - interval '30 days'`),
+      .where(sql`${SOLD} and ${orders.paidAt} >= now() - interval '30 days'`),
   ]);
 
   // Around-the-post numbers, one small pair of queries per campaign. The log
@@ -131,7 +132,7 @@ export async function getMarketing(): Promise<Marketing> {
           .from(orders)
           .innerJoin(orderItems, sql`${orderItems.orderId} = ${orders.id}`)
           .where(
-            sql`${orders.status} = 'paid' and not ${orders.isTest} and ${orders.paidAt} >= ${start}::timestamptz and ${orders.paidAt} < ${start}::timestamptz + interval '${sql.raw(WINDOW)}'`,
+            sql`${SOLD} and ${orders.paidAt} >= ${start}::timestamptz and ${orders.paidAt} < ${start}::timestamptz + interval '${sql.raw(WINDOW)}'`,
           ),
       ]);
       return { id: c.id, visitors: v?.n ?? 0, tickets: t?.n ?? 0 };

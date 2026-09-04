@@ -5,6 +5,7 @@ import { desc, inArray, or, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { orderItems, orders, signups, tickets } from "@/lib/db/schema";
 import { PENDING_HOLD_MINUTES } from "@/lib/orders";
+import { KEPT_CENTS, SOLD } from "@/lib/sold";
 import { TIERS, VAT_RATE, type TierId } from "@/lib/tickets";
 
 /**
@@ -105,10 +106,10 @@ export async function getDashboardData(): Promise<DashboardData> {
     await Promise.all([
       db
         .select({
-          gross: sql<number>`coalesce(sum(${orders.totalCents}) filter (where ${orders.status} = 'paid' and not ${orders.isTest}), 0)::int`,
-          vat: sql<number>`coalesce(sum(${orders.vatCents}) filter (where ${orders.status} = 'paid' and not ${orders.isTest}), 0)::int`,
-          paid: sql<number>`count(*) filter (where ${orders.status} = 'paid' and not ${orders.isTest})::int`,
-          refunded: sql<number>`count(*) filter (where ${orders.status} = 'refunded' and not ${orders.isTest})::int`,
+          gross: sql<number>`coalesce(sum(${KEPT_CENTS}) filter (where ${SOLD}), 0)::int`,
+          vat: sql<number>`coalesce(sum(round(${orders.vatCents} * ${KEPT_CENTS}::numeric / nullif(${orders.totalCents}, 0))) filter (where ${SOLD}), 0)::int`,
+          paid: sql<number>`count(*) filter (where ${SOLD})::int`,
+          refunded: sql<number>`count(*) filter (where not ${orders.isTest} and (${orders.status} = 'refunded' or coalesce(${orders.refundedCents}, 0) >= ${orders.totalCents}))::int`,
           test: sql<number>`count(*) filter (where ${orders.isTest})::int`,
           // Still inside the seat hold - a payment may yet land.
           pending: sql<number>`count(*) filter (where ${orders.status} = 'pending' and not ${orders.isTest} and ${orders.createdAt} > now() - interval '${sql.raw(String(PENDING_HOLD_MINUTES))} minutes')::int`,
@@ -127,7 +128,7 @@ export async function getDashboardData(): Promise<DashboardData> {
         })
         .from(orderItems)
         .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
-        .where(sql`${orders.status} = 'paid' and not ${orders.isTest}`)
+        .where(SOLD)
         .groupBy(orderItems.tierId),
 
       db
@@ -137,7 +138,7 @@ export async function getDashboardData(): Promise<DashboardData> {
           gross: sql<number>`coalesce(sum(${orders.totalCents}), 0)::int`,
         })
         .from(orders)
-        .where(sql`${orders.status} = 'paid' and not ${orders.isTest} and ${orders.paidAt} is not null`)
+        .where(sql`${SOLD} and ${orders.paidAt} is not null`)
         .groupBy(sql`to_char(${orders.paidAt}, 'YYYY-MM-DD')`)
         .orderBy(sql`to_char(${orders.paidAt}, 'YYYY-MM-DD')`),
 
@@ -165,7 +166,7 @@ export async function getDashboardData(): Promise<DashboardData> {
         .select({ n: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int` })
         .from(orderItems)
         .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
-        .where(sql`${orders.status} = 'paid' and not ${orders.isTest} and ${orders.paidAt} > now() - interval '7 days'`),
+        .where(sql`${SOLD} and ${orders.paidAt} > now() - interval '7 days'`),
 
       db
         .select({
@@ -180,7 +181,7 @@ export async function getDashboardData(): Promise<DashboardData> {
         })
         .from(orderItems)
         .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
-        .where(sql`${orders.status} = 'paid' and not ${orders.isTest}`),
+        .where(SOLD),
 
       // Paid orders that do not add up: counted as an order but with no
       // tickets or items behind them, or paid with nothing from Stripe and
@@ -196,12 +197,14 @@ export async function getDashboardData(): Promise<DashboardData> {
           items: sql<number>`(select coalesce(sum(i.quantity), 0) from order_items i where i.order_id = ${orders.id})::int`,
           tickets: sql<number>`(select count(*) from tickets t where t.order_id = ${orders.id})::int`,
           hasStripe: sql<boolean>`${orders.stripePaymentIntentId} is not null`,
+          refundedCents: orders.refundedCents,
         })
         .from(orders)
         .where(sql`${orders.status} = 'paid' and not ${orders.isTest} and (
           ${orders.stripePaymentIntentId} is null and ${orders.totalCents} > 0
           or not exists (select 1 from tickets t where t.order_id = ${orders.id})
           or not exists (select 1 from order_items i where i.order_id = ${orders.id})
+          or coalesce(${orders.refundedCents}, 0) >= ${orders.totalCents}
         )`)
         .orderBy(desc(orders.createdAt))
         .limit(20),
@@ -257,6 +260,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       ...(o.items === 0 ? ["няма артикули - не влиза в „продадени билета“"] : []),
       ...(o.tickets === 0 ? ["няма издадени билети"] : []),
       ...(!o.hasStripe && o.totalCents > 0 ? ["няма плащане в Stripe"] : []),
+      ...((o.refundedCents ?? 0) >= o.totalCents && o.totalCents > 0 ? ["върната изцяло по сума - не се брои"] : []),
     ],
   }));
 

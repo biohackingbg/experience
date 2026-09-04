@@ -8,6 +8,7 @@ import { getDb } from "@/lib/db";
 import { orderItems, orders, signups, siteViews } from "@/lib/db/schema";
 import { getPreparation } from "@/lib/preparation";
 import { STAGE_LABEL, getPricing } from "@/lib/pricing";
+import { SOLD } from "@/lib/sold";
 import { formatPrice } from "@/lib/tickets";
 
 /**
@@ -40,7 +41,7 @@ export async function buildDigest(): Promise<Digest> {
       })
       .from(orders)
       .innerJoin(orderItems, sql`${orderItems.orderId} = ${orders.id}`)
-      .where(sql`${orders.status} = 'paid' and not ${orders.isTest} and ${localDay(orders.paidAt)} = ${yesterday}`),
+      .where(sql`${SOLD} and ${localDay(orders.paidAt)} = ${yesterday}`),
     db
       .select({
         visitors: sql<number>`count(distinct ${siteViews.visitor})::int`,
