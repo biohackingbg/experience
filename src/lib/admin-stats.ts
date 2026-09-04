@@ -49,8 +49,21 @@ export type RecentOrder = {
 /** One of the last seven Sofia days, zero-filled - the week strip on the dashboard. */
 export type WeekDay = { day: string; label: string; orders: number; grossCents: number; today: boolean };
 
+/** A paid order that does not look like a sale: no tickets, no items, or no payment behind it. */
+export type OddOrder = {
+  reference: string;
+  name: string;
+  email: string;
+  totalCents: number;
+  paidAt: Date | null;
+  isTest: boolean;
+  issues: string[];
+};
+
 export type DashboardData = {
   week: WeekDay[];
+  /** What the sold figures leave out or should not include - for the team to look at, not for the count. */
+  odd: OddOrder[];
   grossCents: number;
   netCents: number;
   vatCents: number;
@@ -88,7 +101,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   const sofiaDay = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia" });
   const weekDays = Array.from({ length: 7 }, (_, i) => sofiaDay.format(new Date(Date.now() - (6 - i) * 86_400_000)));
 
-  const [totals, perTierRows, dailyRows, recentRows, signupRow, last7Row, checkedInRow, dayRow] =
+  const [totals, perTierRows, dailyRows, recentRows, signupRow, last7Row, checkedInRow, dayRow, oddRows] =
     await Promise.all([
       db
         .select({
@@ -168,6 +181,30 @@ export async function getDashboardData(): Promise<DashboardData> {
         .from(orderItems)
         .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
         .where(sql`${orders.status} = 'paid' and not ${orders.isTest}`),
+
+      // Paid orders that do not add up: counted as an order but with no
+      // tickets or items behind them, or paid with nothing from Stripe and
+      // not a free order either. Shown, never silently dropped.
+      db
+        .select({
+          reference: orders.reference,
+          name: orders.name,
+          email: orders.email,
+          totalCents: orders.totalCents,
+          paidAt: orders.paidAt,
+          isTest: orders.isTest,
+          items: sql<number>`(select coalesce(sum(i.quantity), 0) from order_items i where i.order_id = ${orders.id})::int`,
+          tickets: sql<number>`(select count(*) from tickets t where t.order_id = ${orders.id})::int`,
+          hasStripe: sql<boolean>`${orders.stripePaymentIntentId} is not null`,
+        })
+        .from(orders)
+        .where(sql`${orders.status} = 'paid' and not ${orders.isTest} and (
+          ${orders.stripePaymentIntentId} is null and ${orders.totalCents} > 0
+          or not exists (select 1 from tickets t where t.order_id = ${orders.id})
+          or not exists (select 1 from order_items i where i.order_id = ${orders.id})
+        )`)
+        .orderBy(desc(orders.createdAt))
+        .limit(20),
     ]);
 
   // Items for the listed orders, fetched separately and stitched in JS. A
@@ -209,7 +246,22 @@ export async function getDashboardData(): Promise<DashboardData> {
   const grossCents = totals[0]?.gross ?? 0;
   const vatCents = totals[0]?.vat ?? 0;
 
+  const odd: OddOrder[] = oddRows.map((o) => ({
+    reference: o.reference,
+    name: o.name,
+    email: o.email,
+    totalCents: o.totalCents,
+    paidAt: o.paidAt,
+    isTest: o.isTest,
+    issues: [
+      ...(o.items === 0 ? ["няма артикули - не влиза в „продадени билета“"] : []),
+      ...(o.tickets === 0 ? ["няма издадени билети"] : []),
+      ...(!o.hasStripe && o.totalCents > 0 ? ["няма плащане в Stripe"] : []),
+    ],
+  }));
+
   return {
+    odd,
     grossCents,
     vatCents,
     netCents: grossCents - vatCents,

@@ -491,6 +491,28 @@ export default async function AdminDashboard({
         <DailyChart data={d.daily} />
       </div>
 
+      {d.odd.length > 0 && (
+        <section className="mt-4 rounded-3xl bg-[#C4607F]/8 p-6 ring-1 ring-[#C4607F]/30">
+          <h2 className="text-lg font-bold tracking-tight">Проверка: {d.odd.length} платени поръчки, които не се връзват</h2>
+          <p className="mt-1 text-xs text-[#0b2a22]/60">
+            Броят се като поръчки, но не и като билети, или са платени без плащане в Stripe. Ако е тест - „тестова“. Ако не е - прати екрана.
+          </p>
+          <ul className="mt-4 flex flex-col divide-y divide-[#0b2a22]/8">
+            {d.odd.map((o) => (
+              <li key={o.reference} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                <div className="min-w-0 text-sm">
+                  <span className="font-mono text-xs text-[#0b2a22]/60">{o.reference}</span>
+                  <span className="ml-2 font-medium">{o.name}</span>
+                  <span className="ml-2 text-xs text-[#0b2a22]/55">{o.email} · <Money cents={o.totalCents} />{o.paidAt ? ` · ${when({ paidAt: o.paidAt, createdAt: o.paidAt })}` : ""}</span>
+                  <div className="mt-0.5 text-xs font-semibold text-[#9c3d5c]">{o.issues.join(" · ")}</div>
+                </div>
+                <TestToggle reference={o.reference} isTest={o.isTest} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <section id="porachki" className="mt-4 rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6">
         <h2 className="text-lg font-bold tracking-tight">Последни поръчки</h2>
         {d.recent.length === 0 ? (

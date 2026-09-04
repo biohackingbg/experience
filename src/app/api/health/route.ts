@@ -71,6 +71,7 @@ export async function GET(request: Request) {
       paid_no_tickets: string;
       paid_no_invoice: string;
       refunded_no_note: string;
+      paid_no_payment: string;
     }>(sql`
       select
         count(*) filter (
@@ -82,6 +83,10 @@ export async function GET(request: Request) {
             and o.invoice_number is null
         ) as paid_no_invoice,
         count(*) filter (
+          where o.status = 'paid' and not o.is_test and o.total_cents > 0
+            and o.stripe_payment_intent_id is null
+        ) as paid_no_payment,
+        count(*) filter (
           where o.status = 'refunded' and o.refunded_at > now() - interval '24 hours'
             and o.invoice_number is not null and o.credit_note_number is null
             and o.refunded_at < now() - interval '15 minutes'
@@ -91,6 +96,7 @@ export async function GET(request: Request) {
     if (Number(row.paid_no_tickets)) failures.push(`${row.paid_no_tickets} платени поръчки от 24ч БЕЗ билети`);
     if (Number(row.paid_no_invoice)) failures.push(`${row.paid_no_invoice} платени поръчки от 24ч БЕЗ фактура`);
     if (Number(row.refunded_no_note)) failures.push(`${row.refunded_no_note} върнати поръчки БЕЗ кредитно известие`);
+    if (Number(row.paid_no_payment)) failures.push(`${row.paid_no_payment} платени поръчки БЕЗ плащане в Stripe (виж „Проверка“ в таблото)`);
   } catch (error) {
     failures.push(`База данни: ${error instanceof Error ? error.message : String(error)}`);
   }
