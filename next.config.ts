@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Speaker portraits are uploaded through a server action; they are resized
+  // in the browser first, so the ceiling is generous, not large.
+  experimental: { serverActions: { bodySizeLimit: "4mb" } },
   async headers() {
     return [
       {

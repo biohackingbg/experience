@@ -1,5 +1,5 @@
 import { getPricing, priceOf } from "@/lib/pricing";
-import { announcedSpeakers } from "@/lib/speakers";
+import { getAnnouncedSpeakers } from "@/lib/speakers-data";
 import { SALES_OPEN, CURRENCY, PRE_ORDER, TIERS } from "@/lib/tickets";
 
 /**
@@ -9,7 +9,7 @@ import { SALES_OPEN, CURRENCY, PRE_ORDER, TIERS } from "@/lib/tickets";
  * place and not the other. Unconfirmed slots are skipped - "Обявява се скоро"
  * is a placeholder, not a person, and Google would treat it as one.
  */
-const performers = announcedSpeakers().map((s) => ({
+const performersOf = (list: Awaited<ReturnType<typeof getAnnouncedSpeakers>>) => list.map((s) => ({
   "@type": "Person" as const,
   name: [s.title, s.name].filter(Boolean).join(" "),
   // Speciality first, then the position held. Never the institution: it was
@@ -33,7 +33,8 @@ const performers = announcedSpeakers().map((s) => ({
  * no longer charges.
  */
 export async function buildEventSchema() {
-  const pricing = await getPricing();
+  const [pricing, speakers] = await Promise.all([getPricing(), getAnnouncedSpeakers()]);
+  const performers = performersOf(speakers);
 
   return {
   "@context": "https://schema.org",

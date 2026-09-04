@@ -1,6 +1,6 @@
 import { Reveal } from "@/components/ui/Reveal";
 import { SpeakerGrid } from "@/components/summit/SpeakerGrid";
-import { announcedSpeakers } from "@/lib/speakers";
+import { getAnnouncedSpeakers } from "@/lib/speakers-data";
 
 /**
  * A grid rather than a horizontal strip. The strip cost less height but hid
@@ -9,7 +9,8 @@ import { announcedSpeakers } from "@/lib/speakers";
  * they sit side by side. Height is held down by the square crop and by
  * revealing the first eight, the rest on request.
  */
-export function SummitSpeakers() {
+export async function SummitSpeakers() {
+  const speakers = await getAnnouncedSpeakers();
   return (
     <section id="lektori" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
@@ -29,7 +30,7 @@ export function SummitSpeakers() {
         </Reveal>
 
         <Reveal className="mt-10">
-          <SpeakerGrid speakers={announcedSpeakers()} />
+          <SpeakerGrid speakers={speakers} />
         </Reveal>
 
       </div>

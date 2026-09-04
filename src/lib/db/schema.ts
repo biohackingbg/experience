@@ -1,6 +1,7 @@
 import {
   bigint,
   boolean,
+  customType,
   date,
   index,
   integer,
@@ -531,6 +532,45 @@ export const sessions = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }),
   },
   (table) => [index("sessions_day_sort_idx").on(table.day, table.sort)],
+);
+
+/** Raw bytes; the driver hands them over as a Buffer. */
+const bytea = customType<{ data: Buffer; driverData: Buffer }>({
+  dataType() {
+    return "bytea";
+  },
+});
+
+/**
+ * Speakers, editable from the admin, portrait included. Empty until the
+ * team imports the list in code (speakers.ts) - after that the database is
+ * what the site reads. The portrait lives here rather than in a bucket:
+ * fifty people at a couple of hundred kilobytes is nothing to a database,
+ * and one less service to configure and lose a key for.
+ */
+export const speakers = pgTable(
+  "speakers",
+  {
+    /** The slug from the code list, or made from the name for new people. */
+    id: text("id").primaryKey(),
+    sort: integer("sort").notNull(),
+    announced: boolean("announced").notNull().default(false),
+    /** A slot still being confirmed: shown as a placeholder, never as a person. */
+    pending: boolean("pending").notNull().default(false),
+    title: text("title"),
+    name: text("name").notNull(),
+    specialty: text("specialty"),
+    country: text("country"),
+    affiliation: text("affiliation"),
+    role: text("role"),
+    topic: text("topic"),
+    photo: bytea("photo"),
+    photoMime: text("photo_mime"),
+    /** Bumped on every upload; part of the image URL, so caches move on. */
+    photoUpdatedAt: timestamp("photo_updated_at", { withTimezone: true }),
+    updatedAt: timestamp("updated_at", { withTimezone: true }),
+  },
+  (table) => [index("speakers_sort_idx").on(table.sort)],
 );
 
 export type DeckLink = typeof deckLinks.$inferSelect;
