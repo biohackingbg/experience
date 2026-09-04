@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { canAccess } from "@/lib/access";
-import { type SpeakerInput, addSpeaker, deleteSpeaker, importSpeakers, moveSpeaker, setAnnounced, setPhoto, updateSpeaker } from "@/lib/speakers-data";
+import { type SpeakerInput, addSpeaker, deleteSpeaker, fillSpeakersEnglish, importSpeakers, moveSpeaker, setAnnounced, setPhoto, updateSpeaker } from "@/lib/speakers-data";
 
 export type FormState = { status: "idle" | "ok" | "error"; message?: string };
 const ID = /^[a-z0-9-]{1,80}$/;
@@ -32,6 +32,7 @@ function parse(formData: FormData): { ok: true; input: SpeakerInput } | { ok: fa
       specialtyEn: s("specialtyEn", 120),
       roleEn: s("roleEn", 120),
       topicEn: s("topicEn", 200),
+      affiliationEn: s("affiliationEn", 160),
       announced: formData.get("announced") === "on",
       pending: formData.get("pending") === "on",
     },
@@ -86,6 +87,13 @@ export async function shiftSpeaker(formData: FormData): Promise<void> {
 export async function seedSpeakers(): Promise<void> {
   if (!(await canAccess("lektori"))) return;
   await importSpeakers();
+  done();
+}
+
+/** Fills the English half of speakers imported before the translations existed. */
+export async function fillEnglish(): Promise<void> {
+  if (!(await canAccess("lektori"))) return;
+  await fillSpeakersEnglish();
   done();
 }
 

@@ -7,7 +7,8 @@ import { asc, eq, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { speakers } from "@/lib/db/schema";
 import type { Lang } from "@/lib/i18n";
-import { SPEAKERS, type Speaker } from "@/lib/speakers";
+import { latin } from "@/lib/latin";
+import { SPEAKERS, SPEAKERS_EN, type Speaker } from "@/lib/speakers";
 
 /**
  * The speakers the site shows. The list in code is the seed; once imported,
@@ -32,6 +33,7 @@ export type SpeakerRow = {
   specialtyEn: string | null;
   roleEn: string | null;
   topicEn: string | null;
+  affiliationEn: string | null;
   hasPhoto: boolean;
   photoUpdatedAt: Date | null;
   updatedAt: Date | null;
@@ -53,6 +55,7 @@ const cols = {
   specialtyEn: speakers.specialtyEn,
   roleEn: speakers.roleEn,
   topicEn: speakers.topicEn,
+  affiliationEn: speakers.affiliationEn,
   hasPhoto: sql<boolean>`${speakers.photo} is not null`,
   photoUpdatedAt: speakers.photoUpdatedAt,
   updatedAt: speakers.updatedAt,
@@ -70,11 +73,11 @@ function toSpeaker(r: SpeakerRow, lang: Lang = "bg"): Speaker {
   const en = lang === "en";
   return {
     id: r.id,
-    name: r.name,
+    name: en ? latin(r.name) : r.name,
     title: (en ? r.titleEn : null) || r.title || undefined,
     specialty: (en ? r.specialtyEn : null) || r.specialty || undefined,
     country: r.country ?? undefined,
-    affiliation: r.affiliation ?? undefined,
+    affiliation: (en ? r.affiliationEn : null) || r.affiliation || undefined,
     role: (en ? r.roleEn : null) || r.role || undefined,
     topic: (en ? r.topicEn : null) || r.topic || undefined,
     photo: photoUrl(r),
@@ -94,7 +97,20 @@ export async function getAnnouncedSpeakers(lang: Lang = "bg"): Promise<Speaker[]
   if (rows.length === 0) {
     // Same rule the code list applies, including the local preview switch.
     const all = process.env.PREVIEW_ALL_SPEAKERS === "1";
-    return SPEAKERS.filter((s) => !s.pending && (all || s.announced));
+    const list = SPEAKERS.filter((s) => !s.pending && (all || s.announced));
+    if (lang !== "en") return list;
+    return list.map((s) => {
+      const t = SPEAKERS_EN[s.id] ?? {};
+      return {
+        ...s,
+        name: latin(s.name),
+        title: t.title || s.title,
+        specialty: t.specialty || s.specialty,
+        role: t.role || s.role,
+        affiliation: t.affiliation || s.affiliation,
+        topic: t.topic || s.topic,
+      };
+    });
   }
   return rows.filter((r) => !r.pending && r.announced).map((r) => toSpeaker(r, lang));
 }
@@ -135,6 +151,11 @@ export async function importSpeakers(): Promise<number> {
       affiliation: s.affiliation ?? null,
       role: s.role ?? null,
       topic: s.topic ?? null,
+      titleEn: SPEAKERS_EN[s.id]?.title ?? null,
+      specialtyEn: SPEAKERS_EN[s.id]?.specialty ?? null,
+      roleEn: SPEAKERS_EN[s.id]?.role ?? null,
+      topicEn: SPEAKERS_EN[s.id]?.topic ?? null,
+      affiliationEn: SPEAKERS_EN[s.id]?.affiliation ?? null,
       photo: photo?.bytes ?? null,
       photoMime: photo?.mime ?? null,
       photoUpdatedAt: photo ? new Date() : null,
@@ -146,8 +167,34 @@ export async function importSpeakers(): Promise<number> {
 
 export type SpeakerInput = Pick<
   SpeakerRow,
-  "name" | "title" | "specialty" | "country" | "affiliation" | "role" | "topic" | "titleEn" | "specialtyEn" | "roleEn" | "topicEn" | "announced" | "pending"
+  | "name" | "title" | "specialty" | "country" | "affiliation" | "role" | "topic"
+  | "titleEn" | "specialtyEn" | "roleEn" | "topicEn" | "affiliationEn"
+  | "announced" | "pending"
 >;
+
+/**
+ * Fills the English half of speakers imported before the translations
+ * existed, matching by id and never overwriting anything typed by hand.
+ */
+export async function fillSpeakersEnglish(): Promise<number> {
+  const db = getDb();
+  const rows = await listSpeakers();
+  let n = 0;
+  for (const r of rows) {
+    const t = SPEAKERS_EN[r.id];
+    if (!t) continue;
+    const patch: Partial<SpeakerRow> = {};
+    if (!r.titleEn && t.title) patch.titleEn = t.title;
+    if (!r.specialtyEn && t.specialty) patch.specialtyEn = t.specialty;
+    if (!r.roleEn && t.role) patch.roleEn = t.role;
+    if (!r.topicEn && t.topic) patch.topicEn = t.topic;
+    if (!r.affiliationEn && t.affiliation) patch.affiliationEn = t.affiliation;
+    if (Object.keys(patch).length === 0) continue;
+    await db.update(speakers).set(patch).where(eq(speakers.id, r.id));
+    n++;
+  }
+  return n;
+}
 
 /** "Д-р Мария Иванова" -> "mariya-ivanova"; unique by suffix if taken. */
 export async function slugFor(name: string): Promise<string> {

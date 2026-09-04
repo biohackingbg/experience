@@ -36,6 +36,7 @@ function Fields({ s }: { s?: SpeakerRow }) {
           <input name="specialtyEn" defaultValue={s?.specialtyEn ?? ""} placeholder="speciality in English" className={field} />
           <input name="roleEn" defaultValue={s?.roleEn ?? ""} placeholder="position in English" className={field} />
           <input name="topicEn" defaultValue={s?.topicEn ?? ""} placeholder="topic in English" className={field} />
+          <input name="affiliationEn" defaultValue={s?.affiliationEn ?? ""} placeholder="institution in English" className={field} />
         </div>
       </details>
       <div className="mt-2 flex flex-wrap gap-4 text-xs text-bh-ink/70">

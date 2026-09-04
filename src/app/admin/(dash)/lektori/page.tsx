@@ -6,7 +6,7 @@ import { requireAccess } from "@/lib/access";
 import { SPEAKERS, initials } from "@/lib/speakers";
 import { listSpeakers, photoUrl } from "@/lib/speakers-data";
 
-import { seedSpeakers, shiftSpeaker, toggleAnnounced } from "./actions";
+import { fillEnglish, seedSpeakers, shiftSpeaker, toggleAnnounced } from "./actions";
 import { NewSpeakerForm, SpeakerEditor } from "./Forms";
 
 export const metadata: Metadata = {
@@ -36,7 +36,14 @@ export default async function SpeakersAdminPage() {
               </p>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {seeded && rows.some((r) => !r.specialtyEn && r.specialty) && (
+              <form action={fillEnglish}>
+                <button type="submit" className="rounded-full border border-bh-ink/20 px-4 py-2 text-sm font-semibold text-bh-ink transition-colors hover:border-bh-ink">
+                  Попълни английското
+                </button>
+              </form>
+            )}
             {seeded && <NewSpeakerForm />}
             <HomeLink />
           </div>
@@ -61,7 +68,10 @@ export default async function SpeakersAdminPage() {
             <p className="mt-4 max-w-3xl text-sm leading-relaxed text-bh-ink/60">
               Редът тук е редът на сайта. „Обяви“ пуска човека на сайта и в
               данните за Google; снимката се качва от бутона на реда и се смалява
-              сама. Промените се виждат до пет минути.
+              сама. Промените се виждат до пет минути. Английските полета са под
+              „На английски“ във всеки ред; бутонът „Попълни английското“ слага
+              готовия превод там, където е празно. Имената излизат на латиница
+              автоматично на английската страница.
             </p>
             <ul className="mt-6 flex flex-col divide-y divide-bh-ink/6 rounded-3xl bg-bh-cloud p-2 ring-1 ring-bh-ink/6">
               {rows.map((s, i) => (

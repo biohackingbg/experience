@@ -176,6 +176,13 @@
       "when": 1788620000000,
       "tag": "0024_english_content",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1788630000000,
+      "tag": "0025_affiliation_en",
+      "breakpoints": true
     }
   ]
 }

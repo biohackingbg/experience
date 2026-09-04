@@ -5,7 +5,8 @@ import { asc, eq, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { sessions } from "@/lib/db/schema";
 import type { Lang } from "@/lib/i18n";
-import { type Day, PROGRAM, type Slot } from "@/lib/program";
+import { latin } from "@/lib/latin";
+import { PROGRAM_EN, type Day, PROGRAM, type Slot } from "@/lib/program";
 import { PROGRAM_SECTION } from "@/lib/site-copy";
 
 /**
@@ -56,7 +57,20 @@ export async function getProgram(lang: Lang = "bg"): Promise<Day[]> {
     console.error("[program] read failed, showing the code copy:", error);
   }
   const meta0 = dayMeta(lang);
-  if (rows.length === 0) return PROGRAM.map((d, i) => ({ ...d, ...meta0[i] }));
+  const en = lang === "en";
+  // Names are transliterated rather than translated: a name is the same name
+  // in both languages, only written in the reader's alphabet.
+  const people = (list?: string[]) => (en ? list?.map(latin) : list);
+  if (rows.length === 0) {
+    return PROGRAM.map((d, i) => ({
+      ...d,
+      ...meta0[i],
+      slots: d.slots.map((s, j) => {
+        const t = en ? PROGRAM_EN[i]?.[j] : undefined;
+        return { ...s, title: t?.title || s.title, note: t?.note || s.note, role: t?.role || s.role, people: people(s.people) };
+      }),
+    }));
+  }
   return meta0.map((meta, i) => ({
     ...meta,
     slots: rows
@@ -68,7 +82,7 @@ export async function getProgram(lang: Lang = "bg"): Promise<Day[]> {
         title: (lang === "en" ? r.titleEn : null) || r.title,
         note: (lang === "en" ? r.noteEn : null) || r.note || undefined,
         role: (lang === "en" ? r.roleEn : null) || r.role || undefined,
-        people: peopleList(r.people).length ? peopleList(r.people) : undefined,
+        people: peopleList(r.people).length ? people(peopleList(r.people)) : undefined,
         pause: r.pause || undefined,
       })),
   }));
@@ -89,6 +103,9 @@ export async function importProgram(): Promise<number> {
       role: s.role ?? null,
       people: s.people?.join("\n") ?? null,
       pause: !!s.pause,
+      titleEn: PROGRAM_EN[di]?.[si]?.title ?? null,
+      noteEn: PROGRAM_EN[di]?.[si]?.note ?? null,
+      roleEn: PROGRAM_EN[di]?.[si]?.role ?? null,
     })),
   );
   if (rows.length) await db.insert(sessions).values(rows);
@@ -96,6 +113,31 @@ export async function importProgram(): Promise<number> {
 }
 
 export type SessionInput = Omit<SessionRow, "id" | "sort">;
+
+/**
+ * Fills the English half of sessions imported before the translations
+ * existed. Matches a row to the code programme by day and time, and only
+ * ever writes into an empty field - anything typed by hand stays.
+ */
+export async function fillProgramEnglish(): Promise<number> {
+  const db = getDb();
+  const rows = await listSessions();
+  let n = 0;
+  for (const r of rows) {
+    const di = r.day - 1;
+    const si = PROGRAM[di]?.slots.findIndex((s) => s.time === r.time && s.title === r.title);
+    const t = si !== undefined && si >= 0 ? PROGRAM_EN[di]?.[si] : undefined;
+    if (!t) continue;
+    const patch: Partial<SessionRow> = {};
+    if (!r.titleEn && t.title) patch.titleEn = t.title;
+    if (!r.noteEn && t.note) patch.noteEn = t.note;
+    if (!r.roleEn && t.role) patch.roleEn = t.role;
+    if (Object.keys(patch).length === 0) continue;
+    await db.update(sessions).set(patch).where(eq(sessions.id, r.id));
+    n++;
+  }
+  return n;
+}
 
 export async function addSession(input: SessionInput): Promise<void> {
   const db = getDb();

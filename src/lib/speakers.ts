@@ -467,6 +467,170 @@ export const SPEAKERS: Speaker[] = [
   },
 ];
 
+/**
+ * The English half of the cards above, written by hand and keyed by id.
+ *
+ * Only what changes: a name is a name in both languages (the English page
+ * transliterates the Cyrillic ones - see lib/latin.ts). Institutions are
+ * given their own official English names where they have one.
+ */
+export type SpeakerEn = {
+  title?: string;
+  specialty?: string;
+  role?: string;
+  affiliation?: string;
+  topic?: string;
+};
+
+export const SPEAKERS_EN: Record<string, SpeakerEn> = {
+  "rayna-stoyanova": { title: "Dr", specialty: "Endocrinologist", role: "President" },
+  "rocio-salas-whalen": { title: "Dr", specialty: "Endocrinology and obesity medicine", topic: "Author of \u201cWeightless\u201d" },
+  "dominik-thor": { title: "Prof.", specialty: "Professor of pharmacy" },
+  "sara-hagg": { title: "Assoc. Prof.", specialty: "Molecular epidemiology of ageing", role: "Research group leader" },
+  "aleksandar-simidchiev": {
+    title: "Dr",
+    specialty: "Pulmonologist and internal medicine specialist",
+    role: "Head of the Department of Functional Diagnostics",
+    affiliation: "Medical Institute of the Ministry of the Interior",
+    topic: "Medical Director, Centre for E-learning and Distance Learning, Medical University - Plovdiv",
+  },
+  "dean-berman": { title: "Dr", specialty: "Longevity medicine and peptide therapies" },
+  "godfrey-grech": { title: "Prof.", specialty: "Pathology and molecular oncology" },
+  "viktoriya-sarafyan": { title: "Prof. Dr", affiliation: "Medical University - Plovdiv" },
+  "tsvetomir-lukanov": {
+    title: "Prof. Dr",
+    specialty: "Paediatric cardiac surgery",
+    role: "Head, Section of Paediatric Cardiac Surgery",
+    affiliation: "Heidelberg University Hospital",
+  },
+  "krasimira-hristova": {
+    title: "Assoc. Prof. Dr",
+    specialty: "Cardiology",
+    topic: "MSc in cardiovascular imaging, KU Leuven",
+  },
+  "ivo-petrov": {
+    title: "Corr. Mem. Prof. Dr",
+    specialty: "Cardiology and angiology",
+    role: "Medical Director",
+    affiliation: "Acibadem City Clinic Tokuda Vitosha Hospital",
+    topic: "Head, Clinic of Cardiology and Angiology",
+  },
+  "nikolay-gabrovski": {
+    title: "Corr. Mem. Prof. Dr",
+    specialty: "Neurosurgery",
+    role: "President",
+    affiliation: "Bulgarian Society of Neurosurgery",
+  },
+  "lachezar-traykov": {
+    title: "Acad. Prof. Dr",
+    specialty: "Neurology and neuroscience",
+    affiliation: "Bulgarian Academy of Sciences",
+    topic: "Expert in Alzheimer\u2019s disease, dementias and brain ageing",
+  },
+  "shima-mehrabiyan": {
+    title: "Assoc. Prof. Dr",
+    specialty: "Neurology and neurodegenerative disease",
+    affiliation: "Department of Neurology, Medical University - Sofia",
+    topic: "Expert in dementias, Alzheimer\u2019s disease and cognitive impairment",
+  },
+  "ivan-koychev": {
+    title: "Dr",
+    specialty: "Neuropsychiatry, dementias and brain health",
+    topic: "Consultant Neuropsychiatrist \u00b7 Expert in early diagnosis, biomarkers and dementia prevention",
+  },
+  "kiril-terziyski": {
+    title: "Assoc. Prof. Dr",
+    specialty: "Sleep medicine and pathophysiology",
+    role: "President",
+    affiliation: "Bulgarian Society of Sleep Medicine",
+    topic: "Associate Professor, Medical University - Plovdiv",
+  },
+  "desislava-dimova": {
+    title: "Dr",
+    specialty: "Ophthalmology and oculoplastic surgery",
+    topic: "Specialist in aesthetic and reconstructive oculoplastic surgery \u00b7 Expert in surgical and non-surgical treatment of the periocular area",
+  },
+  "ivan-sigridov": {
+    title: "Dr",
+    specialty: "Prenatal medicine, obstetrics and gynaecology",
+    role: "Founder",
+    affiliation: "Dr Sigridov Medical Centre",
+    topic: "Expert in embryo-fetal morphology, high-risk pregnancy and preconception care",
+  },
+  "krasimir-balakov": {
+    specialty: "Sporting longevity and high performance",
+    role: "Football legend and coach",
+    topic: "Part of Bulgaria\u2019s Golden Generation, fourth in the world at the 1994 FIFA World Cup",
+  },
+  "milena-hadzhiivanova": {
+    title: "Dr",
+    specialty: "Psychology, mental health and resilience",
+    role: "Psychologist and Executive & Mental Performance Coach",
+    topic: "Author and host of Mindset Power Talk",
+  },
+  "daniela-ilieva": {
+    title: "Prof. Dr",
+    specialty: "Neuro-linguistic programming, communication and personal development",
+    role: "Professor of management, business communication and personal development",
+    topic: "Certified NLP Trainer and Coach",
+  },
+  "yana-balnikova": {
+    specialty: "(Peri)menopause and women\u2019s health",
+    role: "Founder",
+    affiliation: "Menomorphosis",
+    topic: "Speaker and advocate for perimenopause and menopause awareness",
+  },
+  "maria-marinova": {
+    specialty: "Psychology, psychotherapy and emotional health",
+    role: "Psychologist and certified psychotherapist",
+    topic: "Family counsellor under supervision",
+  },
+  "louise-newson": {
+    specialty: "Menopause and women\u2019s hormone health",
+    role: "Founder",
+    topic: "Founder, Balance App \u00b7 Member, UK Government Menopause Taskforce",
+  },
+  "maria-yunakova": {
+    title: "Prof. Dr",
+    specialty: "Reproductive medicine and women\u2019s hormone health",
+    role: "President",
+    affiliation: "Bulgarian Association of Sterility and Reproductive Health",
+    topic: "Obstetrician-gynaecologist and specialist in assisted reproduction",
+  },
+  "malina-petkova": {
+    title: "Assoc. Prof. Dr",
+    specialty: "Endocrinology, metabolic and hormone health",
+    role: "Head, Clinic of Internal Medicine",
+    affiliation: "Lozenets University Hospital",
+    topic: "Lecturer, Faculty of Medicine, Sofia University",
+  },
+  "tyana-presolska": {
+    specialty: "Perimenopause, menopause and women\u2019s metabolic health",
+    role: "Certified menopause specialist and MSc in nutrition",
+    topic: "Lecturer, Medical University - Sofia",
+  },
+  "zdravko-kamenov": {
+    title: "Prof. Dr",
+    specialty: "Endocrinology, metabolic and hormone health",
+    role: "Head, Clinic of Endocrinology and Metabolic Diseases",
+    affiliation: "Alexandrovska University Hospital",
+    topic: "Head, Department of Internal Medicine, Medical University - Sofia",
+  },
+  "branimir-raduilov": {
+    title: "Dr",
+    specialty: "General practice and preventive health",
+    role: "General practitioner",
+    topic: "Expert in the development of modern primary care",
+  },
+  "aleksandar-shinkov": {
+    title: "Assoc. Prof. Dr",
+    specialty: "Endocrinology, metabolic and hormone health",
+    role: "President",
+    affiliation: "Bulgarian Society of Endocrinology",
+    topic: "Associate Professor, Department of Endocrinology, Medical University - Sofia",
+  },
+};
+
 export function initials(name: string): string {
   return name
     .split(/\s+/)

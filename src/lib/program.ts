@@ -242,3 +242,108 @@ export const PROGRAM: Day[] = [
     ],
   },
 ];
+
+/**
+ * The English half of the programme, written by hand and keyed by day and
+ * slot, in the same order as above. Only the words change: times, names and
+ * the shape of the day are the same event.
+ */
+export type SlotEn = { title?: string; note?: string; role?: string };
+
+export const PROGRAM_EN: SlotEn[][] = [
+  [
+    { title: "Registration \u00b7 coffee \u00b7 meeting people", note: "Doors open. Introductions, partners and first conversations about how we want to age." },
+    {
+      title: "Opening: living longer. And living better.",
+      note: "The Bulgarian Longevity Association and Biohacking BG open the event together and put the big question: how do we turn the science of longevity into a better life for everyone?",
+    },
+    {
+      title: "How long can we live - and how do we live better?",
+      note: "From the science of ageing to practice: how geroscience is changing the way we think about prevention, risk and healthy years of life.",
+      role: "Host and moderator: Diana Radeva",
+    },
+    {
+      title: "Metabolism is the new biological clock",
+      note: "GLP-1 and incretin therapies, fatty liver, muscle loss, chronic inflammation, biomarkers for early diagnosis and the new therapeutic options.",
+      role: "Moderator: Rayna Stoyanova",
+    },
+    { title: "Book launch: \u201cWeightless\u201d", note: "Alongside lunch, for those who wish. Meet the author and have your book signed." },
+    { title: "Lunch \u00b7 longevity networking" },
+    {
+      title: "A heart for a long life",
+      note: "How the heart and the vessels age, why menopause changes cardiovascular risk, and how inflammation becomes a target for more healthy years.",
+      role: "Moderator: Tsvetomir Lukanov",
+    },
+    {
+      title: "The brain need not age at the speed of the calendar",
+      note: "Memory, sleep, blood vessels, inflammation, vision, hearing and movement - a practical map for cognitive longevity.",
+      role: "Moderators",
+    },
+    { title: "Coffee \u00b7 reset break" },
+    {
+      title: "Longevity begins before birth",
+      note: "How a mother\u2019s health, pregnancy and fetal development can lay the foundations of health decades ahead.",
+      role: "Special lecture",
+    },
+    {
+      title: "The body remembers discipline",
+      note: "Lessons from elite sport: how movement, consistency, recovery and the mind build a form that lasts.",
+      role: "Special guest",
+    },
+    {
+      title: "Psychological longevity: how not to burn out while trying to live longer",
+      note: "Resilience, meaning, habits, and the link between the mind, performance and the quality of life.",
+    },
+    {
+      title: "DIVA Live: women, energy and age as strength",
+      note: "A live conversation about female identity, the stage, the body, confidence and self-care through the decades.",
+      role: "Host: Maria Silvester",
+    },
+    {
+      title: "End of day 1 \u00b7 invitation to the charity gala dinner",
+      note: "An evening where longevity meets solidarity, community and meaning.",
+    },
+  ],
+  [
+    {
+      title: "A woman\u2019s and a man\u2019s clock: hormones across life",
+      note: "Ovarian ageing, menopause, andropause and testosterone: what is normal, what can be influenced and when treatment makes sense.",
+      role: "Moderator: Yana Balnikova",
+    },
+    {
+      title: "Hormones, muscle and bone: the infrastructure of longevity",
+      note: "Thyroid, osteoporosis, joints, cartilage, sarcopenia and physical function - how to keep our strength and our independence.",
+      role: "Moderator: Aleksandar Shinkov",
+    },
+    { title: "Coffee \u00b7 move break" },
+    {
+      title: "The skin as a mirror of ageing",
+      note: "The skin as a biomarker, sun and the exposome, ASIA syndrome, microplastics, endocrine disruptors and a better-informed choice of cosmetics.",
+      role: "Moderator: Radina Denkova",
+    },
+    { title: "Lunch \u00b7 meet the experts" },
+    {
+      title: "What actually works? Nutrition, supplements, NAD\u207a, infusions and prevention",
+      note: "Without the marketing noise: evidence against hype, nutrition and supplements for a long life, NAD\u207a, intravenous infusions - benefits, risks and ethics - plus prevention and early detection of cancer.",
+      role: "Host and moderator: Kristina Gazieva",
+    },
+    { title: "Coffee \u00b7 longevity lab" },
+    {
+      title: "From the laboratory to everyday life: what a personal longevity plan looks like",
+      note: "How biomarkers, imaging, physical function, cognitive assessment and genetic panels come together into a clinically meaningful plan - with no \u201cmagic\u201d protocols.",
+      role: "Host and moderator: Rayna Stoyanova",
+    },
+    {
+      title: "Longevity is a habit, not a project",
+      note: "How medicine becomes a sustainable everyday: movement, nutrition, sleep, behaviour change, critical thinking and protection from misinformation.",
+      role: "Hosts and moderators",
+    },
+    {
+      title: "Sofia Life Conversation: how we want to live at 60, 70, 80\u2026",
+      note: "A closing conversation without medical jargon - what we take from two days of science, and how we start on Monday.",
+      role: "Host: Maria Silvester",
+    },
+    { title: "Closing \u00b7 the longevity promise", note: "One concrete change for the next 30 days." },
+    { title: "Farewell drink \u00b7 community & connections" },
+  ],
+];

@@ -6,7 +6,7 @@ import { requireAccess } from "@/lib/access";
 import { PROGRAM } from "@/lib/program";
 import { listSessions, peopleList } from "@/lib/program-data";
 
-import { seedProgram, shiftSession } from "./actions";
+import { fillEnglish, seedProgram, shiftSession } from "./actions";
 import { NewSessionForm, SessionEditor } from "./Forms";
 
 export const metadata: Metadata = {
@@ -30,7 +30,14 @@ export default async function ProgramAdminPage() {
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">Админ</p>
             <h1 className="mt-2 text-3xl font-black uppercase tracking-tight text-bh-ink">Програма</h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {rows.some((r) => !r.titleEn) && (
+              <form action={fillEnglish}>
+                <button type="submit" className="rounded-full border border-bh-ink/20 px-4 py-2 text-sm font-semibold text-bh-ink transition-colors hover:border-bh-ink">
+                  Попълни английското
+                </button>
+              </form>
+            )}
             <Link href="/programa" target="_blank" className="rounded-full border border-bh-ink/20 px-4 py-2 text-sm font-semibold text-bh-ink transition-colors hover:border-bh-ink">
               Виж на сайта
             </Link>
@@ -41,6 +48,9 @@ export default async function ProgramAdminPage() {
           Всяка сесия с час, заглавие, описание, водещ и участници, точно както
           излиза на сайта - на началната страница и на /programa. Промените се
           виждат до пет минути. Датите и мотото на дните са фиксирани в кода.
+          Преводът е под „На английски“ във всяка сесия; бутонът „Попълни
+          английското“ слага готовия превод там, където полето е празно, и не
+          пипа нищо, което си написала сама.
         </p>
 
         {!seeded ? (

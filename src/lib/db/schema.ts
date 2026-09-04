@@ -585,6 +585,7 @@ export const speakers = pgTable(
     topic: text("topic"),
     /** English versions; the English page falls back to the Bulgarian ones. */
     titleEn: text("title_en"),
+    affiliationEn: text("affiliation_en"),
     specialtyEn: text("specialty_en"),
     roleEn: text("role_en"),
     topicEn: text("topic_en"),

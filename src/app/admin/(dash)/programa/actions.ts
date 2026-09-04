@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { canAccess } from "@/lib/access";
-import { type SessionInput, addSession, deleteSession, importProgram, moveSession, updateSession } from "@/lib/program-data";
+import { type SessionInput, addSession, deleteSession, fillProgramEnglish, importProgram, moveSession, updateSession } from "@/lib/program-data";
 
 export type FormState = { status: "idle" | "ok" | "error"; message?: string };
 const UUID = /^[0-9a-f-]{36}$/;
@@ -79,5 +79,12 @@ export async function shiftSession(formData: FormData): Promise<void> {
 export async function seedProgram(): Promise<void> {
   if (!(await canAccess("programa"))) return;
   await importProgram();
+  done();
+}
+
+/** Fills the English half of sessions imported before the translations existed. */
+export async function fillEnglish(): Promise<void> {
+  if (!(await canAccess("programa"))) return;
+  await fillProgramEnglish();
   done();
 }
