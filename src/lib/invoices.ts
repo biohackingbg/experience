@@ -27,6 +27,9 @@ export type InvoiceData = {
   /** Present once the refund's credit note is issued. */
   creditNoteNumber: number | null;
   creditNotedAt: Date | null;
+  /** The language the buyer bought in - the sheet opens in it by default. */
+  lang: string | null;
+  paymentMethod: string | null;
 };
 
 /**
@@ -55,6 +58,8 @@ export async function getInvoice(reference: string): Promise<InvoiceData | null>
       currency: orders.currency,
       creditNoteNumber: orders.creditNoteNumber,
       creditNotedAt: orders.creditNotedAt,
+      lang: orders.lang,
+      paymentMethod: orders.paymentMethod,
     })
     .from(orders)
     .where(
@@ -141,6 +146,8 @@ export async function getAllInvoices(): Promise<InvoiceExportRow[]> {
       refundedAt: orders.refundedAt,
       creditNoteNumber: orders.creditNoteNumber,
       creditNotedAt: orders.creditNotedAt,
+      lang: orders.lang,
+      paymentMethod: orders.paymentMethod,
     })
     .from(orders)
     .where(sql`${orders.invoiceNumber} is not null and ${orders.invoicedAt} is not null`)

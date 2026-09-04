@@ -12,7 +12,7 @@ import { SALES_OPEN } from "@/lib/tickets";
  * code. See the `settings` table note in the schema.
  */
 
-export type SettingKey = "early_access" | "price_stage" | "mid_prices" | "bank_details";
+export type SettingKey = "early_access" | "price_stage" | "mid_prices" | "bank_details" | "site_notice";
 
 export async function getSetting(key: SettingKey): Promise<{ value: string; updatedAt: Date } | null> {
   const [row] = await getDb()

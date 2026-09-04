@@ -668,3 +668,48 @@ export type Order = typeof orders.$inferSelect;
 export type NewOrder = typeof orders.$inferInsert;
 export type OrderItem = typeof orderItems.$inferSelect;
 export type Ticket = typeof tickets.$inferSelect;
+
+/**
+ * Where a speaker is on the two days and what they need: the sheet the
+ * team works from in the last weeks. One row per speaker, created the first
+ * time anyone types into it. Deleting the speaker deletes it.
+ */
+export const speakerLogistics = pgTable("speaker_logistics", {
+  speakerId: text("speaker_id")
+    .primaryKey()
+    .references(() => speakers.id, { onDelete: "cascade" }),
+  confirmed: boolean("confirmed").notNull().default(false),
+  email: text("email"),
+  phone: text("phone"),
+  /** Free text: "06.11 14:30, полет W6 4321". */
+  arrives: text("arrives"),
+  departs: text("departs"),
+  hotel: text("hotel"),
+  hotelBooked: boolean("hotel_booked").notNull().default(false),
+  /** "кликер, HDMI, звук за видео". */
+  tech: text("tech"),
+  /** When the slides came in; null while they are still owed. */
+  presentationAt: timestamp("presentation_at", { withTimezone: true }),
+  dietary: text("dietary"),
+  /** Who meets them at the door. */
+  host: text("host"),
+  notes: text("notes"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Who is on which zone at which hour on the two days: the team rota. */
+export const shifts = pgTable(
+  "shifts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    day: integer("day").notNull(),
+    zone: text("zone").notNull(),
+    startsAt: text("starts_at").notNull(),
+    endsAt: text("ends_at").notNull(),
+    person: text("person").notNull(),
+    phone: text("phone"),
+    note: text("note"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("shifts_day_idx").on(table.day, table.zone, table.startsAt)],
+);

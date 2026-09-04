@@ -1,3 +1,4 @@
+import { SiteNotice } from "@/components/summit/SiteNotice";
 import { SummitNav } from "@/components/summit/SummitNav";
 import { SummitHero } from "@/components/summit/SummitHero";
 import { SummitConcept } from "@/components/summit/SummitConcept";
@@ -28,6 +29,7 @@ export default async function Home() {
         // Authored object - no user input reaches this.
         dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }}
       />
+      <SiteNotice />
       <SummitNav />
       <main>
         <SummitHero />

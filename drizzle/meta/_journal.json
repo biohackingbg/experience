@@ -183,6 +183,20 @@
       "when": 1788630000000,
       "tag": "0025_affiliation_en",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1788640000000,
+      "tag": "0026_logistics_shifts",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1788650000000,
+      "tag": "0027_notice_setting",
+      "breakpoints": true
     }
   ]
 }

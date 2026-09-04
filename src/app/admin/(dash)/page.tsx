@@ -5,6 +5,7 @@ import { getAbandonedOrders, getPendingOrders } from "@/lib/abandoned";
 import { requireAccess } from "@/lib/access";
 import { getDashboardData, searchOrders } from "@/lib/admin-stats";
 import { getFinances } from "@/lib/finances";
+import { getNotice } from "@/lib/notice";
 import { getPricing } from "@/lib/pricing";
 import { getTrafficData } from "@/lib/site-views";
 import { formatPrice } from "@/lib/tickets";
@@ -13,6 +14,7 @@ import { setTestOrder } from "./actions";
 import { DailyChart } from "./DailyChart";
 import { ResendForm } from "./fakturi/ResendForm";
 import { PriceStages } from "./PriceStages";
+import { SiteNoticeCard } from "./SiteNoticeCard";
 import { ReminderForm } from "./ReminderForm";
 import { TierBars } from "./TierBars";
 
@@ -207,7 +209,7 @@ export default async function AdminDashboard({
   await requireAccess("tablo");
 
   const { q = "" } = await searchParams;
-  const [d, traffic, found, fin, pricing, abandoned, pendingNow] = await Promise.all([
+  const [d, traffic, found, fin, pricing, abandoned, pendingNow, notice] = await Promise.all([
     getDashboardData(),
     getTrafficData(30),
     searchOrders(q),
@@ -215,6 +217,7 @@ export default async function AdminDashboard({
     getPricing(),
     getAbandonedOrders(),
     getPendingOrders(),
+    getNotice(),
   ]);
   const soldPct = d.capacityTotal ? Math.round((d.ticketsSold / d.capacityTotal) * 100) : 0;
 
@@ -354,8 +357,9 @@ export default async function AdminDashboard({
           <WeekStrip week={d.week} />
         </section>
 
-        <div className="xl:col-span-1">
+        <div className="flex flex-col gap-4 xl:col-span-1">
           <PriceStages pricing={pricing} sold={d.ticketsSold} />
+          <SiteNoticeCard notice={notice} />
         </div>
 
         <div className="flex flex-col gap-4 xl:col-span-1 xl:row-span-2">

@@ -8,6 +8,7 @@ import { remindAbandonedOrder } from "@/lib/abandoned";
 import { getDb } from "@/lib/db";
 import { orders } from "@/lib/db/schema";
 import { canAccess } from "@/lib/access";
+import { saveNotice } from "@/lib/notice";
 import { isStage, saveMidConfig, setPriceStage } from "@/lib/pricing";
 import { TIERS, type TierId } from "@/lib/tickets";
 
@@ -84,4 +85,19 @@ export async function remindOrder(_prev: ActionState, formData: FormData): Promi
     send_failed: "Изпращането не мина. Провери дневника.",
   }[r.reason];
   return { status: "error", message: why };
+}
+
+/** The strip above the site: text in both languages, on or off. */
+export async function saveSiteNotice(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  if (!(await canAccess("tablo"))) return { status: "error", message: "Няма достъп." };
+  const bg = String(formData.get("bg") ?? "").trim().slice(0, 200);
+  const en = String(formData.get("en") ?? "").trim().slice(0, 200);
+  const on = formData.get("on") === "on";
+  if (on && !bg) return { status: "error", message: "Напиши текста на български." };
+  await saveNotice({ on, bg, en });
+  revalidatePrices();
+  revalidatePath("/programa");
+  revalidatePath("/en");
+  revalidatePath("/en/programa");
+  return { status: "ok", message: on ? "Лентата е включена." : "Записано." };
 }

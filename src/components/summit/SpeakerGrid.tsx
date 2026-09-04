@@ -9,6 +9,14 @@ import { CountryMark } from "@/components/ui/Flags";
 /** How many cards are visible before the visitor asks for the rest. */
 const INITIAL = 8;
 
+/**
+ * A width the portrait route can serve. Only the database-backed portraits
+ * are resizable; a file in /public is left alone.
+ */
+function sized(src: string, w: number): string {
+  return src.startsWith("/api/lektor/") ? `${src}${src.includes("?") ? "&" : "?"}w=${w}` : src;
+}
+
 function SpeakerCard({ s }: { s: Speaker }) {
   return (
     <article
@@ -29,7 +37,9 @@ function SpeakerCard({ s }: { s: Speaker }) {
         {s.photo ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={s.photo}
+            src={sized(s.photo, 320)}
+            srcSet={`${sized(s.photo, 320)} 320w, ${sized(s.photo, 640)} 640w`}
+            sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 22vw"
             alt={s.name}
             loading="lazy"
             className="absolute inset-0 h-full w-full object-cover object-top"

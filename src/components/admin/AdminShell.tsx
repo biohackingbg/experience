@@ -15,6 +15,8 @@ import { NavLink } from "./NavLink";
  */
 
 const I = {
+  plane: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3l-6 6-7-2-1.5 1.5L8 11l-2 3H3.5L5 16.5V18l2.5-1.5L9 14l2.5 5.5L13 18l-2-7 6-6z"/></svg>,
+  rota: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8.5h14M7 2.5v3M13 2.5v3M6.5 12h3M6.5 14.5h5"/></svg>,
   grid: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="11" y="3" width="6" height="6" rx="1.5"/><rect x="3" y="11" width="6" height="6" rx="1.5"/><rect x="11" y="11" width="6" height="6" rx="1.5"/></svg>,
   wallet: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="5" width="14" height="11" rx="2"/><path d="M3 9h14M13 12.5h1.5"/></svg>,
   chart: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><path d="M4 16V9M10 16V4M16 16v-5"/></svg>,
@@ -51,6 +53,8 @@ const MENU = [
   { page: "vhod" as const, href: "/admin/vhod", label: "Вход на събитието", icon: I.door },
   { page: "izdai" as const, href: "/admin/izdai", label: "Издаване на билети", icon: I.ticket },
   { page: "rabotilnici" as const, href: "/admin/rabotilnici", label: "Работилници", icon: I.hands },
+  { page: "logistika" as const, href: "/admin/logistika", label: "Логистика на лекторите", icon: I.plane },
+  { page: "smeni" as const, href: "/admin/smeni", label: "Смени", icon: I.rota },
 ];
 
 export function AdminShell({ access, children }: { access: Access; children: React.ReactNode }) {

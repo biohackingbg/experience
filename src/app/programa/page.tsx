@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { SummitFooter } from "@/components/summit/SummitFooter";
+import { SiteNotice } from "@/components/summit/SiteNotice";
 import { SummitNav } from "@/components/summit/SummitNav";
 import { SummitProgram } from "@/components/summit/SummitProgram";
 
@@ -17,6 +18,7 @@ export const revalidate = 300;
 export default function ProgramPage() {
   return (
     <div className="overflow-clip rounded-[1.75rem] bg-bh-paper">
+      <SiteNotice />
       <SummitNav />
       <main className="pb-16">
         <SummitProgram />

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { SiteNotice } from "@/components/summit/SiteNotice";
 import { SummitNav } from "@/components/summit/SummitNav";
 import { SummitHero } from "@/components/summit/SummitHero";
 import { SummitConcept } from "@/components/summit/SummitConcept";
@@ -42,6 +43,7 @@ export default async function HomeEn() {
   return (
     <div className="overflow-clip rounded-[1.75rem] bg-bh-paper">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }} />
+      <SiteNotice lang="en" />
       <SummitNav lang="en" />
       <main>
         <SummitHero lang="en" />
