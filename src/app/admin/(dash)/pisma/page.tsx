@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 
 import { HomeLink } from "@/components/admin/HomeLink";
-import { isAdmin } from "@/lib/admin-auth";
+import { requireAccess } from "@/lib/access";
 import { getInfoMailAudience } from "@/lib/event-mail";
 import { MAIL_KINDS, mailPreview } from "@/lib/mail-samples";
 
@@ -20,7 +19,7 @@ export const dynamic = "force-dynamic";
  * that is sent by hand - the mail before the event - with its controls.
  */
 export default async function MailPage() {
-  if (!(await isAdmin())) redirect("/admin/login");
+  await requireAccess("pisma");
   const audience = await getInfoMailAudience();
   const previews = MAIL_KINDS.map(mailPreview);
 

@@ -2,14 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { canAccess } from "@/lib/access";
 import { createPromo, deletePromo, isPromoKind, normaliseCode, setPromoActive } from "@/lib/promo";
 
 export type FormState = { status: "idle" | "ok" | "error"; message?: string };
 const UUID = /^[0-9a-f-]{36}$/;
 
 export async function addPromo(_prev: FormState, formData: FormData): Promise<FormState> {
-  if (!(await isAdmin())) return { status: "error", message: "Няма достъп." };
+  if (!(await canAccess("promo"))) return { status: "error", message: "Няма достъп." };
   const code = normaliseCode(String(formData.get("code") ?? ""));
   const kind = formData.get("kind");
   const valueRaw = String(formData.get("value") ?? "").replace(/\s/g, "").replace(",", ".");
@@ -33,7 +33,7 @@ export async function addPromo(_prev: FormState, formData: FormData): Promise<Fo
 }
 
 export async function togglePromo(formData: FormData): Promise<void> {
-  if (!(await isAdmin())) return;
+  if (!(await canAccess("promo"))) return;
   const id = String(formData.get("id") ?? "");
   if (!UUID.test(id)) return;
   await setPromoActive(id, formData.get("to") === "1");
@@ -41,7 +41,7 @@ export async function togglePromo(formData: FormData): Promise<void> {
 }
 
 export async function removePromo(formData: FormData): Promise<void> {
-  if (!(await isAdmin())) return;
+  if (!(await canAccess("promo"))) return;
   const id = String(formData.get("id") ?? "");
   if (!UUID.test(id)) return;
   await deletePromo(id);

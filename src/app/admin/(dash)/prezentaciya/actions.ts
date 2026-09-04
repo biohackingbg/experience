@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { canAccess } from "@/lib/access";
 import { createLink, createLinks, isMoney, isStage, isTier, reactivateLink, regenerateToken, revokeLink, updateLinkPipeline } from "@/lib/deck-links";
 import { isDeliverable } from "@/lib/finance-options";
 
@@ -15,7 +15,7 @@ export async function createDeckLink(
 ): Promise<LinkFormState> {
   // Checked here, not only in the layout: a server action is its own entry
   // point and is reachable without ever rendering the page that offers it.
-  if (!(await isAdmin())) return { status: "error", message: "Няма достъп." };
+  if (!(await canAccess("prezentaciya"))) return { status: "error", message: "Няма достъп." };
 
   const label = String(formData.get("label") ?? "").trim();
   if (label.length < 2) return { status: "error", message: "Напиши за кого е линкът." };
@@ -27,7 +27,7 @@ export async function createDeckLink(
 
 /** Closes a link. Its history stays; the URL stops opening. */
 export async function revokeDeckLink(formData: FormData): Promise<void> {
-  if (!(await isAdmin())) return;
+  if (!(await canAccess("prezentaciya"))) return;
   const id = String(formData.get("id") ?? "");
   if (!/^[0-9a-f-]{36}$/.test(id)) return;
   await revokeLink(id);
@@ -36,7 +36,7 @@ export async function revokeDeckLink(formData: FormData): Promise<void> {
 
 /** Reopens a stopped link. Nothing is ever deleted here - only switched. */
 export async function reactivateDeckLink(formData: FormData): Promise<void> {
-  if (!(await isAdmin())) return;
+  if (!(await canAccess("prezentaciya"))) return;
   const id = String(formData.get("id") ?? "");
   if (!/^[0-9a-f-]{36}$/.test(id)) return;
   await reactivateLink(id);
@@ -48,7 +48,7 @@ export async function updateDeckLink(
   _prev: LinkFormState,
   formData: FormData,
 ): Promise<LinkFormState> {
-  if (!(await isAdmin())) return { status: "error", message: "Няма достъп." };
+  if (!(await canAccess("prezentaciya"))) return { status: "error", message: "Няма достъп." };
 
   const id = String(formData.get("id") ?? "");
   const stage = formData.get("stage");
@@ -104,7 +104,7 @@ export async function createDeckLinksBulk(
   _prev: LinkFormState,
   formData: FormData,
 ): Promise<LinkFormState> {
-  if (!(await isAdmin())) return { status: "error", message: "Няма достъп." };
+  if (!(await canAccess("prezentaciya"))) return { status: "error", message: "Няма достъп." };
 
   const owner = String(formData.get("owner") ?? "").trim().slice(0, 40) || null;
   const lines = String(formData.get("labels") ?? "")
@@ -136,7 +136,7 @@ export async function createDeckLinksBulk(
  * with the link; only the address changes, so the old one stops working.
  */
 export async function regenerateDeckLink(formData: FormData): Promise<void> {
-  if (!(await isAdmin())) return;
+  if (!(await canAccess("prezentaciya"))) return;
   const id = String(formData.get("id") ?? "");
   if (!/^[0-9a-f-]{36}$/.test(id)) return;
   await regenerateToken(id);

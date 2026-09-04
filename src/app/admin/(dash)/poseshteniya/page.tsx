@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { requireAccess } from "@/lib/access";
 import { getTrafficData } from "@/lib/site-views";
 
 import { Funnel } from "./Funnel";
@@ -112,7 +111,7 @@ export default async function TrafficPage({
 }) {
   // The layout also checks, but a layout is not an auth boundary - the
   // Next docs are explicit that it may be skipped on RSC navigations.
-  if (!(await isAdmin())) redirect("/admin/login");
+  await requireAccess("poseshteniya");
 
   const { dni } = await searchParams;
   const days = RANGES.includes(Number(dni) as (typeof RANGES)[number]) ? Number(dni) : 30;

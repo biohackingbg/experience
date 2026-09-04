@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 
 import { HomeLink } from "@/components/admin/HomeLink";
-import { isAdmin } from "@/lib/admin-auth";
+import { requireAccess } from "@/lib/access";
 import { getMarketing } from "@/lib/marketing";
 import { formatPrice } from "@/lib/tickets";
 
@@ -30,7 +29,7 @@ function Tile({ label, value, sub }: { label: string; value: React.ReactNode; su
  * indicative ones (what the site saw around a post) are labelled apart.
  */
 export default async function MarketingPage() {
-  if (!(await isAdmin())) redirect("/admin/login");
+  await requireAccess("reklama");
   const m = await getMarketing();
   const untracked = Math.max(0, m.tickets30 - m.taggedTickets);
 

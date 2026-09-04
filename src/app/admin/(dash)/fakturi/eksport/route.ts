@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { canAccess } from "@/lib/access";
 import { invoiceNo } from "@/components/InvoiceDocument";
 import { getAllInvoices } from "@/lib/invoices";
 
@@ -32,7 +32,7 @@ function bgDate(d: Date | null): string {
  * Guarded here too: a route handler is its own entry point.
  */
 export async function GET() {
-  if (!(await isAdmin())) return new NextResponse("Няма достъп.", { status: 403 });
+  if (!(await canAccess("fakturi"))) return new NextResponse("Няма достъп.", { status: 403 });
 
   const rows = await getAllInvoices();
   const header = [

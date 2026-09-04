@@ -9,8 +9,13 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function AdminLoginPage() {
+export default async function AdminLoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ dostap?: string }>;
+}) {
   if (await isAdmin()) redirect("/admin");
+  const { dostap } = await searchParams;
 
   return (
     <div className="flex min-h-screen items-center justify-center rounded-[1.75rem] bg-bh-paper px-5">
@@ -21,6 +26,11 @@ export default async function AdminLoginPage() {
         <p className="mt-2 text-sm text-bh-ink/60">
           Sofia Life Summit - продажби и статистика.
         </p>
+        {dostap === "invalid" && (
+          <p className="mt-4 rounded-2xl bg-[#C4607F]/10 px-4 py-3 text-sm text-[#9c3d5c] ring-1 ring-[#C4607F]/30">
+            Този линк за достъп вече не работи: спрян е или е изтекъл. Поискай нов от екипа.
+          </p>
+        )}
         <LoginForm needsTotp={isTotpConfigured()} />
       </div>
     </div>

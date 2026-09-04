@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 
 import { HomeLink } from "@/components/admin/HomeLink";
-import { isAdmin } from "@/lib/admin-auth";
+import { requireAccess } from "@/lib/access";
 import { SPEAKERS, initials } from "@/lib/speakers";
 import { listSpeakers, photoUrl } from "@/lib/speakers-data";
 
@@ -18,7 +17,7 @@ export const dynamic = "force-dynamic";
 
 /** Every speaker, announced or not, with the portrait and the switch that puts them on the site. */
 export default async function SpeakersAdminPage() {
-  if (!(await isAdmin())) redirect("/admin/login");
+  await requireAccess("lektori");
   const rows = await listSpeakers();
   const seeded = rows.length > 0;
   const announced = rows.filter((r) => r.announced && !r.pending).length;

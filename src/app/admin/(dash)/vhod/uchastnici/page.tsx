@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import { PrintButton } from "@/components/admin/PrintButton";
-import { isAdmin } from "@/lib/admin-auth";
+import { requireAccess } from "@/lib/access";
 import { listAttendees } from "@/lib/tickets-lookup";
 
 export const metadata: Metadata = {
@@ -20,7 +19,7 @@ export const dynamic = "force-dynamic";
  * knows the badge may need a pen.
  */
 export default async function AttendeesPage() {
-  if (!(await isAdmin())) redirect("/admin/login");
+  await requireAccess("vhod");
   const rows = await listAttendees();
   const unnamedShared = rows.filter((r) => !r.named && rows.filter((x) => x.reference === r.reference).length > 1).length;
 

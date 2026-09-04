@@ -2,13 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { canAccess } from "@/lib/access";
 import { sendInfoMail, sendInfoMailTest } from "@/lib/event-mail";
 
 export type MailState = { status: "idle" | "ok" | "error"; message?: string };
 
 export async function sendTest(_prev: MailState, formData: FormData): Promise<MailState> {
-  if (!(await isAdmin())) return { status: "error", message: "Няма достъп." };
+  if (!(await canAccess("pisma"))) return { status: "error", message: "Няма достъп." };
   const to = String(formData.get("to") ?? "").trim().toLowerCase();
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)) return { status: "error", message: "Невалиден имейл." };
   const ok = await sendInfoMailTest(to);
@@ -16,7 +16,7 @@ export async function sendTest(_prev: MailState, formData: FormData): Promise<Ma
 }
 
 export async function sendAll(): Promise<MailState> {
-  if (!(await isAdmin())) return { status: "error", message: "Няма достъп." };
+  if (!(await canAccess("pisma"))) return { status: "error", message: "Няма достъп." };
   const r = await sendInfoMail();
   revalidatePath("/admin/pisma");
   if (r.error) {

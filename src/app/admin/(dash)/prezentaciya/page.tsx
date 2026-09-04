@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { requireAccess } from "@/lib/access";
 import { STAGES, deckUrl, getDeckStats, listViews } from "@/lib/deck-links";
 import { sectionIndex, sectionLabel } from "@/lib/deck-sections";
 
@@ -52,7 +51,7 @@ function Tile({ label, value, sub }: { label: string; value: React.ReactNode; su
 export default async function DeckPage() {
   // The layout also checks, but a layout is not an auth boundary - the
   // Next docs are explicit that it may be skipped on RSC navigations.
-  if (!(await isAdmin())) redirect("/admin/login");
+  await requireAccess("prezentaciya");
 
   const [d, views] = await Promise.all([getDeckStats(), listViews()]);
   const active = d.links.filter((l) => !l.revokedAt);

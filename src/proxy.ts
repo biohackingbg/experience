@@ -3,6 +3,9 @@ import type { NextRequest } from "next/server";
 
 import { ADMIN_COOKIE } from "@/lib/admin-auth";
 
+/** Same name as in lib/access.ts; imported by value to keep this file free of server-only modules. */
+const SCOPE_COOKIE = "bh_scope";
+
 /**
  * Optimistic gate only.
  *
@@ -15,7 +18,7 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
-    if (!request.cookies.get(ADMIN_COOKIE)) {
+    if (!request.cookies.get(ADMIN_COOKIE) && !request.cookies.get(SCOPE_COOKIE)) {
       return NextResponse.redirect(new URL("/admin/login", request.url));
     }
   }

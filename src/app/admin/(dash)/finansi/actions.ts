@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { canAccess } from "@/lib/access";
 import { addExpense, isCategory, isExpenseStatus, removeBudget, setBudget, setExpenseStatus, updateExpense } from "@/lib/finances";
 
 export type FormState = { status: "idle" | "ok" | "error"; message?: string };
@@ -17,7 +17,7 @@ function cents(v: FormDataEntryValue | null): number | null {
 
 export async function createExpense(_prev: FormState, formData: FormData): Promise<FormState> {
   // Checked here, not only in the layout: a server action is its own entry point.
-  if (!(await isAdmin())) return { status: "error", message: "Няма достъп." };
+  if (!(await canAccess("finansi"))) return { status: "error", message: "Няма достъп." };
 
   const category = formData.get("category");
   const status = formData.get("status");
@@ -46,7 +46,7 @@ export async function createExpense(_prev: FormState, formData: FormData): Promi
 }
 
 export async function editExpense(_prev: FormState, formData: FormData): Promise<FormState> {
-  if (!(await isAdmin())) return { status: "error", message: "Няма достъп." };
+  if (!(await canAccess("finansi"))) return { status: "error", message: "Няма достъп." };
 
   const id = String(formData.get("id") ?? "");
   const category = formData.get("category");
@@ -77,7 +77,7 @@ export async function editExpense(_prev: FormState, formData: FormData): Promise
 }
 
 export async function changeExpenseStatus(formData: FormData): Promise<void> {
-  if (!(await isAdmin())) return;
+  if (!(await canAccess("finansi"))) return;
   const id = String(formData.get("id") ?? "");
   const status = formData.get("status");
   if (!/^[0-9a-f-]{36}$/.test(id) || !isExpenseStatus(status)) return;
@@ -87,7 +87,7 @@ export async function changeExpenseStatus(formData: FormData): Promise<void> {
 }
 
 export async function saveBudget(_prev: FormState, formData: FormData): Promise<FormState> {
-  if (!(await isAdmin())) return { status: "error", message: "Няма достъп." };
+  if (!(await canAccess("finansi"))) return { status: "error", message: "Няма достъп." };
   const category = formData.get("category");
   if (!isCategory(category)) return { status: "error", message: "Невалидна категория." };
 

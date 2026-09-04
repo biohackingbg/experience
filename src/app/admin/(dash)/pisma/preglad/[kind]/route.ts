@@ -1,11 +1,11 @@
-import { isAdmin } from "@/lib/admin-auth";
+import { canAccess } from "@/lib/access";
 import { isMailKind, mailPreview } from "@/lib/mail-samples";
 
 export const dynamic = "force-dynamic";
 
 /** The rendered mail, for the iframe on the mail page. Sample data only. */
 export async function GET(_req: Request, ctx: { params: Promise<{ kind: string }> }) {
-  if (!(await isAdmin())) return new Response("unauthorized", { status: 401 });
+  if (!(await canAccess("pisma"))) return new Response("unauthorized", { status: 401 });
   const { kind } = await ctx.params;
   if (!isMailKind(kind)) return new Response("not found", { status: 404 });
   return new Response(mailPreview(kind).html, {

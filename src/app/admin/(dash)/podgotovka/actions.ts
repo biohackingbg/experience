@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { canAccess } from "@/lib/access";
 import { isKind, setContact, setDeliverable } from "@/lib/preparation";
 
 const UUID = /^[0-9a-f-]{36}$/;
@@ -15,7 +15,7 @@ function done() {
 
 /** "Получено" and back. A plain form, so it works on the phone at the venue. */
 export async function markReceived(formData: FormData): Promise<void> {
-  if (!(await isAdmin())) return;
+  if (!(await canAccess("podgotovka"))) return;
   const linkId = String(formData.get("linkId") ?? "");
   const kind = formData.get("kind");
   if (!UUID.test(linkId) || !isKind(kind)) return;
@@ -24,7 +24,7 @@ export async function markReceived(formData: FormData): Promise<void> {
 }
 
 export async function saveDeliverable(formData: FormData): Promise<void> {
-  if (!(await isAdmin())) return;
+  if (!(await canAccess("podgotovka"))) return;
   const linkId = String(formData.get("linkId") ?? "");
   const kind = formData.get("kind");
   if (!UUID.test(linkId) || !isKind(kind)) return;
@@ -37,7 +37,7 @@ export async function saveDeliverable(formData: FormData): Promise<void> {
 }
 
 export async function saveContact(formData: FormData): Promise<void> {
-  if (!(await isAdmin())) return;
+  if (!(await canAccess("podgotovka"))) return;
   const linkId = String(formData.get("linkId") ?? "");
   if (!UUID.test(linkId)) return;
   await setContact(linkId, {

@@ -1,6 +1,5 @@
-import { redirect } from "next/navigation";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { requireAccess } from "@/lib/access";
 
 import { ResendForm } from "./ResendForm";
 import { INVOICE_SERIES_START } from "@/lib/company";
@@ -22,7 +21,7 @@ function bgDate(d: Date | null): string {
 export default async function InvoicesPage() {
   // The layout also checks, but a layout is not an auth boundary - the
   // Next docs are explicit that it may be skipped on RSC navigations.
-  if (!(await isAdmin())) redirect("/admin/login");
+  await requireAccess("fakturi");
 
   const rows = await listInvoices();
 

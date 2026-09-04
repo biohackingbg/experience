@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import { CreditNoteDocument, InvoiceDocument } from "@/components/InvoiceDocument";
 import { PrintButton } from "@/app/faktura/[reference]/PrintButton";
-import { isAdmin } from "@/lib/admin-auth";
+import { requireAccess } from "@/lib/access";
 import { getAllInvoices } from "@/lib/invoices";
 
 export const metadata: Metadata = {
@@ -20,7 +19,7 @@ export const dynamic = "force-dynamic";
  * needed, and the document is the very same component the buyer sees.
  */
 export default async function PrintAllInvoicesPage() {
-  if (!(await isAdmin())) redirect("/admin/login");
+  await requireAccess("fakturi");
 
   const rows = await getAllInvoices();
 

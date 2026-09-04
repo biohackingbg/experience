@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { canAccess } from "@/lib/access";
 import { type CampaignInput, addCampaign, deleteCampaign, suggestCode, updateCampaign } from "@/lib/marketing";
 import { isKind, isPlatform } from "@/lib/marketing-options";
 
@@ -65,7 +65,7 @@ function parse(formData: FormData): { ok: true; input: CampaignInput } | { ok: f
 }
 
 export async function createCampaign(_prev: FormState, formData: FormData): Promise<FormState> {
-  if (!(await isAdmin())) return { status: "error", message: "Няма достъп." };
+  if (!(await canAccess("reklama"))) return { status: "error", message: "Няма достъп." };
   const p = parse(formData);
   if (!p.ok) return { status: "error", message: p.message };
   await addCampaign(p.input);
@@ -74,7 +74,7 @@ export async function createCampaign(_prev: FormState, formData: FormData): Prom
 }
 
 export async function editCampaign(_prev: FormState, formData: FormData): Promise<FormState> {
-  if (!(await isAdmin())) return { status: "error", message: "Няма достъп." };
+  if (!(await canAccess("reklama"))) return { status: "error", message: "Няма достъп." };
   const id = String(formData.get("id") ?? "");
   if (!UUID.test(id)) return { status: "error", message: "Невалиден ред." };
   const p = parse(formData);
@@ -85,7 +85,7 @@ export async function editCampaign(_prev: FormState, formData: FormData): Promis
 }
 
 export async function removeCampaign(formData: FormData): Promise<void> {
-  if (!(await isAdmin())) return;
+  if (!(await canAccess("reklama"))) return;
   const id = String(formData.get("id") ?? "");
   if (!UUID.test(id)) return;
   await deleteCampaign(id);

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { canAccess } from "@/lib/access";
 import { type SessionInput, addSession, deleteSession, importProgram, moveSession, updateSession } from "@/lib/program-data";
 
 export type FormState = { status: "idle" | "ok" | "error"; message?: string };
@@ -29,7 +29,7 @@ function parse(formData: FormData): { ok: true; input: SessionInput } | { ok: fa
 }
 
 export async function createSession(_prev: FormState, formData: FormData): Promise<FormState> {
-  if (!(await isAdmin())) return { status: "error", message: "Няма достъп." };
+  if (!(await canAccess("programa"))) return { status: "error", message: "Няма достъп." };
   const p = parse(formData);
   if (!p.ok) return { status: "error", message: p.message };
   await addSession(p.input);
@@ -38,7 +38,7 @@ export async function createSession(_prev: FormState, formData: FormData): Promi
 }
 
 export async function editSession(_prev: FormState, formData: FormData): Promise<FormState> {
-  if (!(await isAdmin())) return { status: "error", message: "Няма достъп." };
+  if (!(await canAccess("programa"))) return { status: "error", message: "Няма достъп." };
   const id = String(formData.get("id") ?? "");
   if (!UUID.test(id)) return { status: "error", message: "Невалиден ред." };
   const p = parse(formData);
@@ -49,7 +49,7 @@ export async function editSession(_prev: FormState, formData: FormData): Promise
 }
 
 export async function removeSession(formData: FormData): Promise<void> {
-  if (!(await isAdmin())) return;
+  if (!(await canAccess("programa"))) return;
   const id = String(formData.get("id") ?? "");
   if (!UUID.test(id)) return;
   await deleteSession(id);
@@ -57,7 +57,7 @@ export async function removeSession(formData: FormData): Promise<void> {
 }
 
 export async function shiftSession(formData: FormData): Promise<void> {
-  if (!(await isAdmin())) return;
+  if (!(await canAccess("programa"))) return;
   const id = String(formData.get("id") ?? "");
   const dir = formData.get("dir");
   if (!UUID.test(id) || (dir !== "up" && dir !== "down")) return;
@@ -66,7 +66,7 @@ export async function shiftSession(formData: FormData): Promise<void> {
 }
 
 export async function seedProgram(): Promise<void> {
-  if (!(await isAdmin())) return;
+  if (!(await canAccess("programa"))) return;
   await importProgram();
   done();
 }

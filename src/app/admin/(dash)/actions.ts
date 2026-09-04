@@ -7,7 +7,7 @@ import { sql } from "drizzle-orm";
 import { remindAbandonedOrder } from "@/lib/abandoned";
 import { getDb } from "@/lib/db";
 import { orders } from "@/lib/db/schema";
-import { isAdmin } from "@/lib/admin-auth";
+import { canAccess } from "@/lib/access";
 import { isStage, saveMidConfig, setPriceStage } from "@/lib/pricing";
 import { TIERS, type TierId } from "@/lib/tickets";
 
@@ -23,7 +23,7 @@ function revalidatePrices() {
 
 /** Moves the site to a price stage. Every page that quotes a price follows at once. */
 export async function setStage(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  if (!(await isAdmin())) return { status: "error", message: "Няма достъп." };
+  if (!(await canAccess("tablo"))) return { status: "error", message: "Няма достъп." };
   const stage = formData.get("stage");
   if (!isStage(stage)) return { status: "error", message: "Невалиден етап." };
   await setPriceStage(stage);
@@ -34,7 +34,7 @@ export async function setStage(_prev: ActionState, formData: FormData): Promise<
 
 /** The mid stage's prices and wording, in euros as typed. */
 export async function saveMidPrices(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  if (!(await isAdmin())) return { status: "error", message: "Няма достъп." };
+  if (!(await canAccess("tablo"))) return { status: "error", message: "Няма достъп." };
   const prices = {} as Record<TierId, number>;
   for (const t of TIERS) {
     const raw = String(formData.get(`price_${t.id}`) ?? "").replace(/\s/g, "").replace(",", ".");
@@ -56,7 +56,7 @@ export async function saveMidPrices(_prev: ActionState, formData: FormData): Pro
  * the statistics skip it, the invoice keeps its number.
  */
 export async function setTestOrder(formData: FormData): Promise<void> {
-  if (!(await isAdmin())) return;
+  if (!(await canAccess("tablo"))) return;
   const reference = String(formData.get("reference") ?? "").trim().toUpperCase();
   const to = formData.get("to") === "1";
   if (!/^SLS-[A-Z0-9]{6}$/.test(reference)) return;
@@ -68,7 +68,7 @@ export async function setTestOrder(formData: FormData): Promise<void> {
 }
 
 export async function remindOrder(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  if (!(await isAdmin())) return { status: "error", message: "Няма достъп." };
+  if (!(await canAccess("tablo"))) return { status: "error", message: "Няма достъп." };
 
   const reference = String(formData.get("reference") ?? "").trim().toUpperCase();
   if (!reference) return { status: "error", message: "Липсва номер." };

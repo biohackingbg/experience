@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import { HomeLink } from "@/components/admin/HomeLink";
-import { isAdmin } from "@/lib/admin-auth";
+import { requireAccess } from "@/lib/access";
 import { getPreparation } from "@/lib/preparation";
 
 import { markReceived, saveContact, saveDeliverable } from "./actions";
@@ -33,7 +32,7 @@ const small =
  * they get ticked off, dated and chased.
  */
 export default async function PreparationPage() {
-  if (!(await isAdmin())) redirect("/admin/login");
+  await requireAccess("podgotovka");
   const p = await getPreparation();
 
   return (

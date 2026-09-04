@@ -1,11 +1,11 @@
-import { isAdmin } from "@/lib/admin-auth";
+import { canAccess } from "@/lib/access";
 import { financesCsv, getFinances } from "@/lib/finances";
 
 export const dynamic = "force-dynamic";
 
 /** The whole ledger as one CSV, for the accountant's spreadsheet. */
 export async function GET() {
-  if (!(await isAdmin())) return new Response("Няма достъп.", { status: 401 });
+  if (!(await canAccess("finansi"))) return new Response("Няма достъп.", { status: 401 });
   const csv = financesCsv(await getFinances());
   return new Response(csv, {
     headers: {

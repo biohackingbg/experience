@@ -2,7 +2,7 @@
 
 import { sql } from "drizzle-orm";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { canAccess } from "@/lib/access";
 import { getDb } from "@/lib/db";
 import { orderItems, orders, tickets } from "@/lib/db/schema";
 import { sendTicketEmail } from "@/lib/email";
@@ -22,7 +22,7 @@ export async function resendTicketEmail(
 ): Promise<ResendState> {
   // Checked here, not only in the layout: a server action is its own entry
   // point and is reachable without ever rendering the page that offers it.
-  if (!(await isAdmin())) return { status: "error", message: "Няма достъп." };
+  if (!(await canAccess("fakturi"))) return { status: "error", message: "Няма достъп." };
 
   const reference = String(formData.get("reference") ?? "").trim().toUpperCase();
   const override = String(formData.get("email") ?? "").trim().toLowerCase();

@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 
 import { HomeLink } from "@/components/admin/HomeLink";
-import { isAdmin } from "@/lib/admin-auth";
+import { requireAccess } from "@/lib/access";
 import { listPromos } from "@/lib/promo";
 import { formatPrice } from "@/lib/tickets";
 
@@ -20,7 +19,7 @@ const bgDate = (d: Date) => d.toLocaleDateString("bg-BG", { day: "2-digit", mont
 
 /** Discount codes: who they are for, how many times they were used, what they cost and brought. */
 export default async function PromoPage() {
-  if (!(await isAdmin())) redirect("/admin/login");
+  await requireAccess("promo");
   const codes = await listPromos();
   const totals = codes.reduce(
     (a, c) => ({ uses: a.uses + c.uses, tickets: a.tickets + c.tickets, discount: a.discount + c.discountCents, revenue: a.revenue + c.revenueCents }),

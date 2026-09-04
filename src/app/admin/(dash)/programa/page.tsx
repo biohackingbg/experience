@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import { HomeLink } from "@/components/admin/HomeLink";
-import { isAdmin } from "@/lib/admin-auth";
+import { requireAccess } from "@/lib/access";
 import { PROGRAM } from "@/lib/program";
 import { listSessions, peopleList } from "@/lib/program-data";
 
@@ -19,7 +18,7 @@ export const dynamic = "force-dynamic";
 
 /** The programme, slot by slot, with the same fields the site renders. */
 export default async function ProgramAdminPage() {
-  if (!(await isAdmin())) redirect("/admin/login");
+  await requireAccess("programa");
   const rows = await listSessions();
   const seeded = rows.length > 0;
 

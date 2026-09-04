@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { AdminShell } from "@/components/admin/AdminShell";
-import { isAdmin } from "@/lib/admin-auth";
+import { getAccess } from "@/lib/access";
 
 /**
  * The real gate for every page in this route group.
@@ -16,6 +16,7 @@ export default async function ProtectedAdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  if (!(await isAdmin())) redirect("/admin/login");
-  return <AdminShell>{children}</AdminShell>;
+  const access = await getAccess();
+  if (!access) redirect("/admin/login");
+  return <AdminShell access={access}>{children}</AdminShell>;
 }

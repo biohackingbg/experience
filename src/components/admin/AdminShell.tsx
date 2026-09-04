@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { logout } from "@/app/admin/actions";
+import type { Access } from "@/lib/access";
 
 import { NavLink } from "./NavLink";
 
@@ -33,22 +34,24 @@ const I = {
 };
 
 const MENU = [
-  { href: "/admin", label: "Табло", icon: I.grid },
-  { href: "/admin/finansi", label: "Финанси", icon: I.wallet },
-  { href: "/admin/poseshteniya", label: "Посещения", icon: I.chart },
-  { href: "/admin/podgotovka", label: "Подготовка", icon: I.check },
-  { href: "/admin/prezentaciya", label: "Презентация", icon: I.deck },
-  { href: "/admin/fakturi", label: "Фактури", icon: I.file },
-  { href: "/admin/zapisvaniya", label: "Записвания", icon: I.list },
-  { href: "/admin/pisma", label: "Писма", icon: I.mail },
-  { href: "/admin/reklama", label: "Реклама", icon: I.mega },
-  { href: "/admin/promo", label: "Промо кодове", icon: I.tag },
-  { href: "/admin/programa", label: "Програма", icon: I.clock },
-  { href: "/admin/lektori", label: "Лектори", icon: I.person },
-  { href: "/admin/vhod", label: "Вход на събитието", icon: I.door },
+  { page: "tablo" as const, href: "/admin", label: "Табло", icon: I.grid },
+  { page: "finansi" as const, href: "/admin/finansi", label: "Финанси", icon: I.wallet },
+  { page: "poseshteniya" as const, href: "/admin/poseshteniya", label: "Посещения", icon: I.chart },
+  { page: "podgotovka" as const, href: "/admin/podgotovka", label: "Подготовка", icon: I.check },
+  { page: "prezentaciya" as const, href: "/admin/prezentaciya", label: "Презентация", icon: I.deck },
+  { page: "fakturi" as const, href: "/admin/fakturi", label: "Фактури", icon: I.file },
+  { page: "zapisvaniya" as const, href: "/admin/zapisvaniya", label: "Записвания", icon: I.list },
+  { page: "pisma" as const, href: "/admin/pisma", label: "Писма", icon: I.mail },
+  { page: "reklama" as const, href: "/admin/reklama", label: "Реклама", icon: I.mega },
+  { page: "promo" as const, href: "/admin/promo", label: "Промо кодове", icon: I.tag },
+  { page: "programa" as const, href: "/admin/programa", label: "Програма", icon: I.clock },
+  { page: "lektori" as const, href: "/admin/lektori", label: "Лектори", icon: I.person },
+  { page: "vhod" as const, href: "/admin/vhod", label: "Вход на събитието", icon: I.door },
 ];
 
-export function AdminShell({ children }: { children: React.ReactNode }) {
+export function AdminShell({ access, children }: { access: Access; children: React.ReactNode }) {
+  const admin = access.kind === "admin";
+  const menu = MENU.filter((m) => admin || access.scopes.includes(m.page));
   return (
     <div
       className="bh-admin min-h-screen bg-[#e9ebe8] p-3 text-[#0b2a22] sm:p-5"
@@ -73,14 +76,14 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
           <p className="mt-8 px-3 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-[#0b2a22]/45">Меню</p>
           <nav className="mt-2 flex flex-col gap-0.5">
-            {MENU.map((m) => (
-              <NavLink key={m.href} {...m} />
+            {menu.map((m) => (
+              <NavLink key={m.href} href={m.href} label={m.label} icon={m.icon} />
             ))}
           </nav>
 
           <p className="mt-8 px-3 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-[#0b2a22]/45">Общи</p>
           <nav className="mt-2 flex flex-col gap-0.5">
-            <NavLink href="/admin/dostap" label="Достъп" icon={I.key} />
+            {admin && <NavLink href="/admin/dostap" label="Достъп" icon={I.key} />}
             <Link href="/" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[0.95rem] text-[#0b2a22]/60 transition-colors hover:bg-[#0b2a22]/5 hover:text-[#0b2a22]">
               <span className="h-5 w-5">{I.globe}</span>Сайтът
             </Link>
@@ -103,6 +106,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           <header className="flex flex-wrap items-center justify-between gap-3 rounded-[1.5rem] bg-[#f6f7f5] px-4 py-3">
+            {(admin || access.scopes.includes("tablo")) ? (
             <form action="/admin" method="get" className="flex min-w-[16rem] flex-1 items-center gap-3 rounded-full bg-white px-4 py-2.5 ring-1 ring-[#0b2a22]/8 sm:max-w-md">
               <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4 shrink-0 text-[#0b2a22]/50"><circle cx="9" cy="9" r="5.5"/><path d="M13.5 13.5 17 17" strokeLinecap="round"/></svg>
               <input
@@ -112,16 +116,21 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 className="w-full bg-transparent text-sm text-[#0b2a22] outline-none placeholder:text-[#0b2a22]/40"
               />
             </form>
+            ) : (
+              <div className="flex-1 text-sm text-[#0b2a22]/60">Sofia Life Summit · админ</div>
+            )}
             <div className="flex items-center gap-3 lg:hidden">
-              {MENU.slice(0, 4).map((m) => (
+              {menu.slice(0, 4).map((m) => (
                 <Link key={m.href} href={m.href} className="text-xs font-semibold text-[#0b2a22]/70">{m.label}</Link>
               ))}
             </div>
             <div className="hidden items-center gap-3 sm:flex">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#146455] text-sm font-bold text-[#cef870]">SL</span>
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#146455] text-sm font-bold text-[#cef870]">
+                {admin ? "SL" : access.label.trim().slice(0, 2).toUpperCase()}
+              </span>
               <div className="leading-tight">
-                <div className="text-sm font-semibold">Екипът</div>
-                <div className="text-xs text-[#0b2a22]/55">hi@biohacking.bg</div>
+                <div className="text-sm font-semibold">{access.label}</div>
+                <div className="text-xs text-[#0b2a22]/55">{admin ? "hi@biohacking.bg" : `достъп до ${menu.length} ${menu.length === 1 ? "страница" : "страници"}`}</div>
               </div>
             </div>
           </header>

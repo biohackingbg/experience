@@ -1,11 +1,11 @@
-import { isAdmin } from "@/lib/admin-auth";
+import { canAccess } from "@/lib/access";
 import { listAttendees } from "@/lib/tickets-lookup";
 
 export const dynamic = "force-dynamic";
 
 /** The badge list as CSV - for the printer, the badge template, or a spreadsheet at the door. */
 export async function GET() {
-  if (!(await isAdmin())) return new Response("unauthorized", { status: 401 });
+  if (!(await canAccess("vhod"))) return new Response("unauthorized", { status: 401 });
   const rows = await listAttendees();
   const cell = (v: string | null | undefined) => `"${String(v ?? "").replaceAll('"', '""')}"`;
   const lines = [

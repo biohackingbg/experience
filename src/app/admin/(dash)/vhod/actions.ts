@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { canAccess } from "@/lib/access";
 import type { ScanState } from "@/lib/scan-state";
 import { checkInTicket } from "@/lib/tickets-lookup";
 
@@ -14,7 +14,7 @@ import { checkInTicket } from "@/lib/tickets-lookup";
  */
 /** The "Пусни" button beside a name found by search - same check as a scan. */
 export async function admitTicket(formData: FormData): Promise<void> {
-  if (!(await isAdmin())) return;
+  if (!(await canAccess("vhod"))) return;
   const code = String(formData.get("code") ?? "").trim();
   if (code) await checkInTicket(code);
   revalidatePath("/admin/vhod");
@@ -24,7 +24,7 @@ export async function scanTicket(
   _prev: ScanState,
   formData: FormData,
 ): Promise<ScanState> {
-  if (!(await isAdmin())) {
+  if (!(await canAccess("vhod"))) {
     return { status: "error", message: "Сесията изтече. Влез отново." };
   }
 

@@ -62,5 +62,6 @@ export async function login(
 export async function logout() {
   const store = await cookies();
   store.delete(ADMIN_COOKIE);
+  store.delete("bh_scope");
   redirect("/admin/login");
 }

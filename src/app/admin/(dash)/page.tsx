@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import { getAbandonedOrders, getPendingOrders } from "@/lib/abandoned";
-import { isAdmin } from "@/lib/admin-auth";
+import { requireAccess } from "@/lib/access";
 import { getDashboardData, searchOrders } from "@/lib/admin-stats";
 import { getFinances } from "@/lib/finances";
 import { getPricing } from "@/lib/pricing";
@@ -205,7 +204,7 @@ export default async function AdminDashboard({
 }) {
   // The layout also checks, but a layout is not an auth boundary - the
   // Next docs are explicit that it may be skipped on RSC navigations.
-  if (!(await isAdmin())) redirect("/admin/login");
+  await requireAccess("tablo");
 
   const { q = "" } = await searchParams;
   const [d, traffic, found, fin, pricing, abandoned, pendingNow] = await Promise.all([

@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import { HomeLink } from "@/components/admin/HomeLink";
-import { isAdmin } from "@/lib/admin-auth";
+import { requireAccess } from "@/lib/access";
 import { MONEY, TIERS } from "@/lib/deck-links";
 import { deliverableShort } from "@/lib/finance-options";
 import { getFinances } from "@/lib/finances";
@@ -42,7 +41,7 @@ const STATUS_TONE: Record<string, string> = {
  * is the whole story.
  */
 export default async function FinancesPage() {
-  if (!(await isAdmin())) redirect("/admin/login");
+  await requireAccess("finansi");
   const f = await getFinances();
 
   const incomeForecast = f.tickets.netCents + f.sponsors.totalCents;

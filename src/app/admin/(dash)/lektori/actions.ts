@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { isAdmin } from "@/lib/admin-auth";
+import { canAccess } from "@/lib/access";
 import { type SpeakerInput, addSpeaker, deleteSpeaker, importSpeakers, moveSpeaker, setAnnounced, setPhoto, updateSpeaker } from "@/lib/speakers-data";
 
 export type FormState = { status: "idle" | "ok" | "error"; message?: string };
@@ -35,7 +35,7 @@ function parse(formData: FormData): { ok: true; input: SpeakerInput } | { ok: fa
 }
 
 export async function createSpeaker(_prev: FormState, formData: FormData): Promise<FormState> {
-  if (!(await isAdmin())) return { status: "error", message: "Няма достъп." };
+  if (!(await canAccess("lektori"))) return { status: "error", message: "Няма достъп." };
   const p = parse(formData);
   if (!p.ok) return { status: "error", message: p.message };
   await addSpeaker(p.input);
@@ -44,7 +44,7 @@ export async function createSpeaker(_prev: FormState, formData: FormData): Promi
 }
 
 export async function editSpeaker(_prev: FormState, formData: FormData): Promise<FormState> {
-  if (!(await isAdmin())) return { status: "error", message: "Няма достъп." };
+  if (!(await canAccess("lektori"))) return { status: "error", message: "Няма достъп." };
   const id = String(formData.get("id") ?? "");
   if (!ID.test(id)) return { status: "error", message: "Невалиден ред." };
   const p = parse(formData);
@@ -55,7 +55,7 @@ export async function editSpeaker(_prev: FormState, formData: FormData): Promise
 }
 
 export async function toggleAnnounced(formData: FormData): Promise<void> {
-  if (!(await isAdmin())) return;
+  if (!(await canAccess("lektori"))) return;
   const id = String(formData.get("id") ?? "");
   if (!ID.test(id)) return;
   await setAnnounced(id, formData.get("to") === "1");
@@ -63,7 +63,7 @@ export async function toggleAnnounced(formData: FormData): Promise<void> {
 }
 
 export async function removeSpeaker(formData: FormData): Promise<void> {
-  if (!(await isAdmin())) return;
+  if (!(await canAccess("lektori"))) return;
   const id = String(formData.get("id") ?? "");
   if (!ID.test(id)) return;
   await deleteSpeaker(id);
@@ -71,7 +71,7 @@ export async function removeSpeaker(formData: FormData): Promise<void> {
 }
 
 export async function shiftSpeaker(formData: FormData): Promise<void> {
-  if (!(await isAdmin())) return;
+  if (!(await canAccess("lektori"))) return;
   const id = String(formData.get("id") ?? "");
   const dir = formData.get("dir");
   if (!ID.test(id) || (dir !== "up" && dir !== "down")) return;
@@ -80,14 +80,14 @@ export async function shiftSpeaker(formData: FormData): Promise<void> {
 }
 
 export async function seedSpeakers(): Promise<void> {
-  if (!(await isAdmin())) return;
+  if (!(await canAccess("lektori"))) return;
   await importSpeakers();
   done();
 }
 
 /** The portrait, already resized in the browser to about a thousand pixels. */
 export async function uploadPhoto(formData: FormData): Promise<FormState> {
-  if (!(await isAdmin())) return { status: "error", message: "Няма достъп." };
+  if (!(await canAccess("lektori"))) return { status: "error", message: "Няма достъп." };
   const id = String(formData.get("id") ?? "");
   const file = formData.get("photo");
   if (!ID.test(id) || !(file instanceof File)) return { status: "error", message: "Липсва файл." };

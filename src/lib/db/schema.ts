@@ -573,6 +573,25 @@ export const speakers = pgTable(
   (table) => [index("speakers_sort_idx").on(table.sort)],
 );
 
+/**
+ * Page-scoped access for people outside the team - an agency that logs
+ * campaigns, a partner who checks the programme. Each grant is a link with
+ * a long random token (only its hash is kept), a list of pages it opens,
+ * and an expiry; revoking it closes the door at once. Never the password.
+ */
+export const accessGrants = pgTable("access_grants", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  /** Who this is for: "Агенция X". */
+  label: text("label").notNull(),
+  /** Comma-separated page ids from access-options.ts. */
+  scopes: text("scopes").notNull(),
+  tokenHash: text("token_hash").notNull().unique(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export type DeckLink = typeof deckLinks.$inferSelect;
 
 export type Order = typeof orders.$inferSelect;
