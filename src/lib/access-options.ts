@@ -13,6 +13,7 @@ export const PAGES = [
   { id: "prezentaciya", label: "Презентация (партньори)", href: "/admin/prezentaciya", sensitive: false },
   { id: "podgotovka", label: "Подготовка", href: "/admin/podgotovka", sensitive: false },
   { id: "vhod", label: "Вход на събитието", href: "/admin/vhod", sensitive: false },
+  { id: "izdai", label: "Издаване на билети", href: "/admin/izdai", sensitive: true },
 ] as const;
 export type PageId = (typeof PAGES)[number]["id"];
 export const isPageId = (v: unknown): v is PageId => PAGES.some((p) => p.id === v);

@@ -98,6 +98,14 @@ export default async function PreparationPage() {
                       </span>
                     </h2>
                     {partner.owner && <p className="mt-0.5 text-xs text-bh-ink/55">води {partner.owner}</p>}
+                    {partner.items.some((i) => i.kind === "tickets") && (
+                      <Link
+                        href={`/admin/izdai?vid=free&ime=${encodeURIComponent(partner.contactName ?? partner.label)}&imeil=${encodeURIComponent(partner.contactEmail ?? "")}&broi=${encodeURIComponent(partner.items.find((i) => i.kind === "tickets")?.label.replace(/\D/g, "") ?? "1")}&bel=${encodeURIComponent(`Партньор: ${partner.label}`)}`}
+                        className="mt-2 inline-flex rounded-full bg-bh-ink px-3 py-1.5 text-xs font-semibold text-bh-paper"
+                      >
+                        Издай билетите
+                      </Link>
+                    )}
                   </div>
                   {/* Who to call when something is late. */}
                   <form action={saveContact} className="flex flex-wrap items-center gap-2">

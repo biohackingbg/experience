@@ -47,6 +47,8 @@ export const signups = pgTable(
     /** Set when the person asks to be removed; keeps the address on a
      *  suppression list so a later import cannot silently re-add them. */
     unsubscribedAt: timestamp("unsubscribed_at", { withTimezone: true }),
+    /** Waiting list: when "a seat freed up" was sent, so it goes once. */
+    notifiedAt: timestamp("notified_at", { withTimezone: true }),
 
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -135,6 +137,19 @@ export const orders = pgTable(
      */
     promoCode: text("promo_code"),
     discountCents: integer("discount_cents").notNull().default(0),
+
+    /**
+     * card - Stripe checkout (the default). bank - issued by the team,
+     * paid by transfer against a proforma, marked paid by hand. admin - a
+     * free order the team issued (partner or speaker tickets).
+     */
+    paymentMethod: text("payment_method").notNull().default("card"),
+    /** For a bank order: until when the seats are held for the transfer. */
+    bankDueAt: timestamp("bank_due_at", { withTimezone: true }),
+    /** Team note on a manual order: "Партньор Dexcom, 10 билета по договор". */
+    note: text("note"),
+    /** bg | en - the language the buyer chose; the mails follow it. */
+    lang: text("lang").notNull().default("bg"),
 
     /**
      * When the "you did not finish" email went out, for an abandoned checkout.

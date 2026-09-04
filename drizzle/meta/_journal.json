@@ -155,6 +155,13 @@
       "when": 1788590000000,
       "tag": "0021_access_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1788600000000,
+      "tag": "0022_manual_orders",
+      "breakpoints": true
     }
   ]
 }

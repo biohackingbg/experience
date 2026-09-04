@@ -104,7 +104,8 @@ export async function createPendingOrder(
       .where(
         sql`${orderItems.tierId} = ${tier.id} and (
           ${orders.status} = 'paid'
-          or (${orders.status} = 'pending'
+          or (${orders.status} = 'pending' and ${orders.paymentMethod} = 'bank' and ${orders.bankDueAt} > now())
+          or (${orders.status} = 'pending' and ${orders.paymentMethod} = 'card'
               and ${orders.createdAt} > now() - interval '${sql.raw(String(PENDING_HOLD_MINUTES))} minutes')
         )`,
       );
@@ -269,7 +270,8 @@ export async function getRemainingAll(): Promise<Record<string, number>> {
     .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
     .where(
       sql`${orders.status} = 'paid'
-        or (${orders.status} = 'pending' and ${orders.createdAt} > now() - interval '${sql.raw(String(PENDING_HOLD_MINUTES))} minutes')`,
+        or (${orders.status} = 'pending' and ${orders.paymentMethod} = 'bank' and ${orders.bankDueAt} > now())
+        or (${orders.status} = 'pending' and ${orders.paymentMethod} = 'card' and ${orders.createdAt} > now() - interval '${sql.raw(String(PENDING_HOLD_MINUTES))} minutes')`,
     )
     .groupBy(orderItems.tierId);
   const out: Record<string, number> = {};

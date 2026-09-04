@@ -74,6 +74,8 @@ export type DashboardData = {
   refundedOrders: number;
   /** Orders marked as the team's own tests - skipped by every figure here. */
   testOrders: number;
+  /** Bank-transfer orders still waiting for the money. */
+  bankPending: number;
   ticketsSold: number;
   capacityTotal: number;
   /** Paid tickets in the last seven days - the pace the room is filling at. */
@@ -112,11 +114,12 @@ export async function getDashboardData(): Promise<DashboardData> {
           refunded: sql<number>`count(*) filter (where not ${orders.isTest} and (${orders.status} = 'refunded' or coalesce(${orders.refundedCents}, 0) >= ${orders.totalCents}))::int`,
           test: sql<number>`count(*) filter (where ${orders.isTest})::int`,
           // Still inside the seat hold - a payment may yet land.
-          pending: sql<number>`count(*) filter (where ${orders.status} = 'pending' and not ${orders.isTest} and ${orders.createdAt} > now() - interval '${sql.raw(String(PENDING_HOLD_MINUTES))} minutes')::int`,
+          bank: sql<number>`count(*) filter (where ${orders.status} = 'pending' and not ${orders.isTest} and ${orders.paymentMethod} = 'bank')::int`,
+          pending: sql<number>`count(*) filter (where ${orders.status} = 'pending' and not ${orders.isTest} and ${orders.paymentMethod} = 'card' and ${orders.createdAt} > now() - interval '${sql.raw(String(PENDING_HOLD_MINUTES))} minutes')::int`,
           // Hold expired without payment: the checkout was closed. Their seats
           // are already free again; kept as a number because a rising count
           // is a signal about the checkout, not a to-do.
-          abandoned: sql<number>`count(*) filter (where ${orders.status} = 'pending' and not ${orders.isTest} and ${orders.createdAt} <= now() - interval '${sql.raw(String(PENDING_HOLD_MINUTES))} minutes')::int`,
+          abandoned: sql<number>`count(*) filter (where ${orders.status} = 'pending' and not ${orders.isTest} and ${orders.paymentMethod} = 'card' and ${orders.createdAt} <= now() - interval '${sql.raw(String(PENDING_HOLD_MINUTES))} minutes')::int`,
         })
         .from(orders),
 
@@ -204,7 +207,7 @@ export async function getDashboardData(): Promise<DashboardData> {
         })
         .from(orders)
         .where(sql`${orders.status} = 'paid' and not ${orders.isTest} and (
-          ${orders.stripePaymentIntentId} is null and ${orders.totalCents} > 0
+          ${orders.stripePaymentIntentId} is null and ${orders.totalCents} > 0 and ${orders.paymentMethod} = 'card'
           or not exists (select 1 from tickets t where t.order_id = ${orders.id})
           or not exists (select 1 from order_items i where i.order_id = ${orders.id})
           or coalesce(${orders.refundedCents}, 0) >= ${orders.totalCents}
@@ -277,6 +280,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     abandonedOrders: totals[0]?.abandoned ?? 0,
     refundedOrders: totals[0]?.refunded ?? 0,
     testOrders: totals[0]?.test ?? 0,
+    bankPending: totals[0]?.bank ?? 0,
     ticketsSold: perTier.reduce((sum, t) => sum + t.sold, 0),
     capacityTotal: TIERS.reduce((sum, t) => sum + t.capacity, 0),
     soldLast7Days: last7Row[0]?.n ?? 0,

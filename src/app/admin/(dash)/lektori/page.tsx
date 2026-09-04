@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { HomeLink } from "@/components/admin/HomeLink";
 import { requireAccess } from "@/lib/access";
@@ -107,6 +108,9 @@ export default async function SpeakersAdminPage() {
                             {s.pending ? "потвърждава се" : s.announced ? "на сайта" : "скрит"}
                           </span>
                           {!s.hasPhoto && <span className="text-[0.62rem] text-bh-ink/45">без снимка</span>}
+                          <Link href={`/admin/izdai?vid=free&ime=${encodeURIComponent(s.name)}&broi=1&bel=${encodeURIComponent("Лектор")}`} className="text-[0.68rem] font-semibold text-bh-ink/70 underline underline-offset-2 hover:text-bh-ink">
+                            билет
+                          </Link>
                           {!s.pending && (
                             <form action={toggleAnnounced}>
                               <input type="hidden" name="id" value={s.id} />

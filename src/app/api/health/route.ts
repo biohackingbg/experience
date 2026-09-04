@@ -84,7 +84,7 @@ export async function GET(request: Request) {
         ) as paid_no_invoice,
         count(*) filter (
           where o.status = 'paid' and not o.is_test and o.total_cents > 0
-            and o.stripe_payment_intent_id is null
+            and o.payment_method = 'card' and o.stripe_payment_intent_id is null
         ) as paid_no_payment,
         count(*) filter (
           where o.status = 'refunded' and o.refunded_at > now() - interval '24 hours'

@@ -284,6 +284,7 @@ export default async function AdminDashboard({
           sub={
             [
               d.pendingOrders ? `${d.pendingOrders} в процес` : null,
+              d.bankPending ? `${d.bankPending} чакат превод` : null,
               d.refundedOrders ? `${d.refundedOrders} върнати` : null,
               buyRate !== null ? `${buyRate}% от отворилите билетите купуват` : null,
             ]

@@ -51,6 +51,8 @@ export type TicketEmailInput = {
   /** Absent only if numbering somehow failed; the email still sends. */
   invoiceNumber?: number | null;
   tickets: { code: string; tierName: string }[];
+  /** The buyer's language; templates follow it where an English one exists. */
+  lang?: "bg" | "en";
 };
 
 function ticketRows(input: TicketEmailInput): string {
@@ -102,7 +104,7 @@ export function ticketEmailHtml(input: TicketEmailInput): string {
         Билетът ти е готов
       </h1>
       <p style="margin:14px 0 0;font:400 15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251fb3">
-        Здравей, ${esc(input.buyerName)}! Плащането е потвърдено. Отвори билета си
+        Здравей, ${esc(input.buyerName)}! ${input.totalCents > 0 ? "Плащането е потвърдено. " : ""}Отвори билета си
         по-долу и го запази - ще ти трябва на входа.
       </p>
 
@@ -121,7 +123,7 @@ export function ticketEmailHtml(input: TicketEmailInput): string {
           </td>
           <td align="right" style="font:400 14px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251fb3">
             Поръчка<br><strong style="color:#02251f">${input.reference}</strong><br>
-            ${formatPrice(input.totalCents)} €${
+            ${input.totalCents > 0 ? `${formatPrice(input.totalCents)} €` : "без заплащане"}${
               input.invoiceNumber
                 ? `<br><a href="${SITE}/faktura/${input.reference}"
                        style="color:#146455;font-weight:600;text-decoration:underline">Фактура</a>`
@@ -154,7 +156,7 @@ export function ticketEmailText(input: TicketEmailInput): string {
   return [
     `Здравей, ${esc(input.buyerName)}!`,
     "",
-    "Плащането е потвърдено, билетът ти е готов.",
+    input.totalCents > 0 ? "Плащането е потвърдено, билетът ти е готов." : "Билетът ти е готов.",
     "",
     list,
     "",
@@ -428,6 +430,67 @@ export async function sendEventInfoBatch(inputs: EventInfoInput[]): Promise<{ ok
   } catch (error) {
     console.error("[email] event info batch threw:", error);
     return { ok: false, error: error instanceof Error ? error.message : String(error) };
+  }
+}
+
+export type ProformaEmailInput = {
+  to: string;
+  buyerName: string;
+  reference: string;
+  totalCents: number;
+  items: string;
+  dueAt: Date;
+  bank: { holder: string; iban: string; bic: string; bank: string };
+  lang?: "bg" | "en";
+};
+
+/** A bank-transfer order: what to pay, where, until when, and the proforma to attach to the transfer. */
+export async function sendProformaEmail(input: ProformaEmailInput): Promise<boolean> {
+  const resend = getResend();
+  const from = process.env.EMAIL_FROM;
+  if (!resend || !from) return false;
+  const f = "-apple-system,Segoe UI,Roboto,sans-serif";
+  const due = input.dueAt.toLocaleDateString("bg-BG", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "Europe/Sofia" });
+  const row = (k: string, v: string) => `<tr><td style="padding:8px 12px 8px 0;font:600 13px/1.4 ${f};color:#02251f;white-space:nowrap">${k}</td><td style="padding:8px 0;font:400 14px/1.5 ${f};color:#02251f">${v}</td></tr>`;
+  const html = `<!doctype html><html lang="bg"><body style="margin:0;padding:24px;background:#f2f2ee">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#f8f8f5;border-radius:18px;padding:32px"><tr><td>
+    <img src="${SITE}/email-logo.png" width="200" height="54" alt="Biohacking Experience" style="display:block;border:0;width:200px;height:auto;margin:0 0 22px">
+    <div style="font:400 12px/1 ${f};letter-spacing:2px;text-transform:uppercase;color:#14645599">Sofia Life Summit</div>
+    <h1 style="margin:14px 0 0;font:800 26px/1.15 ${f};color:#02251f">Проформа за ${esc(input.items)}</h1>
+    <p style="margin:14px 0 0;font:400 15px/1.6 ${f};color:#02251fb3">Здравей, ${esc(input.buyerName)}! Местата са запазени до <strong style="color:#02251f">${due}</strong>. След като преводът пристигне, изпращаме фактурата и билетите на този адрес.</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:18px;border-top:1px solid #dfe4e0;border-bottom:1px solid #dfe4e0;width:100%">
+      ${row("Сума", `${formatPrice(input.totalCents)} € с ДДС`)}
+      ${row("Получател", esc(input.bank.holder || "-"))}
+      ${row("IBAN", esc(input.bank.iban || "-"))}
+      ${row("BIC", esc(input.bank.bic || "-"))}
+      ${row("Банка", esc(input.bank.bank || "-"))}
+      ${row("Основание", `Sofia Life Summit · ${input.reference}`)}
+    </table>
+    <p style="margin:22px 0 0"><a href="${SITE}/proforma/${input.reference}" style="display:inline-block;background:#146455;color:#f1f5f3;text-decoration:none;font:600 14px/1 ${f};padding:14px 22px;border-radius:999px">Отвори проформата</a></p>
+    <p style="margin:22px 0 0;font:400 12px/1.6 ${f};color:#02251f80">Въпроси: отговори на това писмо или пиши на hi@biohacking.bg.</p>
+  </td></tr></table></body></html>`;
+  const text = [
+    `Здравей, ${input.buyerName}! Проформа за ${input.items} - Sofia Life Summit.`,
+    `Местата са запазени до ${due}. След превода изпращаме фактурата и билетите.`,
+    "",
+    `Сума: ${formatPrice(input.totalCents)} € с ДДС`,
+    `Получател: ${input.bank.holder || "-"}`,
+    `IBAN: ${input.bank.iban || "-"} · BIC: ${input.bank.bic || "-"} · ${input.bank.bank || "-"}`,
+    `Основание: Sofia Life Summit · ${input.reference}`,
+    "",
+    `Проформа: ${SITE}/proforma/${input.reference}`,
+    "Въпроси: hi@biohacking.bg",
+  ].join("\n");
+  try {
+    const { error } = await resend.emails.send({ from, to: input.to, subject: `Проформа за билети Sofia Life Summit · ${input.reference}`, html, text });
+    if (error) {
+      console.error("[email] proforma send failed:", error);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("[email] proforma send threw:", error);
+    return false;
   }
 }
 

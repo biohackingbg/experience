@@ -46,7 +46,7 @@ function ago(t: Date, now: number): string {
 
 /** Pending, past the hold, not a test, no paid order on the same address. */
 function abandonedWhere() {
-  return sql`${orders.status} = 'pending' and not ${orders.isTest}
+  return sql`${orders.status} = 'pending' and not ${orders.isTest} and ${orders.paymentMethod} = 'card'
     and ${orders.createdAt} <= now() - interval '${sql.raw(String(PENDING_HOLD_MINUTES))} minutes'
     and ${orders.createdAt} > now() - interval '${sql.raw(String(DAYS_KEPT))} days'
     and not exists (
@@ -111,7 +111,7 @@ export async function getPendingOrders(): Promise<PendingOrder[]> {
     .select({ id: orders.id, reference: orders.reference, name: orders.name, email: orders.email, totalCents: orders.totalCents, createdAt: orders.createdAt })
     .from(orders)
     .where(
-      sql`${orders.status} = 'pending' and not ${orders.isTest}
+      sql`${orders.status} = 'pending' and not ${orders.isTest} and ${orders.paymentMethod} = 'card'
         and ${orders.createdAt} > now() - interval '${sql.raw(String(PENDING_HOLD_MINUTES))} minutes'`,
     )
     .orderBy(desc(orders.createdAt));
