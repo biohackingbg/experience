@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // sharp carries a native binary and must be required at runtime rather
+  // than bundled into the route that resizes the speaker portraits.
+  serverExternalPackages: ["sharp"],
   // Speaker portraits are uploaded through a server action; they are resized
   // in the browser first, so the ceiling is generous, not large.
   experimental: { serverActions: { bodySizeLimit: "4mb" } },
