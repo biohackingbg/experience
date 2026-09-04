@@ -157,6 +157,9 @@ export async function getDashboardData(): Promise<DashboardData> {
           isTest: orders.isTest,
         })
         .from(orders)
+        // Sales only. An unfinished checkout is not an order the team can act
+        // on here; it has its own card, and mixed in it read as a sale.
+        .where(sql`${orders.status} in ('paid', 'refunded')`)
         .orderBy(desc(orders.createdAt))
         .limit(25),
 

@@ -266,7 +266,7 @@ export default async function AdminDashboard({
           sub={
             <span className="inline-flex flex-wrap items-center gap-2">
               <span className="rounded-md bg-white/15 px-1.5 py-0.5 font-mono text-[0.62rem]">{soldPct}%</span>
-              днес {d.soldToday} · вчера {d.soldYesterday} · от {d.capacityTotal} места
+              днес {d.soldToday} · вчера {d.soldYesterday} · от {d.capacityTotal} места · само платени
               {d.testOrders ? ` · ${d.testOrders} тестови скрити` : ""}
             </span>
           }
@@ -360,7 +360,7 @@ export default async function AdminDashboard({
         <div className="flex flex-col gap-4 xl:col-span-1 xl:row-span-2">
           <section className="rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold tracking-tight">Последни поръчки</h2>
+              <h2 className="text-lg font-bold tracking-tight">Последни продажби</h2>
               <a href="#porachki" className="rounded-full border border-[#0b2a22]/20 px-3 py-1.5 text-xs font-semibold transition-colors hover:border-[#0b2a22]">всички</a>
             </div>
             {d.recent.length === 0 ? (
@@ -513,7 +513,8 @@ export default async function AdminDashboard({
       )}
 
       <section id="porachki" className="mt-4 rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6">
-        <h2 className="text-lg font-bold tracking-tight">Последни поръчки</h2>
+        <h2 className="text-lg font-bold tracking-tight">Последни продажби</h2>
+        <p className="mt-1 text-xs text-[#0b2a22]/50">Платени и върнати поръчки. Незавършените са в „Недовършени поръчки“ по-горе и се намират през търсенето.</p>
         {d.recent.length === 0 ? (
           <p className="mt-4 py-6 text-center text-sm text-[#0b2a22]/55">Още няма поръчки. Тук ще се появят веднага щом продажбите тръгнат.</p>
         ) : (
