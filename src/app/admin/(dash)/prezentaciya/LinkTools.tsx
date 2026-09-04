@@ -203,23 +203,22 @@ export function PipelineEditor({
        at once, and a bare stack of fields did not say whose it was. */
     <form action={formAction} className="flex w-[26rem] max-w-full flex-col gap-2 rounded-2xl bg-bh-paper p-3 ring-1 ring-bh-ink/15">
       <input type="hidden" name="id" value={id} />
-      <div className="flex items-center justify-between gap-2 border-b border-bh-ink/10 pb-2">
-        <span className="font-mono text-[0.6rem] uppercase tracking-[0.15em] text-bh-ink/55">Партньор</span>
+      <label className="block border-b border-bh-ink/10 pb-3">
+        <span className="font-mono text-[0.6rem] uppercase tracking-[0.15em] text-bh-ink/55">Име на партньора</span>
         <input
           type="text"
           name="label"
           defaultValue={partner}
           required
           maxLength={80}
-          title="Името може да се поправи тук"
-          className="w-full rounded-xl border border-transparent bg-transparent px-2 py-1 text-base font-bold text-bh-ink hover:border-bh-ink/15 focus:border-bh-ink/30 focus:outline-none"
+          className="mt-1 w-full min-w-0 rounded-xl border border-bh-ink/15 bg-bh-cloud px-3 py-2 text-base font-bold text-bh-ink focus:border-bh-ink/40 focus:outline-none"
         />
-      </div>
-      <div className="grid grid-cols-[1fr_9rem] gap-2">
+      </label>
+      <div className="grid grid-cols-[minmax(0,1fr)_9rem] gap-2">
         <select
           name="stage"
           defaultValue={stage}
-          className="rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink"
+          className="min-w-0 w-full rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink"
         >
           {stages.map((s) => (
             <option key={s.id} value={s.id}>
@@ -234,7 +233,7 @@ export function PipelineEditor({
           defaultValue={owner ?? ""}
           maxLength={40}
           placeholder="кой води"
-          className="rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35"
+          className="min-w-0 w-full rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35"
         />
         <datalist id={`owners-${id}`}>
           {owners.map((o) => (
@@ -248,15 +247,15 @@ export function PipelineEditor({
         rows={5}
         maxLength={1000}
         placeholder="бележка - с кого говорихме, какво казаха"
-        className="rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm leading-relaxed text-bh-ink placeholder:text-bh-ink/35"
+        className="min-w-0 w-full rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm leading-relaxed text-bh-ink placeholder:text-bh-ink/35"
       />
       {/* The deal itself. Net of VAT, in euros - the accountant's number,
           not the invoice total. */}
-      <div className="grid grid-cols-[1fr_7rem_1fr] gap-2">
+      <div className="grid grid-cols-[minmax(0,1fr)_7rem_minmax(0,1fr)] gap-2">
         <select
           name="tier"
           defaultValue={tier ?? ""}
-          className="rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink"
+          className="min-w-0 w-full rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink"
         >
           <option value="">пакет</option>
           {TIERS.map((t) => (
@@ -271,12 +270,12 @@ export function PipelineEditor({
           name="amount"
           defaultValue={amountCents === null ? "" : String(amountCents / 100)}
           placeholder="€ без ДДС"
-          className="rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35"
+          className="min-w-0 w-full rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35"
         />
         <select
           name="money"
           defaultValue={money ?? ""}
-          className="rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink"
+          className="min-w-0 w-full rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink"
         >
           <option value="">парите</option>
           {MONEY.map((m) => (
@@ -287,14 +286,14 @@ export function PipelineEditor({
         </select>
       </div>
       {/* Product is valued but never counted as income - see finances.ts. */}
-      <div className="grid grid-cols-[1fr_7rem] gap-2">
+      <div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-2">
         <input
           type="text"
           inputMode="decimal"
           name="inKind"
           defaultValue={inKindCents === null ? "" : String(inKindCents / 100)}
           placeholder="бартер / продукти, € без ДДС"
-          className="rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35"
+          className="min-w-0 w-full rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35"
         />
         <input
           type="number"
@@ -303,7 +302,7 @@ export function PipelineEditor({
           name="tickets"
           defaultValue={ticketsCount ?? ""}
           placeholder="билети"
-          className="rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35"
+          className="min-w-0 w-full rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35"
         />
       </div>
       <fieldset className="flex flex-wrap gap-x-4 gap-y-1.5 rounded-xl border border-bh-ink/15 px-3 py-2">
@@ -327,7 +326,7 @@ export function PipelineEditor({
         defaultValue={nextStep ?? ""}
         maxLength={300}
         placeholder="какво се очаква от нас"
-        className="rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35"
+        className="min-w-0 w-full rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35"
       />
       <div className="flex items-center gap-2">
         <button
