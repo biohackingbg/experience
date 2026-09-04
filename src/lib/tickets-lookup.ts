@@ -15,6 +15,7 @@ export type TicketView = {
   buyerName: string;
   reference: string;
   checkedInAt: Date | null;
+  lang: "bg" | "en";
 };
 
 /**
@@ -37,6 +38,7 @@ export async function findTicket(code: string): Promise<TicketView | null> {
       checkedInAt: tickets.checkedInAt,
       buyerName: orders.name,
       reference: orders.reference,
+      lang: orders.lang,
     })
     .from(tickets)
     .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
@@ -47,6 +49,7 @@ export async function findTicket(code: string): Promise<TicketView | null> {
 
   return {
     ...row,
+    lang: row.lang === "en" ? "en" : "bg",
     tierName: getTier(row.tierId)?.name ?? row.tierId,
   };
 }
@@ -229,6 +232,7 @@ export async function searchTickets(q: string): Promise<(TicketView & { email: s
       buyerName: orders.name,
       reference: orders.reference,
       email: orders.email,
+      lang: orders.lang,
     })
     .from(tickets)
     .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
@@ -241,5 +245,5 @@ export async function searchTickets(q: string): Promise<(TicketView & { email: s
     )
     .orderBy(orders.name, tickets.code)
     .limit(30);
-  return rows.map((r) => ({ ...r, tierName: getTier(r.tierId)?.name ?? r.tierId }));
+  return rows.map((r) => ({ ...r, lang: r.lang === "en" ? ("en" as const) : ("bg" as const), tierName: getTier(r.tierId)?.name ?? r.tierId }));
 }

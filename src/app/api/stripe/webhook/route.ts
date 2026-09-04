@@ -97,6 +97,7 @@ export async function POST(request: Request) {
             totalCents: order.totalCents,
             invoiceNumber: order.invoiceNumber,
             tickets: order.tickets,
+            lang: order.lang,
           });
           if (!sent) {
             console.error(

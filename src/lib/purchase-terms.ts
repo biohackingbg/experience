@@ -7,6 +7,13 @@
  */
 export const PURCHASE_TERMS_VERSION = "v1";
 
+/** The same terms in English, stored verbatim when that is what the buyer saw. */
+export const PURCHASE_TERMS_TEXT_EN =
+  "I accept the ticket sales terms of Sofia Life Summit and confirm that I " +
+  "understand the ticket is valid for a specific date and venue. I agree to " +
+  "the service being provided on that date, whereby the right of withdrawal " +
+  "under Art. 57 of the Bulgarian Consumer Protection Act does not apply.";
+
 export const PURCHASE_TERMS_TEXT =
   "Приемам условията за продажба на билети за Sofia Life Summit и " +
   "потвърждавам, че съм запознат/а, че билетът важи за конкретна дата и " +

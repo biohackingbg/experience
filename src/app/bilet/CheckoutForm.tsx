@@ -3,7 +3,8 @@
 import { useActionState, useEffect, useState } from "react";
 
 import { initialCheckoutState } from "@/lib/checkout-state";
-import { PURCHASE_TERMS_TEXT } from "@/lib/purchase-terms";
+import { CHECKOUT, type Lang } from "@/lib/i18n";
+import { PURCHASE_TERMS_TEXT, PURCHASE_TERMS_TEXT_EN } from "@/lib/purchase-terms";
 import { TIERS, formatPrice, splitVat } from "@/lib/tickets";
 import { type PromoPreview, checkPromo, startCheckout } from "./actions";
 
@@ -39,6 +40,7 @@ export function CheckoutForm({
   initialTier,
   prices,
   soldOut = [],
+  lang = "bg",
   utm,
 }: {
   initialTier?: string;
@@ -46,6 +48,7 @@ export function CheckoutForm({
   prices: Record<string, number>;
   /** Tier ids with no seats left; shown, but not selectable. */
   soldOut?: string[];
+  lang?: Lang;
   /** Campaign tags from the URL, written onto the order so marketing can count it. */
   utm?: { source?: string; campaign?: string };
 }) {
@@ -53,6 +56,7 @@ export function CheckoutForm({
     startCheckout,
     initialCheckoutState,
   );
+  const t = CHECKOUT[lang];
 
   // Stripe's checkout lives on another origin, so the jump has to happen here
   // rather than as a server redirect.
@@ -98,23 +102,24 @@ export function CheckoutForm({
 
   return (
     <form action={formAction} className="mt-10 grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+      <input type="hidden" name="lang" value={lang} />
       {utm?.source && <input type="hidden" name="utmSource" value={utm.source} />}
       {utm?.campaign && <input type="hidden" name="utmCampaign" value={utm.campaign} />}
       <div>
         <fieldset>
           <legend className="font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/50">
-            Ниво
+            {t.tier}
           </legend>
           <div className="mt-3 flex flex-col gap-2">
-            {TIERS.map((t) => {
-              const gone = soldOut.includes(t.id);
+            {TIERS.map((tier0) => {
+              const gone = soldOut.includes(tier0.id);
               return (
               <label
-                key={t.id}
+                key={tier0.id}
                 className={`flex items-center justify-between gap-4 rounded-2xl px-5 py-4 ring-1 transition-colors ${
                   gone
                     ? "cursor-not-allowed bg-bh-cloud opacity-60 ring-bh-ink/10"
-                    : t.id === tierId
+                    : tier0.id === tierId
                       ? "bh-mint cursor-pointer ring-bh-pine"
                       : "cursor-pointer bg-bh-cloud ring-bh-ink/10 hover:ring-bh-ink/25"
                 }`}
@@ -123,16 +128,16 @@ export function CheckoutForm({
                   <input
                     type="radio"
                     name="tierId"
-                    value={t.id}
-                    checked={t.id === tierId}
+                    value={tier0.id}
+                    checked={tier0.id === tierId}
                     disabled={gone}
-                    onChange={() => setTierId(t.id)}
+                    onChange={() => setTierId(tier0.id)}
                     className="h-4 w-4 accent-bh-pine"
                   />
-                  <span className="font-semibold text-bh-ink">{t.name}</span>
+                  <span className="font-semibold text-bh-ink">{tier0.name}</span>
                 </span>
                 <span className="font-semibold text-bh-ink">
-                  {gone ? <span className="text-xs font-bold uppercase tracking-wide text-bh-ink/60">изчерпано</span> : `${formatPrice(prices[t.id] ?? t.listPriceCents)} €`}
+                  {gone ? <span className="text-xs font-bold uppercase tracking-wide text-bh-ink/60">{t.soldOut}</span> : `${formatPrice(prices[tier0.id] ?? tier0.listPriceCents)} €`}
                 </span>
               </label>
               );
@@ -141,7 +146,7 @@ export function CheckoutForm({
         </fieldset>
 
         <div className="mt-6">
-          <Label htmlFor="quantity">Брой</Label>
+          <Label htmlFor="quantity">{t.quantity}</Label>
           <select
             id="quantity"
             name="quantity"
@@ -160,12 +165,12 @@ export function CheckoutForm({
 
         <div className="mt-6 grid gap-5 sm:grid-cols-2">
           <div>
-            <Label htmlFor="name">Име и фамилия</Label>
+            <Label htmlFor="name">{t.name}</Label>
             <input id="name" name="name" required autoComplete="name" className={fieldBase} />
             <Err>{state.fieldErrors?.name}</Err>
           </div>
           <div>
-            <Label htmlFor="email">Имейл</Label>
+            <Label htmlFor="email">{t.email}</Label>
             <input
               id="email"
               name="email"
@@ -179,12 +184,12 @@ export function CheckoutForm({
         </div>
 
         <div className="mt-5">
-          <Label htmlFor="phone">Телефон (по избор)</Label>
+          <Label htmlFor="phone">{t.phone}</Label>
           <input id="phone" name="phone" autoComplete="tel" className={fieldBase} />
         </div>
 
         <div className="mt-5">
-          <Label htmlFor="promo">Промо код (ако имаш)</Label>
+          <Label htmlFor="promo">{t.promo}</Label>
           <div className="mt-2 flex gap-2">
             <input
               id="promo"
@@ -197,7 +202,7 @@ export function CheckoutForm({
               onBlur={applyPromo}
               autoCapitalize="characters"
               autoComplete="off"
-              placeholder="напр. STUDENT"
+              placeholder={t.promoPlaceholder}
               className={`${fieldBase} mt-0 uppercase`}
             />
             <button
@@ -206,12 +211,12 @@ export function CheckoutForm({
               disabled={checking}
               className="shrink-0 rounded-full border border-bh-ink/25 px-4 text-sm font-semibold text-bh-ink disabled:opacity-50"
             >
-              {checking ? "Проверява…" : "Приложи"}
+              {checking ? t.checking : t.apply}
             </button>
           </div>
           {promo && (
             <p className={`mt-1.5 text-xs ${promo.ok ? "text-bh-pine" : "text-red-700"}`}>
-              {promo.ok ? `Кодът ${promo.code} важи: ${promo.label}.` : promo.message}
+              {promo.ok ? t.promoOk(promo.code, promo.label) : promo.message}
             </p>
           )}
           <Err>{state.fieldErrors?.promo}</Err>
@@ -224,21 +229,21 @@ export function CheckoutForm({
             onChange={(e) => setWantsInvoice(e.target.checked)}
             className="h-4 w-4 accent-bh-pine"
           />
-          Искам фактура на фирма
+          {t.wantInvoice}
         </label>
 
         {wantsInvoice && (
           <div className="mt-4 grid gap-5 rounded-2xl bg-bh-cloud p-5 ring-1 ring-bh-ink/8 sm:grid-cols-2">
             <div>
-              <Label htmlFor="invoiceCompany">Фирма</Label>
+              <Label htmlFor="invoiceCompany">{t.company}</Label>
               <input id="invoiceCompany" name="invoiceCompany" className={fieldBase} />
             </div>
             <div>
-              <Label htmlFor="invoiceVatNumber">ЕИК / ДДС номер</Label>
+              <Label htmlFor="invoiceVatNumber">{t.vatNumber}</Label>
               <input id="invoiceVatNumber" name="invoiceVatNumber" className={fieldBase} />
             </div>
             <div className="sm:col-span-2">
-              <Label htmlFor="invoiceAddress">Адрес</Label>
+              <Label htmlFor="invoiceAddress">{t.address}</Label>
               <input id="invoiceAddress" name="invoiceAddress" className={fieldBase} />
             </div>
           </div>
@@ -248,7 +253,7 @@ export function CheckoutForm({
       {/* Summary */}
       <aside className="h-fit rounded-3xl bg-bh-cloud p-7 ring-1 ring-bh-ink/8 lg:sticky lg:top-24">
         <h2 className="text-lg font-bold tracking-tight text-bh-ink">
-          Поръчка
+          {t.summary}
         </h2>
 
         <dl className="mt-5 flex flex-col gap-2 text-sm">
@@ -260,22 +265,22 @@ export function CheckoutForm({
           </div>
           {discount > 0 && promo?.ok && (
             <div className="flex justify-between text-bh-pine">
-              <dt>Отстъпка · {promo.code}</dt>
+              <dt>{t.discount} · {promo.code}</dt>
               <dd>-{formatPrice(discount)} €</dd>
             </div>
           )}
           <div className="flex justify-between text-bh-ink/55">
-            <dt>Данъчна основа</dt>
+            <dt>{t.net}</dt>
             <dd>{formatPrice(netCents)} €</dd>
           </div>
           <div className="flex justify-between text-bh-ink/55">
-            <dt>ДДС 20%</dt>
+            <dt>{t.vat}</dt>
             <dd>{formatPrice(vatCents)} €</dd>
           </div>
         </dl>
 
         <div className="mt-4 flex items-baseline justify-between border-t border-bh-ink/10 pt-4">
-          <span className="font-semibold text-bh-ink">За плащане</span>
+          <span className="font-semibold text-bh-ink">{t.toPay}</span>
           <span className="text-2xl font-black tracking-tight text-bh-ink">
             {formatPrice(total)} €
           </span>
@@ -289,14 +294,14 @@ export function CheckoutForm({
             className="mt-1 h-4 w-4 shrink-0 accent-bh-pine"
           />
           <span>
-            {PURCHASE_TERMS_TEXT}{" "}
+            {lang === "en" ? PURCHASE_TERMS_TEXT_EN : PURCHASE_TERMS_TEXT}{" "}
             <a
               href="/usloviya"
               target="_blank"
               rel="noopener noreferrer"
               className="underline underline-offset-2"
             >
-              Пълни условия
+              {t.fullTerms}
             </a>
           </span>
         </label>
@@ -314,12 +319,12 @@ export function CheckoutForm({
           className="bh-gradient mt-6 w-full rounded-full px-6 py-4 text-sm font-semibold text-bh-ink transition-transform hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0"
         >
           {pending || state.status === "redirect"
-            ? total === 0 ? "Издавам билета…" : "Пренасочвам към плащане…"
-            : total === 0 ? "Вземи билета безплатно" : `Плати ${formatPrice(total)} €`}
+            ? total === 0 ? t.issuing : t.redirecting
+            : total === 0 ? t.free : t.pay(formatPrice(total))}
         </button>
 
         <p className="mt-3 text-center text-xs text-bh-ink/50">
-          Плащането се обработва от Stripe. Не съхраняваме данни за карти.
+          {t.stripe}
         </p>
       </aside>
     </form>

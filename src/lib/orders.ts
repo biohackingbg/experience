@@ -37,6 +37,7 @@ export type CreateOrderInput = {
   utmCampaign?: string;
   /** A discount code as typed; resolved here, against the real gross. */
   promoCode?: string;
+  lang?: "bg" | "en";
 };
 
 export type CreateOrderResult =
@@ -141,6 +142,7 @@ export async function createPendingOrder(
         utmCampaign: input.utmCampaign?.replace(/[^a-z0-9_.-]/g, "") || null,
         promoCode,
         discountCents,
+        lang: input.lang ?? "bg",
       })
       .returning({ id: orders.id });
 
@@ -182,6 +184,7 @@ export type PaidOrderSummary = {
     /** Null only if the column was somehow already filled. */
     invoiceNumber: number | null;
     tickets: { code: string; tierName: string }[];
+    lang: "bg" | "en";
   };
 };
 
@@ -206,6 +209,7 @@ export async function markOrderPaid(
         name: orders.name,
         email: orders.email,
         totalCents: orders.totalCents,
+        lang: orders.lang,
       });
 
     if (updated.length === 0) return { issued: 0 };
@@ -250,6 +254,7 @@ export async function markOrderPaid(
         email: order.email,
         totalCents: order.totalCents,
         invoiceNumber: invoiced ? Number(invoiced.invoice_number) : null,
+        lang: order.lang === "en" ? "en" : "bg",
         tickets: rows.map((row) => ({
           code: row.code,
           tierName: getTier(row.tierId)?.name ?? row.tierId,

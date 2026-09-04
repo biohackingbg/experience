@@ -153,6 +153,7 @@ export async function remindAbandonedOrder(reference: string): Promise<RemindRes
       status: orders.status,
       createdAt: orders.createdAt,
       reminderSentAt: orders.reminderSentAt,
+      lang: orders.lang,
       bought: sql<boolean>`exists (select 1 from ${orders} p where p.email = ${orders.email} and p.status = 'paid')`,
     })
     .from(orders)
@@ -177,6 +178,7 @@ export async function remindAbandonedOrder(reference: string): Promise<RemindRes
     reference: order.reference,
     items: items.map((i) => `${i.quantity}× ${i.tierName}`).join(", ") || "билет",
     resumePath: items[0] ? `/bilet?nivo=${items[0].tierId}` : "/bilet",
+    lang: order.lang === "en" ? "en" : "bg",
     offer: await getPricing().then((p) =>
       p.discounted ? `${p.stage === "launch" ? "стартовите цени за" : "специалните цени"} ${p.label}` : null,
     ),

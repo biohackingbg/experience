@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import QRCode from "qrcode";
 
 import { Calendar, Pin, TicketIcon } from "@/components/ui/Pictograms";
+import { TICKET_PAGE } from "@/lib/i18n";
 import { findTicket } from "@/lib/tickets-lookup";
 
 import { AttendeeForm } from "./AttendeeForm";
@@ -24,6 +25,7 @@ export default async function TicketPage({
   const ticket = await findTicket(decodeURIComponent(kod));
 
   if (!ticket) notFound();
+  const t = TICKET_PAGE[ticket.lang];
 
   // Rendered as an SVG string rather than a canvas so it prints crisply and
   // needs no client JavaScript.
@@ -40,7 +42,7 @@ export default async function TicketPage({
         <div className="overflow-hidden rounded-3xl bg-bh-cloud ring-1 ring-bh-ink/10 print:ring-0">
           <div className="bh-mint px-7 py-6">
             <p className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-bh-ink/50">
-              Билет за
+              {t.ticketFor}
             </p>
             <h1 className="mt-2 font-display text-2xl font-[900] uppercase leading-none tracking-tight text-bh-ink">
               Sofia Life Summit
@@ -61,7 +63,7 @@ export default async function TicketPage({
             {ticket.code}
           </p>
           <p className="mt-2 px-7 text-center text-xs text-bh-ink/50">
-            Покажи този код на входа
+            {t.show}
           </p>
 
           <dl className="mt-7 divide-y divide-bh-ink/8 border-t border-bh-ink/8 text-sm">
@@ -69,10 +71,10 @@ export default async function TicketPage({
               <Calendar className="h-5 w-5 shrink-0 text-bh-pine" />
               <div>
                 <dt className="font-mono text-[0.62rem] uppercase tracking-[0.18em] text-bh-ink/45">
-                  Кога
+                  {t.when}
                 </dt>
                 <dd className="mt-0.5 font-medium text-bh-ink">
-                  07-08 ноември 2026
+                  {t.dates}
                 </dd>
               </div>
             </div>
@@ -80,10 +82,10 @@ export default async function TicketPage({
               <Pin className="h-5 w-5 shrink-0 text-bh-pine" />
               <div>
                 <dt className="font-mono text-[0.62rem] uppercase tracking-[0.18em] text-bh-ink/45">
-                  Къде
+                  {t.where}
                 </dt>
                 <dd className="mt-0.5 font-medium text-bh-ink">
-                  Гранд Хотел Милениум, София
+                  {t.venue}
                 </dd>
               </div>
             </div>
@@ -94,7 +96,7 @@ export default async function TicketPage({
                 </span>
                 <div>
                   <dt className="font-mono text-[0.62rem] uppercase tracking-[0.18em] text-bh-ink/45">
-                    Участник
+                    {t.attendee}
                   </dt>
                   <dd className="mt-0.5 font-medium text-bh-ink">{ticket.attendeeName}</dd>
                 </div>
@@ -104,7 +106,7 @@ export default async function TicketPage({
               <TicketIcon className="h-5 w-5 shrink-0 text-bh-pine" />
               <div>
                 <dt className="font-mono text-[0.62rem] uppercase tracking-[0.18em] text-bh-ink/45">
-                  Поръчка
+                  {t.order}
                 </dt>
                 <dd className="mt-0.5 font-medium text-bh-ink">
                   {ticket.reference} · {ticket.buyerName}
@@ -114,12 +116,12 @@ export default async function TicketPage({
           </dl>
 
           {!ticket.checkedInAt && (
-            <AttendeeForm code={ticket.code} current={ticket.attendeeName} />
+            <AttendeeForm code={ticket.code} current={ticket.attendeeName} lang={ticket.lang} />
           )}
 
           {ticket.checkedInAt && (
             <p className="border-t border-bh-ink/8 bg-amber-100 px-7 py-4 text-center text-sm text-amber-900">
-              Този билет вече е използван на{" "}
+              {t.used}{" "}
               {ticket.checkedInAt.toLocaleString("bg-BG", {
                 dateStyle: "short",
                 timeStyle: "short",
@@ -130,7 +132,7 @@ export default async function TicketPage({
         </div>
 
         <p className="mt-5 text-center text-xs leading-relaxed text-bh-ink/45 print:hidden">
-          Запази страницата или я разпечатай. Билетът важи за един човек.
+          {t.keep}
         </p>
       </div>
     </div>

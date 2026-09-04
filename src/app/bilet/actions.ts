@@ -4,11 +4,12 @@ import { headers } from "next/headers";
 import { z } from "zod";
 
 import type { CheckoutState } from "@/lib/checkout-state";
+import { langOf } from "@/lib/i18n";
 import { sendTicketEmail } from "@/lib/email";
 import { createPendingOrder, markOrderPaid } from "@/lib/orders";
 import { createWaitlistSignup } from "@/lib/signups";
 import { discountFor, promoReasonText, resolvePromo } from "@/lib/promo";
-import { PURCHASE_TERMS_TEXT, PURCHASE_TERMS_VERSION } from "@/lib/purchase-terms";
+import { PURCHASE_TERMS_TEXT, PURCHASE_TERMS_TEXT_EN, PURCHASE_TERMS_VERSION } from "@/lib/purchase-terms";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { SALES_OPEN, TIERS, getTier } from "@/lib/tickets";
@@ -28,6 +29,7 @@ const schema = z.object({
   utmSource: z.string().trim().toLowerCase().max(60).optional(),
   utmCampaign: z.string().trim().toLowerCase().max(60).optional(),
   promo: z.string().trim().max(32).optional(),
+  lang: z.string().optional(),
 });
 
 export type WaitlistState = { status: "idle" | "ok" | "error"; message?: string };
@@ -107,10 +109,12 @@ export async function startCheckout(
   const tier = getTier(input.tierId);
   if (!tier) return fail("Непознато ниво билет.");
 
+  const lang = langOf(input.lang);
   const order = await createPendingOrder({
     ...input,
+    lang,
     promoCode: input.promo,
-    termsText: `${PURCHASE_TERMS_VERSION}: ${PURCHASE_TERMS_TEXT}`,
+    termsText: `${PURCHASE_TERMS_VERSION}${lang === "en" ? "-en" : ""}: ${lang === "en" ? PURCHASE_TERMS_TEXT_EN : PURCHASE_TERMS_TEXT}`,
   });
 
   if (!order.ok) {
@@ -146,13 +150,15 @@ export async function startCheckout(
         totalCents: paid.order.totalCents,
         invoiceNumber: paid.order.invoiceNumber,
         tickets: paid.order.tickets,
+        lang,
       });
     }
-    return { status: "redirect", redirectUrl: `${origin}/bilet/uspeh?ref=${order.reference}` };
+    return { status: "redirect", redirectUrl: `${origin}/bilet/uspeh?ref=${order.reference}&lang=${lang}` };
   }
 
   const session = await getStripe().checkout.sessions.create({
     mode: "payment",
+    locale: lang === "en" ? "en" : "bg",
     customer_email: input.email,
     client_reference_id: order.reference,
     // The webhook needs this to find the order it must mark paid.
@@ -192,8 +198,8 @@ export async function startCheckout(
     // therefore longer (35 min): a payment landing in the session's final
     // seconds must still find its seat held, or we could oversell by one.
     expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
-    success_url: `${origin}/bilet/uspeh?ref=${order.reference}`,
-    cancel_url: `${origin}/bilet?otkazano=1`,
+    success_url: `${origin}/bilet/uspeh?ref=${order.reference}&lang=${lang}`,
+    cancel_url: `${origin}/bilet?otkazano=1&lang=${lang}`,
   });
 
   if (!session.url) return fail("Stripe не върна адрес за плащане.");

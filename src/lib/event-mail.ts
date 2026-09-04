@@ -28,7 +28,7 @@ export async function getInfoMailAudience(): Promise<{ pending: number; sent: nu
   return { pending: row?.pending ?? 0, sent: row?.sent ?? 0 };
 }
 
-async function buildInputs(orderRows: { id: string; email: string; name: string; reference: string }[]): Promise<EventInfoInput[]> {
+async function buildInputs(orderRows: { id: string; email: string; name: string; reference: string; lang: string }[]): Promise<EventInfoInput[]> {
   if (orderRows.length === 0) return [];
   const tix = await getDb()
     .select({ orderId: tickets.orderId, code: tickets.code, tierId: tickets.tierId, attendeeName: tickets.attendeeName })
@@ -40,6 +40,7 @@ async function buildInputs(orderRows: { id: string; email: string; name: string;
     buyerName: o.name,
     reference: o.reference,
     daysLeft,
+    lang: o.lang === "en" ? "en" : "bg",
     tickets: tix
       .filter((t) => t.orderId === o.id)
       .map((t) => ({ code: t.code, tierName: getTier(t.tierId)?.name ?? t.tierId, attendeeName: t.attendeeName })),
@@ -50,7 +51,7 @@ async function buildInputs(orderRows: { id: string; email: string; name: string;
 export async function sendInfoMail(limit = 300): Promise<{ sent: number; remaining: number; error?: string }> {
   const db = getDb();
   const waiting = await db
-    .select({ id: orders.id, email: orders.email, name: orders.name, reference: orders.reference })
+    .select({ id: orders.id, email: orders.email, name: orders.name, reference: orders.reference, lang: orders.lang })
     .from(orders)
     .where(sql`${orders.status} = 'paid' and not ${orders.isTest} and ${orders.infoSentAt} is null`)
     .orderBy(orders.createdAt)

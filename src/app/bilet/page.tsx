@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { isTestMode } from "@/lib/stripe";
+import { CHECKOUT, langOf } from "@/lib/i18n";
 import { getRemainingAll } from "@/lib/orders";
 import { getPricing } from "@/lib/pricing";
 import { SALES_OPEN } from "@/lib/tickets";
@@ -19,9 +20,11 @@ export const dynamic = "force-dynamic";
 export default async function CheckoutPage({
   searchParams,
 }: {
-  searchParams: Promise<{ nivo?: string; otkazano?: string; utm_source?: string; utm_campaign?: string }>;
+  searchParams: Promise<{ nivo?: string; otkazano?: string; utm_source?: string; utm_campaign?: string; lang?: string }>;
 }) {
-  const { nivo, otkazano, utm_source, utm_campaign } = await searchParams;
+  const { nivo, otkazano, utm_source, utm_campaign, lang: langRaw } = await searchParams;
+  const lang = langOf(langRaw);
+  const t = CHECKOUT[lang];
   const testMode = isTestMode();
   const [pricing, remaining] = await Promise.all([getPricing(), getRemainingAll()]);
   const early = pricing.discounted;
@@ -68,51 +71,63 @@ export default async function CheckoutPage({
     );
   }
 
+  const keep = new URLSearchParams();
+  if (nivo) keep.set("nivo", nivo);
+  if (utm_source) keep.set("utm_source", utm_source);
+  if (utm_campaign) keep.set("utm_campaign", utm_campaign);
+  keep.set("lang", lang === "en" ? "bg" : "en");
+
   return (
     <div className="min-h-screen rounded-[1.75rem] bg-bh-paper px-5 py-10 sm:px-8 lg:px-10">
       <div className="mx-auto w-full max-w-6xl">
-        <Link
-          href="/"
-          className="font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/50 transition-colors hover:text-bh-ink"
-        >
-          ← Обратно към сайта
-        </Link>
+        <div className="flex items-center justify-between gap-4">
+          <Link
+            href="/"
+            className="font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/50 transition-colors hover:text-bh-ink"
+          >
+            {t.back}
+          </Link>
+          {/* The one place the site speaks English: a guest of a foreign speaker buys here. */}
+          <Link
+            href={`/bilet?${keep.toString()}`}
+            hrefLang={lang === "en" ? "bg" : "en"}
+            className="rounded-full border border-bh-ink/20 px-3 py-1.5 text-xs font-semibold text-bh-ink transition-colors hover:border-bh-ink"
+          >
+            {t.switchTo}
+          </Link>
+        </div>
 
         {testMode && (
           <p className="mt-6 rounded-2xl bg-amber-100 px-5 py-3 text-sm text-amber-900 ring-1 ring-amber-300">
-            <strong>Тестов режим.</strong> Плащанията не са истински. Използвай
-            карта 4242 4242 4242 4242 с произволна бъдеща дата и CVC.
+            {t.testMode}
           </p>
         )}
 
         {otkazano && (
           <p className="mt-6 rounded-2xl bg-bh-cloud px-5 py-3 text-sm text-bh-ink/70 ring-1 ring-bh-ink/10">
-            Плащането беше прекратено. Поръчката не е завършена - можеш да
-            опиташ отново.
+            {t.cancelled}
           </p>
         )}
 
         <h1 className="mt-8 text-[clamp(2rem,4.5vw,3.2rem)] font-display font-[900] uppercase leading-[0.95] tracking-tight text-bh-ink">
-          Купи билет
+          {t.title}
         </h1>
-        <p className="mt-3 max-w-xl text-sm leading-relaxed text-bh-ink/60">
-          Sofia Life Summit · 07-08 ноември 2026 · Гранд Хотел Милениум, София.
-          Цените са крайни, с включен ДДС.
-        </p>
+        <p className="mt-3 max-w-xl text-sm leading-relaxed text-bh-ink/60">{t.intro}</p>
 
         {SALES_OPEN && early && (
           /* Said before the money, not after: the price on this page depends
              on a number that is moving while the buyer reads it. */
           <p className="mt-4 max-w-xl rounded-2xl bg-bh-cloud px-5 py-4 text-sm leading-relaxed text-bh-ink/70 ring-1 ring-bh-ink/10">
             <strong className="font-semibold text-bh-ink">
-              {pricing.stage === "launch" ? "Стартова цена" : "Специална цена"}
+              {pricing.stage === "launch" ? t.launchPrice : t.specialPrice}
             </strong>{" "}
-            - тази цена важи {pricing.stage === "launch" ? "за " : ""}{pricing.label}. Плащаш сега, билетът и
-            мястото ти са запазени, а програмата се допълва до събитието.
+            {lang === "en"
+              ? CHECKOUT.en.priceNote(pricing.stage === "launch" ? "to the first 200 tickets" : pricing.label)
+              : CHECKOUT.bg.priceNote(pricing.label, pricing.stage === "launch")}
           </p>
         )}
 
-        <CheckoutForm initialTier={nivo} prices={pricing.prices} soldOut={soldOut} utm={{ source: utm_source, campaign: utm_campaign }} />
+        <CheckoutForm initialTier={nivo} prices={pricing.prices} soldOut={soldOut} lang={lang} utm={{ source: utm_source, campaign: utm_campaign }} />
       </div>
     </div>
   );

@@ -2,23 +2,25 @@
 
 import { useActionState } from "react";
 
+import { TICKET_PAGE, type Lang } from "@/lib/i18n";
+
 import { type AttendeeState, saveAttendee } from "./actions";
 
 const initial: AttendeeState = { status: "idle" };
 
 /** "Who is this ticket for" - one field, saved in place, editable until the door. */
-export function AttendeeForm({ code, current }: { code: string; current: string | null }) {
+export function AttendeeForm({ code, current, lang = "bg" }: { code: string; current: string | null; lang?: Lang }) {
   const [state, action, pending] = useActionState(saveAttendee, initial);
+  const t = TICKET_PAGE[lang];
 
   return (
     <form action={action} className="border-t border-bh-ink/8 px-7 py-5 print:hidden">
       <input type="hidden" name="code" value={code} />
       <label htmlFor="attendee" className="block text-sm font-medium text-bh-ink">
-        {current ? "Име на участника" : "За кого е този билет?"}
+        {current ? t.whoTitle : t.whoAsk}
       </label>
       <p className="mt-1 text-xs leading-relaxed text-bh-ink/55">
-        Ако билетът е за друг човек, напиши името му - така ще го намерим на
-        входа и баджът ще е с неговото име. Ако е за теб, остави празно.
+        {t.whoHint}
       </p>
       <div className="mt-3 flex gap-2">
         <input
@@ -26,7 +28,7 @@ export function AttendeeForm({ code, current }: { code: string; current: string 
           name="name"
           defaultValue={current ?? ""}
           maxLength={80}
-          placeholder="Име и фамилия"
+          placeholder={t.whoPlaceholder}
           className="w-full rounded-full border border-bh-ink/15 bg-bh-paper px-4 py-2.5 text-sm text-bh-ink placeholder:text-bh-ink/35"
         />
         <button
@@ -34,7 +36,7 @@ export function AttendeeForm({ code, current }: { code: string; current: string 
           disabled={pending}
           className="shrink-0 rounded-full bg-bh-ink px-4 py-2.5 text-sm font-semibold text-bh-paper disabled:opacity-50"
         >
-          {pending ? "Записва…" : "Запиши"}
+          {pending ? t.saving : t.save}
         </button>
       </div>
       {state.status !== "idle" && (

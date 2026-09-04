@@ -10,7 +10,8 @@ import { orders } from "@/lib/db/schema";
  * back from Stripe as a partial-refund event for the whole sum - the status
  * then stays "paid" and the order would otherwise keep counting as sold.
  */
-export const SOLD = sql`${orders.status} = 'paid' and not ${orders.isTest} and coalesce(${orders.refundedCents}, 0) < ${orders.totalCents}`;
+// A free order (partner, speaker) has nothing to refund and must still count.
+export const SOLD = sql`${orders.status} = 'paid' and not ${orders.isTest} and (${orders.totalCents} = 0 or coalesce(${orders.refundedCents}, 0) < ${orders.totalCents})`;
 
 /** Money actually kept on a sold order, after any partial refund. */
 export const KEPT_CENTS = sql<number>`(${orders.totalCents} - coalesce(${orders.refundedCents}, 0))`;
