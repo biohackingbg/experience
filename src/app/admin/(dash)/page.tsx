@@ -349,7 +349,7 @@ export default async function AdminDashboard({
 
       {/* Middle band: week strip · prices · recent + countdown */}
       <div className="mt-6 grid gap-4 xl:grid-cols-4">
-        <section className="rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6 xl:col-span-2">
+        <section className="self-start rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6 xl:col-span-2">
           <div className="flex items-baseline justify-between">
             <h2 className="text-lg font-bold tracking-tight">Поръчки тази седмица</h2>
             <span className="text-xs text-[#0b2a22]/55">{d.soldLast7Days} билета за 7 дни</span>
@@ -357,9 +357,8 @@ export default async function AdminDashboard({
           <WeekStrip week={d.week} />
         </section>
 
-        <div className="flex flex-col gap-4 xl:col-span-1">
+        <div className="self-start xl:col-span-1">
           <PriceStages pricing={pricing} sold={d.ticketsSold} />
-          <SiteNoticeCard notice={notice} />
         </div>
 
         <div className="flex flex-col gap-4 xl:col-span-1 xl:row-span-2">
@@ -404,7 +403,7 @@ export default async function AdminDashboard({
 
         {/* Abandoned: money that got as far as the checkout and stopped. One
             nudge each, by hand, a day later - never automatic, never twice. */}
-        <section id="nedovarsheni" className="rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6 xl:col-span-2">
+        <section id="nedovarsheni" className="self-start rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6 xl:col-span-2">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="text-lg font-bold tracking-tight">Недовършени поръчки</h2>
             <p className="text-xs text-[#0b2a22]/50">
@@ -480,14 +479,17 @@ export default async function AdminDashboard({
           )}
         </section>
 
-        <section className="rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6 xl:col-span-1">
-          <h2 className="text-lg font-bold tracking-tight">Запълване</h2>
-          <Gauge pct={soldPct} />
-          <div className="mt-5 flex flex-wrap justify-center gap-4 text-xs text-[#0b2a22]/65">
-            <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-[#146455]" />продадени {d.ticketsSold}</span>
-            <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-[#c9cfca]" />свободни {seatsLeft}</span>
-          </div>
-        </section>
+        <div className="flex flex-col gap-4 self-start xl:col-span-1">
+          <section className="rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6">
+            <h2 className="text-lg font-bold tracking-tight">Запълване</h2>
+            <Gauge pct={soldPct} />
+            <div className="mt-5 flex flex-wrap justify-center gap-4 text-xs text-[#0b2a22]/65">
+              <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-[#146455]" />продадени {d.ticketsSold}</span>
+              <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-[#c9cfca]" />свободни {seatsLeft}</span>
+            </div>
+          </section>
+          <SiteNoticeCard notice={notice} />
+        </div>
       </div>
 
       <div className="mt-4 grid gap-4 xl:grid-cols-2">
