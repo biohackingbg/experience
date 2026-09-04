@@ -76,6 +76,7 @@ type Stage = { id: string; label: string; hint: string };
  */
 export function PipelineEditor({
   id,
+  label: partner,
   stage,
   note,
   nextStep,
@@ -91,6 +92,8 @@ export function PipelineEditor({
   action,
 }: {
   id: string;
+  /** The partner's name - the heading of the open editor, and editable inside it. */
+  label: string;
   stage: string;
   note: string | null;
   nextStep: string | null;
@@ -189,8 +192,22 @@ export function PipelineEditor({
   }
 
   return (
-    <form action={formAction} className="flex w-[26rem] max-w-full flex-col gap-2">
+    /* A framed panel with the partner's name on top: several rows can be open
+       at once, and a bare stack of fields did not say whose it was. */
+    <form action={formAction} className="flex w-[26rem] max-w-full flex-col gap-2 rounded-2xl bg-bh-paper p-3 ring-1 ring-bh-ink/15">
       <input type="hidden" name="id" value={id} />
+      <div className="flex items-center justify-between gap-2 border-b border-bh-ink/10 pb-2">
+        <span className="font-mono text-[0.6rem] uppercase tracking-[0.15em] text-bh-ink/55">Партньор</span>
+        <input
+          type="text"
+          name="label"
+          defaultValue={partner}
+          required
+          maxLength={80}
+          title="Името може да се поправи тук"
+          className="w-full rounded-xl border border-transparent bg-transparent px-2 py-1 text-base font-bold text-bh-ink hover:border-bh-ink/15 focus:border-bh-ink/30 focus:outline-none"
+        />
+      </div>
       <div className="grid grid-cols-[1fr_9rem] gap-2">
         <select
           name="stage"

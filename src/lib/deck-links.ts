@@ -182,6 +182,8 @@ export async function revokeLink(id: string): Promise<void> {
 export async function updateLinkPipeline(
   id: string,
   input: {
+    /** Omitted or undefined keeps the current name; never blanked from here. */
+    label?: string;
     stage: StageId;
     note: string | null;
     nextStep: string | null;
@@ -194,9 +196,10 @@ export async function updateLinkPipeline(
     ticketsCount: number | null;
   },
 ): Promise<void> {
+  const { label, ...rest } = input;
   await getDb()
     .update(deckLinks)
-    .set({ ...input, updatedAt: new Date() })
+    .set({ ...rest, ...(label ? { label } : {}), updatedAt: new Date() })
     .where(eq(deckLinks.id, id));
 }
 

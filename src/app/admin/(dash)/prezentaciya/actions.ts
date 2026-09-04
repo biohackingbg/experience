@@ -83,6 +83,7 @@ export async function updateDeckLink(
   }
 
   await updateLinkPipeline(id, {
+    label: clean(formData.get("label"), 80) ?? undefined,
     stage,
     note: clean(formData.get("note"), 1000),
     nextStep: clean(formData.get("nextStep"), 300),

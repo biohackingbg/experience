@@ -153,12 +153,15 @@ export default async function DeckPage() {
                     return (
                       <tr
                         key={l.id}
-                        className={`border-b border-bh-ink/8 last:border-0 ${off ? "text-bh-ink/45" : ""}`}
+                        // Top-aligned, so an opened editor grows downward and
+                        // the name stays level with the fields that belong to it.
+                        className={`border-b border-bh-ink/8 last:border-0 [&>td]:align-top ${off ? "text-bh-ink/45" : ""}`}
                       >
                         <td className={`px-5 py-3 font-medium ${off ? "" : "text-bh-ink"}`}>{l.label}</td>
                         <td className="px-5 py-3 align-top">
                           <PipelineEditor
                             id={l.id}
+                            label={l.label}
                             stage={l.stage}
                             note={l.note}
                             nextStep={l.nextStep}
