@@ -18,9 +18,9 @@ export const dynamic = "force-dynamic";
 export default async function CheckoutPage({
   searchParams,
 }: {
-  searchParams: Promise<{ nivo?: string; otkazano?: string }>;
+  searchParams: Promise<{ nivo?: string; otkazano?: string; utm_source?: string; utm_campaign?: string }>;
 }) {
-  const { nivo, otkazano } = await searchParams;
+  const { nivo, otkazano, utm_source, utm_campaign } = await searchParams;
   const testMode = isTestMode();
   const early = await getEarlyAccess();
 
@@ -109,7 +109,7 @@ export default async function CheckoutPage({
           </p>
         )}
 
-        <CheckoutForm initialTier={nivo} early={early} />
+        <CheckoutForm initialTier={nivo} early={early} utm={{ source: utm_source, campaign: utm_campaign }} />
       </div>
     </div>
   );

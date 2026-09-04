@@ -120,6 +120,13 @@
       "when": 1788540000000,
       "tag": "0016_attendees_info_mail",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1788550000000,
+      "tag": "0017_marketing",
+      "breakpoints": true
     }
   ]
 }

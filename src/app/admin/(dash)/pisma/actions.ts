@@ -15,7 +15,7 @@ export async function sendTest(_prev: MailState, formData: FormData): Promise<Ma
   return ok ? { status: "ok", message: `Тестът е изпратен до ${to}.` } : { status: "error", message: "Изпращането не мина. Провери дневника." };
 }
 
-export async function sendAll(_prev: MailState): Promise<MailState> {
+export async function sendAll(): Promise<MailState> {
   if (!(await isAdmin())) return { status: "error", message: "Няма достъп." };
   const r = await sendInfoMail();
   revalidatePath("/admin/pisma");

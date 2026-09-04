@@ -20,6 +20,10 @@ const schema = z.object({
   invoiceVatNumber: z.string().trim().max(40).optional(),
   invoiceAddress: z.string().trim().max(300).optional(),
   terms: z.literal("on", { message: "Трябва да приемеш условията." }),
+  // Campaign tags, if the buyer came through a tagged link. Labels we chose,
+  // so anything but plain characters is dropped rather than refused.
+  utmSource: z.string().trim().toLowerCase().max(60).optional(),
+  utmCampaign: z.string().trim().toLowerCase().max(60).optional(),
 });
 
 function fail(

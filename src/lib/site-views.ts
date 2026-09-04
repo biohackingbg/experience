@@ -57,6 +57,8 @@ export async function recordSiteView(row: {
   device: string | null;
   country: string | null;
   city: string | null;
+  utmSource: string | null;
+  utmCampaign: string | null;
 }): Promise<void> {
   await getDb().insert(siteViews).values(row);
 }

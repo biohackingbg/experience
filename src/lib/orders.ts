@@ -37,6 +37,8 @@ export type CreateOrderInput = {
   invoiceVatNumber?: string;
   invoiceAddress?: string;
   termsText: string;
+  utmSource?: string;
+  utmCampaign?: string;
 };
 
 export type CreateOrderResult =
@@ -121,6 +123,8 @@ export async function createPendingOrder(
         invoiceAddress: input.invoiceAddress?.trim() || null,
         termsAcceptedAt: new Date(),
         termsText: input.termsText,
+        utmSource: input.utmSource?.replace(/[^a-z0-9_.-]/g, "") || null,
+        utmCampaign: input.utmCampaign?.replace(/[^a-z0-9_.-]/g, "") || null,
       })
       .returning({ id: orders.id });
 

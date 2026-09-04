@@ -38,9 +38,12 @@ function Err({ children }: { children?: string }) {
 export function CheckoutForm({
   initialTier,
   early,
+  utm,
 }: {
   initialTier?: string;
   early: boolean;
+  /** Campaign tags from the URL, written onto the order so marketing can count it. */
+  utm?: { source?: string; campaign?: string };
 }) {
   const [state, formAction, pending] = useActionState(
     startCheckout,
@@ -67,6 +70,8 @@ export function CheckoutForm({
 
   return (
     <form action={formAction} className="mt-10 grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+      {utm?.source && <input type="hidden" name="utmSource" value={utm.source} />}
+      {utm?.campaign && <input type="hidden" name="utmCampaign" value={utm.campaign} />}
       <div>
         <fieldset>
           <legend className="font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/50">

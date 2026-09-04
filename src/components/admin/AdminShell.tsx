@@ -24,6 +24,7 @@ const I = {
   door: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 17V4a1 1 0 0 1 1-1h7v14M12 17h4M12 6l4-2v13"/><circle cx="9.5" cy="10" r=".8" fill="currentColor"/></svg>,
   key: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="7" cy="10" r="3.5"/><path d="M10.5 10H17M15 10v2.5"/></svg>,
   globe: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="10" cy="10" r="7"/><path d="M3 10h14M10 3c2.5 2.5 2.5 11.5 0 14M10 3c-2.5 2.5-2.5 11.5 0 14"/></svg>,
+  mega: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" strokeLinecap="round"><path d="M3 9v2a1 1 0 0 0 1 1h2l6 3V4L6 7H4a1 1 0 0 0-1 1v1zM15 8a3 3 0 0 1 0 4M7 12v3.5a1 1 0 0 0 1 1h1"/></svg>,
   mail: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"><rect x="3" y="5" width="14" height="11" rx="2"/><path d="m3 7 7 5 7-5"/></svg>,
   out: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M8 4H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3M12 7l3 3-3 3M15 10H8"/></svg>,
 };
@@ -37,6 +38,7 @@ const MENU = [
   { href: "/admin/fakturi", label: "Фактури", icon: I.file },
   { href: "/admin/zapisvaniya", label: "Записвания", icon: I.list },
   { href: "/admin/pisma", label: "Писма", icon: I.mail },
+  { href: "/admin/reklama", label: "Реклама", icon: I.mega },
   { href: "/admin/vhod", label: "Вход на събитието", icon: I.door },
 ];
 

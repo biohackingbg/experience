@@ -119,6 +119,15 @@ export const orders = pgTable(
     infoSentAt: timestamp("info_sent_at", { withTimezone: true }),
 
     /**
+     * Which campaign brought the buyer, from the utm_* tags on the link they
+     * arrived through - carried from the landing page to the checkout in the
+     * URL, never stored on their device. Null for everyone who came another
+     * way, which is most people; the marketing page counts only what is here.
+     */
+    utmSource: text("utm_source"),
+    utmCampaign: text("utm_campaign"),
+
+    /**
      * When the "you did not finish" email went out, for an abandoned checkout.
      * One reminder per order, ever - a buyer who walked away is not to be
      * chased, only told once that the door is still open.
@@ -408,12 +417,16 @@ export const siteViews = pgTable(
     device: text("device"),
     country: text("country"),
     city: text("city"),
+    /** Campaign tags from the URL (utm_source, utm_campaign) - the only query parameters kept. */
+    utmSource: text("utm_source"),
+    utmCampaign: text("utm_campaign"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
   },
   (table) => [
     index("site_views_created_idx").on(table.createdAt),
+    index("site_views_utm_campaign_idx").on(table.utmCampaign),
     index("site_views_path_created_idx").on(table.path, table.createdAt),
     index("site_views_visitor_idx").on(table.visitor, table.createdAt),
   ],
@@ -430,6 +443,39 @@ export const settings = pgTable("settings", {
   value: text("value").notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/**
+ * The marketing log: one row per post, story, reel, ad or newsletter, with
+ * what it cost and what the platform reported about it. Reach, likes and the
+ * rest are typed in from the platform's insights; what the site saw - visits,
+ * sales - is computed from site_views and orders and never stored here.
+ */
+export const campaigns = pgTable(
+  "campaigns",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    postedAt: timestamp("posted_at", { withTimezone: true }).notNull(),
+    /** instagram | facebook | linkedin | tiktok | youtube | google | newsletter | other */
+    platform: text("platform").notNull(),
+    /** post | story | reel | ad | video | newsletter | other */
+    kind: text("kind").notNull(),
+    title: text("title").notNull(),
+    url: text("url"),
+    /** The utm_campaign value on this campaign's links; what ties a sale to it. */
+    utmCampaign: text("utm_campaign"),
+    /** Paid media for this item, net, in cents. Zero for an organic post. */
+    spendCents: integer("spend_cents").notNull().default(0),
+    reach: integer("reach"),
+    likes: integer("likes"),
+    comments: integer("comments"),
+    saves: integer("saves"),
+    clicks: integer("clicks"),
+    note: text("note"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }),
+  },
+  (table) => [index("campaigns_posted_at_idx").on(table.postedAt)],
+);
 
 export type DeckLink = typeof deckLinks.$inferSelect;
 

@@ -42,9 +42,16 @@ export async function POST(request: Request) {
     city = null;
   }
 
+  // Campaign tags: lowercase, plain characters, short. Anything odd is dropped
+  // rather than stored - a tag is a label we chose, not free text.
+  const tag = (v: unknown) =>
+    typeof v === "string" ? v.toLowerCase().replace(/[^a-z0-9_.-]/g, "").slice(0, 60) || null : null;
+
   await recordSiteView({
     path,
     visitor,
+    utmSource: tag(body?.utmSource),
+    utmCampaign: tag(body?.utmCampaign),
     referrerHost: referrerHost(
       typeof body?.referrer === "string" ? body.referrer : null,
       new URL(request.url).hostname,
