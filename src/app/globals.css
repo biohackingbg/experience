@@ -320,3 +320,15 @@ body {
     --bh-orbit-angle: 360deg;
   }
 }
+
+/* Admin: native select arrows hug the right edge in most browsers. Draw our
+   own chevron and leave it room. */
+.bh-admin select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%230b2a22' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  background-size: 0.8rem 0.8rem;
+  padding-right: 2.4rem;
+}

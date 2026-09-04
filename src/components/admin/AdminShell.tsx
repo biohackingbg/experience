@@ -45,7 +45,7 @@ const MENU = [
 export function AdminShell({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="min-h-screen bg-[#e9ebe8] p-3 text-[#0b2a22] sm:p-5"
+      className="bh-admin min-h-screen bg-[#e9ebe8] p-3 text-[#0b2a22] sm:p-5"
       style={
         {
           "--color-bh-paper": "#f2f3f1",

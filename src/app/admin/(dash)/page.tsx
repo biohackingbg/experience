@@ -142,14 +142,15 @@ function WeekStrip({ week }: { week: { day: string; label: string; orders: numbe
 /**
  * Half-ring: sold share of the room, the rest hatched. Number and caption
  * are SVG text, so they scale with the ring and never collide with it on a
- * phone. A tiny share is drawn with flat ends: a 26-wide round cap on a
- * 2% arc is a blob, not an arc.
+ * phone. The fill keeps the same round caps as the track, so its start sits
+ * exactly inside the track's rounded end; a tiny share is stretched to a
+ * short pill rather than left as a dot or given flat ends that stick out.
  */
 function Gauge({ pct }: { pct: number }) {
   const r = 80;
   const c = Math.PI * r; // half circumference
   const share = Math.min(100, Math.max(0, pct)) / 100;
-  const filled = share * c;
+  const filled = share > 0 ? Math.max(share * c, 6) : 0;
   return (
     <svg viewBox="0 0 200 118" className="mx-auto mt-2 w-full max-w-[17rem]" role="img" aria-label={`${pct}% от залата е продадена`}>
       <defs>
@@ -164,7 +165,7 @@ function Gauge({ pct }: { pct: number }) {
           fill="none"
           stroke={GREEN}
           strokeWidth="26"
-          strokeLinecap={share < 0.08 ? "butt" : "round"}
+          strokeLinecap="round"
           strokeDasharray={`${filled} ${c + 30}`}
         />
       )}
