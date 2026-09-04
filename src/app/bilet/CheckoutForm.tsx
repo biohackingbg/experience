@@ -4,7 +4,7 @@ import { useActionState, useEffect, useState } from "react";
 
 import { initialCheckoutState } from "@/lib/checkout-state";
 import { PURCHASE_TERMS_TEXT } from "@/lib/purchase-terms";
-import { TIERS, formatPrice, priceCents, splitVat } from "@/lib/tickets";
+import { TIERS, formatPrice, splitVat } from "@/lib/tickets";
 import { type PromoPreview, checkPromo, startCheckout } from "./actions";
 
 const fieldBase =
@@ -37,12 +37,13 @@ function Err({ children }: { children?: string }) {
  */
 export function CheckoutForm({
   initialTier,
-  early,
+  prices,
   soldOut = [],
   utm,
 }: {
   initialTier?: string;
-  early: boolean;
+  /** Per tier, VAT included, decided on the server for the stage the site is on. */
+  prices: Record<string, number>;
   /** Tier ids with no seats left; shown, but not selectable. */
   soldOut?: string[];
   /** Campaign tags from the URL, written onto the order so marketing can count it. */
@@ -72,7 +73,7 @@ export function CheckoutForm({
   const [checking, setChecking] = useState(false);
 
   const tier = TIERS.find((t) => t.id === tierId)!;
-  const gross = priceCents(tier, early) * quantity;
+  const gross = (prices[tier.id] ?? tier.listPriceCents) * quantity;
   // Preview only - the server resolves the code again when the order is made.
   const discount =
     promo?.ok
@@ -131,7 +132,7 @@ export function CheckoutForm({
                   <span className="font-semibold text-bh-ink">{t.name}</span>
                 </span>
                 <span className="font-semibold text-bh-ink">
-                  {gone ? <span className="text-xs font-bold uppercase tracking-wide text-bh-ink/60">изчерпано</span> : `${formatPrice(priceCents(t, early))} €`}
+                  {gone ? <span className="text-xs font-bold uppercase tracking-wide text-bh-ink/60">изчерпано</span> : `${formatPrice(prices[t.id] ?? t.listPriceCents)} €`}
                 </span>
               </label>
               );

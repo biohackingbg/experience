@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Sofia_Sans, Geologica, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ViewTracker } from "@/components/ViewTracker";
-import { getEarlyAccess } from "@/lib/settings";
-import { TIERS, formatPrice, priceCents } from "@/lib/tickets";
+import { cheapestOf, getPricing, priceOf } from "@/lib/pricing";
+import { formatPrice } from "@/lib/tickets";
 
 /** Both faces carry Cyrillic, so Bulgarian headings no longer fall back. */
 const bodyFont = Geologica({
@@ -24,8 +24,7 @@ const monoFont = Geist_Mono({
 const SITE = "https://thelongevitysummit.eu";
 const TITLE =
   "Sofia Life Summit 2026 - дълголетие и биохакинг, София | Biohacking Experience";
-function describe(early: boolean): string {
-  const from = Math.min(...TIERS.map((t) => priceCents(t, early)));
+function describe(from: number): string {
   return (
     "Фест за дълголетие и биохакинг - 07-08 ноември 2026, Гранд Хотел " +
     "Милениум, София. Четири зони, longevity паспорт, 12 станции за " +
@@ -39,7 +38,8 @@ function describe(early: boolean): string {
  * after the early window has closed.
  */
 export async function generateMetadata(): Promise<Metadata> {
-  const DESCRIPTION = describe(await getEarlyAccess());
+  const pricing = await getPricing();
+  const DESCRIPTION = describe(priceOf(pricing, cheapestOf(pricing)));
   return {
   // Makes the generated OG image resolve to an absolute URL, which every
   // social crawler requires.

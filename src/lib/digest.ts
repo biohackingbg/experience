@@ -7,7 +7,7 @@ import { getDashboardData } from "@/lib/admin-stats";
 import { getDb } from "@/lib/db";
 import { orderItems, orders, signups, siteViews } from "@/lib/db/schema";
 import { getPreparation } from "@/lib/preparation";
-import { getEarlyAccessState } from "@/lib/settings";
+import { STAGE_LABEL, getPricing } from "@/lib/pricing";
 import { formatPrice } from "@/lib/tickets";
 
 /**
@@ -27,9 +27,9 @@ export type Digest = { subject: string; text: string; html: string };
 
 export async function buildDigest(): Promise<Digest> {
   const db = getDb();
-  const [d, early, abandoned, prep, [sales], [visits], [signup]] = await Promise.all([
+  const [d, pricing, abandoned, prep, [sales], [visits], [signup]] = await Promise.all([
     getDashboardData(),
-    getEarlyAccessState(),
+    getPricing(),
     getAbandonedOrders(50),
     getPreparation(),
     db
@@ -86,7 +86,7 @@ export async function buildDigest(): Promise<Digest> {
     ["Сайт", `${visits.visitors === 1 ? "1 човек" : `${visits.visitors} души`} вчера · ${visits.ticketPage} отворили билетите · ${signup.n} нови в списъка`],
     [
       "Цени",
-      early.open ? "стартови (първите 200 билета)" : "редовни",
+      `${STAGE_LABEL[pricing.stage].toLowerCase()}${pricing.discounted ? ` (${pricing.label})` : ""}`,
     ],
     [
       "Недовършени",

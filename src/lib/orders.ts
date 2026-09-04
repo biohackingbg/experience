@@ -7,8 +7,8 @@ import { getDb } from "@/lib/db";
 import { orderItems, orders, tickets } from "@/lib/db/schema";
 import { PENDING_HOLD_MINUTES } from "@/lib/orders-const";
 import { resolvePromo } from "@/lib/promo";
-import { getEarlyAccess } from "@/lib/settings";
-import { CURRENCY, TIERS, VAT_RATE, getTier, priceCents, splitVat } from "@/lib/tickets";
+import { getPricing, priceOf } from "@/lib/pricing";
+import { CURRENCY, TIERS, VAT_RATE, getTier, splitVat } from "@/lib/tickets";
 
 export { PENDING_HOLD_MINUTES };
 
@@ -74,8 +74,7 @@ export async function createPendingOrder(
   // Resolved once, before the lock is taken. Everything downstream - the row,
   // the total and the Stripe line item - uses this answer, so the launch
   // prices being closed mid-request cannot record one price and charge another.
-  const early = await getEarlyAccess();
-  const unitPriceCents = priceCents(tier, early);
+  const unitPriceCents = priceOf(await getPricing(), tier);
   const grossCents = unitPriceCents * input.quantity;
 
   // The code is resolved before the seat is taken: a refused code must not

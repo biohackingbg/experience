@@ -52,7 +52,7 @@ const reminderSample: ReminderEmailInput = {
   reference: "SLS-ПРИМЕР",
   items: "2× PLUS",
   resumePath: "/bilet?nivo=plus",
-  early: true,
+  offer: "стартовите цени за първите 200 билета",
 };
 
 export function eventSample(): EventInfoInput {

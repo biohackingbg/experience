@@ -5,14 +5,14 @@ import { sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { settings } from "@/lib/db/schema";
-import { EARLY_ACCESS, SALES_OPEN } from "@/lib/tickets";
+import { SALES_OPEN } from "@/lib/tickets";
 
 /**
  * Organiser-controlled switches, read from the database with a default in
  * code. See the `settings` table note in the schema.
  */
 
-export type SettingKey = "early_access";
+export type SettingKey = "early_access" | "price_stage" | "mid_prices";
 
 export async function getSetting(key: SettingKey): Promise<{ value: string; updatedAt: Date } | null> {
   const [row] = await getDb()
@@ -51,14 +51,10 @@ export type EarlyAccessState = {
  */
 export const getEarlyAccessState = cache(async (): Promise<EarlyAccessState> => {
   if (!SALES_OPEN) return { open: false, changedAt: null };
-  try {
-    const row = await getSetting("early_access");
-    if (!row) return { open: EARLY_ACCESS.open, changedAt: null };
-    return { open: row.value === "on", changedAt: row.updatedAt };
-  } catch (error) {
-    console.error("[settings] early_access read failed, using code default:", error);
-    return { open: EARLY_ACCESS.open, changedAt: null };
-  }
+  // Stages superseded the on/off switch; "early" now means the launch stage.
+  const { getPricing } = await import("@/lib/pricing");
+  const p = await getPricing();
+  return { open: p.stage === "launch", changedAt: p.changedAt };
 });
 
 export async function getEarlyAccess(): Promise<boolean> {

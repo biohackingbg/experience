@@ -205,7 +205,8 @@ export type ReminderEmailInput = {
   items: string;
   /** Where "finish the order" lands: the checkout with their tier picked. */
   resumePath: string;
-  early: boolean;
+  /** "стартовите цени за първите 200 билета", or null when nothing is discounted. */
+  offer: string | null;
 };
 
 /**
@@ -235,7 +236,7 @@ export function reminderEmailHtml(input: ReminderEmailInput): string {
       </p>
       <p style="margin:14px 0 0;${p}">
         Ако все още искаш да си там на 07-08 ноември, довърши поръчката оттук${
-          input.early ? " - стартовите цени за първите 200 билета още важат" : ""
+          input.offer ? ` - ${input.offer} още важат` : ""
         }:
       </p>
       <p style="margin:22px 0 0">
@@ -264,7 +265,7 @@ export function reminderEmailText(input: ReminderEmailInput): string {
     "Нищо не е таксувано и място не е запазено.",
     "",
     `Ако все още искаш да си там на 07-08 ноември, довърши поръчката оттук${
-      input.early ? " (стартовите цени за първите 200 билета още важат)" : ""
+      input.offer ? ` (${input.offer} още важат)` : ""
     }:`,
     `${SITE}${input.resumePath}`,
     "",

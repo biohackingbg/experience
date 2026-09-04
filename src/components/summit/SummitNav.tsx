@@ -2,8 +2,8 @@ import Link from "next/link";
 
 import { ScrollProgress } from "@/components/ui/ScrollProgress";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { getEarlyAccess } from "@/lib/settings";
-import { TIERS, SALES_OPEN, formatPrice, priceCents } from "@/lib/tickets";
+import { cheapestOf, getPricing, priceOf } from "@/lib/pricing";
+import { SALES_OPEN, formatPrice } from "@/lib/tickets";
 
 const links = [
   // Same order the sections appear in on the page.
@@ -16,13 +16,11 @@ const links = [
 export async function SummitNav() {
   // The hero gave up its CTA row for a cleaner composition; the price anchor
   // moves here, onto the one button that is now always on screen.
-  const early = await getEarlyAccess();
+  const pricing = await getPricing();
   // The cheapest tier, not just the cheapest number: the button links to it,
   // so the two must be the same tier.
-  const cheapestTier = TIERS.reduce((a, b) =>
-    priceCents(b, early) < priceCents(a, early) ? b : a,
-  );
-  const cheapest = priceCents(cheapestTier, early);
+  const cheapestTier = cheapestOf(pricing);
+  const cheapest = priceOf(pricing, cheapestTier);
 
   return (
     /* Sticky glass: translucent paper over a backdrop blur, so the page

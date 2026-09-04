@@ -1,6 +1,6 @@
-import { getEarlyAccess } from "@/lib/settings";
+import { getPricing, priceOf } from "@/lib/pricing";
 import { announcedSpeakers } from "@/lib/speakers";
-import { SALES_OPEN, CURRENCY, PRE_ORDER, TIERS, priceCents } from "@/lib/tickets";
+import { SALES_OPEN, CURRENCY, PRE_ORDER, TIERS } from "@/lib/tickets";
 
 /**
  * Speakers, as schema.org performers.
@@ -33,7 +33,7 @@ const performers = announcedSpeakers().map((s) => ({
  * no longer charges.
  */
 export async function buildEventSchema() {
-  const early = await getEarlyAccess();
+  const pricing = await getPricing();
 
   return {
   "@context": "https://schema.org",
@@ -86,7 +86,7 @@ export async function buildEventSchema() {
   offers: TIERS.map((tier) => ({
       "@type": "Offer",
       name: tier.name,
-      price: (priceCents(tier, early) / 100).toFixed(2),
+      price: (priceOf(pricing, tier) / 100).toFixed(2),
       priceCurrency: CURRENCY,
       availability: "https://schema.org/PreOrder",
       url: "https://thelongevitysummit.eu/bilet",

@@ -3,8 +3,8 @@ import Link from "next/link";
 
 import { isTestMode } from "@/lib/stripe";
 import { getRemainingAll } from "@/lib/orders";
-import { getEarlyAccess } from "@/lib/settings";
-import { EARLY_ACCESS, SALES_OPEN } from "@/lib/tickets";
+import { getPricing } from "@/lib/pricing";
+import { SALES_OPEN } from "@/lib/tickets";
 import { CheckoutForm } from "./CheckoutForm";
 
 export const metadata: Metadata = {
@@ -23,7 +23,8 @@ export default async function CheckoutPage({
 }) {
   const { nivo, otkazano, utm_source, utm_campaign } = await searchParams;
   const testMode = isTestMode();
-  const [early, remaining] = await Promise.all([getEarlyAccess(), getRemainingAll()]);
+  const [pricing, remaining] = await Promise.all([getPricing(), getRemainingAll()]);
+  const early = pricing.discounted;
   const soldOut = Object.entries(remaining).filter(([, n]) => n === 0).map(([id]) => id);
 
   // While sales are closed the page still answers - a shared link should
@@ -104,14 +105,14 @@ export default async function CheckoutPage({
              on a number that is moving while the buyer reads it. */
           <p className="mt-4 max-w-xl rounded-2xl bg-bh-cloud px-5 py-4 text-sm leading-relaxed text-bh-ink/70 ring-1 ring-bh-ink/10">
             <strong className="font-semibold text-bh-ink">
-              Стартова цена
+              {pricing.stage === "launch" ? "Стартова цена" : "Специална цена"}
             </strong>{" "}
-            - тази цена важи за {EARLY_ACCESS.label}. Плащаш сега, билетът и
+            - тази цена важи {pricing.stage === "launch" ? "за " : ""}{pricing.label}. Плащаш сега, билетът и
             мястото ти са запазени, а програмата се допълва до събитието.
           </p>
         )}
 
-        <CheckoutForm initialTier={nivo} early={early} soldOut={soldOut} utm={{ source: utm_source, campaign: utm_campaign }} />
+        <CheckoutForm initialTier={nivo} prices={pricing.prices} soldOut={soldOut} utm={{ source: utm_source, campaign: utm_campaign }} />
       </div>
     </div>
   );

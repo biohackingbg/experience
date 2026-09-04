@@ -3,16 +3,8 @@ import Link from "next/link";
 import { Reveal } from "@/components/ui/Reveal";
 import { WaitlistForm } from "@/components/summit/WaitlistForm";
 import { getRemainingAll } from "@/lib/orders";
-import { getEarlyAccess } from "@/lib/settings";
-import {
-  EARLY_ACCESS,
-  TIERS,
-  SALES_OPEN,
-  SALES_SOON_LABEL,
-  formatPrice,
-  priceCents,
-  tierDiscountLabel,
-} from "@/lib/tickets";
+import { cheapestOf, discountLabelOf, getPricing, priceOf } from "@/lib/pricing";
+import { TIERS, SALES_OPEN, SALES_SOON_LABEL, formatPrice } from "@/lib/tickets";
 
 
 function Check({ muted }: { muted?: boolean }) {
@@ -38,7 +30,10 @@ function Check({ muted }: { muted?: boolean }) {
 const SCARCE_BELOW = 15;
 
 export async function SummitTickets() {
-  const [early, remaining] = await Promise.all([getEarlyAccess(), SALES_OPEN ? getRemainingAll() : Promise.resolve({} as Record<string, number>)]);
+  const [pricing, remaining] = await Promise.all([getPricing(), SALES_OPEN ? getRemainingAll() : Promise.resolve({} as Record<string, number>)]);
+  const early = pricing.discounted;
+  const stageWord = pricing.stage === "launch" ? "Стартови цени за" : "Специални цени";
+  void cheapestOf;
 
   return (
     <section id="tickets" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
@@ -53,7 +48,7 @@ export async function SummitTickets() {
                 /* Colours written out, not tokens: bh-ink flips in dark mode,
                    and this pill came out pale-on-pale there. */
                 <span className="rounded-full bg-[#cef870] px-3.5 py-1.5 text-[0.72rem] font-bold tracking-tight text-[#02251f]">
-                  Стартови цени за {EARLY_ACCESS.label}
+                  {stageWord} {pricing.label}
                 </span>
               )}
             </div>
@@ -68,7 +63,7 @@ export async function SummitTickets() {
               <>
                 {" "}
                 <strong className="font-semibold text-bh-ink">
-                  Тези цени важат за {EARLY_ACCESS.label}.
+                  Тези цени важат {pricing.stage === "launch" ? "за " : ""}{pricing.label}.
                 </strong>
               </>
             )}
@@ -137,7 +132,7 @@ export async function SummitTickets() {
                   {SALES_OPEN ? (
                     <div className="flex items-baseline gap-1">
                       <span className="text-6xl font-black tracking-tight">
-                        {formatPrice(priceCents(tier, early))}
+                        {formatPrice(priceOf(pricing, tier))}
                       </span>
                       <span className="text-2xl font-semibold">€</span>
                     </div>
@@ -156,14 +151,14 @@ export async function SummitTickets() {
                           {formatPrice(tier.listPriceCents)} €
                         </s>
                         <span className="bh-gradient rounded-full px-2.5 py-1 text-xs font-bold tracking-tight text-bh-ink">
-                          {tierDiscountLabel(tier)}
+                          {discountLabelOf(pricing, tier)}
                         </span>
                       </div>
                       {/* The struck figure is named as the price that starts on
                           a date, not one that was ever charged - see the note
                           in lib/tickets.ts. */}
                       <p className={`mt-1.5 text-[0.7rem] leading-snug ${tone.note}`}>
-                        редовна цена {EARLY_ACCESS.regularAfter}
+                        редовна цена {pricing.regularAfter}
                       </p>
                     </>
                   )}
@@ -246,7 +241,7 @@ export async function SummitTickets() {
               <tbody>
                 {[
                   SALES_OPEN
-                    ? ["Цена", early ? "Ранна €35" : "€49", early ? "Ранна €89" : "€129", early ? "Ранна €249" : "€349"]
+                    ? ["Цена", ...TIERS.map((t) => `${early ? "Сега " : ""}€${formatPrice(priceOf(pricing, t))}`)]
                     : ["Цена", SALES_SOON_LABEL, SALES_SOON_LABEL, SALES_SOON_LABEL],
                   ["Достъп", "1 ден по избор", "И двата дни", "И двата дни"],
                   ["Лекции", "При наличие на места", "Приоритетен достъп", "Гарантиран достъп"],
@@ -281,8 +276,7 @@ export async function SummitTickets() {
             section, and this is the moment the money is decided. */}
         <p className="mt-6 max-w-3xl font-mono text-[0.7rem] leading-relaxed uppercase tracking-[0.12em] text-bh-ink/40">
           Билетите тук са за Biohacking Experience · медицинската конференция
-          има отделна регистрация · стартовите цени важат за {EARLY_ACCESS.label},
-          независимо от нивото · групи над 10 души и корпоративни пакети по
+          има отделна регистрация{early ? ` · специалните цени важат ${pricing.stage === "launch" ? "за " : ""}${pricing.label}, независимо от нивото` : ""} · групи над 10 души и корпоративни пакети по
           договаряне · отстъпка за студенти и медицински специалисти.
         </p>
       </div>

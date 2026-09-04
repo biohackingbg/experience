@@ -6,7 +6,7 @@ import { getDb } from "@/lib/db";
 import { orderItems, orders } from "@/lib/db/schema";
 import { sendReminderEmail } from "@/lib/email";
 import { PENDING_HOLD_MINUTES } from "@/lib/orders";
-import { getEarlyAccess } from "@/lib/settings";
+import { getPricing } from "@/lib/pricing";
 
 /**
  * Checkouts that were opened and never paid.
@@ -177,7 +177,9 @@ export async function remindAbandonedOrder(reference: string): Promise<RemindRes
     reference: order.reference,
     items: items.map((i) => `${i.quantity}× ${i.tierName}`).join(", ") || "билет",
     resumePath: items[0] ? `/bilet?nivo=${items[0].tierId}` : "/bilet",
-    early: await getEarlyAccess(),
+    offer: await getPricing().then((p) =>
+      p.discounted ? `${p.stage === "launch" ? "стартовите цени за" : "специалните цени"} ${p.label}` : null,
+    ),
   });
   if (emailId === null) return { ok: false, reason: "send_failed" };
 

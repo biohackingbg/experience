@@ -6,14 +6,14 @@ import { getAbandonedOrders, getPendingOrders } from "@/lib/abandoned";
 import { isAdmin } from "@/lib/admin-auth";
 import { getDashboardData, searchOrders } from "@/lib/admin-stats";
 import { getFinances } from "@/lib/finances";
-import { getEarlyAccessState } from "@/lib/settings";
+import { getPricing } from "@/lib/pricing";
 import { getTrafficData } from "@/lib/site-views";
 import { formatPrice } from "@/lib/tickets";
 
 import { setTestOrder } from "./actions";
 import { DailyChart } from "./DailyChart";
 import { ResendForm } from "./fakturi/ResendForm";
-import { PriceSwitch } from "./PriceSwitch";
+import { PriceStages } from "./PriceStages";
 import { ReminderForm } from "./ReminderForm";
 import { TierBars } from "./TierBars";
 
@@ -189,12 +189,12 @@ export default async function AdminDashboard({
   if (!(await isAdmin())) redirect("/admin/login");
 
   const { q = "" } = await searchParams;
-  const [d, traffic, found, fin, early, abandoned, pendingNow] = await Promise.all([
+  const [d, traffic, found, fin, pricing, abandoned, pendingNow] = await Promise.all([
     getDashboardData(),
     getTrafficData(30),
     searchOrders(q),
     getFinances(),
-    getEarlyAccessState(),
+    getPricing(),
     getAbandonedOrders(),
     getPendingOrders(),
   ]);
@@ -348,7 +348,7 @@ export default async function AdminDashboard({
         </section>
 
         <div className="xl:col-span-1">
-          <PriceSwitch open={early.open} changedAt={early.changedAt} sold={d.ticketsSold} />
+          <PriceStages pricing={pricing} sold={d.ticketsSold} />
         </div>
 
         <div className="flex flex-col gap-4 xl:col-span-1 xl:row-span-2">

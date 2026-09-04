@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 // import { EarlyAccessForm } from "@/components/summit/EarlyAccessForm";
-import { getEarlyAccess } from "@/lib/settings";
-import { EARLY_ACCESS, SALES_OPEN, TIERS, formatPrice } from "@/lib/tickets";
+import { cheapestOf, getPricing, priceOf } from "@/lib/pricing";
+import { SALES_OPEN, TIERS, formatPrice } from "@/lib/tickets";
 import { Reveal } from "@/components/ui/Reveal";
 import { Calendar, Pin, TicketIcon } from "@/components/ui/Pictograms";
 
@@ -16,7 +16,10 @@ import { Calendar, Pin, TicketIcon } from "@/components/ui/Pictograms";
  * signups table all stay in place for when there is something to send.
  */
 export async function SummitRegister() {
-  const early = await getEarlyAccess();
+  const pricing = await getPricing();
+  const early = pricing.discounted;
+  const offer = `${pricing.stage === "launch" ? "стартови цени за" : "специални цени"} ${pricing.label}`;
+  const from = formatPrice(priceOf(pricing, cheapestOf(pricing)));
 
   const facts = [
     { label: "Дати", value: "07-08 ноември 2026", icon: Calendar },
@@ -26,7 +29,7 @@ export async function SummitRegister() {
       value: !SALES_OPEN
         ? "Билетите - съвсем скоро"
         : early
-          ? `Стартови цени за ${EARLY_ACCESS.label}`
+          ? offer.charAt(0).toUpperCase() + offer.slice(1)
           : "Билетите са в продажба",
       icon: TicketIcon,
     },
@@ -59,7 +62,7 @@ export async function SummitRegister() {
                   {" "}
                   - на{" "}
                   <strong className="font-semibold text-bh-lime">
-                    стартови цени за {EARLY_ACCESS.label}
+                    {offer}
                   </strong>
                 </>
               )}
@@ -74,7 +77,7 @@ export async function SummitRegister() {
                 href="/bilet"
                 className="bh-gradient mt-8 inline-flex items-center gap-2 rounded-full px-8 py-4 text-base font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
               >
-                Купи билет{early && <> от 35 €</>}
+                Купи билет{early && <> от {from} €</>}
               </Link>
             ) : (
               <span className="mt-8 inline-flex items-center gap-2 rounded-full border border-bh-paper/30 px-8 py-4 text-base font-semibold text-bh-paper/75">
@@ -87,7 +90,7 @@ export async function SummitRegister() {
             {SALES_OPEN && early && (
               <p className="mt-12 max-w-xl border-t border-bh-paper/15 pt-8 text-sm leading-relaxed text-bh-paper/65">
                 <strong className="font-semibold text-bh-lime">
-                  Стартовите цени важат за {EARLY_ACCESS.label}.
+                  {pricing.stage === "launch" ? "Стартовите" : "Специалните"} цени важат {pricing.stage === "launch" ? "за " : ""}{pricing.label}.
                 </strong>{" "}
                 След тях билетите минават на редовни цени:{" "}
                 {TIERS.map((t, i) => (
