@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { canAccess } from "@/lib/access";
 import { cancelBankOrder, createManualOrder, markBankOrderPaid, saveBankDetails } from "@/lib/manual-orders";
 import { getTier } from "@/lib/tickets";
+import { notifyWaitlist } from "@/lib/waitlist";
 
 export type IssueState = { status: "idle" | "ok" | "error"; message?: string; reference?: string };
 
@@ -71,7 +72,8 @@ export async function bankCancel(formData: FormData): Promise<void> {
   if (!(await canAccess("izdai"))) return;
   const reference = String(formData.get("reference") ?? "").trim().toUpperCase();
   if (!/^SLS-[A-Z0-9]{6}$/.test(reference)) return;
-  await cancelBankOrder(reference);
+  const tierId = await cancelBankOrder(reference);
+  if (tierId) await notifyWaitlist(tierId);
   done();
 }
 

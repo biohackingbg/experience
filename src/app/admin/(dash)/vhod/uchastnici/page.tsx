@@ -42,6 +42,9 @@ export default async function AttendeesPage() {
             <a href="/admin/vhod/uchastnici/eksport" className="rounded-full border border-bh-ink/20 px-4 py-2 text-xs font-semibold text-bh-ink transition-colors hover:border-bh-ink">
               CSV
             </a>
+            <Link href="/admin/vhod/uchastnici/badzhove" target="_blank" className="rounded-full border border-bh-ink/20 px-4 py-2 text-xs font-semibold text-bh-ink transition-colors hover:border-bh-ink">
+              Баджове (PDF)
+            </Link>
             <PrintButton label="Печат на списъка" />
           </div>
         </div>

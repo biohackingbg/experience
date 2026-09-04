@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { buildDigest } from "@/lib/digest";
 import { sendDigestEmail } from "@/lib/email";
+import { notifyWaitlistAll } from "@/lib/waitlist";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -17,10 +18,17 @@ export async function GET(request: Request) {
   }
 
   try {
+    const dry = !!new URL(request.url).searchParams.get("dry");
+    // Seats freed by expired holds have nobody to announce them; the morning
+    // run does - but a dry run must not mail anyone.
+    if (!dry) {
+      const notified = await notifyWaitlistAll();
+      if (notified) console.info(`[digest] waitlist: ${notified} notified`);
+    }
     const digest = await buildDigest();
     // ?dry=1 returns the digest instead of mailing it - for checking the
     // wording without spending a send.
-    if (new URL(request.url).searchParams.get("dry")) {
+    if (dry) {
       return NextResponse.json({ ok: true, dry: true, subject: digest.subject, text: digest.text });
     }
     const sent = await sendDigestEmail(digest);

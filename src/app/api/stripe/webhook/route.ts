@@ -8,6 +8,8 @@ import { sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { orders } from "@/lib/db/schema";
 import { issueCreditNote, markOrderPaid, markOrderRefunded } from "@/lib/orders";
+import { orderItems } from "@/lib/db/schema";
+import { notifyWaitlist } from "@/lib/waitlist";
 import { getStripe } from "@/lib/stripe";
 
 /**
@@ -129,6 +131,10 @@ export async function POST(request: Request) {
           console.info(
             `[stripe] order ${outcome.reference} fully refunded: ${outcome.refundedCents}/${outcome.totalCents} - invoice ${outcome.invoiceNumber ?? "-"}, credit note ${creditNote ?? "already issued"}`,
           );
+          // The seat is free again; the waiting list for that tier hears first.
+          revalidatePath("/");
+          const [item] = await getDb().select({ tierId: orderItems.tierId }).from(orderItems).where(sql`${orderItems.orderId} = ${outcome.orderId}`).limit(1);
+          if (item) await notifyWaitlist(item.tierId);
         } else {
           console.info(
             `[stripe] order ${outcome.reference} partially refunded: ${outcome.refundedCents}/${outcome.totalCents} - credit note is the accountant's call`,

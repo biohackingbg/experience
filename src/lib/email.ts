@@ -494,6 +494,38 @@ export async function sendProformaEmail(input: ProformaEmailInput): Promise<bool
   }
 }
 
+/** "A seat freed up" to someone on the waiting list. One line, one link, no pressure. */
+export async function sendWaitlistEmail(input: { to: string; tierName: string; tierId: string; left: number }): Promise<boolean> {
+  const resend = getResend();
+  const from = process.env.EMAIL_FROM;
+  if (!resend || !from) return false;
+  const f = "-apple-system,Segoe UI,Roboto,sans-serif";
+  const link = `${SITE}/bilet?nivo=${input.tierId}`;
+  const html = `<!doctype html><html lang="bg"><body style="margin:0;padding:24px;background:#f2f2ee">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#f8f8f5;border-radius:18px;padding:32px"><tr><td>
+    <img src="${SITE}/email-logo.png" width="200" height="54" alt="Biohacking Experience" style="display:block;border:0;width:200px;height:auto;margin:0 0 22px">
+    <div style="font:400 12px/1 ${f};letter-spacing:2px;text-transform:uppercase;color:#14645599">Sofia Life Summit</div>
+    <h1 style="margin:14px 0 0;font:800 26px/1.15 ${f};color:#02251f">Освободи се място от ${input.tierName}</h1>
+    <p style="margin:14px 0 0;font:400 15px/1.6 ${f};color:#02251fb3">Записа се да ти пишем, ако се освободи място от това ниво. Освободиха се ${input.left === 1 ? "едно място" : `${input.left} места`} - първите, които купят, ги вземат.</p>
+    <p style="margin:22px 0 0"><a href="${link}" style="display:inline-block;background:#146455;color:#f1f5f3;text-decoration:none;font:600 14px/1 ${f};padding:14px 22px;border-radius:999px">Купи билет ${input.tierName}</a></p>
+    <p style="margin:22px 0 0;font:400 12px/1.6 ${f};color:#02251f80">Пишем ти само този път. Ако мястото вече е заето, когато отвориш, съжаляваме - и благодарим за интереса. Въпроси: hi@biohacking.bg.</p>
+  </td></tr></table></body></html>`;
+  const text = [
+    `Освободи се място от ${input.tierName} на Sofia Life Summit.`,
+    `Записа се да ти пишем, ако се освободи място. Освободиха се ${input.left} - първите, които купят, ги вземат.`,
+    "",
+    link,
+    "",
+    "Пишем ти само този път. Въпроси: hi@biohacking.bg",
+  ].join("\n");
+  try {
+    const { error } = await resend.emails.send({ from, to: input.to, subject: `Освободи се място от ${input.tierName} · Sofia Life Summit`, html, text });
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Mail to the organisers themselves - the daily digest. Goes to the team
  * address unless DIGEST_EMAIL says otherwise, so it works without any new
