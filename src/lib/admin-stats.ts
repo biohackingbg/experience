@@ -200,8 +200,11 @@ export async function getDashboardData(): Promise<DashboardData> {
           totalCents: orders.totalCents,
           paidAt: orders.paidAt,
           isTest: orders.isTest,
-          items: sql<number>`(select coalesce(sum(i.quantity), 0) from order_items i where i.order_id = ${orders.id})::int`,
-          tickets: sql<number>`(select count(*) from tickets t where t.order_id = ${orders.id})::int`,
+          // "orders.id" spelled out: in a SELECT field Drizzle drops the
+          // table qualifier, and a bare "id" would bind to the subquery's own
+          // table - so every order looked like it had no items and no tickets.
+          items: sql<number>`(select coalesce(sum(i.quantity), 0) from order_items i where i.order_id = orders.id)::int`,
+          tickets: sql<number>`(select count(*) from tickets t where t.order_id = orders.id)::int`,
           hasStripe: sql<boolean>`${orders.stripePaymentIntentId} is not null`,
           refundedCents: orders.refundedCents,
         })

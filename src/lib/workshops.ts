@@ -36,6 +36,11 @@ export type Workshop = {
 
 const overlaps = (aStart: string, aEnd: string, bStart: string, bEnd: string) => aStart < bEnd && bStart < aEnd;
 
+// Correlated subqueries are written with the outer table spelled out:
+// in a SELECT field Drizzle renders a column reference unqualified, and a
+// bare "id" inside the subquery binds to the subquery's own table, which
+// silently matches nothing. In a WHERE clause it qualifies, so those are
+// left as they are.
 export async function listWorkshops(includeInactive = false): Promise<Workshop[]> {
   const rows = await getDb()
     .select({
@@ -50,7 +55,8 @@ export async function listWorkshops(includeInactive = false): Promise<Workshop[]
       endsAt: workshops.endsAt,
       capacity: workshops.capacity,
       active: workshops.active,
-      booked: sql<number>`(select count(*) from ${workshopBookings} b where b.workshop_id = ${workshops.id})::int`,
+      // See the note above listWorkshops: the outer column is spelled out.
+      booked: sql<number>`(select count(*) from workshop_bookings b where b.workshop_id = workshops.id)::int`,
     })
     .from(workshops)
     .where(includeInactive ? sql`true` : eq(workshops.active, true))

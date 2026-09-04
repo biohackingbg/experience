@@ -177,7 +177,8 @@ export async function listBankOrders(): Promise<BankOrder[]> {
       createdAt: orders.createdAt,
       bankDueAt: orders.bankDueAt,
       note: orders.note,
-      items: sql<string>`(select string_agg(i.quantity || '× ' || i.tier_name, ', ') from order_items i where i.order_id = ${orders.id})`,
+      // "orders.id" spelled out - see the note in admin-stats.ts.
+      items: sql<string>`(select string_agg(i.quantity || '× ' || i.tier_name, ', ') from order_items i where i.order_id = orders.id)`,
     })
     .from(orders)
     .where(sql`${orders.status} = 'pending' and ${orders.paymentMethod} = 'bank'`)
