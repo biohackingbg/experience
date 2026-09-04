@@ -124,13 +124,20 @@ export function PipelineEditor({
     return (
       <div className="flex min-w-[18rem] max-w-md flex-col items-start gap-2">
         <div className="flex flex-wrap items-center gap-2">
+          <span className={`rounded-full px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide ${STAGE_TONE[stage] ?? STAGE_TONE.new}`}>
+            {label}
+          </span>
+          {/* A real button, not a glyph inside the status chip - it was too small to be seen as one. */}
           <button
             type="button"
             onClick={() => setOpen(true)}
-            title="Редактирай етап, бележки и кой води"
-            className={`rounded-full px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide ${STAGE_TONE[stage] ?? STAGE_TONE.new}`}
+            title="Редактирай етап, бележки, договорка и кой води"
+            className="inline-flex items-center gap-1.5 rounded-full border border-bh-ink/20 px-2.5 py-1 text-xs font-semibold text-bh-ink transition-colors hover:border-bh-ink hover:bg-bh-ink/5"
           >
-            {label} ✎
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden>
+              <path d="M13.5 3.5a1.8 1.8 0 0 1 2.5 2.5L7 15l-3.5 1 1-3.5z" />
+            </svg>
+            Редактирай
           </button>
           {owner ? (
             <span
@@ -154,7 +161,7 @@ export function PipelineEditor({
         </div>
         {(amountCents !== null || tier) && (
           <p className="text-sm text-bh-ink">
-            {tier && <span className="text-bh-ink/60">{TIERS.find((t) => t.id === tier)?.label ?? tier} · </span>}
+            {tier && <span className="text-bh-ink/60">{TIERS.find((t) => t.id === tier)?.label ?? tier}{amountCents !== null ? " · " : ""}</span>}
             {amountCents !== null && (
               <span className="font-semibold">{(amountCents / 100).toLocaleString("bg-BG")} €</span>
             )}
