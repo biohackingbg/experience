@@ -506,6 +506,33 @@ export const promoCodes = pgTable("promo_codes", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+/**
+ * The programme, one row per slot, editable from the admin. Empty until the
+ * team imports the version in code (program.ts), which then stops being read.
+ * Day headings (date, theme, intro) stay in code - they change once a year.
+ */
+export const sessions = pgTable(
+  "sessions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    /** 1 = Saturday, 2 = Sunday. */
+    day: integer("day").notNull(),
+    sort: integer("sort").notNull(),
+    /** As printed: "10:25-11:20". */
+    time: text("time").notNull(),
+    title: text("title").notNull(),
+    note: text("note"),
+    /** "Модератор: Диана Радева" - how the people below are billed. */
+    role: text("role"),
+    /** Names, one per line. */
+    people: text("people"),
+    /** Registration, coffee, lunch - rendered quietly. */
+    pause: boolean("pause").notNull().default(false),
+    updatedAt: timestamp("updated_at", { withTimezone: true }),
+  },
+  (table) => [index("sessions_day_sort_idx").on(table.day, table.sort)],
+);
+
 export type DeckLink = typeof deckLinks.$inferSelect;
 
 export type Order = typeof orders.$inferSelect;

@@ -1,5 +1,5 @@
 import { Reveal } from "@/components/ui/Reveal";
-import { PROGRAM } from "@/lib/program";
+import { getProgram } from "@/lib/program-data";
 
 /**
  * The programme, with every name on it.
@@ -13,7 +13,8 @@ import { PROGRAM } from "@/lib/program";
  * people the source marks "(не е говорено с нея)" were never transcribed
  * into it. Nobody is announced here who has not agreed to come.
  */
-export function SummitProgram() {
+export async function SummitProgram() {
+  const PROGRAM = await getProgram();
 
   return (
     <section id="program" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">

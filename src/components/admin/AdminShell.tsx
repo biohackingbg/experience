@@ -26,6 +26,7 @@ const I = {
   globe: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="10" cy="10" r="7"/><path d="M3 10h14M10 3c2.5 2.5 2.5 11.5 0 14M10 3c-2.5 2.5-2.5 11.5 0 14"/></svg>,
   mega: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" strokeLinecap="round"><path d="M3 9v2a1 1 0 0 0 1 1h2l6 3V4L6 7H4a1 1 0 0 0-1 1v1zM15 8a3 3 0 0 1 0 4M7 12v3.5a1 1 0 0 0 1 1h1"/></svg>,
   tag: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"><path d="M3 10V4h6l8 8-6 6z"/><circle cx="6.5" cy="7.5" r="1" fill="currentColor"/></svg>,
+  clock: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l3 2"/></svg>,
   mail: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"><rect x="3" y="5" width="14" height="11" rx="2"/><path d="m3 7 7 5 7-5"/></svg>,
   out: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M8 4H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3M12 7l3 3-3 3M15 10H8"/></svg>,
 };
@@ -41,6 +42,7 @@ const MENU = [
   { href: "/admin/pisma", label: "Писма", icon: I.mail },
   { href: "/admin/reklama", label: "Реклама", icon: I.mega },
   { href: "/admin/promo", label: "Промо кодове", icon: I.tag },
+  { href: "/admin/programa", label: "Програма", icon: I.clock },
   { href: "/admin/vhod", label: "Вход на събитието", icon: I.door },
 ];
 
