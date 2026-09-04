@@ -6,6 +6,7 @@ import { getAbandonedOrders } from "@/lib/abandoned";
 import { getDashboardData } from "@/lib/admin-stats";
 import { getDb } from "@/lib/db";
 import { orderItems, orders, signups, siteViews } from "@/lib/db/schema";
+import { getPreparation } from "@/lib/preparation";
 import { getEarlyAccessState } from "@/lib/settings";
 import { formatPrice } from "@/lib/tickets";
 
@@ -26,10 +27,11 @@ export type Digest = { subject: string; text: string; html: string };
 
 export async function buildDigest(): Promise<Digest> {
   const db = getDb();
-  const [d, early, abandoned, [sales], [visits], [signup]] = await Promise.all([
+  const [d, early, abandoned, prep, [sales], [visits], [signup]] = await Promise.all([
     getDashboardData(),
     getEarlyAccessState(),
     getAbandonedOrders(50),
+    getPreparation(),
     db
       .select({
         orders: sql<number>`count(distinct ${orders.id})::int`,
@@ -91,6 +93,19 @@ export async function buildDigest(): Promise<Digest> {
       abandoned.length === 0
         ? "няма"
         : `${abandonedYesterday.length} нови вчера · ${toRemind.length} чакат напомняне`,
+    ],
+    [
+      "Партньори",
+      prep.total === 0
+        ? "още нищо не е уговорено"
+        : `получени ${prep.received} от ${prep.total}${
+            prep.overdue
+              ? ` · просрочени ${prep.overdue}: ${prep.partners
+                  .flatMap((p) => p.items.filter((i) => i.overdue).map((i) => `${p.label} - ${i.label.toLowerCase()}`))
+                  .slice(0, 4)
+                  .join(", ")}`
+              : " · нищо просрочено"
+          }`,
     ],
   ];
 

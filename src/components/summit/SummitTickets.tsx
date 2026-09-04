@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import { Reveal } from "@/components/ui/Reveal";
+import { WaitlistForm } from "@/components/summit/WaitlistForm";
+import { getRemainingAll } from "@/lib/orders";
 import { getEarlyAccess } from "@/lib/settings";
 import {
   EARLY_ACCESS,
@@ -32,8 +34,11 @@ function Check({ muted }: { muted?: boolean }) {
   );
 }
 
+/** Below this many seats the card says so - a true number, not a countdown gimmick. */
+const SCARCE_BELOW = 15;
+
 export async function SummitTickets() {
-  const early = await getEarlyAccess();
+  const [early, remaining] = await Promise.all([getEarlyAccess(), SALES_OPEN ? getRemainingAll() : Promise.resolve({} as Record<string, number>)]);
 
   return (
     <section id="tickets" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
@@ -75,6 +80,9 @@ export async function SummitTickets() {
         <div className="mt-8 grid gap-4 lg:grid-cols-3">
           {TIERS.map((tier, i) => {
             const featured = tier.featured;
+            const left = remaining[tier.id];
+            const gone = SALES_OPEN && left === 0;
+            const scarce = SALES_OPEN && !gone && left !== undefined && left < SCARCE_BELOW;
             // Whole class names, never assembled from pieces: Tailwind reads
             // the source statically, so `${x}/50` would never be generated.
             const tone = featured
@@ -104,11 +112,15 @@ export async function SummitTickets() {
                     : "bh-mint text-bh-ink"
                 }`}
               >
-                {featured && (
+                {gone ? (
+                  <span className={`absolute right-6 top-6 rounded-full px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.15em] ${featured ? "bg-bh-paper/15 text-bh-paper" : "bg-bh-ink/10 text-bh-ink"}`}>
+                    Изчерпано
+                  </span>
+                ) : featured ? (
                   <span className="bh-gradient absolute right-6 top-6 rounded-full px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.15em] text-bh-ink">
                     Най-избиран
                   </span>
-                )}
+                ) : null}
 
                 <h3 className="text-xl font-black uppercase tracking-tight">
                   {tier.name}
@@ -177,7 +189,15 @@ export async function SummitTickets() {
                 {/* Straight to the checkout with the tier pre-selected. This
                     pointed at the waitlist while sales had not started - a
                     buyer who picked a tier landed on an email form. */}
-                {SALES_OPEN ? (
+                {scarce && (
+                  <p className={`mt-6 text-xs font-semibold ${featured ? "text-bh-lime" : "text-bh-pine"}`}>
+                    Остават {left} {left === 1 ? "място" : "места"}
+                  </p>
+                )}
+
+                {gone ? (
+                  <WaitlistForm tierId={tier.id} dark={featured} />
+                ) : SALES_OPEN ? (
                   <Link
                     href={`/bilet?nivo=${tier.id}`}
                     className={`mt-8 inline-flex items-center justify-center rounded-full px-6 py-3.5 text-sm font-semibold transition-transform hover:-translate-y-0.5 ${

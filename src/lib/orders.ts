@@ -8,7 +8,7 @@ import { orderItems, orders, tickets } from "@/lib/db/schema";
 import { PENDING_HOLD_MINUTES } from "@/lib/orders-const";
 import { resolvePromo } from "@/lib/promo";
 import { getEarlyAccess } from "@/lib/settings";
-import { CURRENCY, VAT_RATE, getTier, priceCents, splitVat } from "@/lib/tickets";
+import { CURRENCY, TIERS, VAT_RATE, getTier, priceCents, splitVat } from "@/lib/tickets";
 
 export { PENDING_HOLD_MINUTES };
 
@@ -257,6 +257,25 @@ export async function markOrderPaid(
       },
     };
   });
+}
+
+/**
+ * Seats left per tier, counted the way the checkout counts them: paid, plus
+ * pending inside the hold. This is what "изчерпано" on the page means.
+ */
+export async function getRemainingAll(): Promise<Record<string, number>> {
+  const rows = await getDb()
+    .select({ tierId: orderItems.tierId, n: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int` })
+    .from(orderItems)
+    .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
+    .where(
+      sql`${orders.status} = 'paid'
+        or (${orders.status} = 'pending' and ${orders.createdAt} > now() - interval '${sql.raw(String(PENDING_HOLD_MINUTES))} minutes')`,
+    )
+    .groupBy(orderItems.tierId);
+  const out: Record<string, number> = {};
+  for (const t of TIERS) out[t.id] = Math.max(0, t.capacity - (rows.find((r) => r.tierId === t.id)?.n ?? 0));
+  return out;
 }
 
 /** Seats still available per tier, for the checkout UI. */

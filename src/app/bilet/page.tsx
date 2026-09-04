@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { isTestMode } from "@/lib/stripe";
+import { getRemainingAll } from "@/lib/orders";
 import { getEarlyAccess } from "@/lib/settings";
 import { EARLY_ACCESS, SALES_OPEN } from "@/lib/tickets";
 import { CheckoutForm } from "./CheckoutForm";
@@ -22,7 +23,8 @@ export default async function CheckoutPage({
 }) {
   const { nivo, otkazano, utm_source, utm_campaign } = await searchParams;
   const testMode = isTestMode();
-  const early = await getEarlyAccess();
+  const [early, remaining] = await Promise.all([getEarlyAccess(), getRemainingAll()]);
+  const soldOut = Object.entries(remaining).filter(([, n]) => n === 0).map(([id]) => id);
 
   // While sales are closed the page still answers - a shared link should
   // explain itself rather than 404 - but it carries no prices and no form.
@@ -109,7 +111,7 @@ export default async function CheckoutPage({
           </p>
         )}
 
-        <CheckoutForm initialTier={nivo} early={early} utm={{ source: utm_source, campaign: utm_campaign }} />
+        <CheckoutForm initialTier={nivo} early={early} soldOut={soldOut} utm={{ source: utm_source, campaign: utm_campaign }} />
       </div>
     </div>
   );

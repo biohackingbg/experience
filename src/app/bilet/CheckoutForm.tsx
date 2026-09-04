@@ -38,10 +38,13 @@ function Err({ children }: { children?: string }) {
 export function CheckoutForm({
   initialTier,
   early,
+  soldOut = [],
   utm,
 }: {
   initialTier?: string;
   early: boolean;
+  /** Tier ids with no seats left; shown, but not selectable. */
+  soldOut?: string[];
   /** Campaign tags from the URL, written onto the order so marketing can count it. */
   utm?: { source?: string; campaign?: string };
 }) {
@@ -58,9 +61,10 @@ export function CheckoutForm({
     }
   }, [state]);
 
-  const [tierId, setTierId] = useState(
-    TIERS.some((t) => t.id === initialTier) ? initialTier! : "plus",
-  );
+  const [tierId, setTierId] = useState(() => {
+    const wanted = TIERS.some((t) => t.id === initialTier) && !soldOut.includes(initialTier!) ? initialTier! : null;
+    return wanted ?? TIERS.find((t) => !soldOut.includes(t.id))?.id ?? "plus";
+  });
   const [quantity, setQuantity] = useState(1);
   const [wantsInvoice, setWantsInvoice] = useState(false);
   const [promoInput, setPromoInput] = useState("");
@@ -101,13 +105,17 @@ export function CheckoutForm({
             Ниво
           </legend>
           <div className="mt-3 flex flex-col gap-2">
-            {TIERS.map((t) => (
+            {TIERS.map((t) => {
+              const gone = soldOut.includes(t.id);
+              return (
               <label
                 key={t.id}
-                className={`flex cursor-pointer items-center justify-between gap-4 rounded-2xl px-5 py-4 ring-1 transition-colors ${
-                  t.id === tierId
-                    ? "bh-mint ring-bh-pine"
-                    : "bg-bh-cloud ring-bh-ink/10 hover:ring-bh-ink/25"
+                className={`flex items-center justify-between gap-4 rounded-2xl px-5 py-4 ring-1 transition-colors ${
+                  gone
+                    ? "cursor-not-allowed bg-bh-cloud opacity-60 ring-bh-ink/10"
+                    : t.id === tierId
+                      ? "bh-mint cursor-pointer ring-bh-pine"
+                      : "cursor-pointer bg-bh-cloud ring-bh-ink/10 hover:ring-bh-ink/25"
                 }`}
               >
                 <span className="flex items-center gap-3">
@@ -116,16 +124,18 @@ export function CheckoutForm({
                     name="tierId"
                     value={t.id}
                     checked={t.id === tierId}
+                    disabled={gone}
                     onChange={() => setTierId(t.id)}
                     className="h-4 w-4 accent-bh-pine"
                   />
                   <span className="font-semibold text-bh-ink">{t.name}</span>
                 </span>
                 <span className="font-semibold text-bh-ink">
-                  {formatPrice(priceCents(t, early))} €
+                  {gone ? <span className="text-xs font-bold uppercase tracking-wide text-bh-ink/60">изчерпано</span> : `${formatPrice(priceCents(t, early))} €`}
                 </span>
               </label>
-            ))}
+              );
+            })}
           </div>
         </fieldset>
 

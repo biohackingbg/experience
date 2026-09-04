@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 
@@ -78,6 +79,9 @@ export async function POST(request: Request) {
         console.info(
           `[stripe] order ${orderId} paid, ${issued} ticket(s) issued`,
         );
+        // The home page is static between sales; a sale may have just sold
+        // out a tier, and "изчерпано" must not wait for the next revalidation.
+        revalidatePath("/");
 
         // Only the delivery that actually flipped the order returns `order`,
         // so a Stripe retry cannot send the buyer a second copy. A failed send

@@ -6,6 +6,7 @@ import { z } from "zod";
 import type { CheckoutState } from "@/lib/checkout-state";
 import { sendTicketEmail } from "@/lib/email";
 import { createPendingOrder, markOrderPaid } from "@/lib/orders";
+import { createWaitlistSignup } from "@/lib/signups";
 import { discountFor, promoReasonText, resolvePromo } from "@/lib/promo";
 import { PURCHASE_TERMS_TEXT, PURCHASE_TERMS_VERSION } from "@/lib/purchase-terms";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -28,6 +29,21 @@ const schema = z.object({
   utmCampaign: z.string().trim().toLowerCase().max(60).optional(),
   promo: z.string().trim().max(32).optional(),
 });
+
+export type WaitlistState = { status: "idle" | "ok" | "error"; message?: string };
+
+/** "Tell me if a seat frees up" under a sold-out tier. */
+export async function joinWaitlist(_prev: WaitlistState, formData: FormData): Promise<WaitlistState> {
+  const head = await headers();
+  const ip = head.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  if (!checkRateLimit(`waitlist:${ip}`, 10).allowed) return { status: "error", message: "Твърде много опити." };
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const tierId = String(formData.get("tierId") ?? "");
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || email.length > 254) return { status: "error", message: "Провери имейл адреса." };
+  if (!getTier(tierId)) return { status: "error", message: "Непознато ниво." };
+  await createWaitlistSignup(email, tierId);
+  return { status: "ok", message: "Записахме те. Ще ти пишем само ако се освободи място." };
+}
 
 export type PromoPreview =
   | { ok: true; code: string; kind: "percent" | "fixed"; value: number; label: string }
