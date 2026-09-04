@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { useState, useSyncExternalStore } from "react";
 import type { Lang } from "@/lib/i18n";
 import { SPEAKERS_SECTION } from "@/lib/site-copy";
@@ -8,14 +10,6 @@ import { CountryMark } from "@/components/ui/Flags";
 
 /** How many cards are visible before the visitor asks for the rest. */
 const INITIAL = 8;
-
-/**
- * A width the portrait route can serve. Only the database-backed portraits
- * are resizable; a file in /public is left alone.
- */
-function sized(src: string, w: number): string {
-  return src.startsWith("/api/lektor/") ? `${src}${src.includes("?") ? "&" : "?"}w=${w}` : src;
-}
 
 function SpeakerCard({ s }: { s: Speaker }) {
   return (
@@ -36,13 +30,12 @@ function SpeakerCard({ s }: { s: Speaker }) {
       >
         {s.photo ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={sized(s.photo, 320)}
-            srcSet={`${sized(s.photo, 320)} 320w, ${sized(s.photo, 640)} 640w`}
-            sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 22vw"
+          <Image
+            src={s.photo}
             alt={s.name}
-            loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover object-top"
+            fill
+            sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 22vw"
+            className="object-cover object-top"
           />
         ) : s.pending ? (
           <span className="text-3xl text-bh-ink/25" aria-hidden>

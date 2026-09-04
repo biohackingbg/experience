@@ -13,7 +13,7 @@ import { SPEAKERS, SPEAKERS_EN, type Speaker } from "@/lib/speakers";
 /**
  * The speakers the site shows. The list in code is the seed; once imported,
  * the database is the source and the code copy is history. Portraits are
- * served from /api/lektor/<id>?v=<stamp>, so replacing one moves the URL
+ * served from /api/lektor/<id>/<stamp>, so replacing one moves the URL
  * and no cache keeps the old face.
  */
 
@@ -66,7 +66,7 @@ export async function listSpeakers(): Promise<SpeakerRow[]> {
 }
 
 export const photoUrl = (r: { id: string; hasPhoto: boolean; photoUpdatedAt: Date | null }) =>
-  r.hasPhoto ? `/api/lektor/${r.id}?v=${r.photoUpdatedAt?.getTime() ?? 0}` : undefined;
+  r.hasPhoto ? `/api/lektor/${r.id}/${r.photoUpdatedAt?.getTime() ?? 0}` : undefined;
 
 function toSpeaker(r: SpeakerRow, lang: Lang = "bg"): Speaker {
   // English where it has been filled in, the Bulgarian original otherwise.

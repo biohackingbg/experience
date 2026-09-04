@@ -1,9 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // sharp carries a native binary and must be required at runtime rather
-  // than bundled into the route that resizes the speaker portraits.
-  serverExternalPackages: ["sharp"],
+  images: {
+    // The speaker portraits come out of the database through a route of our
+    // own; the optimizer needs to be told it may resize them. Nothing else
+    // local is dynamic, so the pattern is as narrow as the route.
+    localPatterns: [{ pathname: "/api/lektor/**", search: "" }],
+  },
   // Speaker portraits are uploaded through a server action; they are resized
   // in the browser first, so the ceiling is generous, not large.
   experimental: { serverActions: { bodySizeLimit: "4mb" } },
