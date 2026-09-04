@@ -3,10 +3,12 @@ import { notFound } from "next/navigation";
 import QRCode from "qrcode";
 
 import { Calendar, Pin, TicketIcon } from "@/components/ui/Pictograms";
-import { TICKET_PAGE } from "@/lib/i18n";
+import { BOOKING, TICKET_PAGE } from "@/lib/i18n";
+import { getTicketPlaces, listWorkshops } from "@/lib/workshops";
 import { findTicket } from "@/lib/tickets-lookup";
 
 import { AttendeeForm } from "./AttendeeForm";
+import { Workshops } from "./Workshops";
 
 export const metadata: Metadata = {
   title: "Твоят билет | Sofia Life Summit 2026",
@@ -26,6 +28,7 @@ export default async function TicketPage({
 
   if (!ticket) notFound();
   const t = TICKET_PAGE[ticket.lang];
+  const [sessions, places] = await Promise.all([listWorkshops(), getTicketPlaces(ticket.code)]);
 
   // Rendered as an SVG string rather than a canvas so it prints crisply and
   // needs no client JavaScript.
@@ -130,6 +133,28 @@ export default async function TicketPage({
             </p>
           )}
         </div>
+
+        {places && (
+          <Workshops
+            code={ticket.code}
+            lang={ticket.lang}
+            tierId={places.tierId}
+            sessions={sessions.map((w) => ({
+              id: w.id,
+              kind: w.kind,
+              title: w.title,
+              description: w.description,
+              host: w.host,
+              location: w.location,
+              day: w.day,
+              startsAt: w.startsAt,
+              endsAt: w.endsAt,
+              left: w.left,
+            }))}
+            booked={places.bookings.map((b) => b.workshopId)}
+            remaining={places.remaining}
+          />
+        )}
 
         <p className="mt-5 text-center text-xs leading-relaxed text-bh-ink/45 print:hidden">
           {t.keep}

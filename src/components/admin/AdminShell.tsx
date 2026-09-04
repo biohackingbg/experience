@@ -30,6 +30,7 @@ const I = {
   clock: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l3 2"/></svg>,
   person: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="10" cy="7" r="3.5"/><path d="M4 17c.8-3 3.2-4.5 6-4.5s5.2 1.5 6 4.5"/></svg>,
   ticket: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"><path d="M3 7a2 2 0 0 0 2-2h10a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z"/><path d="M8 5v10" strokeDasharray="2 2"/></svg>,
+  hands: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M7 11V5.5a1.5 1.5 0 0 1 3 0V10m0-1.5a1.5 1.5 0 0 1 3 0V11m0-1a1.5 1.5 0 0 1 3 0v3a4 4 0 0 1-4 4h-2a4 4 0 0 1-4-4v-1l-1.5-1.5a1.5 1.5 0 0 1 2-2L7 11"/></svg>,
   mail: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"><rect x="3" y="5" width="14" height="11" rx="2"/><path d="m3 7 7 5 7-5"/></svg>,
   out: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M8 4H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3M12 7l3 3-3 3M15 10H8"/></svg>,
 };
@@ -49,6 +50,7 @@ const MENU = [
   { page: "lektori" as const, href: "/admin/lektori", label: "Лектори", icon: I.person },
   { page: "vhod" as const, href: "/admin/vhod", label: "Вход на събитието", icon: I.door },
   { page: "izdai" as const, href: "/admin/izdai", label: "Издаване на билети", icon: I.ticket },
+  { page: "rabotilnici" as const, href: "/admin/rabotilnici", label: "Работилници", icon: I.hands },
 ];
 
 export function AdminShell({ access, children }: { access: Access; children: React.ReactNode }) {

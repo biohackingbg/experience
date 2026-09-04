@@ -93,6 +93,47 @@ export const TICKET_PAGE = {
     whoTitle: "Attendee name", whoAsk: "Who is this ticket for?", whoHint: "If the ticket is for someone else, write their name - that is how we find them at the entrance and print their badge. If it is for you, leave it empty.", whoPlaceholder: "Full name", save: "Save", saving: "Saving…" },
 } as const;
 
+export const BOOKING = {
+  bg: {
+    title: "Работилници и преживявания",
+    intro: "Местата са ограничени и се пазят с реда на записване. Можеш да се откажеш по всяко време.",
+    day1: "Събота 07.11",
+    day2: "Неделя 08.11",
+    book: "Запиши ме",
+    booking: "Записва…",
+    cancel: "Откажи мястото",
+    cancelling: "Отказва…",
+    booked: "Записан",
+    full: "Няма места",
+    clash: "В този час вече си записан другаде",
+    notAllowed: "Не е включено в твоя билет",
+    usedUp: "Използва избора си",
+    left: (n: number) => (n === 1 ? "остава 1 място" : `остават ${n} места`),
+    none: "Записването отваря скоро - ще пишем на купувачите, щом програмата се отвори.",
+    coreNote: "Работилниците и преживяванията са включени в PLUS и PEAK.",
+    yours: "Твоята програма",
+  },
+  en: {
+    title: "Workshops and experiences",
+    intro: "Places are limited and go in the order people book. You can cancel at any time.",
+    day1: "Saturday 7 Nov",
+    day2: "Sunday 8 Nov",
+    book: "Book a place",
+    booking: "Booking…",
+    cancel: "Cancel place",
+    cancelling: "Cancelling…",
+    booked: "Booked",
+    full: "Full",
+    clash: "You are booked elsewhere at this time",
+    notAllowed: "Not included in your ticket",
+    usedUp: "You have used your choice",
+    left: (n: number) => (n === 1 ? "1 place left" : `${n} places left`),
+    none: "Booking opens soon - we will write to ticket holders when it does.",
+    coreNote: "Workshops and experiences are included with PLUS and PEAK.",
+    yours: "Your programme",
+  },
+} as const;
+
 export const SUCCESS = {
   bg: { eyebrow: "Плащането е прието", title: "Благодарим!", body: "Билетът ти се издава в момента. Ще получиш имейл с потвърждение и самия билет до няколко минути. Ако не пристигне, провери папката със спам.", ref: "Номер на поръчка", keep: "Пази този номер - с него можем да намерим поръчката ти при въпрос.", back: "Обратно към сайта" },
   en: { eyebrow: "Payment received", title: "Thank you!", body: "Your ticket is being issued. A confirmation email with the ticket itself arrives within a few minutes. If it does not, check your spam folder.", ref: "Order number", keep: "Keep this number - it is how we find your order if you have a question.", back: "Back to the site" },

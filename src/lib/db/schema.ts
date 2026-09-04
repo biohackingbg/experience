@@ -607,6 +607,49 @@ export const accessGrants = pgTable("access_grants", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+/**
+ * Workshops and special experiences - the parts of the programme with a
+ * seat count. A ticket books a place here; what a ticket may book comes
+ * from its tier (see workshops.ts), which is what the ticket page promises.
+ */
+export const workshops = pgTable("workshops", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  /** workshop | experience - the two things the tiers speak about separately. */
+  kind: text("kind").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  /** Who runs it, as it should read on the page. */
+  host: text("host"),
+  /** Room or zone, for the person looking for it on the day. */
+  location: text("location"),
+  /** 1 = Saturday, 2 = Sunday. */
+  day: integer("day").notNull(),
+  /** "11:00" - comparable as text, which is all the clash check needs. */
+  startsAt: text("starts_at").notNull(),
+  endsAt: text("ends_at").notNull(),
+  capacity: integer("capacity").notNull(),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }),
+});
+
+/** One place, held by one ticket. The unique pair is what stops a double booking. */
+export const workshopBookings = pgTable(
+  "workshop_bookings",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    workshopId: uuid("workshop_id").notNull().references(() => workshops.id, { onDelete: "cascade" }),
+    ticketId: uuid("ticket_id").notNull().references(() => tickets.id, { onDelete: "cascade" }),
+    /** Scanned at the workshop's own door, if the team checks there too. */
+    checkedInAt: timestamp("checked_in_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("workshop_bookings_pair_idx").on(table.workshopId, table.ticketId),
+    index("workshop_bookings_ticket_idx").on(table.ticketId),
+  ],
+);
+
 export type DeckLink = typeof deckLinks.$inferSelect;
 
 export type Order = typeof orders.$inferSelect;
