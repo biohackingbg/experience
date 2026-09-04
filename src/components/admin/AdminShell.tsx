@@ -15,7 +15,7 @@ import { NavLink } from "./NavLink";
  */
 
 const I = {
-  plane: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M17.2 2.8 8.6 11.4"/><path d="M17.2 2.8 11.8 17.4 8.6 11.4 2.6 8.2z"/></svg>,
+  plane: <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2.4c.95 0 1.6 1.05 1.6 2.5v4.1l6.4 3.9v1.9l-6.4-1.9v3.5l2.1 1.6v1.3L10 18.3l-3.7 1v-1.3l2.1-1.6v-3.5L2 14.8v-1.9l6.4-3.9V4.9c0-1.45.65-2.5 1.6-2.5z"/></svg>,
   rota: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8.5h14M7 2.5v3M13 2.5v3M6.5 12h3M6.5 14.5h5"/></svg>,
   grid: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="11" y="3" width="6" height="6" rx="1.5"/><rect x="3" y="11" width="6" height="6" rx="1.5"/><rect x="11" y="11" width="6" height="6" rx="1.5"/></svg>,
   wallet: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="5" width="14" height="11" rx="2"/><path d="M3 9h14M13 12.5h1.5"/></svg>,
