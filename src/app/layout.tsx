@@ -3,6 +3,7 @@ import { Sofia_Sans, Geologica, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ViewTracker } from "@/components/ViewTracker";
 import { cheapestOf, getPricing, priceOf } from "@/lib/pricing";
+import { META } from "@/lib/site-copy";
 import { formatPrice } from "@/lib/tickets";
 
 /** Both faces carry Cyrillic, so Bulgarian headings no longer fall back. */
@@ -22,15 +23,8 @@ const monoFont = Geist_Mono({
 });
 
 const SITE = "https://thelongevitysummit.eu";
-const TITLE =
-  "Sofia Life Summit 2026 - дълголетие и биохакинг, София | Biohacking Experience";
-function describe(from: number): string {
-  return (
-    "Фест за дълголетие и биохакинг - 07-08 ноември 2026, Гранд Хотел " +
-    "Милениум, София. Четири зони, longevity паспорт, 12 станции за " +
-    `измерване, международни лектори. Билети от ${formatPrice(from)} €.`
-  );
-}
+const TITLE = META.bg.title;
+const describe = (from: number) => META.bg.describe(formatPrice(from));
 
 /**
  * Generated rather than declared: the description quotes the cheapest ticket,
@@ -46,7 +40,9 @@ export async function generateMetadata(): Promise<Metadata> {
   metadataBase: new URL(SITE),
   title: TITLE,
   description: DESCRIPTION,
-  alternates: { canonical: "/" },
+  // Both languages are declared to search engines, so the English page is
+  // found as the English version rather than as a near-duplicate.
+  alternates: { canonical: "/", languages: { bg: "/", en: "/en" } },
   // Proves ownership to Search Console without touching DNS. The domain sits
   // on SuperHosting's redirect nameservers, which serve a template zone with
   // no TXT records, so the DNS method is not available until the zone moves.

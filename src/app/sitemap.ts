@@ -18,6 +18,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
+      url: `${SITE}/en`,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
+      url: `${SITE}/programa`,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    {
+      url: `${SITE}/en/programa`,
+      changeFrequency: "weekly",
+      priority: 0.6,
+    },
+    {
       url: `${SITE}/usloviya`,
       changeFrequency: "yearly",
       priority: 0.3,

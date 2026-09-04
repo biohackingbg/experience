@@ -5,7 +5,6 @@ import { SummitZones } from "@/components/summit/SummitZones";
 import { SummitPartners } from "@/components/summit/SummitPartners";
 import { SummitSpeakers } from "@/components/summit/SummitSpeakers";
 import { SummitTracks } from "@/components/summit/SummitTracks";
-// import { SummitPassport } from "@/components/summit/SummitPassport";
 import { SummitProgram } from "@/components/summit/SummitProgram";
 import { SummitTickets } from "@/components/summit/SummitTickets";
 import { SummitRegister } from "@/components/summit/SummitRegister";
@@ -19,6 +18,7 @@ import { buildEventSchema } from "@/lib/event-schema";
 // this interval only covers a flip that somehow did not.
 export const revalidate = 300;
 
+/** The Bulgarian site. Its English twin is /en, built from the same sections. */
 export default async function Home() {
   const eventSchema = await buildEventSchema();
   return (
@@ -36,8 +36,6 @@ export default async function Home() {
         <SummitZones />
         <SummitConcept />
         <SummitPartners />
-        {/* Held back until the passport programme is confirmed. */}
-        {/* <SummitPassport /> */}
         <SummitProgram />
         <SummitTickets />
         <SummitRegister />

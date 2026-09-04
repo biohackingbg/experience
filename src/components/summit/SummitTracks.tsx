@@ -6,6 +6,8 @@ import {
   People,
   Stethoscope,
 } from "@/components/ui/Pictograms";
+import type { Lang } from "@/lib/i18n";
+import { TRACKS } from "@/lib/site-copy";
 
 /**
  * The two tracks, side by side.
@@ -23,23 +25,22 @@ import {
 
 const CONFERENCE_URL = "https://www.longevitybulgaria.com/post/conference-2026";
 
-export function SummitTracks() {
+export function SummitTracks({ lang = "bg" }: { lang?: Lang }) {
+  const c = TRACKS[lang];
   return (
     <section id="dve-sabitiya" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
         <Reveal className="flex flex-col gap-6 border-t border-bh-ink/15 pt-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="bh-eyebrow font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">
-              Как е устроено
+              {c.eyebrow}
             </p>
             <h2 className="mt-4 max-w-2xl text-[clamp(2rem,4.5vw,3.5rem)] font-display font-[900] uppercase leading-[0.95] tracking-tight text-bh-ink">
-              Две събития под един покрив
+              {c.title}
             </h2>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-bh-ink/60">
-            Медицинската конференция е от 6 до 8 ноември, потребителският фест -
-            на 7 и 8. Една сграда, Гранд Хотел Милениум, но отделни събития с
-            отделни билети.
+            {c.intro}
           </p>
         </Reveal>
 
@@ -58,25 +59,21 @@ export function SummitTracks() {
               </div>
 
               <p className="mt-5 font-mono text-[0.65rem] uppercase tracking-[0.2em] text-bh-ink/45">
-                Bulgarian Longevity Association
+                {c.medEyebrow}
               </p>
               <h3 className="mt-2 font-display text-2xl font-[900] uppercase leading-none tracking-tight">
-                Медицинска конференция
+                {c.medTitle}
               </h3>
               <p className="mt-3 text-sm font-semibold text-bh-rose">
-                За лекари и специалисти
+                {c.medFor}
               </p>
               <p className="mt-4 flex items-center gap-2 font-mono text-[0.7rem] uppercase tracking-[0.12em] text-bh-ink/55">
                 <Calendar className="h-4 w-4 shrink-0 text-bh-assoc" />
-                06-08 ноември 2026
+                {c.medDates}
               </p>
 
               <ul className="mt-6 flex flex-1 flex-col gap-3">
-                {[
-                  "Научни доклади и клинични данни",
-                  "Международни лектори в пълен формат",
-                  "Регистрация през сайта на Асоциацията",
-                ].map((point) => (
+                {c.medPoints.map((point) => (
                   <li
                     key={point}
                     className="flex gap-3 text-sm leading-relaxed text-bh-ink/70"
@@ -92,13 +89,13 @@ export function SummitTracks() {
 
               <div className="mt-8 flex items-center justify-between gap-4">
                 <span className="font-mono text-[0.62rem] uppercase tracking-[0.15em] text-bh-ink/45">
-                  Към регистрацията
+                  {c.medCta}
                 </span>
                 <a
                   href={CONFERENCE_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="Регистрация за медицинската конференция, longevitybulgaria.com"
+                  aria-label={c.medAria}
                   className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-bh-rose text-white transition-transform hover:-translate-y-0.5"
                 >
                   <Arrow className="h-5 w-5" />
@@ -129,19 +126,15 @@ export function SummitTracks() {
                 Biohacking Experience
               </h3>
               <p className="mt-3 text-sm font-semibold text-bh-lime">
-                За всички, без медицинско образование
+                {c.ourFor}
               </p>
               <p className="mt-4 flex items-center gap-2 font-mono text-[0.7rem] uppercase tracking-[0.12em] text-bh-paper/60">
                 <Calendar className="h-4 w-4 shrink-0 text-bh-lime" />
-                07-08 ноември 2026
+                {c.ourDates}
               </p>
 
               <ul className="mt-6 flex flex-1 flex-col gap-3">
-                {[
-                  "Четири зони: сцена, движение, възстановяване, Village",
-                  "Същите лектори, на разбираем език, по 25 минути",
-                  "Билетите на тази страница",
-                ].map((point) => (
+                {c.ourPoints.map((point) => (
                   <li
                     key={point}
                     className="flex gap-3 text-sm leading-relaxed text-bh-paper/75"
@@ -157,13 +150,13 @@ export function SummitTracks() {
 
               <div className="mt-8 flex items-center justify-between gap-4">
                 <span className="font-mono text-[0.62rem] uppercase tracking-[0.15em] text-bh-paper/50">
-                  Към билетите
+                  {c.ourCta}
                 </span>
                 {/* Down rather than diagonal: this one stays on the page, and
                     the arrow should say so before it is clicked. */}
                 <a
                   href="#tickets"
-                  aria-label="Към билетите"
+                  aria-label={c.ourAria}
                   className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-bh-lime text-bh-ink transition-transform hover:-translate-y-0.5"
                 >
                   <ArrowDown className="h-5 w-5" />
@@ -174,9 +167,7 @@ export function SummitTracks() {
         </div>
 
         <p className="mt-6 max-w-3xl font-mono text-[0.7rem] leading-relaxed uppercase tracking-[0.12em] text-bh-ink/40">
-          Билетът от тази страница дава достъп до Biohacking Experience.
-          Медицинската конференция има отделна регистрация през Bulgarian
-          Longevity Association.
+          {c.footnote}
         </p>
       </div>
     </section>

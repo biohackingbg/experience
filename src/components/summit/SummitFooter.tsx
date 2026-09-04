@@ -1,11 +1,10 @@
-const nav = [
-  { href: "#concept", label: "Концепция" },
-  { href: "#passport", label: "Паспорт" },
-  { href: "#program", label: "Програма" },
-  { href: "#tickets", label: "Билети" },
-];
+import Link from "next/link";
 
-export function SummitFooter() {
+import type { Lang } from "@/lib/i18n";
+import { FOOTER } from "@/lib/site-copy";
+
+export function SummitFooter({ lang = "bg" }: { lang?: Lang }) {
+  const c = FOOTER[lang];
   return (
     <footer className="px-5 pb-10 pt-24 sm:px-8 sm:pt-32 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
@@ -25,18 +24,17 @@ export function SummitFooter() {
               className="bh-logo-dark-bg h-9 w-auto"
             />
             <p className="mt-5 text-sm leading-relaxed text-bh-ink/55">
-              Sofia Life Summit се организира съвместно от Bulgarian Longevity
-              Association и Biohacking.bg.
+              {c.about}
             </p>
           </div>
 
           <div className="flex gap-16">
             <div>
               <p className="font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/40">
-                Навигация
+                {c.navTitle}
               </p>
               <ul className="mt-4 flex flex-col gap-3 text-sm">
-                {nav.map((l) => (
+                {c.links.map((l) => (
                   <li key={l.href}>
                     <a
                       href={l.href}
@@ -51,7 +49,7 @@ export function SummitFooter() {
 
             <div>
               <p className="font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/40">
-                Контакт
+                {c.contactTitle}
               </p>
               <ul className="mt-4 flex flex-col gap-3 text-sm">
                 <li>
@@ -62,8 +60,8 @@ export function SummitFooter() {
                     hi@biohacking.bg
                   </a>
                 </li>
-                <li className="text-bh-ink/70">Гранд Хотел Милениум, София</li>
-                <li className="text-bh-ink/70">07-08 ноември 2026</li>
+                <li className="text-bh-ink/70">{c.venue}</li>
+                <li className="text-bh-ink/70">{c.dates}</li>
                 <li>
                   {/* Where the weekly speaker reveals actually live - the
                       site had no way of sending anyone there until now.
@@ -120,14 +118,14 @@ export function SummitFooter() {
         <div className="mt-12 flex flex-col gap-2 border-t border-bh-ink/10 pt-6 font-mono text-xs uppercase tracking-[0.15em] text-bh-ink/35 sm:flex-row sm:justify-between">
           <span>© 2026 Biohacking.bg</span>
           <span className="flex flex-wrap gap-x-4 gap-y-1">
-            <a href="/usloviya" className="transition-colors hover:text-bh-ink">
-              Общи условия
-            </a>
-            <a href="/poveritelnost" className="transition-colors hover:text-bh-ink">
-              Поверителност
-            </a>
+            <Link href="/usloviya" className="transition-colors hover:text-bh-ink">
+              {c.terms}
+            </Link>
+            <Link href="/poveritelnost" className="transition-colors hover:text-bh-ink">
+              {c.privacy}
+            </Link>
           </span>
-          <span>Sofia Life Summit · Longevity for everyone</span>
+          <span>{c.tagline}</span>
         </div>
       </div>
     </footer>

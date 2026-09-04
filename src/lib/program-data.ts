@@ -4,7 +4,9 @@ import { asc, eq, sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { sessions } from "@/lib/db/schema";
+import type { Lang } from "@/lib/i18n";
 import { type Day, PROGRAM, type Slot } from "@/lib/program";
+import { PROGRAM_SECTION } from "@/lib/site-copy";
 
 /**
  * The programme the site shows. Until the team imports it into the database
@@ -12,8 +14,18 @@ import { type Day, PROGRAM, type Slot } from "@/lib/program";
  * code copy is only the seed it came from.
  */
 
-/** The day headings never left the code; the rows only carry the slots. */
-const DAY_META = PROGRAM.map(({ day, date, theme, intro }) => ({ day, date, theme, intro }));
+/**
+ * The day headings never left the code; the rows only carry the slots. In
+ * English the heading words come from site-copy - the date is a number in
+ * both languages, so only the day, the theme and the intro are translated.
+ */
+function dayMeta(lang: Lang) {
+  return PROGRAM.map(({ day, date, theme, intro }, i) => {
+    if (lang === "bg") return { day, date, theme, intro };
+    const en = PROGRAM_SECTION.en.days[i];
+    return { day: en?.day || day, date, theme: en?.theme || theme, intro: en?.intro || intro };
+  });
+}
 
 export type SessionRow = {
   id: string;
@@ -33,15 +45,16 @@ export async function listSessions(): Promise<SessionRow[]> {
 
 export const peopleList = (v: string | null) => (v ?? "").split(/\r?\n|;/).map((s) => s.trim()).filter(Boolean);
 
-export async function getProgram(): Promise<Day[]> {
+export async function getProgram(lang: Lang = "bg"): Promise<Day[]> {
   let rows: SessionRow[] = [];
   try {
     rows = await listSessions();
   } catch (error) {
     console.error("[program] read failed, showing the code copy:", error);
   }
-  if (rows.length === 0) return PROGRAM;
-  return DAY_META.map((meta, i) => ({
+  const meta0 = dayMeta(lang);
+  if (rows.length === 0) return PROGRAM.map((d, i) => ({ ...d, ...meta0[i] }));
+  return meta0.map((meta, i) => ({
     ...meta,
     slots: rows
       .filter((r) => r.day === i + 1)

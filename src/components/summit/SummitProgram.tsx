@@ -1,5 +1,7 @@
 import { Reveal } from "@/components/ui/Reveal";
+import type { Lang } from "@/lib/i18n";
 import { getProgram } from "@/lib/program-data";
+import { PROGRAM_SECTION } from "@/lib/site-copy";
 
 /**
  * The programme, with every name on it.
@@ -13,8 +15,9 @@ import { getProgram } from "@/lib/program-data";
  * people the source marks "(не е говорено с нея)" were never transcribed
  * into it. Nobody is announced here who has not agreed to come.
  */
-export async function SummitProgram() {
-  const PROGRAM = await getProgram();
+export async function SummitProgram({ lang = "bg" }: { lang?: Lang }) {
+  const PROGRAM = await getProgram(lang);
+  const c = PROGRAM_SECTION[lang];
 
   return (
     <section id="program" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
@@ -22,16 +25,14 @@ export async function SummitProgram() {
         <Reveal className="flex flex-col gap-6 border-t border-bh-ink/15 pt-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="bh-eyebrow font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">
-              Програма
+              {c.eyebrow}
             </p>
             <h2 className="mt-4 text-[clamp(2rem,4.5vw,3.5rem)] font-display font-[900] uppercase leading-[0.95] tracking-tight text-bh-ink">
-              Два дни, един голям въпрос
+              {c.title}
             </h2>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-bh-ink/60">
-            Как да превърнем повече години в повече живот? Сцената, движението
-            и възстановяването вървят паралелно през целия ден, със записване
-            на час.
+            {c.intro}
           </p>
         </Reveal>
 
@@ -109,8 +110,7 @@ export async function SummitProgram() {
             A published schedule reads as a commitment, and both the line-up
             and the times are still being confirmed. */}
         <p className="mt-6 font-mono text-[0.7rem] uppercase tracking-[0.12em] text-bh-ink/40">
-          Предварителна програма · подлежи на финално потвърждение на лектори и
-          часови диапазони.
+          {c.footnote}
         </p>
       </div>
     </section>

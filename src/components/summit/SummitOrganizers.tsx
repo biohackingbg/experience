@@ -1,4 +1,6 @@
 import { Reveal } from "@/components/ui/Reveal";
+import type { Lang } from "@/lib/i18n";
+import { ORGANIZERS } from "@/lib/site-copy";
 
 /**
  * Co-branding strip: one event, two organisers.
@@ -9,13 +11,14 @@ import { Reveal } from "@/components/ui/Reveal";
  * without importing a second palette.
  */
 
-export function SummitOrganizers() {
+export function SummitOrganizers({ lang = "bg" }: { lang?: Lang }) {
+  const c = ORGANIZERS[lang];
   return (
     <section className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
         <Reveal className="rounded-3xl bg-bh-cloud px-8 py-12 ring-1 ring-bh-ink/8 sm:px-12">
           <p className="bh-eyebrow text-center font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/45">
-            Организатори
+            {c.eyebrow}
           </p>
 
           <div className="mt-10 flex flex-col items-center justify-center gap-8 sm:flex-row sm:gap-14">
@@ -59,11 +62,13 @@ export function SummitOrganizers() {
           </div>
 
           <p className="mx-auto mt-10 max-w-2xl text-center text-sm leading-relaxed text-bh-ink/60">
-            Sofia Life Summit се организира съвместно от{" "}
+            {c.body[0]}
             <span className="font-semibold text-bh-ink">
               Bulgarian Longevity Association
-            </span>{" "}
-            и <span className="font-semibold text-bh-ink">Biohacking.bg</span>.
+            </span>
+            {c.body[1]}
+            <span className="font-semibold text-bh-ink">Biohacking.bg</span>
+            {c.body[2]}
           </p>
         </Reveal>
       </div>

@@ -6,7 +6,9 @@ import {
   People,
   Stage,
 } from "@/components/ui/Pictograms";
+import type { Lang } from "@/lib/i18n";
 import { SPEAKERS } from "@/lib/speakers";
+import { HERO } from "@/lib/site-copy";
 
 /**
  * The full line-up size, announced or not - the number is public even while
@@ -49,7 +51,8 @@ function OrbitBadge() {
   );
 }
 
-export function SummitHero() {
+export function SummitHero({ lang = "bg" }: { lang?: Lang }) {
+  const c = HERO[lang];
   return (
     <section
       id="top"
@@ -74,14 +77,14 @@ export function SummitHero() {
               style={{ animationDelay: "80ms" }}
             >
               <span className="block">
-                Два дни,{" "}
+                {c.line1a}{" "}
                 <span className="mx-1 inline-block -translate-y-[0.32em] whitespace-nowrap rounded-full border border-bh-ink/30 px-[0.5em] py-[0.22em] align-middle font-mono text-[0.3em] font-semibold tracking-[0.16em] text-bh-ink/80">
-                  07-08.11.2026
+                  {c.date}
                 </span>{" "}
-                които могат да
+                {c.line1b}
               </span>
-              <span className="block">променят начина, по който живееш</span>
-              <span className="block lg:pl-[24%]">следващите 20 години.</span>
+              <span className="block">{c.line2}</span>
+              <span className="block lg:pl-[24%]">{c.line3}</span>
             </h1>
           </div>
 
@@ -92,15 +95,12 @@ export function SummitHero() {
           >
             <div className="flex items-start justify-between gap-4">
               <span className="rounded-full border border-bh-paper/30 px-4 py-1.5 font-mono text-xs uppercase tracking-[0.15em] text-bh-paper/90">
-                Гранд Хотел Милениум
+                {c.venue}
               </span>
               <Hotel className="h-8 w-8 shrink-0 text-bh-lime" />
             </div>
             <p className="text-sm leading-relaxed text-bh-paper/80">
-              Не конференция със столове в редици. Науката за дълголетието и
-              биохакинга излиза от лабораторията - на разбираем език, за един
-              ден, в който слушаш, измерваш се, изпробваш и си тръгваш с личен
-              протокол.
+              {c.welcome}
             </p>
           </article>
         </div>
@@ -116,16 +116,15 @@ export function SummitHero() {
               <div className="flex items-start justify-between">
                 <Dna className="h-8 w-8 text-bh-pine" />
                 <span className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-bh-ink/45">
-                  Първото
+                  {c.firstTag}
                 </span>
               </div>
               <div className="mt-4">
                 <h2 className="text-[1.35rem] font-bold leading-snug tracking-tight">
-                  Първото по рода си биохакинг изживяване в България.
+                  {c.firstTitle}
                 </h2>
                 <p className="mt-3 text-sm leading-relaxed text-bh-ink/65">
-                  Два дни, в които науката за дълголетието се пипа, пробва и
-                  измерва - не се слуша от стол.
+                  {c.firstBody}
                 </p>
               </div>
             </article>
@@ -138,7 +137,7 @@ export function SummitHero() {
                   1 000+
                 </div>
                 <div className="mt-1.5 font-mono text-[0.65rem] uppercase tracking-[0.15em] text-bh-paper/50">
-                  посетители
+                  {c.visitors}
                 </div>
               </article>
               <article className="bh-mint rounded-3xl p-5">
@@ -147,7 +146,7 @@ export function SummitHero() {
                   10
                 </div>
                 <div className="mt-1.5 font-mono text-[0.65rem] uppercase tracking-[0.15em] text-bh-ink/50">
-                  интерактивни станции
+                  {c.stations}
                 </div>
               </article>
             </div>
@@ -159,7 +158,7 @@ export function SummitHero() {
             <div className="flex items-start justify-between">
               <Stage className="h-8 w-8 text-bh-pine" />
               <span className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-bh-ink/45">
-                Сцената
+                {c.stageTag}
               </span>
             </div>
 
@@ -168,17 +167,16 @@ export function SummitHero() {
                 {speakerCount}
               </div>
               <div className="mt-2 text-[1.35rem] font-bold leading-snug tracking-tight">
-                международни лектори
+                {c.speakersLabel}
               </div>
               <div className="mt-6 border-t border-bh-ink/15 pt-5" />
               <div className="flex items-end justify-between gap-6">
                 <p className="max-w-md text-sm leading-relaxed text-bh-ink/70 lg:text-base">
-                  Лекари и изследователи от България и чужбина - на разбираем
-                  език, по 25 минути. Обявяваме нови имена всяка седмица.
+                  {c.speakersBody}
                 </p>
                 <a
                   href="#lektori"
-                  aria-label="Към лекторите"
+                  aria-label={c.toSpeakers}
                   className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-bh-ink text-bh-lime transition-transform hover:-translate-y-0.5"
                 >
                   {/* Down-left: the speakers sit below and start at the left

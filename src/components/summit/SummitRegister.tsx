@@ -1,7 +1,9 @@
 import Link from "next/link";
 
 // import { EarlyAccessForm } from "@/components/summit/EarlyAccessForm";
+import type { Lang } from "@/lib/i18n";
 import { cheapestOf, getPricing, priceOf } from "@/lib/pricing";
+import { REGISTER } from "@/lib/site-copy";
 import { SALES_OPEN, TIERS, formatPrice } from "@/lib/tickets";
 import { Reveal } from "@/components/ui/Reveal";
 import { Calendar, Pin, TicketIcon } from "@/components/ui/Pictograms";
@@ -15,22 +17,22 @@ import { Calendar, Pin, TicketIcon } from "@/components/ui/Pictograms";
  * what the visitor loses by waiting. The form, its consent copy and the
  * signups table all stay in place for when there is something to send.
  */
-export async function SummitRegister() {
+export async function SummitRegister({ lang = "bg" }: { lang?: Lang }) {
   const pricing = await getPricing();
+  const c = REGISTER[lang];
   const early = pricing.discounted;
-  const offer = `${pricing.stage === "launch" ? "стартови цени за" : "специални цени"} ${pricing.label}`;
+  const offer =
+    lang === "en"
+      ? `${pricing.stage === "launch" ? "launch prices for" : "special prices"} ${pricing.stage === "launch" ? "the first 200 tickets" : pricing.label}`
+      : `${pricing.stage === "launch" ? "стартови цени за" : "специални цени"} ${pricing.label}`;
   const from = formatPrice(priceOf(pricing, cheapestOf(pricing)));
 
   const facts = [
-    { label: "Дати", value: "07-08 ноември 2026", icon: Calendar },
-    { label: "Място", value: "Гранд Хотел Милениум, София", icon: Pin },
+    { label: c.factDates, value: c.dates, icon: Calendar },
+    { label: c.factPlace, value: c.venue, icon: Pin },
     {
-      label: "Достъп",
-      value: !SALES_OPEN
-        ? "Билетите - съвсем скоро"
-        : early
-          ? offer.charAt(0).toUpperCase() + offer.slice(1)
-          : "Билетите са в продажба",
+      label: c.factAccess,
+      value: !SALES_OPEN ? c.accessSoon : early ? offer.charAt(0).toUpperCase() + offer.slice(1) : c.accessOpen,
       icon: TicketIcon,
     },
   ];
@@ -41,47 +43,40 @@ export async function SummitRegister() {
         <Reveal className="rounded-[2rem] bg-bh-ink px-8 py-14 text-bh-paper sm:px-12 lg:px-16 lg:py-20">
           <div className="max-w-3xl">
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-bh-lime">
-              Запази мястото си
+              {c.eyebrow}
             </p>
             <h2 className="mt-5 text-[clamp(2.1rem,5vw,4rem)] font-display font-[900] uppercase leading-[0.95] tracking-tight">
-              Един ден. Реални числа. Личен план.
+              {c.title}
             </h2>
             <p className="mt-6 max-w-xl text-base leading-relaxed text-bh-paper/65">
               {!SALES_OPEN ? (
-                <>
-                  Билетите отварят съвсем скоро. Финализираме нивата и цените,
-                  за да са честни и към теб, и към програмата, която строим.
-                  Местата в работилниците и специалните преживявания са
-                  ограничени и се запазват с реда на купуване.
-                </>
+                <>{c.bodyClosed}</>
               ) : (
                 <>
-              Билетите са в продажба
+              {c.bodyOpen}
               {early && (
                 <>
-                  {" "}
-                  - на{" "}
-                  <strong className="font-semibold text-bh-lime">
-                    {offer}
-                  </strong>
+                  {lang === "en" ? " - at " : " - на "}
+                  <strong className="font-semibold text-bh-lime">{offer}</strong>
                 </>
               )}
-              . Местата в работилниците и специалните преживявания са
-              ограничени и се запазват с реда на купуване.
+              {lang === "en"
+                ? ". Places in the workshops and the special experiences are limited and go in the order people buy."
+                : ". Местата в работилниците и специалните преживявания са ограничени и се запазват с реда на купуване."}
                 </>
               )}
             </p>
 
             {SALES_OPEN ? (
               <Link
-                href="/bilet"
+                href={lang === "en" ? "/bilet?lang=en" : "/bilet"}
                 className="bh-gradient mt-8 inline-flex items-center gap-2 rounded-full px-8 py-4 text-base font-semibold text-bh-ink transition-transform hover:-translate-y-0.5"
               >
-                Купи билет{early && <> от {from} €</>}
+                {c.buy}{early && c.buyFrom(from)}
               </Link>
             ) : (
               <span className="mt-8 inline-flex items-center gap-2 rounded-full border border-bh-paper/30 px-8 py-4 text-base font-semibold text-bh-paper/75">
-                Очаквайте скоро
+                {c.soon}
               </span>
             )}
 
@@ -89,14 +84,12 @@ export async function SummitRegister() {
                 event's own numbers rather than a countdown gimmick. */}
             {SALES_OPEN && early && (
               <p className="mt-12 max-w-xl border-t border-bh-paper/15 pt-8 text-sm leading-relaxed text-bh-paper/65">
-                <strong className="font-semibold text-bh-lime">
-                  {pricing.stage === "launch" ? "Стартовите" : "Специалните"} цени важат {pricing.stage === "launch" ? "за " : ""}{pricing.label}.
-                </strong>{" "}
-                След тях билетите минават на редовни цени:{" "}
+                <strong className="font-semibold text-bh-lime">{c.offerNote(offer)}</strong>{" "}
+                {c.regularAfter}
                 {TIERS.map((t, i) => (
                   <span key={t.id}>
                     {i > 0 && ", "}
-                    {t.name} става {formatPrice(t.listPriceCents)} €
+                    {c.becomes(t.name, formatPrice(t.listPriceCents))}
                   </span>
                 ))}
                 .

@@ -9,39 +9,34 @@ import {
   Watch,
   Waves,
 } from "@/components/ui/Pictograms";
+import type { Lang } from "@/lib/i18n";
+import { CONCEPT } from "@/lib/site-copy";
 
 /**
  * The station categories. Partners are announced per category as they sign,
  * so a card carries the field rather than a logo - the promise is "you will
  * try things in this area", which holds before any name is public.
  */
-const stations = [
-  { no: "01", icon: Pulse, title: "Диагностика" },
-  { no: "02", icon: Watch, title: "Wearables" },
-  { no: "03", icon: Waves, title: "Recovery" },
-  { no: "04", icon: Neural, title: "AI & Precision Medicine" },
-  { no: "05", icon: Capsule, title: "Хранителни добавки" },
-  { no: "06", icon: Chip, title: "Медицински технологии" },
-  { no: "07", icon: Heart, title: "Women’s Health" },
-  { no: "08", icon: TestTube, title: "Functional Testing" },
-];
+/** Icons only; the titles are in site-copy.ts. */
+const icons = [Pulse, Watch, Waves, Neural, Capsule, Chip, Heart, TestTube];
 
-export function SummitConcept() {
+export function SummitConcept({ lang = "bg" }: { lang?: Lang }) {
+  const c = CONCEPT[lang];
+  const stations = c.stations.map((title, i) => ({ title, no: String(i + 1).padStart(2, "0"), icon: icons[i] }));
   return (
     <section id="concept" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
         <Reveal className="flex flex-col gap-6 border-t border-bh-ink/15 pt-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="bh-eyebrow font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">
-              Станциите
+              {c.eyebrow}
             </p>
             <h2 className="mt-4 max-w-2xl text-[clamp(2rem,4.5vw,3.5rem)] font-display font-[900] uppercase leading-[0.95] tracking-tight text-bh-ink">
-              10 интерактивни станции
+              {c.title}
             </h2>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-bh-ink/60">
-            Не гледаш отстрани - измерваш се, пробваш, питаш. Всяка станция е
-            водена от партньор в своята област.
+            {c.intro}
           </p>
         </Reveal>
 
@@ -65,7 +60,7 @@ export function SummitConcept() {
                     {s.title}
                   </h3>
                   <p className="mt-2 font-mono text-[0.65rem] uppercase tracking-[0.15em] text-bh-ink/45">
-                    Партньорите ще бъдат обявени скоро.
+                    {c.partnersSoon}
                   </p>
                 </div>
               </article>

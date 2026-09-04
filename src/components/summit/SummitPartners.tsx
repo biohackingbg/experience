@@ -1,5 +1,7 @@
 import { Reveal } from "@/components/ui/Reveal";
+import type { Lang } from "@/lib/i18n";
 import { PARTNERS, type Partner } from "@/lib/partners";
+import { PARTNERS_SECTION } from "@/lib/site-copy";
 
 /**
  * The confirmed partners: white marks on the green, no tiles.
@@ -48,7 +50,8 @@ function Mark({ partner }: { partner: Partner }) {
   );
 }
 
-export function SummitPartners() {
+export function SummitPartners({ lang = "bg" }: { lang?: Lang }) {
+  const c = PARTNERS_SECTION[lang];
   const count = PARTNERS.length;
   if (count === 0) return null;
 
@@ -63,15 +66,14 @@ export function SummitPartners() {
         <Reveal className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="bh-eyebrow font-mono text-xs uppercase tracking-[0.25em] !text-[#cef870]">
-              Партньорите
+              {c.eyebrow}
             </p>
             <h2 className="mt-4 max-w-2xl text-[clamp(2rem,4.5vw,3.5rem)] font-display font-[900] uppercase leading-[0.95] tracking-tight text-[#f2f2ee]">
-              Кой стои зад Sofia Life Summit
+              {c.title}
             </h2>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-[#f2f2ee]/75">
-            Брандовете, които вече са потвърдили участие. Списъкът расте до
-            ноември.
+            {c.intro}
           </p>
         </Reveal>
 

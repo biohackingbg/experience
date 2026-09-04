@@ -1,23 +1,21 @@
 import { Reveal } from "@/components/ui/Reveal";
 import { SponsorWall } from "@/components/summit/SponsorWall";
-import {
-  EXHIBITORS,
-  ZONE_BLURB,
-  ZONE_SPONSORS,
-  type ZoneSponsor,
-} from "@/lib/sponsors";
+import type { Lang } from "@/lib/i18n";
+import { SPONSORS_SECTION } from "@/lib/site-copy";
+import { EXHIBITORS, ZONE_SPONSORS, type ZoneSponsor } from "@/lib/sponsors";
 
-function ZoneCard({ s }: { s: ZoneSponsor }) {
+function ZoneCard({ s, lang }: { s: ZoneSponsor; lang: Lang }) {
+  const c = SPONSORS_SECTION[lang];
   const body = (
     <>
       <p className="bh-eyebrow font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bh-ink/45">
-        Спонсор на зоната
+        {c.zoneSponsor}
       </p>
       <h3 className="mt-2 font-display text-3xl font-[900] uppercase leading-none tracking-tight text-bh-ink">
         {s.zone}
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-bh-ink/55">
-        {ZONE_BLURB[s.zone]}
+        {c.blurbs[s.zone] ?? ""}
       </p>
 
       <div className="mt-8 flex flex-1 items-end">
@@ -61,7 +59,8 @@ function ZoneCard({ s }: { s: ZoneSponsor }) {
  * the page that sells the tickets says "nobody backs this", and the dashed
  * "your logo here" placeholder belongs in the sales deck, not here.
  */
-export function SummitSponsors() {
+export function SummitSponsors({ lang = "bg" }: { lang?: Lang }) {
+  const c = SPONSORS_SECTION[lang];
   if (ZONE_SPONSORS.length === 0 && EXHIBITORS.length === 0) return null;
 
   return (
@@ -70,15 +69,14 @@ export function SummitSponsors() {
         <Reveal className="flex flex-col gap-6 border-t border-bh-ink/15 pt-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="bh-eyebrow font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">
-              Партньори
+              {c.eyebrow}
             </p>
             <h2 className="mt-4 max-w-2xl text-[clamp(2rem,4.5vw,3.5rem)] font-display font-[900] uppercase leading-[0.95] tracking-tight text-bh-ink">
-              Марките, които стоят зад деня
+              {c.title}
             </h2>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-bh-ink/60">
-            Всяка зона има свой партньор, а във Village се събират подбрани
-            компании - добавки, устройства, лаборатории, клиники и храна.
+            {c.intro}
           </p>
         </Reveal>
 
@@ -94,7 +92,7 @@ export function SummitSponsors() {
               }`}
             >
               {ZONE_SPONSORS.map((s) => (
-                <ZoneCard key={s.zone} s={s} />
+                <ZoneCard key={s.zone} s={s} lang={lang} />
               ))}
             </div>
           </Reveal>
@@ -104,7 +102,7 @@ export function SummitSponsors() {
           <>
             <Reveal className="mt-14">
               <p className="font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/45">
-                Village · {EXHIBITORS.length} експонента
+                {c.village(EXHIBITORS.length)}
               </p>
             </Reveal>
             <Reveal className="mt-5">

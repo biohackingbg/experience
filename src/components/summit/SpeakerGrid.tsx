@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
+import type { Lang } from "@/lib/i18n";
+import { SPEAKERS_SECTION } from "@/lib/site-copy";
 import { initials, type Speaker } from "@/lib/speakers";
 import { CountryMark } from "@/components/ui/Flags";
 
@@ -122,7 +124,7 @@ function rotate<T>(list: T[], offset: number, n: number): T[] {
   return Array.from({ length: n }, (_, i) => list[(offset + i) % list.length]);
 }
 
-export function SpeakerGrid({ speakers }: { speakers: Speaker[] }) {
+export function SpeakerGrid({ speakers, lang = "bg" }: { speakers: Speaker[]; lang?: Lang }) {
   const [expanded, setExpanded] = useState(false);
   const { offset, settled } = useFrontRowOffset(speakers.length);
   const hidden = speakers.length - INITIAL;
@@ -147,7 +149,7 @@ export function SpeakerGrid({ speakers }: { speakers: Speaker[] }) {
             onClick={() => setExpanded(true)}
             className="rounded-full bg-bh-ink px-7 py-3.5 text-sm font-semibold text-bh-paper transition-transform hover:-translate-y-0.5"
           >
-            Виж всички {speakers.length} лектори
+            {SPEAKERS_SECTION[lang].showAll(speakers.length)}
           </button>
         </div>
       )}

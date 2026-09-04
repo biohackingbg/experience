@@ -2,8 +2,10 @@ import Link from "next/link";
 
 import { Reveal } from "@/components/ui/Reveal";
 import { WaitlistForm } from "@/components/summit/WaitlistForm";
+import type { Lang } from "@/lib/i18n";
 import { getRemainingAll } from "@/lib/orders";
 import { cheapestOf, discountLabelOf, getPricing, priceOf } from "@/lib/pricing";
+import { TICKETS_SECTION, TIER_FEATURES } from "@/lib/site-copy";
 import { TIERS, SALES_OPEN, SALES_SOON_LABEL, formatPrice } from "@/lib/tickets";
 
 
@@ -29,10 +31,14 @@ function Check({ muted }: { muted?: boolean }) {
 /** Below this many seats the card says so - a true number, not a countdown gimmick. */
 const SCARCE_BELOW = 15;
 
-export async function SummitTickets() {
+export async function SummitTickets({ lang = "bg" }: { lang?: Lang }) {
   const [pricing, remaining] = await Promise.all([getPricing(), SALES_OPEN ? getRemainingAll() : Promise.resolve({} as Record<string, number>)]);
+  const c = TICKETS_SECTION[lang];
   const early = pricing.discounted;
-  const stageWord = pricing.stage === "launch" ? "Стартови цени за" : "Специални цени";
+  // In English the launch window is named in words rather than by the
+  // Bulgarian label, which is written for the Bulgarian sentence.
+  const offerLabel = lang === "en" && pricing.stage === "launch" ? "the first 200 tickets" : pricing.label;
+  const badge = pricing.stage === "launch" ? c.launchBadge(offerLabel) : c.specialBadge(offerLabel);
   void cheapestOf;
 
   return (
@@ -42,28 +48,27 @@ export async function SummitTickets() {
           <div>
             <div className="flex flex-wrap items-center gap-3">
               <p className="bh-eyebrow font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">
-                Билети
+                {c.eyebrow}
               </p>
               {early && (
                 /* Colours written out, not tokens: bh-ink flips in dark mode,
                    and this pill came out pale-on-pale there. */
                 <span className="rounded-full bg-[#cef870] px-3.5 py-1.5 text-[0.72rem] font-bold tracking-tight text-[#02251f]">
-                  {stageWord} {pricing.label}
+                  {badge}
                 </span>
               )}
             </div>
             <h2 className="mt-4 max-w-2xl text-[clamp(2rem,4.5vw,3.5rem)] font-display font-[900] uppercase leading-[0.95] tracking-tight text-bh-ink">
-              Три нива, една логика: колко надълбоко
+              {c.title}
             </h2>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-bh-ink/60">
-            Всички билети дават достъп до сцената и Village. Разликата е в
-            дните, работилниците и специалните преживявания.
+            {c.intro}
             {early && (
               <>
                 {" "}
                 <strong className="font-semibold text-bh-ink">
-                  Тези цени важат {pricing.stage === "launch" ? "за " : ""}{pricing.label}.
+                  {c.introOffer(offerLabel, pricing.stage === "launch")}
                 </strong>
               </>
             )}
@@ -109,20 +114,20 @@ export async function SummitTickets() {
               >
                 {gone ? (
                   <span className={`absolute right-6 top-6 rounded-full px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.15em] ${featured ? "bg-bh-paper/15 text-bh-paper" : "bg-bh-ink/10 text-bh-ink"}`}>
-                    Изчерпано
+                    {c.soldOut}
                   </span>
                 ) : featured ? (
                   <span className="bh-gradient absolute right-6 top-6 rounded-full px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.15em] text-bh-ink">
-                    Най-избиран
+                    {c.featured}
                   </span>
                 ) : null}
 
                 <h3 className="text-xl font-black uppercase tracking-tight">
                   {tier.name}
                 </h3>
-                {tier.tagline ? (
+                {(TIER_FEATURES[tier.id]?.[lang].tagline ?? tier.tagline) ? (
                   <span className={`mt-1 font-mono text-xs uppercase tracking-[0.15em] ${tone.tagline}`}>
-                    {tier.tagline}
+                    {TIER_FEATURES[tier.id]?.[lang].tagline ?? tier.tagline}
                   </span>
                 ) : (
                   <span className="mt-1 block h-4" />
@@ -158,14 +163,14 @@ export async function SummitTickets() {
                           a date, not one that was ever charged - see the note
                           in lib/tickets.ts. */}
                       <p className={`mt-1.5 text-[0.7rem] leading-snug ${tone.note}`}>
-                        редовна цена {pricing.regularAfter}
+                        {c.regularAfter(lang === "en" && pricing.stage === "launch" ? "after the first 200 tickets" : pricing.regularAfter)}
                       </p>
                     </>
                   )}
                 </div>
 
                 <ul className={`mt-8 flex flex-1 flex-col gap-3 text-sm ${tone.list}`}>
-                  {tier.features.map((f) => (
+                  {(TIER_FEATURES[tier.id]?.[lang].features ?? tier.features).map((f) => (
                     <li key={f} className="flex gap-3">
                       <span className={tone.check}>
                         <Check />
@@ -173,7 +178,7 @@ export async function SummitTickets() {
                       {f}
                     </li>
                   ))}
-                  {tier.absent.map((f) => (
+                  {(TIER_FEATURES[tier.id]?.[lang].absent ?? tier.absent).map((f) => (
                     <li key={f} className="flex gap-3 opacity-40 line-through">
                       <Check muted />
                       {f}
@@ -186,22 +191,22 @@ export async function SummitTickets() {
                     buyer who picked a tier landed on an email form. */}
                 {scarce && (
                   <p className={`mt-6 text-xs font-semibold ${featured ? "text-bh-lime" : "text-bh-pine"}`}>
-                    Остават {left} {left === 1 ? "място" : "места"}
+                    {c.left(left ?? 0)}
                   </p>
                 )}
 
                 {gone ? (
-                  <WaitlistForm tierId={tier.id} dark={featured} />
+                  <WaitlistForm tierId={tier.id} dark={featured} lang={lang} />
                 ) : SALES_OPEN ? (
                   <Link
-                    href={`/bilet?nivo=${tier.id}`}
+                    href={`/bilet?nivo=${tier.id}${lang === "en" ? "&lang=en" : ""}`}
                     className={`mt-8 inline-flex items-center justify-center rounded-full px-6 py-3.5 text-sm font-semibold transition-transform hover:-translate-y-0.5 ${
                       featured
                         ? "bh-gradient text-bh-ink"
                         : "bg-bh-ink text-bh-paper"
                     }`}
                   >
-                    Избери {tier.name}
+                    {c.choose(tier.name)}
                   </Link>
                 ) : (
                   <span
@@ -209,7 +214,7 @@ export async function SummitTickets() {
                       featured ? "border-bh-paper/30 text-bh-paper/70" : "border-bh-ink/25 text-bh-ink/60"
                     }`}
                   >
-                    Скоро в продажба
+                    {c.soon}
                   </span>
                 )}
               </div>
@@ -224,7 +229,7 @@ export async function SummitTickets() {
             which a stack of bullet lists cannot do. */}
         <Reveal className="mt-14">
           <h3 className="text-xl font-black uppercase tracking-tight text-bh-ink">
-            Сравни билетите
+            {c.compare}
           </h3>
           <div className="mt-5 overflow-x-auto">
             <table className="w-full min-w-[40rem] text-sm">
@@ -241,18 +246,9 @@ export async function SummitTickets() {
               <tbody>
                 {[
                   SALES_OPEN
-                    ? ["Цена", ...TIERS.map((t) => `${early ? "Сега " : ""}€${formatPrice(priceOf(pricing, t))}`)]
-                    : ["Цена", SALES_SOON_LABEL, SALES_SOON_LABEL, SALES_SOON_LABEL],
-                  ["Достъп", "1 ден по избор", "И двата дни", "И двата дни"],
-                  ["Лекции", "При наличие на места", "Приоритетен достъп", "Гарантиран достъп"],
-                  ["Запазени места", "-", "-", "Премиум зона"],
-                  ["Работилници", "-", "Включени", "Включени с приоритет"],
-                  ["Специални преживявания", "-", "1 по избор", "Всички включени"],
-                  ["Goody bag", "-", "Стойност €100+", "Стойност €250+"],
-                  ["Premium Lounge", "-", "-", "Включен"],
-                  ["Meet & Greet с лектори", "-", "-", "Включен"],
-                  ["Приоритетен вход", "-", "-", "Включен"],
-                  ["Партньорски оферти и привилегии", "✓", "✓", "✓"],
+                    ? [c.priceRow, ...TIERS.map((t) => `${early ? (lang === "en" ? "Now " : "Сега ") : ""}€${formatPrice(priceOf(pricing, t))}`)]
+                    : [c.priceRow, SALES_SOON_LABEL, SALES_SOON_LABEL, SALES_SOON_LABEL],
+                  ...c.rows,
                 ].map(([label, ...cells]) => (
                   <tr key={label} className="border-t border-bh-ink/8 align-top">
                     <td className="py-3 pr-4 font-semibold text-bh-ink">{label}</td>
@@ -275,9 +271,13 @@ export async function SummitTickets() {
             someone who scrolls straight to the prices never sees the two-track
             section, and this is the moment the money is decided. */}
         <p className="mt-6 max-w-3xl font-mono text-[0.7rem] leading-relaxed uppercase tracking-[0.12em] text-bh-ink/40">
-          Билетите тук са за Biohacking Experience · медицинската конференция
-          има отделна регистрация{early ? ` · специалните цени важат ${pricing.stage === "launch" ? "за " : ""}${pricing.label}, независимо от нивото` : ""} · групи над 10 души и корпоративни пакети по
-          договаряне · отстъпка за студенти и медицински специалисти.
+          {c.footnote(
+            early
+              ? lang === "en"
+                ? ` · the special prices apply ${offerLabel}, whichever level you choose`
+                : ` · специалните цени важат ${pricing.stage === "launch" ? "за " : ""}${offerLabel}, независимо от нивото`
+              : "",
+          )}
         </p>
       </div>
     </section>

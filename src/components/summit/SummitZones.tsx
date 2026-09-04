@@ -1,5 +1,7 @@
 import { Reveal } from "@/components/ui/Reveal";
 import { Stage, Stall, Walk, Waves } from "@/components/ui/Pictograms";
+import type { Lang } from "@/lib/i18n";
+import { ZONES } from "@/lib/site-copy";
 
 /**
  * The four zones - the map of the day, sitting above the stations, which are
@@ -9,53 +11,26 @@ import { Stage, Stall, Walk, Waves } from "@/components/ui/Pictograms";
  * buys "името на зоната", so the zone a brand is sold has to exist under the
  * same name on the public page, or the thing they paid for cannot be shown.
  */
-const zones = [
-  {
-    no: "01",
-    tag: "Знанието",
-    title: "Сцена",
-    icon: Stage,
-    text: "18 лекции и панела - лекари и изследователи на разбираем език.",
-  },
-  {
-    no: "02",
-    tag: "Тялото",
-    title: "Движение",
-    icon: Walk,
-    text: "Power Plate зона и пилатес - на постелка и на реформър, със записан час.",
-  },
-  {
-    no: "03",
-    tag: "Балансът",
-    title: "Възстановяване",
-    icon: Waves,
-    text: "Breathwork сесии и Recovery зона, по 30 минути.",
-  },
-  {
-    no: "04",
-    tag: "Брандовете",
-    title: "Village",
-    icon: Stall,
-    text: "30 подбрани компании: добавки, устройства, клиники, храна.",
-  },
-];
+/** Icons only; the words are in site-copy.ts, where both languages sit together. */
+const icons = [Stage, Walk, Waves, Stall];
 
-export function SummitZones() {
+export function SummitZones({ lang = "bg" }: { lang?: Lang }) {
+  const c = ZONES[lang];
+  const zones = c.items.map((z, i) => ({ ...z, no: String(i + 1).padStart(2, "0"), icon: icons[i] }));
   return (
     <section id="zoni" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
         <Reveal className="flex flex-col gap-6 border-t border-bh-ink/15 pt-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="bh-eyebrow font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">
-              Концепцията
+              {c.eyebrow}
             </p>
             <h2 className="mt-4 max-w-2xl text-[clamp(2rem,4.5vw,3.5rem)] font-display font-[900] uppercase leading-[0.95] tracking-tight text-bh-ink">
-              Четири зони, един ден в тялото ти
+              {c.title}
             </h2>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-bh-ink/60">
-            Един ден се движи през четирите - знание, движение, възстановяване
-            и брандовете, които стоят зад тях.
+            {c.intro}
           </p>
         </Reveal>
 
