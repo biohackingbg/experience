@@ -119,10 +119,11 @@ function Banner({ p, ours, partner }: { p: BannerPreset; ours: string; partner: 
   // A single wide line: logos, then the name, then the details - nothing
   // stacked, because there is no room to stack in a 6:1 frame.
   if (layout === "strip") {
-    // LinkedIn lays its own page avatar over the bottom-left of the cover, so
-    // that corner is left empty and the row starts clear of it.
+    // LinkedIn lays its own page avatar over the bottom-left of the cover -
+    // measured on the live page, it covers the first fifth of the width - so
+    // the row starts clear of it rather than behind it.
     return (
-      <div style={{ ...base, alignItems: "center", justifyContent: "space-between", padding: `0 ${pad}px 0 ${h * 0.6}px` }}>
+      <div style={{ ...base, alignItems: "center", justifyContent: "space-between", padding: `0 ${pad}px 0 ${w * 0.22}px` }}>
         <Molecules w={w} h={h} />
         <div style={{ display: "flex", alignItems: "center", gap: pad * 0.9, position: "relative" }}>
           <Logos ours={ours} partner={partner} height={h * 0.22} />
