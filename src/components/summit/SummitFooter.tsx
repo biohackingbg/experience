@@ -1,7 +1,8 @@
 import Link from "next/link";
 
 import type { Lang } from "@/lib/i18n";
-import { FOOTER } from "@/lib/site-copy";
+import { ListForm } from "@/components/summit/ListForm";
+import { FOOTER, LIST } from "@/lib/site-copy";
 
 export function SummitFooter({ lang = "bg" }: { lang?: Lang }) {
   const c = FOOTER[lang];
@@ -26,6 +27,13 @@ export function SummitFooter({ lang = "bg" }: { lang?: Lang }) {
             <p className="mt-5 text-sm leading-relaxed text-bh-ink/55">
               {c.about}
             </p>
+
+            {/* The second and last place to leave an address: someone who
+                reached the bottom of the page without buying. */}
+            <p className="mt-8 font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/40">
+              {LIST[lang].footerTitle}
+            </p>
+            <ListForm lang={lang} source="footer" variant="footer" />
           </div>
 
           <div className="flex gap-16">

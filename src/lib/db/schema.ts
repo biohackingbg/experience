@@ -713,3 +713,21 @@ export const shifts = pgTable(
   },
   (table) => [index("shifts_day_idx").on(table.day, table.zone, table.startsAt)],
 );
+
+/**
+ * Every letter sent to a list, kept as written. Two reasons: the same news
+ * should not go out twice by accident, and when someone asks "what did you
+ * send me in September" the answer is here rather than in someone's memory.
+ */
+export const listMailings = pgTable("list_mailings", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  /** Which list it went to: signups | buyers | waitlist. */
+  audience: text("audience").notNull(),
+  subject: text("subject").notNull(),
+  body: text("body").notNull(),
+  ctaLabel: text("cta_label"),
+  ctaUrl: text("cta_url"),
+  recipients: integer("recipients").notNull().default(0),
+  sentAt: timestamp("sent_at", { withTimezone: true }).notNull().defaultNow(),
+  sentBy: text("sent_by"),
+});

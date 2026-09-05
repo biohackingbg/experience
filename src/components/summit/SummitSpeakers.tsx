@@ -1,7 +1,8 @@
 import { Reveal } from "@/components/ui/Reveal";
 import { SpeakerGrid } from "@/components/summit/SpeakerGrid";
 import type { Lang } from "@/lib/i18n";
-import { SPEAKERS_SECTION } from "@/lib/site-copy";
+import { ListForm } from "@/components/summit/ListForm";
+import { LIST, SPEAKERS_SECTION } from "@/lib/site-copy";
 import { getAnnouncedSpeakers } from "@/lib/speakers-data";
 
 /**
@@ -35,6 +36,23 @@ export async function SummitSpeakers({ lang = "bg" }: { lang?: Lang }) {
           <SpeakerGrid speakers={speakers} lang={lang} />
         </Reveal>
 
+        {/* Someone who has just read the line-up and is not buying today has
+            one reason left to leave an address. It stands here rather than
+            beside the ticket cards, where a free option costs sales. */}
+        <Reveal className="mt-14">
+          <div className="bh-forest rounded-3xl p-8 text-bh-paper sm:p-10">
+            <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-bh-paper/50">
+              {LIST[lang].eyebrow}
+            </p>
+            <h3 className="mt-3 max-w-xl text-2xl font-bold leading-snug tracking-tight sm:text-3xl">
+              {LIST[lang].title}
+            </h3>
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-bh-paper/70">
+              {LIST[lang].body}
+            </p>
+            <ListForm lang={lang} source="speakers-section" />
+          </div>
+        </Reveal>
       </div>
     </section>
   );

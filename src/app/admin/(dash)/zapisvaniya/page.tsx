@@ -3,6 +3,9 @@ import { requireAccess } from "@/lib/access";
 import { sql } from "drizzle-orm";
 
 import { CopyEmails } from "./CopyEmails";
+import { MailForm } from "./MailForm";
+import { audienceCounts, recentMailings } from "@/lib/newsletter";
+import type { Audience } from "@/lib/newsletter-options";
 import { getDb } from "@/lib/db";
 import { signups } from "@/lib/db/schema";
 import { getTier } from "@/lib/tickets";
@@ -40,6 +43,7 @@ export default async function SignupsPage() {
     .orderBy(sql`${signups.createdAt} desc`);
 
   const active = rows.filter((r) => !r.unsubscribedAt);
+  const [counts, mailings] = await Promise.all([audienceCounts(), recentMailings()]);
 
   return (
     <div className="min-h-screen rounded-[1.75rem] bg-bh-paper px-5 py-10 sm:px-8 lg:px-10">
@@ -71,6 +75,33 @@ export default async function SignupsPage() {
             <CopyEmails emails={active.map((r) => r.email)} />
           )}
         </div>
+
+        {/* Writing to a list, in the same place the list lives. Every letter
+            carries a one-click unsubscribe, and what went out is kept below. */}
+        <section className="mt-8 rounded-3xl bg-bh-cloud p-6 ring-1 ring-bh-ink/8">
+          <h2 className="text-lg font-bold tracking-tight text-bh-ink">Писмо до списък</h2>
+          <p className="mt-1 max-w-2xl text-xs leading-relaxed text-bh-ink/55">
+            Изпраща се на партиди до сто, с връзка за отписване във всяко писмо. Прати първо проба на
+            себе си - изглежда точно както ще го получат. Числото на бутона е броят хора, които ще го получат.
+          </p>
+          <MailForm counts={counts} />
+        </section>
+
+        {mailings.length > 0 && (
+          <section className="mt-6">
+            <h2 className="text-lg font-bold tracking-tight text-bh-ink">Изпратени писма</h2>
+            <ul className="mt-3 flex flex-col divide-y divide-bh-ink/8">
+              {mailings.map((m) => (
+                <li key={m.id} className="flex flex-wrap items-baseline justify-between gap-2 py-3 text-sm">
+                  <span className="font-medium text-bh-ink">{m.subject}</span>
+                  <span className="text-xs text-bh-ink/55">
+                    {m.recipients} души · {bgDateTime(m.sentAt)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {rows.length === 0 ? (
           <p className="mt-10 rounded-2xl bg-bh-cloud px-6 py-8 text-center text-sm text-bh-ink/55 ring-1 ring-bh-ink/8">

@@ -528,6 +528,41 @@ export const REGISTER: Copy<{
   },
 };
 
+export const LIST: Copy<{
+  eyebrow: string;
+  title: string;
+  body: string;
+  placeholder: string;
+  button: string;
+  consent: string;
+  done: string;
+  footerTitle: string;
+  footerButton: string;
+}> = {
+  bg: {
+    eyebrow: "Бъди в течение",
+    title: "Програмата, работилниците и цените - на имейл",
+    body: "Пишем рядко и само по повод: когато програмата по часове е готова, когато отворим записването за работилниците и преди цените да се вдигнат. Отписваш се с едно кликване.",
+    placeholder: "твоят имейл",
+    button: "Пиши ми",
+    consent: "Съгласен съм да получавам новини за Sofia Life Summit.",
+    done: "Готово. Ще ти пишем само по тези три повода.",
+    footerTitle: "Новини по имейл",
+    footerButton: "Запиши ме",
+  },
+  en: {
+    eyebrow: "Stay in the loop",
+    title: "The programme, the workshops and the prices - by email",
+    body: "We write rarely and only when there is something: when the hour-by-hour programme is ready, when workshop booking opens, and before the prices go up. One click to unsubscribe.",
+    placeholder: "your email",
+    button: "Write to me",
+    consent: "I agree to receive news about Sofia Life Summit.",
+    done: "Done. We will only write on those three occasions.",
+    footerTitle: "News by email",
+    footerButton: "Sign me up",
+  },
+};
+
 export const PARTNERS_SECTION: Copy<{ eyebrow: string; title: string; intro: string }> = {
   bg: {
     eyebrow: "Партньорите",

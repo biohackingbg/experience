@@ -681,3 +681,111 @@ export async function sendAlertEmail(subject: string, body: string): Promise<boo
     return false;
   }
 }
+
+/* ------------------------------------------------------------------ *
+ * Letters to a list
+ * ------------------------------------------------------------------ */
+
+export type ListMailInput = {
+  to: string;
+  name: string | null;
+  subject: string;
+  /** Plain text as typed in the admin; blank lines separate paragraphs. */
+  body: string;
+  ctaLabel: string | null;
+  ctaUrl: string | null;
+};
+
+/** Line breaks the way people type them, escaped, as paragraphs. */
+function paragraphs(body: string): string {
+  return body
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map(
+      (p) =>
+        `<p style="margin:0 0 16px;font:400 15px/1.65 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f">${esc(p).replaceAll("\n", "<br>")}</p>`,
+    )
+    .join("");
+}
+
+export function listMailHtml(input: ListMailInput, unsubUrl: string): string {
+  const hi = input.name ? `<p style="margin:0 0 16px;font:600 15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f">Здравей, ${esc(input.name)},</p>` : "";
+  const cta =
+    input.ctaUrl && input.ctaLabel
+      ? `<p style="margin:24px 0 0">
+           <a href="${esc(input.ctaUrl)}" style="display:inline-block;background:#146455;color:#f1f5f3;text-decoration:none;
+              font:600 14px/1 -apple-system,Segoe UI,Roboto,sans-serif;padding:14px 22px;border-radius:999px">${esc(input.ctaLabel)}</a>
+         </p>`
+      : "";
+  return `<!doctype html><html lang="bg"><body style="margin:0;background:#f1f5f3;padding:28px 16px">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:20px;padding:32px">
+    <tr><td>
+      <div style="font:700 13px/1 -apple-system,Segoe UI,Roboto,sans-serif;letter-spacing:2px;text-transform:uppercase;color:#14645599">Sofia Life Summit</div>
+      <h1 style="margin:12px 0 20px;font:800 22px/1.3 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f">${esc(input.subject)}</h1>
+      ${hi}
+      ${paragraphs(input.body)}
+      ${cta}
+      <p style="margin:28px 0 0;padding-top:18px;border-top:1px solid #dfe4e0;font:400 12px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f80">
+        07-08 ноември 2026 · Гранд Хотел Милениум, София · <a href="${SITE}" style="color:#146455">thelongevitysummit.eu</a><br>
+        Получаваш това писмо, защото си оставил имейл за новини около Sofia Life Summit.
+        <a href="${esc(unsubUrl)}" style="color:#02251f80">Отпиши се</a>.
+      </p>
+    </td></tr>
+  </table>
+</body></html>`;
+}
+
+export function listMailText(input: ListMailInput, unsubUrl: string): string {
+  return [
+    input.name ? `Здравей, ${input.name},` : "",
+    "",
+    input.body.trim(),
+    input.ctaUrl && input.ctaLabel ? `\n${input.ctaLabel}: ${input.ctaUrl}` : "",
+    "",
+    "07-08 ноември 2026 · Гранд Хотел Милениум, София",
+    SITE,
+    `Отписване: ${unsubUrl}`,
+  ]
+    .filter((l) => l !== "")
+    .join("\n");
+}
+
+/**
+ * One batch of up to a hundred, Resend's limit. Each letter carries its own
+ * unsubscribe link, and the List-Unsubscribe header lets Gmail show its own
+ * button - which keeps complaints off the spam report.
+ */
+export async function sendListMailBatch(inputs: ListMailInput[]): Promise<{ ok: boolean; error?: string }> {
+  const resend = getResend();
+  const from = process.env.EMAIL_FROM;
+  if (!resend || !from) return { ok: false, error: "Пощата не е настроена." };
+  if (inputs.length === 0) return { ok: true };
+  const { unsubscribeUrl, unsubscribePostUrl } = await import("@/lib/unsubscribe");
+  try {
+    const { error } = await resend.batch.send(
+      inputs.map((input) => {
+        const unsub = unsubscribeUrl(input.to);
+        return {
+          from,
+          to: input.to,
+          subject: input.subject,
+          html: listMailHtml(input, unsub),
+          text: listMailText(input, unsub),
+          headers: {
+            "List-Unsubscribe": `<${unsubscribePostUrl(input.to)}>, <${unsub}>`,
+            "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+          },
+        };
+      }),
+    );
+    if (error) {
+      console.error("[email] list mail batch failed:", error);
+      return { ok: false, error: error.message };
+    }
+    return { ok: true };
+  } catch (error) {
+    console.error("[email] list mail batch threw:", error);
+    return { ok: false, error: error instanceof Error ? error.message : String(error) };
+  }
+}
