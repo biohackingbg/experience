@@ -86,6 +86,8 @@ export type DashboardData = {
   /** Whole days until doors open, never below one - the pace line divides by it. */
   daysToEvent: number;
   signupCount: number;
+  /** Joined in the last seven days - whether the list is actually growing. */
+  signupWeek: number;
   checkedIn: number;
   perTier: TierSales[];
   daily: DailySales[];
@@ -166,7 +168,7 @@ export async function getDashboardData(): Promise<DashboardData> {
         .orderBy(desc(orders.createdAt))
         .limit(25),
 
-      db.select({ n: sql<number>`count(*)::int` }).from(signups),
+      db.select({ n: sql<number>`count(*) filter (where ${signups.unsubscribedAt} is null)::int`, week: sql<number>`count(*) filter (where ${signups.unsubscribedAt} is null and ${signups.createdAt} > now() - interval '7 days')::int` }).from(signups),
 
       db
         .select({ n: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int` })
@@ -291,6 +293,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     soldYesterday: dayRow[0]?.yesterday ?? 0,
     daysToEvent,
     signupCount: signupRow[0]?.n ?? 0,
+    signupWeek: signupRow[0]?.week ?? 0,
     checkedIn: checkedInRow[0]?.n ?? 0,
     perTier,
     daily: dailyRows.map((r) => ({

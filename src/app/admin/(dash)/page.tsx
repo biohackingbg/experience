@@ -364,7 +364,7 @@ export default async function AdminDashboard({
         <div className="flex flex-col gap-4 xl:col-span-1 xl:row-span-2">
           <TierBars tiers={d.perTier} />
 
-          <section className="relative flex-1 overflow-hidden rounded-3xl bg-[#0b2a22] p-6 text-white">
+          <section className="relative overflow-hidden rounded-3xl bg-[#0b2a22] p-6 text-white">
             <div aria-hidden className="pointer-events-none absolute -right-16 -top-10 h-56 w-56 rounded-full border-[18px] border-[#146455]/50" />
             <div aria-hidden className="pointer-events-none absolute -bottom-20 -right-6 h-56 w-56 rounded-full border-[18px] border-[#146455]/30" />
             <h2 className="relative text-lg font-bold tracking-tight">До събитието</h2>
@@ -373,6 +373,40 @@ export default async function AdminDashboard({
             </div>
             <p className="relative mt-3 text-sm text-white/65">07-08 ноември · Гранд Хотел Милениум</p>
             <p className="relative mt-1 text-xs text-white/45">остават {seatsLeft} места</p>
+          </section>
+
+          {/* The card above used to stretch to the bottom of the row and leave
+              a hand's width of empty green. The space now answers the question
+              the countdown asks: at this rate, where does it end? */}
+          <section className="rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6">
+            <h2 className="text-lg font-bold tracking-tight">Темпо</h2>
+            <p className="mt-1 text-xs text-[#0b2a22]/50">По продажбите от последните 7 дни.</p>
+            <dl className="mt-4 flex flex-col gap-3 text-sm">
+              <div className="flex items-baseline justify-between gap-3">
+                <dt className="text-[#0b2a22]/60">на ден сега</dt>
+                <dd className="font-semibold tabular-nums">{fmt1(pacePerDay)}</dd>
+              </div>
+              <div className="flex items-baseline justify-between gap-3">
+                <dt className="text-[#0b2a22]/60">нужни на ден</dt>
+                <dd className={`font-semibold tabular-nums ${onPace ? "" : "text-[#9c3d5c]"}`}>{fmt1(neededPerDay)}</dd>
+              </div>
+              <div className="flex items-baseline justify-between gap-3 border-t border-[#0b2a22]/8 pt-3">
+                <dt className="text-[#0b2a22]/60">при това темпо до 7 ноември</dt>
+                <dd className="font-semibold tabular-nums">
+                  ~{Math.round(d.ticketsSold + pacePerDay * daysLeft)} билета
+                </dd>
+              </div>
+            </dl>
+            <Link
+              href="/admin/zapisvaniya"
+              className="mt-5 flex items-baseline justify-between gap-3 border-t border-[#0b2a22]/8 pt-4 text-sm transition-colors hover:text-[#146455]"
+            >
+              <span className="text-[#0b2a22]/60">списък за новини</span>
+              <span className="font-semibold tabular-nums">
+                {d.signupCount}
+                {d.signupWeek > 0 && <span className="ml-1 text-xs font-normal text-[#146455]">+{d.signupWeek}</span>}
+              </span>
+            </Link>
           </section>
         </div>
 
