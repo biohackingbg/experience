@@ -3,6 +3,8 @@ import { Sofia_Sans, Geologica, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ViewTracker } from "@/components/ViewTracker";
 import { cheapestOf, getPricing, priceOf } from "@/lib/pricing";
+import { MetaPixel } from "@/components/MetaPixel";
+import { pixelId } from "@/lib/meta-pixel";
 import { META } from "@/lib/site-copy";
 import { formatPrice } from "@/lib/tickets";
 
@@ -86,6 +88,9 @@ export default function RootLayout({
         />
         <ViewTracker />
         {children}
+        {/* Nothing renders until the pixel id is set, so the site ships with
+            no advertising script on it. */}
+        <MetaPixel id={pixelId()} />
       </body>
     </html>
   );

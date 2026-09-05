@@ -7,6 +7,7 @@ import { sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { orders } from "@/lib/db/schema";
+import { sendPurchase } from "@/lib/meta-pixel";
 import { issueCreditNote, markOrderPaid, markOrderRefunded } from "@/lib/orders";
 import { orderItems } from "@/lib/db/schema";
 import { alertSale } from "@/lib/sale-alert";
@@ -92,6 +93,16 @@ export async function POST(request: Request) {
         // either way, and a 500 here would have Stripe retry a paid order.
         if (order) {
           await alertSale(order.reference);
+          // The same purchase, told to Meta from here as well as from the
+          // browser: a large share of visitors block the browser pixel, and
+          // the shared event id lets Meta keep one of the two. Inert until an
+          // account is connected, and never allowed to fail the webhook.
+          await sendPurchase({
+            eventId: order.reference,
+            email: order.email,
+            value: order.totalCents / 100,
+            currency: "EUR",
+          });
           const sent = await sendTicketEmail({
             to: order.email,
             buyerName: order.name,
