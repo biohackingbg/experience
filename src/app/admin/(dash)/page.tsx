@@ -362,32 +362,7 @@ export default async function AdminDashboard({
         </div>
 
         <div className="flex flex-col gap-4 xl:col-span-1 xl:row-span-2">
-          <section className="rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold tracking-tight">Последни продажби</h2>
-              <a href="#porachki" className="rounded-full border border-[#0b2a22]/20 px-3 py-1.5 text-xs font-semibold transition-colors hover:border-[#0b2a22]">всички</a>
-            </div>
-            {d.recent.length === 0 ? (
-              <p className="mt-5 text-sm text-[#0b2a22]/55">Още няма поръчки.</p>
-            ) : (
-              <ul className="mt-5 flex flex-col gap-4">
-                {d.recent.filter((o) => !o.isTest).slice(0, 5).map((o) => (
-                  <li key={o.reference} className="flex items-start gap-3">
-                    <span
-                      className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${
-                        o.status === "paid" ? "bg-[#146455]" : o.status === "refunded" ? "bg-[#C4607F]" : "bg-[#0b2a22]/25"
-                      }`}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm font-medium">{o.name}</div>
-                      <div className="text-xs text-[#0b2a22]/55">{o.items} · <Money cents={o.totalCents} /></div>
-                      <div className="text-[0.68rem] text-[#0b2a22]/45">{when(o)}</div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
+          <TierBars tiers={d.perTier} />
 
           <section className="relative flex-1 overflow-hidden rounded-3xl bg-[#0b2a22] p-6 text-white">
             <div aria-hidden className="pointer-events-none absolute -right-16 -top-10 h-56 w-56 rounded-full border-[18px] border-[#146455]/50" />
@@ -401,9 +376,53 @@ export default async function AdminDashboard({
           </section>
         </div>
 
+        {/* The sales themselves, where the eye lands first: paid and refunded
+            only, with the unfinished ones kept further down. */}
+        <section className="self-start rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6 xl:col-span-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-lg font-bold tracking-tight">Последни продажби</h2>
+            <a href="#porachki" className="rounded-full border border-[#0b2a22]/20 px-3 py-1.5 text-xs font-semibold transition-colors hover:border-[#0b2a22]">всички</a>
+          </div>
+          {d.recent.filter((o) => !o.isTest).length === 0 ? (
+            <p className="mt-5 text-sm text-[#0b2a22]/55">Още няма поръчки.</p>
+          ) : (
+            <ul className="mt-5 grid gap-4 sm:grid-cols-2">
+              {d.recent.filter((o) => !o.isTest).slice(0, 8).map((o) => (
+                <li key={o.reference} className="flex items-start gap-3">
+                  <span
+                    className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${
+                      o.status === "paid" ? "bg-[#146455]" : o.status === "refunded" ? "bg-[#C4607F]" : "bg-[#0b2a22]/25"
+                    }`}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-medium">{o.name}</div>
+                    <div className="text-xs text-[#0b2a22]/55">{o.items} · <Money cents={o.totalCents} /></div>
+                    <div className="text-[0.68rem] text-[#0b2a22]/45">{when(o)}</div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        <div className="flex flex-col gap-4 self-start xl:col-span-1">
+          <section className="rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6">
+            <h2 className="text-lg font-bold tracking-tight">Запълване</h2>
+            <Gauge pct={soldPct} />
+            <div className="mt-5 flex flex-wrap justify-center gap-4 text-xs text-[#0b2a22]/65">
+              <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-[#146455]" />продадени {d.ticketsSold}</span>
+              <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-[#c9cfca]" />свободни {seatsLeft}</span>
+            </div>
+          </section>
+          <SiteNoticeCard notice={notice} />
+        </div>
+      </div>
+
+      <div className="mt-4 grid items-start gap-4 xl:grid-cols-2">
         {/* Abandoned: money that got as far as the checkout and stopped. One
-            nudge each, by hand, a day later - never automatic, never twice. */}
-        <section id="nedovarsheni" className="self-start rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6 xl:col-span-2">
+            nudge each, by hand, a day later - never automatic, never twice.
+            It sits below the sales now: it is work to do, not the score. */}
+        <section id="nedovarsheni" className="self-start rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="text-lg font-bold tracking-tight">Недовършени поръчки</h2>
             <p className="text-xs text-[#0b2a22]/50">
@@ -478,22 +497,6 @@ export default async function AdminDashboard({
             </ul>
           )}
         </section>
-
-        <div className="flex flex-col gap-4 self-start xl:col-span-1">
-          <section className="rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6">
-            <h2 className="text-lg font-bold tracking-tight">Запълване</h2>
-            <Gauge pct={soldPct} />
-            <div className="mt-5 flex flex-wrap justify-center gap-4 text-xs text-[#0b2a22]/65">
-              <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-[#146455]" />продадени {d.ticketsSold}</span>
-              <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-[#c9cfca]" />свободни {seatsLeft}</span>
-            </div>
-          </section>
-          <SiteNoticeCard notice={notice} />
-        </div>
-      </div>
-
-      <div className="mt-4 grid gap-4 xl:grid-cols-2">
-        <TierBars tiers={d.perTier} />
         <DailyChart data={d.daily} />
       </div>
 
