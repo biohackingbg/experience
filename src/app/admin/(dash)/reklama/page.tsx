@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 
 import { HomeLink } from "@/components/admin/HomeLink";
 import { BANNERS } from "@/lib/banner-presets";
+
+import { BannerDownload } from "./BannerDownload";
 import { requireAccess } from "@/lib/access";
 import { getMarketing } from "@/lib/marketing";
 import { formatPrice } from "@/lib/tickets";
@@ -123,7 +125,7 @@ export default async function MarketingPage() {
           <h2 className="text-lg font-bold tracking-tight text-bh-ink">Банери за социалните мрежи</h2>
           <p className="mt-1 max-w-2xl text-xs leading-relaxed text-bh-ink/55">
             Всеки размер е нарисуван за рамката на своята мрежа, за да не се реже. Датите, мястото и
-            адресът идват от сайта - смениш ли ги там, банерите се сменят сами. Отвори и запази картинката.
+            адресът идват от сайта - смениш ли ги там, банерите се сменят сами. Ако мрежата откаже PNG - LinkedIn понякога го прави - вземи JPEG от втория бутон.
           </p>
           <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {BANNERS.map((b) => (
@@ -139,13 +141,7 @@ export default async function MarketingPage() {
                 </a>
                 <div className="mt-3 text-sm font-semibold text-bh-ink">{b.label}</div>
                 <div className="mt-0.5 text-xs text-bh-ink/55">{b.note}</div>
-                <a
-                  href={`/api/banner/${b.id}`}
-                  download={`sofia-life-summit-${b.id}.png`}
-                  className="mt-3 inline-flex w-fit rounded-full border border-bh-ink/20 px-3 py-1.5 text-xs font-semibold text-bh-ink transition-colors hover:border-bh-ink"
-                >
-                  Свали {b.width}×{b.height}
-                </a>
+                <BannerDownload id={b.id} width={b.width} height={b.height} />
               </li>
             ))}
           </ul>
