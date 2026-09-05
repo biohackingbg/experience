@@ -22,10 +22,13 @@ export const BANNERS: BannerPreset[] = [
   {
     id: "linkedin-cover",
     label: "LinkedIn · корица на страница",
-    width: 1512,
-    height: 256,
+    // LinkedIn's own recommendation, and the one their uploader accepts:
+    // 1512×256 sits above their stated minimum but was refused, which is a
+    // known trap - the picture has to be big enough for the size it is shown at.
+    width: 4200,
+    height: 700,
     layout: "strip",
-    note: "1512×256 - официалният размер на LinkedIn за корица на фирмена страница",
+    note: "4200×700 - препоръчаният от LinkedIn размер за корица на фирмена страница",
   },
   {
     id: "x-header",
