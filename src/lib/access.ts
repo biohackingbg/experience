@@ -22,7 +22,16 @@ import { accessGrants } from "@/lib/db/schema";
  */
 
 export const SCOPE_COOKIE = "bh_scope";
-const SCOPE_MAX_DAYS = 30;
+/**
+ * How long a scoped session lasts, and how long the letter that starts one
+ * stays usable. Both are generous on purpose: these are people doing work on
+ * a few pages for months, and a sign-in that expires while they are still
+ * needed is friction with no safety to show for it. Revoking a grant closes
+ * both the same second - the grant is read from the database on every check,
+ * and the letter's link checks it too.
+ */
+const SCOPE_MAX_DAYS = 90;
+const LOGIN_LINK_DAYS = 30;
 
 export type Access =
   | { kind: "admin"; label: string; scopes: PageId[] }
@@ -150,7 +159,7 @@ export async function requestEmailLink(rawEmail: string): Promise<{ sent: boolea
   // is the same - the page must not tell a stranger who has access.
   if (!g || g.revokedAt || (g.expiresAt && g.expiresAt.getTime() < Date.now())) return { sent: false };
 
-  const exp = Date.now() + 30 * 60_000;
+  const exp = Date.now() + LOGIN_LINK_DAYS * 86_400_000;
   const payload = `${g.id}.${exp}`;
   const sig = sign(`login:${payload}`);
   if (!sig) return { sent: false };

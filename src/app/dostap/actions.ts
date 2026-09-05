@@ -21,6 +21,6 @@ export async function requestAccess(_prev: RequestState, formData: FormData): Pr
   await requestEmailLink(email);
   return {
     status: "sent",
-    message: "Ако този адрес има достъп, връзката вече пътува към него. Важи 30 минути - провери и в спам.",
+    message: "Ако този адрес има достъп, връзката вече пътува към него. Важи месец - провери и в спам.",
   };
 }

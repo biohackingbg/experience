@@ -797,9 +797,8 @@ export async function sendListMailBatch(inputs: ListMailInput[]): Promise<{ ok: 
 export type AccessLinkInput = { to: string; label: string; link: string; pages: string[] };
 
 /**
- * Half an hour of validity, and the letter says so - a sign-in link that
- * looks permanent invites people to keep it in a bookmark, which is exactly
- * what tying access to an address is meant to stop.
+ * The letter says how long the link lasts and that the session it opens
+ * lasts longer still, so nobody has to guess whether to keep it.
  */
 export async function sendAccessLinkEmail(input: AccessLinkInput): Promise<boolean> {
   const resend = getResend();
@@ -817,7 +816,7 @@ export async function sendAccessLinkEmail(input: AccessLinkInput): Promise<boole
       <div style="font:700 13px/1 -apple-system,Segoe UI,Roboto,sans-serif;letter-spacing:2px;text-transform:uppercase;color:#14645599">Sofia Life Summit</div>
       <h1 style="margin:12px 0 16px;font:800 20px/1.3 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f">Вход за ${esc(input.label)}</h1>
       <p style="margin:0 0 20px;font:400 15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f">
-        Натисни бутона, за да влезеш. Връзката важи 30 минути и е само за този имейл.
+        Натисни бутона, за да влезеш. Връзката важи месец, а след влизане оставаш вписан(а) три месеца.
       </p>
       <p style="margin:0 0 24px">
         <a href="${esc(input.link)}" style="display:inline-block;background:#146455;color:#f1f5f3;text-decoration:none;
@@ -834,7 +833,7 @@ export async function sendAccessLinkEmail(input: AccessLinkInput): Promise<boole
       text: [
         `Вход за ${input.label}`,
         "",
-        "Връзката важи 30 минути и е само за този имейл:",
+        "Връзката важи месец. След влизане оставаш вписан(а) три месеца:",
         input.link,
         "",
         `Отваря: ${input.pages.join(", ")}`,

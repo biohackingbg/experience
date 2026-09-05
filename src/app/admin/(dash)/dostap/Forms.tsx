@@ -59,8 +59,9 @@ export function NewGrantForm() {
       </div>
       <input name="email" type="email" placeholder="имейл на човека (по избор, но по-сигурно)" className={`${field} mt-2`} />
       <p className="mt-1.5 text-xs leading-relaxed text-bh-ink/55">
-        С имейл няма линк за подаване: човекът отваря /dostap, въвежда своя адрес и получава вход,
-        който важи 30 минути. Препратено писмо не отваря нищо, а спирането е едно натискане.
+        С имейл няма линк за подаване: човекът отваря /dostap, въвежда своя адрес и получава връзка за
+        вход. Тя важи месец, а самото влизане - три месеца, за да си работи спокойно. „Спри“ затваря
+        и двете веднага.
       </p>
       <Scopes checked={["reklama", "poseshteniya"]} />
       <div className="mt-4 flex items-center gap-3">

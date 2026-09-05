@@ -21,7 +21,8 @@ export default function AccessRequestPage() {
         <p className="font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">Sofia Life Summit</p>
         <h1 className="mt-3 text-2xl font-black tracking-tight text-bh-ink">Вход с имейл</h1>
         <p className="mt-3 text-sm leading-relaxed text-bh-ink/65">
-          Въведи адреса, на който ти е даден достъп. Изпращаме връзка за вход, която важи 30 минути.
+          Въведи адреса, на който ти е даден достъп. Изпращаме връзка за вход, която важи месец - след
+          влизане оставаш вписан(а) три месеца, без да я търсиш пак.
         </p>
         <AccessRequestForm />
       </div>

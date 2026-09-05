@@ -34,7 +34,7 @@ export default async function AdminLoginPage({
         )}
         {dostap === "expired" && (
           <p className="mt-4 rounded-2xl bg-[#C4607F]/10 px-4 py-3 text-sm text-[#9c3d5c] ring-1 ring-[#C4607F]/30">
-            Връзката за вход е изтекла - важи 30 минути. Поискай нова от{" "}
+            Връзката за вход е изтекла. Поискай нова от{" "}
             <Link href="/dostap" className="underline">страницата за вход с имейл</Link>.
           </p>
         )}
