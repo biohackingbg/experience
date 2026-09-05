@@ -43,7 +43,18 @@ export default async function SignupsPage() {
     .orderBy(sql`${signups.createdAt} desc`);
 
   const active = rows.filter((r) => !r.unsubscribedAt);
-  const [counts, mailings] = await Promise.all([audienceCounts(), recentMailings()]);
+  // The list itself must render even if the mailing side fails: this page is
+  // where the addresses live, and losing sight of them because a letter count
+  // threw is the wrong trade. The reason is shown rather than swallowed.
+  let counts: Record<Audience, number> = { signups: 0, buyers: 0, waitlist: 0 };
+  let mailings: Awaited<ReturnType<typeof recentMailings>> = [];
+  let mailError: string | null = null;
+  try {
+    [counts, mailings] = await Promise.all([audienceCounts(), recentMailings()]);
+  } catch (error) {
+    mailError = error instanceof Error ? error.message : String(error);
+    console.error("[zapisvaniya] mailing panel failed:", error);
+  }
 
   return (
     <div className="min-h-screen rounded-[1.75rem] bg-bh-paper px-5 py-10 sm:px-8 lg:px-10">
@@ -84,7 +95,13 @@ export default async function SignupsPage() {
             Изпраща се на партиди до сто, с връзка за отписване във всяко писмо. Прати първо проба на
             себе си - изглежда точно както ще го получат. Числото на бутона е броят хора, които ще го получат.
           </p>
-          <MailForm counts={counts} />
+          {mailError ? (
+            <p className="mt-4 rounded-2xl bg-[#C4607F]/10 px-4 py-3 text-sm text-[#9c3d5c] ring-1 ring-[#C4607F]/30">
+              Писането до списък не се зареди: {mailError}. Записаните по-долу се виждат нормално.
+            </p>
+          ) : (
+            <MailForm counts={counts} />
+          )}
         </section>
 
         {mailings.length > 0 && (

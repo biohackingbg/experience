@@ -57,6 +57,11 @@ export function NewGrantForm() {
         <input name="label" required placeholder="за кого е (напр. Агенция X)" className={field} />
         <input name="until" type="date" className={field} title="валиден до (по избор)" />
       </div>
+      <input name="email" type="email" placeholder="имейл на човека (по избор, но по-сигурно)" className={`${field} mt-2`} />
+      <p className="mt-1.5 text-xs leading-relaxed text-bh-ink/55">
+        С имейл няма линк за подаване: човекът отваря /dostap, въвежда своя адрес и получава вход,
+        който важи 30 минути. Препратено писмо не отваря нищо, а спирането е едно натискане.
+      </p>
       <Scopes checked={["reklama", "poseshteniya"]} />
       <div className="mt-4 flex items-center gap-3">
         <button type="submit" disabled={pending} className="rounded-full bg-bh-ink px-5 py-2.5 text-sm font-semibold text-bh-paper disabled:opacity-50">
@@ -93,7 +98,8 @@ export function GrantRow({ g }: { g: Grant }) {
             {g.scopes.map((s) => PAGES.find((p) => p.id === s)?.label ?? s).join(" · ")}
           </div>
           <div className="mt-0.5 text-xs text-bh-ink/50">
-            {g.expiresAt ? `до ${d(g.expiresAt)}` : "без срок"} · {g.lastUsedAt ? `последно отварян ${d(g.lastUsedAt)}` : "още не е отварян"} · създаден {d(g.createdAt)}
+            {g.email ? `вход с ${g.email}` : "вход с линк"} · {g.expiresAt ? `до ${d(g.expiresAt)}` : "без срок"} ·{" "}
+            {g.lastUsedAt ? `последно отварян ${d(g.lastUsedAt)}` : "още не е отварян"} · създаден {d(g.createdAt)}
           </div>
         </div>
         {!dead && (
@@ -114,10 +120,16 @@ export function GrantRow({ g }: { g: Grant }) {
       {open && !dead && (
         <form action={action} className="mt-3 rounded-2xl bg-bh-paper p-4 ring-1 ring-bh-ink/8">
           <input type="hidden" name="id" value={g.id} />
-          <label className="block text-xs text-bh-ink/60">
-            валиден до (празно = без срок)
-            <input name="until" type="date" defaultValue={g.expiresAt ? g.expiresAt.toISOString().slice(0, 10) : ""} className={`${field} mt-1 sm:w-48`} />
-          </label>
+          <div className="grid gap-2 sm:grid-cols-[12rem_1fr]">
+            <label className="block text-xs text-bh-ink/60">
+              валиден до (празно = без срок)
+              <input name="until" type="date" defaultValue={g.expiresAt ? g.expiresAt.toISOString().slice(0, 10) : ""} className={`${field} mt-1`} />
+            </label>
+            <label className="block text-xs text-bh-ink/60">
+              имейл (празно = достъп с линк)
+              <input name="email" type="email" defaultValue={g.email ?? ""} className={`${field} mt-1`} />
+            </label>
+          </div>
           <Scopes checked={g.scopes} />
           <div className="mt-3 flex items-center gap-2">
             <button type="submit" disabled={pending} className="rounded-full bg-bh-ink px-4 py-2 text-xs font-semibold text-bh-paper disabled:opacity-50">

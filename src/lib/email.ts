@@ -789,3 +789,66 @@ export async function sendListMailBatch(inputs: ListMailInput[]): Promise<{ ok: 
     return { ok: false, error: error instanceof Error ? error.message : String(error) };
   }
 }
+
+/* ------------------------------------------------------------------ *
+ * The sign-in link for someone with page access
+ * ------------------------------------------------------------------ */
+
+export type AccessLinkInput = { to: string; label: string; link: string; pages: string[] };
+
+/**
+ * Half an hour of validity, and the letter says so - a sign-in link that
+ * looks permanent invites people to keep it in a bookmark, which is exactly
+ * what tying access to an address is meant to stop.
+ */
+export async function sendAccessLinkEmail(input: AccessLinkInput): Promise<boolean> {
+  const resend = getResend();
+  const from = process.env.EMAIL_FROM;
+  if (!resend || !from) return false;
+  const pages = input.pages.map((p) => `<li style="margin:2px 0">${esc(p)}</li>`).join("");
+  try {
+    const { error } = await resend.emails.send({
+      from,
+      to: input.to,
+      subject: "Вход към администрацията на Sofia Life Summit",
+      html: `<!doctype html><html lang="bg"><body style="margin:0;background:#f1f5f3;padding:28px 16px">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:20px;padding:32px">
+    <tr><td>
+      <div style="font:700 13px/1 -apple-system,Segoe UI,Roboto,sans-serif;letter-spacing:2px;text-transform:uppercase;color:#14645599">Sofia Life Summit</div>
+      <h1 style="margin:12px 0 16px;font:800 20px/1.3 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f">Вход за ${esc(input.label)}</h1>
+      <p style="margin:0 0 20px;font:400 15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f">
+        Натисни бутона, за да влезеш. Връзката важи 30 минути и е само за този имейл.
+      </p>
+      <p style="margin:0 0 24px">
+        <a href="${esc(input.link)}" style="display:inline-block;background:#146455;color:#f1f5f3;text-decoration:none;
+           font:600 14px/1 -apple-system,Segoe UI,Roboto,sans-serif;padding:14px 22px;border-radius:999px">Влез</a>
+      </p>
+      <p style="margin:0 0 6px;font:600 13px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f">Отваря:</p>
+      <ul style="margin:0 0 20px;padding-left:18px;font:400 13px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f99">${pages}</ul>
+      <p style="margin:0;padding-top:16px;border-top:1px solid #dfe4e0;font:400 12px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f80">
+        Ако не си искал(а) вход, просто изтрий това писмо - никой не е влязъл.
+      </p>
+    </td></tr>
+  </table>
+</body></html>`,
+      text: [
+        `Вход за ${input.label}`,
+        "",
+        "Връзката важи 30 минути и е само за този имейл:",
+        input.link,
+        "",
+        `Отваря: ${input.pages.join(", ")}`,
+        "",
+        "Ако не си искал(а) вход, изтрий това писмо.",
+      ].join("\n"),
+    });
+    if (error) {
+      console.error("[email] access link failed:", error);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("[email] access link threw:", error);
+    return false;
+  }
+}

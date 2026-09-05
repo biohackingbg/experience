@@ -608,6 +608,12 @@ export const accessGrants = pgTable("access_grants", {
   id: uuid("id").primaryKey().defaultRandom(),
   /** Who this is for: "Агенция X". */
   label: text("label").notNull(),
+  /**
+   * Whose address may open it. With one set, the link is not the key: the
+   * person asks for a sign-in link at /dostap and it is sent to this address,
+   * so a forwarded link opens nothing.
+   */
+  email: text("email"),
   /** Comma-separated page ids from access-options.ts. */
   scopes: text("scopes").notNull(),
   tokenHash: text("token_hash").notNull().unique(),

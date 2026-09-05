@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { isAdmin, isTotpConfigured } from "@/lib/admin-auth";
@@ -29,6 +30,12 @@ export default async function AdminLoginPage({
         {dostap === "invalid" && (
           <p className="mt-4 rounded-2xl bg-[#C4607F]/10 px-4 py-3 text-sm text-[#9c3d5c] ring-1 ring-[#C4607F]/30">
             Този линк за достъп вече не работи: спрян е или е изтекъл. Поискай нов от екипа.
+          </p>
+        )}
+        {dostap === "expired" && (
+          <p className="mt-4 rounded-2xl bg-[#C4607F]/10 px-4 py-3 text-sm text-[#9c3d5c] ring-1 ring-[#C4607F]/30">
+            Връзката за вход е изтекла - важи 30 минути. Поискай нова от{" "}
+            <Link href="/dostap" className="underline">страницата за вход с имейл</Link>.
           </p>
         )}
         <LoginForm needsTotp={isTotpConfigured()} />

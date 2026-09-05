@@ -82,6 +82,8 @@ export async function requireAccess(page: PageId): Promise<Access> {
 export type Grant = {
   id: string;
   label: string;
+  /** When set, the link is not the key - a sign-in link is mailed here. */
+  email: string | null;
   scopes: PageId[];
   expiresAt: Date | null;
   revokedAt: Date | null;
@@ -101,15 +103,83 @@ export async function listGrants(): Promise<Grant[]> {
   }));
 }
 
-/** Creates a grant and returns the one-time link token; only its hash is stored. */
-export async function createGrant(label: string, scopes: PageId[], expiresAt: Date | null): Promise<string> {
+/**
+ * Creates a grant and returns the link token; only its hash is stored.
+ *
+ * With an address, that link is meant for nobody: the person signs in at
+ * /dostap with their address and the link is mailed to them, so it cannot be
+ * forwarded, and taking someone's access away is one revoke rather than
+ * hoping the link they were sent never travelled.
+ */
+export async function createGrant(label: string, scopes: PageId[], expiresAt: Date | null, email: string | null = null): Promise<string> {
   const token = randomBytes(24).toString("base64url");
-  await getDb().insert(accessGrants).values({ label, scopes: scopes.join(","), tokenHash: hashToken(token), expiresAt });
+  await getDb().insert(accessGrants).values({
+    label,
+    email: email?.toLowerCase().trim() || null,
+    scopes: scopes.join(","),
+    tokenHash: hashToken(token),
+    expiresAt,
+  });
   return token;
 }
 
-export async function updateGrant(id: string, scopes: PageId[], expiresAt: Date | null): Promise<void> {
-  await getDb().update(accessGrants).set({ scopes: scopes.join(","), expiresAt }).where(eq(accessGrants.id, id));
+export async function updateGrant(id: string, scopes: PageId[], expiresAt: Date | null, email?: string | null): Promise<void> {
+  await getDb()
+    .update(accessGrants)
+    .set({
+      scopes: scopes.join(","),
+      expiresAt,
+      ...(email === undefined ? {} : { email: email?.toLowerCase().trim() || null }),
+    })
+    .where(eq(accessGrants.id, id));
+}
+
+/**
+ * A sign-in link for whoever owns this address, valid for half an hour.
+ *
+ * Signed rather than stored: the address and the deadline are inside the
+ * token, so there is no table of pending logins to clean up, and a stolen
+ * link is stale within the hour. It is only ever mailed to the address on
+ * the grant - never returned to whoever asked.
+ */
+export async function requestEmailLink(rawEmail: string): Promise<{ sent: boolean }> {
+  const email = rawEmail.toLowerCase().trim();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { sent: false };
+  const [g] = await getDb().select().from(accessGrants).where(eq(accessGrants.email, email)).limit(1);
+  // Whether or not an address is on the list, the answer to the person asking
+  // is the same - the page must not tell a stranger who has access.
+  if (!g || g.revokedAt || (g.expiresAt && g.expiresAt.getTime() < Date.now())) return { sent: false };
+
+  const exp = Date.now() + 30 * 60_000;
+  const payload = `${g.id}.${exp}`;
+  const sig = sign(`login:${payload}`);
+  if (!sig) return { sent: false };
+  const link = `https://thelongevitysummit.eu/dostap/vhod/${payload}.${sig}`;
+
+  const { sendAccessLinkEmail } = await import("@/lib/email");
+  const scopes = parseScopes(g.scopes);
+  await sendAccessLinkEmail({ to: email, label: g.label, link, pages: scopes.map((s) => PAGES.find((p) => p.id === s)?.label ?? s) });
+  return { sent: true };
+}
+
+/** Turns a mailed sign-in link into the same scoped session a grant link gives. */
+export async function redeemEmailLink(raw: string): Promise<{ cookie: string; maxAge: number; home: string } | null> {
+  const parts = raw.split(".");
+  if (parts.length !== 3) return null;
+  const [grantId, exp, sig] = parts;
+  const expected = sign(`login:${grantId}.${exp}`);
+  if (!expected || !safeEqual(sig, expected) || Number(exp) < Date.now()) return null;
+  const db = getDb();
+  const [g] = await db.select().from(accessGrants).where(eq(accessGrants.id, grantId)).limit(1);
+  if (!g || g.revokedAt || (g.expiresAt && g.expiresAt.getTime() < Date.now())) return null;
+  const cap = Date.now() + SCOPE_MAX_DAYS * 86_400_000;
+  const until = g.expiresAt ? Math.min(g.expiresAt.getTime(), cap) : cap;
+  const cookieSig = sign(`${g.id}.${until}`);
+  if (!cookieSig) return null;
+  await db.update(accessGrants).set({ lastUsedAt: new Date() }).where(eq(accessGrants.id, g.id));
+  const scopes = parseScopes(g.scopes);
+  const home = PAGES.find((p) => scopes.includes(p.id))?.href ?? "/admin/login";
+  return { cookie: `${g.id}.${until}.${cookieSig}`, maxAge: Math.floor((until - Date.now()) / 1000), home };
 }
 
 export async function revokeGrant(id: string): Promise<void> {
@@ -122,6 +192,9 @@ export async function redeemToken(raw: string): Promise<{ cookie: string; maxAge
   const db = getDb();
   const [g] = await db.select().from(accessGrants).where(eq(accessGrants.tokenHash, hashToken(raw))).limit(1);
   if (!g || g.revokedAt || (g.expiresAt && g.expiresAt.getTime() < Date.now())) return null;
+  // A grant tied to an address is opened by the letter, not by the link -
+  // otherwise the address would be a label rather than a lock.
+  if (g.email) return null;
   const cap = Date.now() + SCOPE_MAX_DAYS * 86_400_000;
   const exp = g.expiresAt ? Math.min(g.expiresAt.getTime(), cap) : cap;
   const sig = sign(`${g.id}.${exp}`);
