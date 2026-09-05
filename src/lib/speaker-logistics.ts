@@ -4,6 +4,7 @@ import { asc, eq, sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { speakerLogistics, speakers } from "@/lib/db/schema";
+import { kitUrl } from "@/lib/speaker-kit";
 
 /**
  * The logistics sheet: every speaker with what is known about their two
@@ -12,6 +13,8 @@ import { speakerLogistics, speakers } from "@/lib/db/schema";
  */
 export type LogisticsRow = {
   speakerId: string;
+  /** Their private materials page - one tap to copy and send. */
+  kitUrl: string;
   name: string;
   title: string | null;
   country: string | null;
@@ -32,7 +35,7 @@ export type LogisticsRow = {
   updatedAt: Date | null;
 };
 
-export type LogisticsInput = Omit<LogisticsRow, "speakerId" | "name" | "title" | "country" | "announced" | "pending" | "updatedAt" | "presentationAt"> & {
+export type LogisticsInput = Omit<LogisticsRow, "speakerId" | "name" | "title" | "country" | "announced" | "pending" | "updatedAt" | "presentationAt" | "kitUrl"> & {
   presentationReceived: boolean;
 };
 
@@ -63,7 +66,7 @@ export async function listLogistics(): Promise<LogisticsRow[]> {
     .leftJoin(speakerLogistics, eq(speakerLogistics.speakerId, speakers.id))
     .where(eq(speakers.pending, false))
     .orderBy(asc(speakers.sort), asc(speakers.name));
-  return rows;
+  return rows.map((r) => ({ ...r, kitUrl: kitUrl(r.speakerId) }));
 }
 
 export async function saveLogistics(speakerId: string, input: LogisticsInput): Promise<void> {

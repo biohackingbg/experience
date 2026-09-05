@@ -17,6 +17,7 @@ function Label({ children }: { children: React.ReactNode }) {
 /** One speaker's sheet: folded to a line of badges, opened to the form. */
 export function LogisticsEditor({ r }: { r: LogisticsRow }) {
   const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [state, action, pending] = useActionState(saveRow, idle);
   const abroad = r.country && r.country !== "България";
 
@@ -35,6 +36,30 @@ export function LogisticsEditor({ r }: { r: LogisticsRow }) {
         >
           {open ? "Затвори" : "Редактирай"}
         </button>
+        {/* The materials page is private per speaker; this is the link to send them. */}
+        <button
+          type="button"
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(r.kitUrl);
+              setCopied(true);
+              window.setTimeout(() => setCopied(false), 2000);
+            } catch {
+              window.prompt("Копирай връзката:", r.kitUrl);
+            }
+          }}
+          className="rounded-full border border-bh-ink/20 px-3 py-1 text-xs font-semibold text-bh-ink transition-colors hover:border-bh-ink"
+        >
+          {copied ? "Копирана" : "Копирай материалите"}
+        </button>
+        <a
+          href={r.kitUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-1 text-xs font-semibold text-bh-ink/60 underline underline-offset-2 hover:text-bh-ink"
+        >
+          отвори
+        </a>
       </div>
 
       {open && (
