@@ -9,12 +9,12 @@ import {
   priceCents,
 } from "@/lib/tickets";
 
-export const CONSENT_VERSION = "v2";
+export const CONSENT_VERSION = "v3";
 
 export const CONSENT_TEXT =
   "Съгласявам се Biohacking.bg да ми изпраща новини за Sofia Life Summit - " +
-  "нови лектори, програма и цени на билетите. Мога да оттегля съгласието си " +
-  "по всяко време.";
+  "програмата по часове, отварянето на работилниците и промени в цените на " +
+  "билетите. Мога да оттегля съгласието си по всяко време.";
 
 export const TIERS = ["core", "plus", "peak"] as const;
 
