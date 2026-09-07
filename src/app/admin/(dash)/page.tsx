@@ -454,7 +454,7 @@ export default async function AdminDashboard({
       </div>
 
       <div className="mt-4 grid items-start gap-4 xl:grid-cols-2">
-        <WhenChart byHour={d.byHour} byWeekday={d.byWeekday} />
+        <WhenChart byHour={d.byHour} punch={d.punch} />
 
         {/* Abandoned: money that got as far as the checkout and stopped. One
             nudge each, by hand, a day later - never automatic, never twice.

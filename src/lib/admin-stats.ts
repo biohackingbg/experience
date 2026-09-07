@@ -94,6 +94,8 @@ export type DashboardData = {
   /** Paid orders by hour of the Sofia day, 0-23, and by weekday, Monday first. */
   byHour: number[];
   byWeekday: number[];
+  /** The last three weeks, one row per day: which hour each order landed in. */
+  punch: { day: string; hours: number[] }[];
   recent: RecentOrder[];
 };
 
@@ -109,7 +111,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   const sofiaDay = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia" });
   const weekDays = Array.from({ length: 7 }, (_, i) => sofiaDay.format(new Date(Date.now() - (6 - i) * 86_400_000)));
 
-  const [totals, perTierRows, dailyRows, recentRows, signupRow, last7Row, checkedInRow, dayRow, oddRows, hourRows, weekdayRows] =
+  const [totals, perTierRows, dailyRows, recentRows, signupRow, last7Row, checkedInRow, dayRow, oddRows, hourRows, weekdayRows, punchRows] =
     await Promise.all([
       db
         .select({
@@ -242,6 +244,21 @@ export async function getDashboardData(): Promise<DashboardData> {
         .from(orders)
         .where(sql`${SOLD} and ${orders.paidAt} is not null`)
         .groupBy(sql`extract(isodow from ${orders.paidAt} at time zone 'Europe/Sofia')`),
+
+      // Day and hour together: the pattern reads down the columns, a single
+      // day's answer to a post reads across its row.
+      db
+        .select({
+          day: sql<string>`to_char(${orders.paidAt} at time zone 'Europe/Sofia', 'YYYY-MM-DD')`,
+          hour: sql<number>`extract(hour from ${orders.paidAt} at time zone 'Europe/Sofia')::int`,
+          count: sql<number>`count(*)::int`,
+        })
+        .from(orders)
+        .where(sql`${SOLD} and ${orders.paidAt} > now() - interval '21 days'`)
+        .groupBy(
+          sql`to_char(${orders.paidAt} at time zone 'Europe/Sofia', 'YYYY-MM-DD')`,
+          sql`extract(hour from ${orders.paidAt} at time zone 'Europe/Sofia')`,
+        ),
     ]);
 
   // Items for the listed orders, fetched separately and stitched in JS. A
@@ -320,6 +337,16 @@ export async function getDashboardData(): Promise<DashboardData> {
     checkedIn: checkedInRow[0]?.n ?? 0,
     perTier,
     byHour: Array.from({ length: 24 }, (_, h) => hourRows.find((r) => r.hour === h)?.count ?? 0),
+    // Every day of the window, including the empty ones - a gap in sales is
+    // information, and a grid with days missing cannot show it.
+    punch: Array.from({ length: 21 }, (_, i) => {
+      const d = new Date(Date.now() - (20 - i) * 86_400_000);
+      const day = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+      return {
+        day,
+        hours: Array.from({ length: 24 }, (_, h) => punchRows.find((r) => r.day === day && r.hour === h)?.count ?? 0),
+      };
+    }),
     byWeekday: Array.from({ length: 7 }, (_, i) => weekdayRows.find((r) => r.dow === i + 1)?.count ?? 0),
     daily: dailyRows.map((r) => ({
       day: r.day,
