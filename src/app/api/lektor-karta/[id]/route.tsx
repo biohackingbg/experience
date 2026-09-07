@@ -62,8 +62,6 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
   const credit = [role, affiliation].filter(Boolean).join(", ");
   const dates = en ? "7-8 NOVEMBER 2026 · SOFIA" : "07-08.11.2026 · СОФИЯ";
   const pad = Math.round(w * 0.075);
-  const star = Math.round(w * 0.07);
-  const bar = Math.round(star * 0.16);
   const src = photo ? `data:${photo.mime};base64,${photo.bytes.toString("base64")}` : null;
 
   return new ImageResponse(
@@ -90,7 +88,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
         />
 
         <div style={{ position: "relative", display: "flex", flexDirection: "column", justifyContent: "space-between", width: "100%", height: "100%", padding: pad }}>
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "flex-start" }}>
             <div
               style={{
                 display: "flex",
@@ -101,25 +99,6 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
               }}
             >
               [ Sofia Life Summit ]
-            </div>
-            {/* The mark is drawn rather than typed: as a character it is an
-                emoji, and an emoji arrives with its own coloured tile. */}
-            <div style={{ position: "relative", display: "flex", width: star, height: star }}>
-              {[0, 45, 90, 135].map((deg) => (
-                <div
-                  key={deg}
-                  style={{
-                    position: "absolute",
-                    left: (star - bar) / 2,
-                    top: 0,
-                    width: bar,
-                    height: star,
-                    borderRadius: bar,
-                    background: LIME,
-                    transform: `rotate(${deg}deg)`,
-                  }}
-                />
-              ))}
             </div>
           </div>
 
