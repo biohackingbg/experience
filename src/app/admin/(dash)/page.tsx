@@ -409,6 +409,43 @@ export default async function AdminDashboard({
               </span>
             </Link>
           </section>
+
+          {/* Who is buying - the one thing an advert needs and the checkout
+              never asks. Estimated from the name, so the card says so and
+              carries its own unknown rather than rounding it away. */}
+          {(() => {
+            const b = d.buyers;
+            const known = b.female + b.male;
+            if (known === 0) return null;
+            const fp = Math.round((b.female / known) * 100);
+            return (
+              <section className="rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6">
+                <h2 className="text-lg font-bold tracking-tight">Кой купува</h2>
+                <p className="mt-1 text-xs text-[#0b2a22]/50">Приблизително, по имената на купувачите.</p>
+                <div className="mt-4 flex h-3 overflow-hidden rounded-full bg-[#0b2a22]/8">
+                  <div style={{ width: `${fp}%` }} className="bg-[#C4607F]" />
+                  <div style={{ width: `${100 - fp}%` }} className="bg-[#0E8C7D]" />
+                </div>
+                <div className="mt-3 flex flex-wrap justify-between gap-x-4 gap-y-1 text-sm">
+                  <span className="inline-flex items-center gap-2">
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#C4607F]" />
+                    жени <strong className="font-semibold tabular-nums">{fp}%</strong>
+                    <span className="text-xs text-[#0b2a22]/45">({b.female})</span>
+                  </span>
+                  <span className="inline-flex items-center gap-2">
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#0E8C7D]" />
+                    мъже <strong className="font-semibold tabular-nums">{100 - fp}%</strong>
+                    <span className="text-xs text-[#0b2a22]/45">({b.male})</span>
+                  </span>
+                </div>
+                {b.unknown > 0 && (
+                  <p className="mt-3 text-xs text-[#0b2a22]/45">
+                    {b.unknown} {b.unknown === 1 ? "име не се чете" : "имена не се четат"} - чужди или фирмени, извън сметката.
+                  </p>
+                )}
+              </section>
+            );
+          })()}
         </div>
 
         {/* The sales themselves, where the eye lands first: paid and refunded

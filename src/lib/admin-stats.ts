@@ -3,6 +3,7 @@ import "server-only";
 import { desc, inArray, or, sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
+import { genderSplit } from "@/lib/gender";
 import { orderItems, orders, signups, tickets } from "@/lib/db/schema";
 import { PENDING_HOLD_MINUTES } from "@/lib/orders";
 import { KEPT_CENTS, SOLD } from "@/lib/sold";
@@ -96,6 +97,8 @@ export type DashboardData = {
   byWeekday: number[];
   /** The last three weeks, one row per day: which hour each order landed in. */
   punch: { day: string; hours: number[] }[];
+  /** Buyers by an estimate from the name - see lib/gender.ts. */
+  buyers: { female: number; male: number; unknown: number };
   recent: RecentOrder[];
 };
 
@@ -111,7 +114,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   const sofiaDay = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia" });
   const weekDays = Array.from({ length: 7 }, (_, i) => sofiaDay.format(new Date(Date.now() - (6 - i) * 86_400_000)));
 
-  const [totals, perTierRows, dailyRows, recentRows, signupRow, last7Row, checkedInRow, dayRow, oddRows, hourRows, weekdayRows, punchRows] =
+  const [totals, perTierRows, dailyRows, recentRows, signupRow, last7Row, checkedInRow, dayRow, oddRows, hourRows, weekdayRows, punchRows, buyerNames] =
     await Promise.all([
       db
         .select({
@@ -259,6 +262,9 @@ export async function getDashboardData(): Promise<DashboardData> {
           sql`to_char(${orders.paidAt} at time zone 'Europe/Sofia', 'YYYY-MM-DD')`,
           sql`extract(hour from ${orders.paidAt} at time zone 'Europe/Sofia')`,
         ),
+
+      // Only the names, for the aggregate estimate of who is buying.
+      db.select({ name: orders.name }).from(orders).where(SOLD),
     ]);
 
   // Items for the listed orders, fetched separately and stitched in JS. A
@@ -339,6 +345,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     byHour: Array.from({ length: 24 }, (_, h) => hourRows.find((r) => r.hour === h)?.count ?? 0),
     // Every day of the window, including the empty ones - a gap in sales is
     // information, and a grid with days missing cannot show it.
+    buyers: genderSplit(buyerNames.map((r) => r.name)),
     punch: Array.from({ length: 21 }, (_, i) => {
       const d = new Date(Date.now() - (20 - i) * 86_400_000);
       const day = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
