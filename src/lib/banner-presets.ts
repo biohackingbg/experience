@@ -31,6 +31,16 @@ export const BANNERS: BannerPreset[] = [
     note: "4200×700 - препоръчаният от LinkedIn размер за корица на фирмена страница",
   },
   {
+    id: "linkedin-event",
+    label: "LinkedIn · корица на събитие",
+    // LinkedIn's event dialog asks for 16:9 and at least 480 wide; this is
+    // that ratio at a size that stays sharp on a desktop feed.
+    width: 1920,
+    height: 1080,
+    layout: "wide",
+    note: "1920×1080 - 16:9, за корица на събитие в LinkedIn",
+  },
+  {
     id: "x-header",
     label: "X / Twitter · заглавна снимка",
     width: 1500,
