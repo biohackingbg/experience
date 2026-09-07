@@ -126,10 +126,10 @@ function Banner({ p, ours, partner }: { p: BannerPreset; ours: string; partner: 
       <div style={{ ...base, alignItems: "center", justifyContent: "space-between", padding: `0 ${pad}px 0 ${w * 0.22}px` }}>
         <Molecules w={w} h={h} />
         <div style={{ display: "flex", alignItems: "center", gap: pad * 0.9, position: "relative" }}>
-          <Logos ours={ours} partner={partner} height={h * 0.22} />
-          {title(h * 0.175, false)}
+          <Logos ours={ours} partner={partner} height={h * 0.24} />
+          {title(h * 0.15, false)}
         </div>
-        <div style={{ display: "flex", position: "relative" }}>{meta(h * 0.066, true, true)}</div>
+        <div style={{ display: "flex", position: "relative" }}>{meta(h * 0.058, true, true)}</div>
       </div>
     );
   }
@@ -139,7 +139,7 @@ function Banner({ p, ours, partner }: { p: BannerPreset; ours: string; partner: 
       <div style={{ ...base, flexDirection: "column", justifyContent: "center", gap: h * 0.06, padding: `${h * 0.16}px ${pad}px` }}>
         <Molecules w={w} h={h} />
         <div style={{ display: "flex", position: "relative" }}>
-          <Logos ours={ours} partner={partner} height={w * 0.09} />
+          <Logos ours={ours} partner={partner} height={w * 0.125} />
         </div>
         <div style={{ display: "flex", position: "relative" }}>{title(w * 0.155, true)}</div>
         <div style={{ display: "flex", position: "relative" }}>{meta(w * 0.032, true)}</div>
@@ -159,7 +159,7 @@ function Banner({ p, ours, partner }: { p: BannerPreset; ours: string; partner: 
     >
       <Molecules w={w} h={h} />
       <div style={{ display: "flex", position: "relative" }}>
-        <Logos ours={ours} partner={partner} height={Math.min(w, h) * 0.09} />
+        <Logos ours={ours} partner={partner} height={Math.min(w, h) * 0.135} />
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: Math.min(w, h) * 0.05, position: "relative" }}>
         {title(stacked ? w * 0.13 : w * 0.1, true)}
