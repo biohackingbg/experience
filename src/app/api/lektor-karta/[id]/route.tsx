@@ -8,14 +8,16 @@ const INK = "#02251f";
 const LIME = "#cef870";
 const TEAL = "#5fd4c0";
 
-/** The three shapes a card gets posted in. */
+/** The shapes a card gets posted in. */
 const SIZES = {
   portrait: { width: 1080, height: 1350 },
   square: { width: 1080, height: 1080 },
   story: { width: 1080, height: 1920 },
+  /** LinkedIn reads landscape, so that one is composed side by side. */
+  landscape: { width: 1200, height: 627 },
 } as const;
 type SizeId = keyof typeof SIZES;
-const isSize = (v: string | null): v is SizeId => v === "portrait" || v === "square" || v === "story";
+const isSize = (v: string | null): v is SizeId => v !== null && v in SIZES;
 
 async function font(weight: 400 | 900): Promise<ArrayBuffer | null> {
   try {
@@ -63,6 +65,48 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
   const dates = en ? "7-8 NOVEMBER 2026 · SOFIA" : "07-08.11.2026 · СОФИЯ";
   const pad = Math.round(w * 0.075);
   const src = photo ? `data:${photo.mime};base64,${photo.bytes.toString("base64")}` : null;
+  const name = [title, speaker.name].filter(Boolean).join(" ");
+  const fonts = [
+    ...(bold ? [{ name: "Sofia Sans", data: bold, weight: 900 as const, style: "normal" as const }] : []),
+    ...(regular ? [{ name: "Sofia Sans", data: regular, weight: 400 as const, style: "normal" as const }] : []),
+  ];
+
+  if (sizeId === "landscape") {
+    return new ImageResponse(
+      (
+        <div style={{ width: "100%", height: "100%", display: "flex", background: INK }}>
+          {src ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={src} alt="" width={420} height={h} style={{ width: 420, height: h, objectFit: "cover", objectPosition: "top" }} />
+          ) : (
+            <div style={{ display: "flex", width: 420, height: h, background: "#0a3229" }} />
+          )}
+          <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", flexGrow: 1, padding: "54px 60px" }}>
+            <div style={{ display: "flex", fontSize: 20, letterSpacing: 6, color: "rgba(255,255,255,0.7)", textTransform: "uppercase" }}>
+              [ Sofia Life Summit ]
+            </div>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <div style={{ display: "flex", fontSize: 18, letterSpacing: 6, color: LIME, textTransform: "uppercase", marginBottom: 10 }}>
+                {en ? "On stage" : "На сцената"}
+              </div>
+              <div style={{ display: "flex", fontFamily: "Sofia Sans", fontWeight: 900, fontSize: name.length > 30 ? 42 : 54, lineHeight: 1.05, color: "#ffffff" }}>
+                {name}
+              </div>
+              {specialty && (
+                <div style={{ display: "flex", fontSize: 26, color: "rgba(255,255,255,0.9)", marginTop: 8 }}>{specialty}</div>
+              )}
+              {credit && <div style={{ display: "flex", fontSize: 21, color: TEAL, marginTop: 8 }}>{credit}</div>}
+            </div>
+            <div style={{ display: "flex", gap: 22, fontSize: 19, letterSpacing: 4, color: "rgba(255,255,255,0.6)", textTransform: "uppercase" }}>
+              <div style={{ display: "flex" }}>{dates}</div>
+              <div style={{ display: "flex", color: LIME }}>thelongevitysummit.eu</div>
+            </div>
+          </div>
+        </div>
+      ),
+      { width: w, height: h, fonts },
+    );
+  }
 
   return new ImageResponse(
     (
@@ -128,7 +172,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
                 color: "#ffffff",
               }}
             >
-              {[title, speaker.name].filter(Boolean).join(" ")}
+              {name}
             </div>
             {specialty && (
               <div style={{ display: "flex", fontSize: Math.round(w * 0.042), color: "rgba(255,255,255,0.9)", marginTop: Math.round(h * 0.008) }}>
@@ -154,13 +198,6 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
         </div>
       </div>
     ),
-    {
-      width: w,
-      height: h,
-      fonts: [
-        ...(bold ? [{ name: "Sofia Sans", data: bold, weight: 900 as const, style: "normal" as const }] : []),
-        ...(regular ? [{ name: "Sofia Sans", data: regular, weight: 400 as const, style: "normal" as const }] : []),
-      ],
-    },
+    { width: w, height: h, fonts },
   );
 }
