@@ -139,8 +139,9 @@ function Banner({ p, ours, partner }: { p: BannerPreset; ours: string; partner: 
   if (layout === "manifest") {
     const u = w / 100;
     return (
+      // Plain ground: the rings were reading as noise behind a headline that
+      // carries the post on its own.
       <div style={{ ...base, flexDirection: "column", justifyContent: "space-between", padding: u * 8 }}>
-        <Molecules w={w} h={h} />
         <div style={{ display: "flex", position: "relative" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={ours} alt="" height={u * 6} />
