@@ -91,6 +91,9 @@ export type DashboardData = {
   checkedIn: number;
   perTier: TierSales[];
   daily: DailySales[];
+  /** Paid orders by hour of the Sofia day, 0-23, and by weekday, Monday first. */
+  byHour: number[];
+  byWeekday: number[];
   recent: RecentOrder[];
 };
 
@@ -106,7 +109,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   const sofiaDay = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia" });
   const weekDays = Array.from({ length: 7 }, (_, i) => sofiaDay.format(new Date(Date.now() - (6 - i) * 86_400_000)));
 
-  const [totals, perTierRows, dailyRows, recentRows, signupRow, last7Row, checkedInRow, dayRow, oddRows] =
+  const [totals, perTierRows, dailyRows, recentRows, signupRow, last7Row, checkedInRow, dayRow, oddRows, hourRows, weekdayRows] =
     await Promise.all([
       db
         .select({
@@ -219,6 +222,26 @@ export async function getDashboardData(): Promise<DashboardData> {
         )`)
         .orderBy(desc(orders.createdAt))
         .limit(20),
+
+      // When people actually pay, in Sofia time - the hour is what a post or a
+      // letter can be aimed at, and it is meaningless in UTC.
+      db
+        .select({
+          hour: sql<number>`extract(hour from ${orders.paidAt} at time zone 'Europe/Sofia')::int`,
+          count: sql<number>`count(*)::int`,
+        })
+        .from(orders)
+        .where(sql`${SOLD} and ${orders.paidAt} is not null`)
+        .groupBy(sql`extract(hour from ${orders.paidAt} at time zone 'Europe/Sofia')`),
+
+      db
+        .select({
+          dow: sql<number>`extract(isodow from ${orders.paidAt} at time zone 'Europe/Sofia')::int`,
+          count: sql<number>`count(*)::int`,
+        })
+        .from(orders)
+        .where(sql`${SOLD} and ${orders.paidAt} is not null`)
+        .groupBy(sql`extract(isodow from ${orders.paidAt} at time zone 'Europe/Sofia')`),
     ]);
 
   // Items for the listed orders, fetched separately and stitched in JS. A
@@ -296,6 +319,8 @@ export async function getDashboardData(): Promise<DashboardData> {
     signupWeek: signupRow[0]?.week ?? 0,
     checkedIn: checkedInRow[0]?.n ?? 0,
     perTier,
+    byHour: Array.from({ length: 24 }, (_, h) => hourRows.find((r) => r.hour === h)?.count ?? 0),
+    byWeekday: Array.from({ length: 7 }, (_, i) => weekdayRows.find((r) => r.dow === i + 1)?.count ?? 0),
     daily: dailyRows.map((r) => ({
       day: r.day,
       orders: r.count,

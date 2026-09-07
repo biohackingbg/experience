@@ -17,6 +17,7 @@ import { PriceStages } from "./PriceStages";
 import { SiteNoticeCard } from "./SiteNoticeCard";
 import { ReminderForm } from "./ReminderForm";
 import { TierBars } from "./TierBars";
+import { WhenChart } from "./WhenChart";
 
 export const metadata: Metadata = {
   title: "Табло | Администрация",
@@ -412,7 +413,7 @@ export default async function AdminDashboard({
 
         {/* The sales themselves, where the eye lands first: paid and refunded
             only, with the unfinished ones kept further down. */}
-        <section className="self-start rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6 xl:col-span-2">
+        <section className="rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6 xl:col-span-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-lg font-bold tracking-tight">Последни продажби</h2>
             <a href="#porachki" className="rounded-full border border-[#0b2a22]/20 px-3 py-1.5 text-xs font-semibold transition-colors hover:border-[#0b2a22]">всички</a>
@@ -421,7 +422,7 @@ export default async function AdminDashboard({
             <p className="mt-5 text-sm text-[#0b2a22]/55">Още няма поръчки.</p>
           ) : (
             <ul className="mt-5 grid gap-4 sm:grid-cols-2">
-              {d.recent.filter((o) => !o.isTest).slice(0, 8).map((o) => (
+              {d.recent.filter((o) => !o.isTest).slice(0, 14).map((o) => (
                 <li key={o.reference} className="flex items-start gap-3">
                   <span
                     className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${
@@ -453,6 +454,8 @@ export default async function AdminDashboard({
       </div>
 
       <div className="mt-4 grid items-start gap-4 xl:grid-cols-2">
+        <WhenChart byHour={d.byHour} byWeekday={d.byWeekday} />
+
         {/* Abandoned: money that got as far as the checkout and stopped. One
             nudge each, by hand, a day later - never automatic, never twice.
             It sits below the sales now: it is work to do, not the score. */}
