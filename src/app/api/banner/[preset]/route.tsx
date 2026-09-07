@@ -134,6 +134,64 @@ function Banner({ p, ours, partner }: { p: BannerPreset; ours: string; partner: 
     );
   }
 
+  // One square that says the whole thing: the promise in three lines, the
+  // where and when under it, and the two marks kept quiet at the foot.
+  if (layout === "manifest") {
+    const u = w / 100;
+    return (
+      <div style={{ ...base, flexDirection: "column", justifyContent: "space-between", padding: u * 8 }}>
+        <Molecules w={w} h={h} />
+        <div style={{ display: "flex", position: "relative" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={ours} alt="" height={u * 6} />
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", position: "relative", gap: u * 3 }}>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: u * 1.4,
+              fontFamily: "Sofia Sans",
+              fontWeight: 900,
+              fontSize: u * 9.4,
+              lineHeight: 1.02,
+              letterSpacing: -u * 0.25,
+              color: "#ffffff",
+              textTransform: "uppercase",
+            }}
+          >
+            <div style={{ display: "flex" }}>Sofia Life Summit</div>
+            <div style={{ display: "flex", color: LIME }}>2026</div>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: u * 1.2, fontFamily: "Sofia Sans", fontWeight: 900, fontSize: u * 4.6, lineHeight: 1.15, letterSpacing: -u * 0.05, textTransform: "uppercase" }}>
+            <div style={{ display: "flex", color: "rgba(255,255,255,0.92)" }}>50+ experts. 2 days. One mission.</div>
+            <div style={{ display: "flex", color: LIME }}>Live better. Longer.</div>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: u * 0.9, marginTop: u * 2, fontSize: u * 2.5, letterSpacing: u * 0.35, color: "rgba(255,255,255,0.75)", textTransform: "uppercase" }}>
+            <div style={{ display: "flex" }}>7-8 November 2026</div>
+            <div style={{ display: "flex" }}>Grand Hotel Millennium Sofia</div>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: u * 3, position: "relative" }}>
+          <div style={{ display: "flex", fontSize: u * 2, letterSpacing: u * 0.22, color: "rgba(255,255,255,0.55)" }}>
+            Science · Medicine · Longevity · Biohacking Experience
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: u * 2.6, paddingTop: u * 2.6, borderTop: "1px solid rgba(255,255,255,0.15)" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={ours} alt="" height={u * 3.4} />
+            <div style={{ display: "flex", fontSize: u * 2, color: "rgba(255,255,255,0.4)" }}>×</div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={partner} alt="" height={u * 4.6} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (layout === "story") {
     return (
       <div style={{ ...base, flexDirection: "column", justifyContent: "center", gap: h * 0.06, padding: `${h * 0.16}px ${pad}px` }}>
