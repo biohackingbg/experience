@@ -32,7 +32,8 @@ export default async function SpeakersAdminPage() {
             <h1 className="mt-2 text-3xl font-black uppercase tracking-tight text-bh-ink">Лектори</h1>
             {seeded && (
               <p className="mt-2 text-sm text-bh-ink/60">
-                {announced} обявени на сайта · {rows.length - announced} още не · {rows.filter((r) => !r.hasPhoto).length} без снимка
+                {announced} обявени на сайта · {rows.length - announced} още не · {rows.filter((r) => !r.hasPhoto).length} без снимка ·{" "}
+                <span className="text-bh-ink/45">„картинка“ на всеки ред дава готов пост за Instagram</span>
               </p>
             )}
           </div>
@@ -121,6 +122,19 @@ export default async function SpeakersAdminPage() {
                           <Link href={`/admin/izdai?vid=free&ime=${encodeURIComponent(s.name)}&broi=1&bel=${encodeURIComponent("Лектор")}`} className="text-[0.68rem] font-semibold text-bh-ink/70 underline underline-offset-2 hover:text-bh-ink">
                             билет
                           </Link>
+                          {s.hasPhoto && (
+                            /* The card for social media, drawn from this row - correct a
+                               title here and the picture is corrected with it. */
+                            <a
+                              href={`/api/lektor-karta/${s.id}?size=portrait`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[0.68rem] font-semibold text-bh-ink/70 underline underline-offset-2 hover:text-bh-ink"
+                              title="Картинка за Instagram - 1080×1350"
+                            >
+                              картинка
+                            </a>
+                          )}
                           {!s.pending && (
                             <form action={toggleAnnounced}>
                               <input type="hidden" name="id" value={s.id} />

@@ -109,6 +109,34 @@ export default async function SpeakerKitPage({ params }: { params: Promise<{ tok
             ))}
           </ul>
           {speaker.hasPhoto && (
+            <div className="mt-5 rounded-2xl bg-bh-cloud p-4 ring-1 ring-bh-ink/8">
+              <p className="font-mono text-[0.65rem] uppercase tracking-[0.15em] text-bh-ink/50">Твоята карта</p>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`/api/lektor-karta/${speaker.id}?size=portrait`}
+                alt=""
+                className="mt-3 w-full max-w-xs rounded-xl"
+                style={{ aspectRatio: "1080 / 1350" }}
+              />
+              <div className="mt-3 flex flex-wrap gap-2">
+                {[
+                  { id: "portrait", label: "Пост 1080×1350" },
+                  { id: "square", label: "Квадрат 1080×1080" },
+                  { id: "story", label: "Стори 1080×1920" },
+                ].map((v) => (
+                  <a
+                    key={v.id}
+                    href={`/api/lektor-karta/${speaker.id}?size=${v.id}`}
+                    download={`sofia-life-summit-${speaker.id}-${v.id}.png`}
+                    className="rounded-full border border-bh-ink/20 px-3 py-1.5 text-xs font-semibold transition-colors hover:border-bh-ink"
+                  >
+                    {v.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+          {speaker.hasPhoto && (
             <p className="mt-4 text-sm text-bh-ink/60">
               Снимката ти, както излиза на сайта:{" "}
               <a href={`/api/lektor/${speaker.id}`} className="underline" download={`${speaker.id}.jpg`}>
