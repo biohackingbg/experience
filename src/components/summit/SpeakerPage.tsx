@@ -47,15 +47,29 @@ export async function SpeakerPage({ data, lang = "bg" }: { data: Data; lang?: La
       <SummitNav lang={lang} />
       <main className="px-5 pb-20 pt-10 sm:px-8 lg:px-10">
         <div className="mx-auto w-full max-w-5xl">
-          {/* The trail the site already uses for a section label, rather than
-              a button floating on its own: the eyebrow is this page's idiom. */}
-          <p className="bh-eyebrow font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/45">
-            Sofia Life Summit
-            <span className="mx-2 text-bh-ink/25">/</span>
-            <Link href={lang === "en" ? "/en#lektori" : "/#lektori"} className="text-bh-ink/70 underline-offset-4 transition-colors hover:text-bh-ink hover:underline">
-              {c.crumb}
-            </Link>
-          </p>
+          {/* One round button, nothing to read: on a page about a person
+              the way back should be a gesture, not a sentence. The label
+              stays for screen readers and on hover. */}
+          <Link
+            href={lang === "en" ? "/en#lektori" : "/#lektori"}
+            aria-label={c.allSpeakers}
+            title={c.allSpeakers}
+            className="group inline-flex h-11 w-11 items-center justify-center rounded-full border border-bh-ink/20 text-bh-ink transition-colors hover:border-bh-ink hover:bg-bh-ink hover:text-bh-paper"
+          >
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+              className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-0.5 motion-reduce:transition-none"
+            >
+              <path d="M11.5 5l-5 5 5 5" />
+              <path d="M6.5 10h7" />
+            </svg>
+          </Link>
 
           <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,22rem)_1fr] lg:items-start">
             <div className="relative aspect-square overflow-hidden rounded-3xl bg-bh-forest">

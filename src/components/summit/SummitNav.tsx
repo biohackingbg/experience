@@ -26,7 +26,7 @@ export async function SummitNav({ lang = "bg" }: { lang?: Lang }) {
     <header className="sticky top-0 z-40 border-b border-bh-ink/10 bg-bh-paper/70 px-4 backdrop-blur-lg sm:px-8 lg:px-10">
       <ScrollProgress />
       <nav className="flex items-center justify-between py-4">
-        <Link href="#top" aria-label={c.home} className="flex items-center">
+        <Link href={en ? "/en" : "/"} aria-label={c.home} className="flex items-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.svg" alt="Biohacking Experience" className="bh-logo-light-bg h-6 w-auto sm:h-8" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
