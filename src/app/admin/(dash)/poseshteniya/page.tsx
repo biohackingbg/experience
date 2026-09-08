@@ -5,6 +5,7 @@ import { requireAccess } from "@/lib/access";
 import { getTrafficData } from "@/lib/site-views";
 
 import { Funnel } from "./Funnel";
+import { HoursGrid } from "./HoursGrid";
 import { HomeLink } from "@/components/admin/HomeLink";
 
 export const metadata: Metadata = {
@@ -185,6 +186,8 @@ export default async function TrafficPage({
         <Funnel steps={d.funnel} />
 
         <DaysChart data={d.daily} />
+
+        <HoursGrid hours={d.hours} days={d.days} />
 
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
           <Ranked

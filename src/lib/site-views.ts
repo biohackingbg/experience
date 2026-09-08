@@ -89,6 +89,11 @@ export type TrafficData = {
   places: { place: string; n: number }[];
   devices: { device: string; n: number }[];
   daily: { day: string; views: number; visitors: number }[];
+  /**
+   * Views by weekday and hour in Sofia time - 1 = Monday, hour 0-23. Only
+   * the cells that have anything in them; the grid fills the rest with zero.
+   */
+  hours: { weekday: number; hour: number; views: number }[];
 };
 
 const pct = (part: number, whole: number): number | null =>
@@ -98,7 +103,7 @@ export async function getTrafficData(days = 30): Promise<TrafficData> {
   const db = getDb();
   const since = sql.raw(`now() - interval '${Math.max(1, Math.min(365, days))} days'`);
 
-  const [totals, ticketRow, orderRow, signupRow, pages, refs, places, devices, daily] =
+  const [totals, ticketRow, orderRow, signupRow, pages, refs, places, devices, daily, hours] =
     await Promise.all([
       db
         .select({
@@ -177,6 +182,21 @@ export async function getTrafficData(days = 30): Promise<TrafficData> {
         .where(sql`${siteViews.createdAt} >= ${since}`)
         .groupBy(sql`to_char(${siteViews.createdAt} at time zone 'Europe/Sofia', 'YYYY-MM-DD')`)
         .orderBy(sql`to_char(${siteViews.createdAt} at time zone 'Europe/Sofia', 'YYYY-MM-DD')`),
+
+      // When people actually look: the day of the week and the hour, in Sofia
+      // time, which is the clock every post is scheduled against.
+      db
+        .select({
+          weekday: sql<number>`extract(isodow from ${siteViews.createdAt} at time zone 'Europe/Sofia')::int`,
+          hour: sql<number>`extract(hour from ${siteViews.createdAt} at time zone 'Europe/Sofia')::int`,
+          views: sql<number>`count(*)::int`,
+        })
+        .from(siteViews)
+        .where(sql`${siteViews.createdAt} >= ${since}`)
+        .groupBy(
+          sql`extract(isodow from ${siteViews.createdAt} at time zone 'Europe/Sofia')`,
+          sql`extract(hour from ${siteViews.createdAt} at time zone 'Europe/Sofia')`,
+        ),
     ]);
 
   const visitors = totals[0]?.visitors ?? 0;
@@ -225,6 +245,7 @@ export async function getTrafficData(days = 30): Promise<TrafficData> {
     places,
     devices,
     daily,
+    hours,
     signups: signupRow[0]?.n ?? 0,
   };
 }
