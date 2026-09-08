@@ -17,6 +17,18 @@ function done() {
 function parse(formData: FormData): { ok: true; input: SpeakerInput } | { ok: false; message: string } {
   const name = String(formData.get("name") ?? "").trim().slice(0, 120);
   if (name.length < 2) return { ok: false, message: "Напиши име." };
+  /** Accepts a full address or a bare host, and refuses anything else. */
+  const link = (k: string) => {
+    const raw = String(formData.get(k) ?? "").trim().slice(0, 200);
+    if (!raw) return null;
+    const url = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+    try {
+      const u = new URL(url);
+      return u.protocol === "https:" || u.protocol === "http:" ? u.toString() : null;
+    } catch {
+      return null;
+    }
+  };
   const s = (k: string, max: number) => String(formData.get(k) ?? "").trim().slice(0, max) || null;
   return {
     ok: true,
@@ -33,6 +45,9 @@ function parse(formData: FormData): { ok: true; input: SpeakerInput } | { ok: fa
       roleEn: s("roleEn", 120),
       topicEn: s("topicEn", 200),
       affiliationEn: s("affiliationEn", 160),
+      website: link("website"),
+      linkedin: link("linkedin"),
+      instagram: link("instagram"),
       announced: formData.get("announced") === "on",
       pending: formData.get("pending") === "on",
     },

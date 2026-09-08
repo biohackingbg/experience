@@ -597,6 +597,10 @@ export const speakers = pgTable(
     specialtyEn: text("specialty_en"),
     roleEn: text("role_en"),
     topicEn: text("topic_en"),
+    /** Where to read more about them, if they want to be found. */
+    website: text("website"),
+    linkedin: text("linkedin"),
+    instagram: text("instagram"),
     photo: bytea("photo"),
     photoMime: text("photo_mime"),
     /** Bumped on every upload; part of the image URL, so caches move on. */

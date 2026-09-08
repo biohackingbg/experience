@@ -34,6 +34,9 @@ export type SpeakerRow = {
   roleEn: string | null;
   topicEn: string | null;
   affiliationEn: string | null;
+  website: string | null;
+  linkedin: string | null;
+  instagram: string | null;
   hasPhoto: boolean;
   photoUpdatedAt: Date | null;
   updatedAt: Date | null;
@@ -56,6 +59,9 @@ const cols = {
   roleEn: speakers.roleEn,
   topicEn: speakers.topicEn,
   affiliationEn: speakers.affiliationEn,
+  website: speakers.website,
+  linkedin: speakers.linkedin,
+  instagram: speakers.instagram,
   hasPhoto: sql<boolean>`${speakers.photo} is not null`,
   photoUpdatedAt: speakers.photoUpdatedAt,
   updatedAt: speakers.updatedAt,
@@ -169,6 +175,7 @@ export type SpeakerInput = Pick<
   SpeakerRow,
   | "name" | "title" | "specialty" | "country" | "affiliation" | "role" | "topic"
   | "titleEn" | "specialtyEn" | "roleEn" | "topicEn" | "affiliationEn"
+  | "website" | "linkedin" | "instagram"
   | "announced" | "pending"
 >;
 
@@ -251,4 +258,42 @@ export async function moveSpeaker(id: string, dir: "up" | "down"): Promise<void>
     await tx.update(speakers).set({ sort: all[j].sort }).where(eq(speakers.id, all[i].id));
     await tx.update(speakers).set({ sort: all[i].sort }).where(eq(speakers.id, all[j].id));
   });
+}
+
+/**
+ * One speaker with everything their own page needs: the person as the site
+ * shows them, and the slots they appear in, matched by name against the
+ * programme - the programme writes people as they are billed ("проф. Иво
+ * Петров"), so the match is on the name being contained, not equal.
+ */
+export async function getSpeakerPage(id: string, lang: Lang = "bg") {
+  const [row] = await getDb().select(cols).from(speakers).where(eq(speakers.id, id)).limit(1);
+  if (!row || row.pending || !row.announced) return null;
+
+  const { getProgram } = await import("@/lib/program-data");
+  const program = await getProgram(lang);
+  const needle = row.name.toLowerCase();
+  const surname = needle.split(/\s+/).slice(-1)[0];
+
+  const sessions = program.flatMap((day) =>
+    day.slots
+      .filter((slot) => {
+        const hay = [...(slot.people ?? []), slot.role ?? ""].join(" ").toLowerCase();
+        // The surname alone would match two people who share one; the full
+        // name is tried first and the surname only as a fallback for a
+        // programme that spells someone shorter.
+        return hay.includes(needle) || (surname.length > 4 && hay.includes(surname));
+      })
+      .map((slot) => ({ day: day.day, date: day.date, time: slot.time, title: slot.title, note: slot.note, role: slot.role })),
+  );
+
+  return { speaker: toSpeaker(row, lang), links: { website: row.website, linkedin: row.linkedin, instagram: row.instagram }, sessions };
+}
+
+/** Every announced speaker with a photo - the ones with a page worth listing. */
+export async function listSpeakerPages(): Promise<{ id: string; updatedAt: Date | null }[]> {
+  const rows = await getDb()
+    .select({ id: speakers.id, updatedAt: speakers.updatedAt, announced: speakers.announced, pending: speakers.pending })
+    .from(speakers);
+  return rows.filter((r) => r.announced && !r.pending).map((r) => ({ id: r.id, updatedAt: r.updatedAt }));
 }

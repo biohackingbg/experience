@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import Image from "next/image";
 
 import { useState, useSyncExternalStore } from "react";
@@ -11,15 +13,26 @@ import { CountryMark } from "@/components/ui/Flags";
 /** How many cards are visible before the visitor asks for the rest. */
 const INITIAL = 8;
 
-function SpeakerCard({ s }: { s: Speaker }) {
+/**
+ * A card that is a link when there is a page behind it - which is everyone
+ * announced. A pending slot has no page, so it stays a plain article and
+ * nothing invites a click that would go nowhere.
+ */
+function Card({ s, lang, children }: { s: Speaker; lang: Lang; children: React.ReactNode }) {
+  const className = `flex h-full flex-col overflow-hidden rounded-3xl ring-1 transition-transform duration-300 ${
+    s.pending ? "bg-bh-cloud ring-bh-ink/8" : "bg-bh-ink text-bh-paper ring-bh-ink/8 hover:-translate-y-1.5"
+  }`;
+  if (s.pending) return <article className={className}>{children}</article>;
   return (
-    <article
-      className={`flex h-full flex-col overflow-hidden rounded-3xl ring-1 transition-transform duration-300 ${
-        s.pending
-          ? "bg-bh-cloud ring-bh-ink/8"
-          : "bg-bh-ink text-bh-paper ring-bh-ink/8 hover:-translate-y-1.5"
-      }`}
-    >
+    <Link href={`${lang === "en" ? "/en" : ""}/lektor/${s.id}`} className={className}>
+      {children}
+    </Link>
+  );
+}
+
+function SpeakerCard({ s, lang }: { s: Speaker; lang: Lang }) {
+  return (
+    <Card s={s} lang={lang}>
       {/* Square rather than 3/4: at this many people the portrait is an
           identifier, not a poster, and the shorter crop is what keeps the
           section from running away vertically. */}
@@ -87,7 +100,7 @@ function SpeakerCard({ s }: { s: Speaker }) {
           </>
         )}
       </div>
-    </article>
+    </Card>
   );
 }
 
@@ -141,7 +154,7 @@ export function SpeakerGrid({ speakers, lang = "bg" }: { speakers: Speaker[]; la
         }`}
       >
         {shown.map((s) => (
-          <SpeakerCard key={s.id} s={s} />
+          <SpeakerCard key={s.id} s={s} lang={lang} />
         ))}
       </div>
 

@@ -563,6 +563,41 @@ export const LIST: Copy<{
   },
 };
 
+export const SPEAKER_PAGE: Copy<{
+  allSpeakers: string;
+  website: string;
+  onStage: string;
+  fullProgramme: string;
+  ctaTitle: string;
+  ctaBody: string;
+  ctaButton: (price: string) => string;
+  ctaSoon: string;
+  describe: (who: string, what: string) => string;
+}> = {
+  bg: {
+    allSpeakers: "Всички лектори",
+    website: "Сайт",
+    onStage: "На сцената",
+    fullProgramme: "Цялата програма по часове",
+    ctaTitle: "Чуй го на живо на 7 и 8 ноември",
+    ctaBody: "Sofia Life Summit събира лекари и изследователи от осем държави в Гранд Хотел Милениум - по 25 минути всеки, на разбираем език.",
+    ctaButton: (price) => `Виж билетите от ${price} €`,
+    ctaSoon: "Билетите - скоро",
+    describe: (who, what) => `${who} на Sofia Life Summit, 07-08 ноември 2026, Гранд Хотел Милениум, София.${what ? ` ${what}` : ""}`,
+  },
+  en: {
+    allSpeakers: "All speakers",
+    website: "Website",
+    onStage: "On stage",
+    fullProgramme: "The full programme, hour by hour",
+    ctaTitle: "Hear them live on 7-8 November",
+    ctaBody: "Sofia Life Summit brings doctors and researchers from eight countries to Grand Hotel Millennium - 25 minutes each, in plain language.",
+    ctaButton: (price) => `See the tickets - from €${price}`,
+    ctaSoon: "Tickets - soon",
+    describe: (who, what) => `${who} at Sofia Life Summit, 7-8 November 2026, Grand Hotel Millennium, Sofia.${what ? ` ${what}` : ""}`,
+  },
+};
+
 export const PARTNERS_SECTION: Copy<{ eyebrow: string; title: string; intro: string }> = {
   bg: {
     eyebrow: "Партньорите",

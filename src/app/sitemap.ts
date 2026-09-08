@@ -1,9 +1,25 @@
 import type { MetadataRoute } from "next";
 
+import { listSpeakerPages } from "@/lib/speakers-data";
+
 const SITE = "https://thelongevitysummit.eu";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // A page per announced speaker: the addresses people reach by searching a
+  // name rather than the event.
+  let speakers: MetadataRoute.Sitemap = [];
+  try {
+    const rows = await listSpeakerPages();
+    speakers = rows.flatMap((r) => [
+      { url: `${SITE}/lektor/${r.id}`, lastModified: r.updatedAt ?? undefined, changeFrequency: "monthly" as const, priority: 0.6 },
+      { url: `${SITE}/en/lektor/${r.id}`, lastModified: r.updatedAt ?? undefined, changeFrequency: "monthly" as const, priority: 0.5 },
+    ]);
+  } catch {
+    // A sitemap without the speakers beats a build that fails over them.
+  }
+
   return [
+    ...speakers,
     {
       url: SITE,
       changeFrequency: "weekly",

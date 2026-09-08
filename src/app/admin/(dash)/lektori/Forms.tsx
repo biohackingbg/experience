@@ -39,6 +39,15 @@ function Fields({ s }: { s?: SpeakerRow }) {
           <input name="affiliationEn" defaultValue={s?.affiliationEn ?? ""} placeholder="institution in English" className={field} />
         </div>
       </details>
+      <details className="mt-2" open={!!(s?.website || s?.linkedin || s?.instagram)}>
+        <summary className="cursor-pointer text-xs font-semibold text-bh-ink/60">Връзки (по избор)</summary>
+        <div className="mt-2 grid gap-2 sm:grid-cols-3">
+          <input name="website" defaultValue={s?.website ?? ""} placeholder="сайт" className={field} />
+          <input name="linkedin" defaultValue={s?.linkedin ?? ""} placeholder="LinkedIn" className={field} />
+          <input name="instagram" defaultValue={s?.instagram ?? ""} placeholder="Instagram" className={field} />
+        </div>
+        <p className="mt-1.5 text-xs text-bh-ink/55">Показват се на страницата на лектора. Може и само домейн - добавяме https сами.</p>
+      </details>
       <div className="mt-2 flex flex-wrap gap-4 text-xs text-bh-ink/70">
         <label className="flex items-center gap-2">
           <input type="checkbox" name="announced" defaultChecked={s?.announced ?? false} className="h-3.5 w-3.5 accent-[#146455]" />
