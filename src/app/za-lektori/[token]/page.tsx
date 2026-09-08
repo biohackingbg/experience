@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 
 import { BANNERS } from "@/lib/banner-presets";
@@ -111,12 +112,13 @@ export default async function SpeakerKitPage({ params }: { params: Promise<{ tok
           {speaker.hasPhoto && (
             <div className="mt-5 rounded-2xl bg-bh-cloud p-4 ring-1 ring-bh-ink/8">
               <p className="font-mono text-[0.65rem] uppercase tracking-[0.15em] text-bh-ink/50">Твоята карта</p>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={`/api/lektor-karta/${speaker.id}?size=portrait`}
                 alt=""
+                width={1080}
+                height={1350}
+                sizes="(max-width: 640px) 90vw, 320px"
                 className="mt-3 w-full max-w-xs rounded-xl"
-                style={{ aspectRatio: "1080 / 1350" }}
               />
               <div className="mt-3 flex flex-wrap gap-2">
                 {[

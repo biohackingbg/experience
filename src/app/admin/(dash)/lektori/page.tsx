@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 
 import { HomeLink } from "@/components/admin/HomeLink";
@@ -97,8 +98,13 @@ export default async function SpeakersAdminPage() {
                       </div>
                       <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-bh-ink text-bh-paper/60">
                         {s.hasPhoto ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={photoUrl(s)} alt="" className="h-full w-full object-cover object-top" />
+                          <Image
+                            src={photoUrl(s)!}
+                            alt=""
+                            width={56}
+                            height={56}
+                            className="h-full w-full object-cover object-top"
+                          />
                         ) : (
                           <span className="text-sm font-black">{initials(s.name)}</span>
                         )}

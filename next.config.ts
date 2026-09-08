@@ -5,7 +5,12 @@ const nextConfig: NextConfig = {
     // The speaker portraits come out of the database through a route of our
     // own; the optimizer needs to be told it may resize them. Nothing else
     // local is dynamic, so the pattern is as narrow as the route.
-    localPatterns: [{ pathname: "/api/lektor/**", search: "" }],
+    localPatterns: [
+      { pathname: "/api/lektor/**", search: "" },
+      // The generated speaker cards are previewed on the kit page; each one
+      // is a megabyte of PNG at full size.
+      { pathname: "/api/lektor-karta/**" },
+    ],
   },
   // Speaker portraits are uploaded through a server action; they are resized
   // in the browser first, so the ceiling is generous, not large.
