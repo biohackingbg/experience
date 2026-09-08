@@ -29,7 +29,7 @@ export function PriceStages({ pricing, sold }: { pricing: Pricing; sold: number 
     : null;
 
   return (
-    <section className={`rounded-3xl p-6 ring-1 ${pricing.stage === "regular" ? "bg-white ring-[#0b2a22]/6" : "bg-[#cef870]/25 ring-[#8fb832]/40"}`}>
+    <section className={`flex w-full flex-col rounded-3xl p-6 ring-1 ${pricing.stage === "regular" ? "bg-white ring-[#0b2a22]/6" : "bg-[#cef870]/25 ring-[#8fb832]/40"}`}>
       <p className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-bh-ink/55">Цени на сайта</p>
       <p className="mt-1 text-lg font-bold tracking-tight text-bh-ink">
         {STAGES.find((s) => s.id === pricing.stage)?.label} цени{pricing.discounted ? ` · ${pricing.label}` : ""}
@@ -73,22 +73,24 @@ export function PriceStages({ pricing, sold }: { pricing: Pricing; sold: number 
 
       <details className="mt-4">
         <summary className="cursor-pointer text-xs font-semibold text-bh-ink/70">Междинни цени и надпис</summary>
-        <form action={midAction} className="mt-3 grid gap-2 sm:grid-cols-3">
-          {TIERS.map((t) => (
-            <label key={t.id} className="text-xs text-bh-ink/60">
-              {t.name}, € с ДДС
-              <input name={`price_${t.id}`} inputMode="decimal" defaultValue={pricing.mid.prices[t.id] / 100} className={`${field} mt-1`} />
-            </label>
-          ))}
-          <label className="text-xs text-bh-ink/60 sm:col-span-1">
-            надпис („до 15 октомври“)
-            <input name="label" defaultValue={pricing.mid.label} maxLength={60} className={`${field} mt-1`} />
+        <form action={midAction} className="mt-3 flex flex-col gap-3">
+          <div className="grid grid-cols-3 gap-2">
+            {TIERS.map((t) => (
+              <label key={t.id} className="min-w-0 text-[0.68rem] leading-tight text-bh-ink/60">
+                {t.name} €
+                <input name={`price_${t.id}`} inputMode="decimal" defaultValue={pricing.mid.prices[t.id] / 100} className={`${field} mt-1`} />
+              </label>
+            ))}
+          </div>
+          <label className="block text-[0.68rem] leading-tight text-bh-ink/60">
+            надпис на цената
+            <input name="label" defaultValue={pricing.mid.label} maxLength={60} placeholder="до 15 октомври" className={`${field} mt-1`} />
           </label>
-          <label className="text-xs text-bh-ink/60 sm:col-span-1">
-            под зачертаната цена („след 15 октомври“)
-            <input name="after" defaultValue={pricing.mid.regularAfter} maxLength={60} className={`${field} mt-1`} />
+          <label className="block text-[0.68rem] leading-tight text-bh-ink/60">
+            под зачертаната цена
+            <input name="after" defaultValue={pricing.mid.regularAfter} maxLength={60} placeholder="след 15 октомври" className={`${field} mt-1`} />
           </label>
-          <div className="flex items-end gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button type="submit" disabled={midPending} className="rounded-full border border-bh-ink/25 px-4 py-1.5 text-xs font-semibold text-bh-ink disabled:opacity-50">
               {midPending ? "Записва…" : "Запиши"}
             </button>

@@ -133,14 +133,14 @@ function Stat({
 function WeekStrip({ week }: { week: { day: string; label: string; orders: number; grossCents: number; today: boolean }[] }) {
   const max = week.reduce((m, d) => Math.max(m, d.orders), 0);
   return (
-    <div className="mt-6 flex h-full min-h-44 w-full items-end gap-3 sm:gap-5">
+    <div className="mt-4 flex h-full min-h-44 w-full items-end gap-3 sm:gap-5">
       {week.map((d) => {
         const h = max ? Math.max((d.orders / max) * 100, 8) : 8;
         const peak = max > 0 && d.orders === max;
         return (
           <div key={d.day} className="group relative flex flex-1 flex-col items-center justify-end" style={{ height: "100%" }}>
             <span
-              className={`mb-2 rounded-md px-2 py-0.5 text-[0.65rem] font-semibold ${
+              className={`mb-3 rounded-md px-2 py-0.5 text-[0.65rem] font-semibold ${
                 peak
                   ? "bg-[#0b2a22] text-white"
                   : d.orders > 0
@@ -363,12 +363,12 @@ export default async function AdminDashboard({
             <h2 className="text-lg font-bold tracking-tight">Поръчки тази седмица</h2>
             <span className="text-xs text-[#0b2a22]/55">{d.soldLast7Days} билета за 7 дни</span>
           </div>
-          <div className="flex flex-1 items-end">
+          <div className="flex flex-1 items-end pt-4">
             <WeekStrip week={d.week} />
           </div>
         </section>
 
-        <div className="self-start xl:col-span-1">
+        <div className="flex xl:col-span-1">
           <PriceStages pricing={pricing} sold={d.ticketsSold} />
         </div>
 
