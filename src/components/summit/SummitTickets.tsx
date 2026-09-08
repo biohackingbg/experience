@@ -232,12 +232,12 @@ export async function SummitTickets({ lang = "bg" }: { lang?: Lang }) {
             {c.compare}
           </h3>
           <div className="mt-5 overflow-x-auto">
-            <table className="w-full min-w-[40rem] text-sm">
+            <table className="w-full min-w-[34rem] text-sm sm:min-w-[40rem]">
               <thead>
                 <tr className="text-left font-mono text-[0.62rem] uppercase tracking-[0.15em] text-bh-ink/45">
-                  <th className="w-1/3 py-3 pr-4 font-normal" />
+                  <th className="sticky left-0 z-10 w-[9.5rem] bg-bh-paper py-3 pr-3 font-normal sm:w-1/3 sm:pr-4" />
                   {TIERS.map((tier) => (
-                    <th key={tier.id} className="py-3 pr-4 font-bold normal-case tracking-normal text-sm text-bh-ink">
+                    <th key={tier.id} className="py-3 pr-3 text-sm font-bold normal-case tracking-normal text-bh-ink sm:pr-4">
                       {tier.name}
                     </th>
                   ))}
@@ -251,11 +251,15 @@ export async function SummitTickets({ lang = "bg" }: { lang?: Lang }) {
                   ...c.rows,
                 ].map(([label, ...cells]) => (
                   <tr key={label} className="border-t border-bh-ink/8 align-top">
-                    <td className="py-3 pr-4 font-semibold text-bh-ink">{label}</td>
+                    {/* Pinned, so the row's question stays on screen while the
+                        answers scroll past it. */}
+                    <td className="sticky left-0 z-10 bg-bh-paper py-3 pr-3 text-[0.8rem] font-semibold leading-snug text-bh-ink sm:pr-4 sm:text-sm">
+                      {label}
+                    </td>
                     {cells.map((cell, i) => (
                       <td
                         key={i}
-                        className={`py-3 pr-4 ${cell === "-" ? "text-bh-ink/30" : "text-bh-ink/75"}`}
+                        className={`py-3 pr-3 text-[0.8rem] leading-snug sm:pr-4 sm:text-sm ${cell === "-" ? "text-bh-ink/30" : "text-bh-ink/75"}`}
                       >
                         {cell}
                       </td>

@@ -10,6 +10,8 @@ import { getTier } from "@/lib/tickets";
 export type TicketView = {
   code: string;
   tierId: string;
+  /** 1 = Saturday, 2 = Sunday; null on a ticket that admits both days. */
+  day: number | null;
   tierName: string;
   attendeeName: string | null;
   buyerName: string;
@@ -34,6 +36,7 @@ export async function findTicket(code: string): Promise<TicketView | null> {
     .select({
       code: tickets.code,
       tierId: tickets.tierId,
+      day: tickets.day,
       attendeeName: tickets.attendeeName,
       checkedInAt: tickets.checkedInAt,
       buyerName: orders.name,
@@ -114,6 +117,8 @@ export type AttendeeRow = {
   name: string;
   /** Whether that name was written for this ticket, or is the buyer's by default. */
   named: boolean;
+  /** 1 = Saturday, 2 = Sunday; null admits both. */
+  day: number | null;
   tierName: string;
   reference: string;
   buyerName: string;
@@ -128,6 +133,7 @@ export async function listAttendees(): Promise<AttendeeRow[]> {
     .select({
       code: tickets.code,
       tierId: tickets.tierId,
+      day: tickets.day,
       attendeeName: tickets.attendeeName,
       checkedInAt: tickets.checkedInAt,
       buyerName: orders.name,
@@ -143,6 +149,7 @@ export async function listAttendees(): Promise<AttendeeRow[]> {
       code: r.code,
       name: r.attendeeName ?? r.buyerName,
       named: !!r.attendeeName,
+      day: r.day,
       tierName: getTier(r.tierId)?.name ?? r.tierId,
       reference: r.reference,
       buyerName: r.buyerName,
@@ -175,6 +182,9 @@ export async function getDoorStats(): Promise<{
   checkedIn: number;
   /** Sofia's today: the event has two days and each morning starts at zero. */
   today: number;
+  /** Expected on each day: a one-day ticket names one, the rest admit both. */
+  saturday: number;
+  sunday: number;
   recent: DoorRecent[];
 }> {
   const db = getDb();
@@ -184,6 +194,8 @@ export async function getDoorStats(): Promise<{
         total: sql<number>`count(*)::int`,
         checkedIn: sql<number>`count(*) filter (where ${tickets.checkedInAt} is not null)::int`,
         today: sql<number>`count(*) filter (where (${tickets.checkedInAt} at time zone 'Europe/Sofia')::date = (now() at time zone 'Europe/Sofia')::date)::int`,
+        saturday: sql<number>`count(*) filter (where ${tickets.day} is null or ${tickets.day} = 1)::int`,
+        sunday: sql<number>`count(*) filter (where ${tickets.day} is null or ${tickets.day} = 2)::int`,
       })
       .from(tickets)
       .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
@@ -208,6 +220,8 @@ export async function getDoorStats(): Promise<{
     total: row?.total ?? 0,
     checkedIn: row?.checkedIn ?? 0,
     today: row?.today ?? 0,
+    saturday: row?.saturday ?? 0,
+    sunday: row?.sunday ?? 0,
     recent: recentRows.flatMap((r) =>
       r.at ? [{ code: r.code, name: r.attendeeName ?? r.buyerName, tierName: getTier(r.tierId)?.name ?? r.tierId, at: r.at }] : [],
     ),
@@ -227,6 +241,7 @@ export async function searchTickets(q: string): Promise<(TicketView & { email: s
     .select({
       code: tickets.code,
       tierId: tickets.tierId,
+      day: tickets.day,
       attendeeName: tickets.attendeeName,
       checkedInAt: tickets.checkedInAt,
       buyerName: orders.name,

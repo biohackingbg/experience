@@ -13,12 +13,13 @@ import { SummitTickets } from "@/components/summit/SummitTickets";
 import { SummitRegister } from "@/components/summit/SummitRegister";
 import { SummitSponsors } from "@/components/summit/SummitSponsors";
 import { SummitOrganizers } from "@/components/summit/SummitOrganizers";
+import { BuyBar } from "@/components/summit/BuyBar";
 import { SummitFooter } from "@/components/summit/SummitFooter";
 import { buildEventSchema } from "@/lib/event-schema";
 import { getAnnouncedSpeakers } from "@/lib/speakers-data";
 import { cheapestOf, getPricing, priceOf } from "@/lib/pricing";
 import { META } from "@/lib/site-copy";
-import { formatPrice } from "@/lib/tickets";
+import { SALES_OPEN, formatPrice } from "@/lib/tickets";
 
 export const revalidate = 300;
 
@@ -68,6 +69,7 @@ export default async function HomeEn() {
         <SummitOrganizers lang="en" />
       </main>
       <SummitFooter lang="en" />
+      {SALES_OPEN && <BuyBar lang="en" from={from} tierId={cheapestOf(pricing).id} />}
     </div>
   );
 }

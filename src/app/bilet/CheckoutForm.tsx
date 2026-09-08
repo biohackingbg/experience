@@ -5,7 +5,7 @@ import { useActionState, useEffect, useState } from "react";
 import { initialCheckoutState } from "@/lib/checkout-state";
 import { CHECKOUT, type Lang } from "@/lib/i18n";
 import { PURCHASE_TERMS_TEXT, PURCHASE_TERMS_TEXT_EN } from "@/lib/purchase-terms";
-import { TIERS, formatPrice, splitVat } from "@/lib/tickets";
+import { TIERS, formatPrice, picksDay, splitVat } from "@/lib/tickets";
 import { type PromoPreview, checkPromo, startCheckout } from "./actions";
 
 const fieldBase =
@@ -71,6 +71,7 @@ export function CheckoutForm({
     return wanted ?? TIERS.find((t) => !soldOut.includes(t.id))?.id ?? "plus";
   });
   const [quantity, setQuantity] = useState(1);
+  const [day, setDay] = useState(1);
   const [wantsInvoice, setWantsInvoice] = useState(false);
   const [promoInput, setPromoInput] = useState("");
   const [promo, setPromo] = useState<PromoPreview | null>(null);
@@ -144,6 +145,40 @@ export function CheckoutForm({
             })}
           </div>
         </fieldset>
+
+        {picksDay(tierId) && (
+          /* CORE promised "a day of your choice" and nothing ever asked
+             which - so the buyer answers here and the day rides on the
+             ticket, instead of being settled at the door. */
+          <fieldset className="mt-6">
+            <legend className="font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/50">{t.day}</legend>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              {[
+                { value: 1, label: t.daySat },
+                { value: 2, label: t.daySun },
+              ].map((d) => (
+                <label
+                  key={d.value}
+                  className={`flex cursor-pointer items-center gap-3 rounded-2xl px-5 py-4 ring-1 transition-colors ${
+                    day === d.value ? "bh-mint ring-bh-pine" : "bg-bh-cloud ring-bh-ink/10 hover:ring-bh-ink/25"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="coreDay"
+                    value={d.value}
+                    checked={day === d.value}
+                    onChange={() => setDay(d.value)}
+                    className="h-4 w-4 accent-bh-pine"
+                  />
+                  <span className="font-semibold text-bh-ink">{d.label}</span>
+                </label>
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-bh-ink/55">{t.dayNote}</p>
+            <Err>{state.fieldErrors?.coreDay}</Err>
+          </fieldset>
+        )}
 
         <div className="mt-6">
           <Label htmlFor="quantity">{t.quantity}</Label>

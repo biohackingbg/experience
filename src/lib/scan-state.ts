@@ -10,6 +10,8 @@ export type ScanState = {
   code?: string;
   name?: string;
   tierName?: string;
+  /** 1 = Saturday, 2 = Sunday - what the door has to check on a one-day ticket. */
+  day?: number | null;
   usedAt?: string;
   message?: string;
   scannedAt?: number;

@@ -11,11 +11,12 @@ import { SummitTickets } from "@/components/summit/SummitTickets";
 import { SummitRegister } from "@/components/summit/SummitRegister";
 import { SummitSponsors } from "@/components/summit/SummitSponsors";
 import { SummitOrganizers } from "@/components/summit/SummitOrganizers";
+import { BuyBar } from "@/components/summit/BuyBar";
 import { SummitFooter } from "@/components/summit/SummitFooter";
 import { buildEventSchema } from "@/lib/event-schema";
 import { cheapestOf, getPricing, priceOf } from "@/lib/pricing";
 import { getAnnouncedSpeakers } from "@/lib/speakers-data";
-import { formatPrice } from "@/lib/tickets";
+import { SALES_OPEN, formatPrice } from "@/lib/tickets";
 
 // Re-rendered periodically as a safety net. Closing the launch prices is a
 // switch in the admin, and that switch revalidates this page on the spot;
@@ -56,6 +57,7 @@ export default async function Home() {
         <SummitOrganizers />
       </main>
       <SummitFooter />
+      {SALES_OPEN && <BuyBar from={from} tierId={cheapestOf(pricing).id} />}
     </div>
   );
 }

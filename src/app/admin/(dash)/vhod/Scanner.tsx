@@ -127,7 +127,7 @@ export function Scanner() {
             <p className="text-3xl font-black uppercase tracking-tight">Заповядай</p>
             <p className="mt-2 text-lg font-semibold">{state.name}</p>
             <p className="text-sm opacity-80">
-              {state.tierName} · {state.code}
+              {state.tierName}{state.day ? ` · ${state.day === 1 ? "Събота 07.11" : "Неделя 08.11"}` : ""} · {state.code}
             </p>
           </>
         )}

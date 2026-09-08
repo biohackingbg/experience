@@ -24,6 +24,21 @@ export const CURRENCY = "EUR";
  * including the server action, so a bookmarked /bilet or a cached page cannot
  * slip an order through while it is off.
  */
+/**
+ * The tiers that admit one day of the two, so the buyer picks which. The
+ * others admit both and never ask.
+ */
+export const ONE_DAY_TIERS = ["core"];
+export const picksDay = (tierId: string) => ONE_DAY_TIERS.includes(tierId);
+
+/** 1 = Saturday, 2 = Sunday - the shape stored on the order and the ticket. */
+export const DAY_LABEL: Record<number, { bg: string; en: string }> = {
+  1: { bg: "Събота, 07.11", en: "Saturday, 7 Nov" },
+  2: { bg: "Неделя, 08.11", en: "Sunday, 8 Nov" },
+};
+export const dayLabel = (day: number | null | undefined, lang: "bg" | "en" = "bg") =>
+  day && DAY_LABEL[day] ? DAY_LABEL[day][lang] : null;
+
 export const SALES_OPEN = true;
 
 /** What the page says wherever a price would be. */

@@ -8,7 +8,7 @@ import { orderItems, orders, tickets } from "@/lib/db/schema";
 import { PENDING_HOLD_MINUTES } from "@/lib/orders-const";
 import { resolvePromo } from "@/lib/promo";
 import { getPricing, priceOf } from "@/lib/pricing";
-import { CURRENCY, TIERS, VAT_RATE, getTier, splitVat } from "@/lib/tickets";
+import { CURRENCY, TIERS, VAT_RATE, getTier, picksDay, splitVat } from "@/lib/tickets";
 
 export { PENDING_HOLD_MINUTES };
 
@@ -24,6 +24,8 @@ function randomCode(length: number): string {
 }
 
 export type CreateOrderInput = {
+  /** 1 = Saturday, 2 = Sunday; only for the tiers that admit one day. */
+  coreDay?: number | null;
   tierId: string;
   quantity: number;
   name: string;
@@ -143,6 +145,7 @@ export async function createPendingOrder(
         promoCode,
         discountCents,
         lang: input.lang ?? "bg",
+        coreDay: input.coreDay ?? null,
       })
       .returning({ id: orders.id });
 
@@ -183,7 +186,7 @@ export type PaidOrderSummary = {
     totalCents: number;
     /** Null only if the column was somehow already filled. */
     invoiceNumber: number | null;
-    tickets: { code: string; tierName: string }[];
+    tickets: { code: string; tierName: string; day: number | null }[];
     lang: "bg" | "en";
   };
 };
@@ -235,11 +238,18 @@ export async function markOrderPaid(
       .from(orderItems)
       .where(sql`${orderItems.orderId} = ${orderId}`);
 
+    const [{ coreDay }] = await tx
+      .select({ coreDay: orders.coreDay })
+      .from(orders)
+      .where(sql`${orders.id} = ${orderId}`);
+
     const rows = items.flatMap((item) =>
       Array.from({ length: item.quantity }, () => ({
         orderId,
         tierId: item.tierId,
         code: `${randomCode(4)}-${randomCode(4)}`,
+        // Only the one-day tiers carry a day; the rest admit both.
+        day: picksDay(item.tierId) ? coreDay : null,
       })),
     );
 
@@ -258,6 +268,7 @@ export async function markOrderPaid(
         tickets: rows.map((row) => ({
           code: row.code,
           tierName: getTier(row.tierId)?.name ?? row.tierId,
+          day: row.day,
         })),
       },
     };

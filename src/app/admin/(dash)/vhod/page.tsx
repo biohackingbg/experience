@@ -6,6 +6,7 @@ import { getDoorStats, searchTickets } from "@/lib/tickets-lookup";
 
 import { admitTicket } from "./actions";
 import { Scanner } from "./Scanner";
+import { dayLabel } from "@/lib/tickets";
 
 export const metadata: Metadata = {
   title: "Вход | Администрация",
@@ -60,6 +61,8 @@ export default async function DoorPage({
             [stats.today, "влезли днес"],
             [stats.checkedIn, "влезли общо"],
             [stats.total - stats.checkedIn, "очаквани"],
+            [stats.saturday, "за събота"],
+            [stats.sunday, "за неделя"],
           ].map(([n, label]) => (
             <div key={label} className="rounded-2xl bg-bh-cloud px-4 py-4 ring-1 ring-bh-ink/8">
               <div className="text-2xl font-black tracking-tight text-bh-ink">{n}</div>
@@ -100,7 +103,7 @@ export default async function DoorPage({
                     <div className="min-w-0">
                       <div className="font-medium text-bh-ink">{t.attendeeName ?? t.buyerName}</div>
                       <div className="truncate text-xs text-bh-ink/55">
-                        {t.tierName} · {t.code} · {t.reference}
+                        {t.tierName}{dayLabel(t.day) ? ` · ${dayLabel(t.day)}` : ""} · {t.code} · {t.reference}
                         {t.attendeeName ? ` · купил ${t.buyerName}` : ""}
                       </div>
                     </div>

@@ -6,6 +6,7 @@
  */
 export type CheckoutField =
   | "tierId"
+  | "coreDay"
   | "quantity"
   | "promo"
   | "name"

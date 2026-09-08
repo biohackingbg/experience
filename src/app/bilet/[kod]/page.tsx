@@ -5,6 +5,7 @@ import QRCode from "qrcode";
 import { Calendar, Pin, TicketIcon } from "@/components/ui/Pictograms";
 import { BOOKING, TICKET_PAGE } from "@/lib/i18n";
 import { getTicketPlaces, listWorkshops } from "@/lib/workshops";
+import { dayLabel } from "@/lib/tickets";
 import { findTicket } from "@/lib/tickets-lookup";
 
 import { AttendeeForm } from "./AttendeeForm";
@@ -50,7 +51,15 @@ export default async function TicketPage({
             <h1 className="mt-2 font-display text-2xl font-[900] uppercase leading-none tracking-tight text-bh-ink">
               Sofia Life Summit
             </h1>
-            <p className="mt-2 text-sm text-bh-ink/70">{ticket.tierName}</p>
+            <p className="mt-2 text-sm text-bh-ink/70">
+              {ticket.tierName}
+              {dayLabel(ticket.day, ticket.lang) && (
+                <>
+                  {" · "}
+                  <span className="font-semibold text-bh-ink">{dayLabel(ticket.day, ticket.lang)}</span>
+                </>
+              )}
+            </p>
           </div>
 
           <div className="flex justify-center px-7 py-8">

@@ -211,6 +211,13 @@
       "when": 1788660000000,
       "tag": "0028_grant_email",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1788670000000,
+      "tag": "0029_core_day",
+      "breakpoints": true
     }
   ]
 }

@@ -148,6 +148,8 @@ export const orders = pgTable(
     bankDueAt: timestamp("bank_due_at", { withTimezone: true }),
     /** Team note on a manual order: "Партньор Dexcom, 10 билета по договор". */
     note: text("note"),
+    /** Which day a one-day ticket is for: 1 = Saturday, 2 = Sunday. */
+    coreDay: integer("core_day"),
     /** bg | en - the language the buyer chose; the mails follow it. */
     lang: text("lang").notNull().default("bg"),
 
@@ -232,6 +234,12 @@ export const tickets = pgTable(
     tierId: text("tier_id").notNull(),
 
     attendeeName: text("attendee_name"),
+    /**
+     * Which day this ticket admits, for the tiers that buy one: 1 = Saturday,
+     * 2 = Sunday, null = both days (PLUS and PEAK) or a ticket issued before
+     * the choice existed.
+     */
+    day: integer("day"),
     checkedInAt: timestamp("checked_in_at", { withTimezone: true }),
 
     createdAt: timestamp("created_at", { withTimezone: true })

@@ -2,7 +2,7 @@ import "server-only";
 
 import { Resend } from "resend";
 
-import { formatPrice } from "@/lib/tickets";
+import { DAY_LABEL, formatPrice } from "@/lib/tickets";
 
 /**
  * Transactional email.
@@ -50,7 +50,7 @@ export type TicketEmailInput = {
   totalCents: number;
   /** Absent only if numbering somehow failed; the email still sends. */
   invoiceNumber?: number | null;
-  tickets: { code: string; tierName: string }[];
+  tickets: { code: string; tierName: string; day?: number | null }[];
   /** The buyer's language; templates follow it where an English one exists. */
   lang?: "bg" | "en";
 };
@@ -62,7 +62,7 @@ function ticketRows(input: TicketEmailInput, open = "Отвори билета",
       <tr>
         <td style="padding:14px 0;border-bottom:1px solid #dfe4e0">
           <div style="font:600 15px/1.3 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f">
-            ${t.tierName}
+            ${t.tierName}${t.day ? ` · ${esc(DAY_LABEL[t.day]?.[open === "Отвори билета" ? "bg" : "en"] ?? "")}` : ""}
           </div>
           <div style="font:400 13px/1.4 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f99;margin-top:2px">
             ${code}: <strong style="letter-spacing:1px">${t.code}</strong>

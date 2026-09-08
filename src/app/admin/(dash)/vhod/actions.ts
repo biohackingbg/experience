@@ -49,6 +49,7 @@ export async function scanTicket(
       code: result.ticket.code,
       name: result.ticket.buyerName,
       tierName: result.ticket.tierName,
+      day: result.ticket.day,
       usedAt: result.ticket.checkedInAt?.toISOString(),
       scannedAt,
     };
@@ -59,6 +60,7 @@ export async function scanTicket(
     code: result.ticket.code,
     name: result.ticket.buyerName,
     tierName: result.ticket.tierName,
+    day: result.ticket.day,
     scannedAt,
   };
 }

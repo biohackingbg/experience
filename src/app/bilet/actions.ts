@@ -13,11 +13,13 @@ import { discountFor, promoReasonText, resolvePromo } from "@/lib/promo";
 import { PURCHASE_TERMS_TEXT, PURCHASE_TERMS_TEXT_EN, PURCHASE_TERMS_VERSION } from "@/lib/purchase-terms";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
-import { SALES_OPEN, TIERS, getTier } from "@/lib/tickets";
+import { SALES_OPEN, TIERS, getTier, picksDay } from "@/lib/tickets";
 
 const schema = z.object({
   tierId: z.enum(TIERS.map((t) => t.id) as [string, ...string[]]),
   quantity: z.coerce.number().int().min(1).max(10),
+  /** Only the one-day tiers send it; checked against the tier below. */
+  coreDay: z.coerce.number().int().min(1).max(2).optional(),
   name: z.string().trim().min(2, "Въведи име и фамилия.").max(120),
   email: z.string().trim().toLowerCase().email("Провери имейл адреса."),
   phone: z.string().trim().max(40).optional(),
@@ -109,10 +111,17 @@ export async function startCheckout(
   const input = parsed.data;
   const tier = getTier(input.tierId);
   if (!tier) return fail("Непознато ниво билет.");
+  // A one-day ticket without a day would be a promise nobody can keep at the
+  // door; a two-day one carries no day at all.
+  if (picksDay(tier.id) && !input.coreDay) {
+    return fail("Избери за кой ден е билетът.", { coreDay: "Избери събота или неделя." });
+  }
+  const coreDay = picksDay(tier.id) ? (input.coreDay ?? null) : null;
 
   const lang = langOf(input.lang);
   const order = await createPendingOrder({
     ...input,
+    coreDay,
     lang,
     promoCode: input.promo,
     termsText: `${PURCHASE_TERMS_VERSION}${lang === "en" ? "-en" : ""}: ${lang === "en" ? PURCHASE_TERMS_TEXT_EN : PURCHASE_TERMS_TEXT}`,
