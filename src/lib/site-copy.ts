@@ -565,6 +565,10 @@ export const LIST: Copy<{
 
 export const SPEAKER_PAGE: Copy<{
   allSpeakers: string;
+  crumb: string;
+  others: string;
+  prev: string;
+  next: string;
   website: string;
   onStage: string;
   fullProgramme: string;
@@ -576,6 +580,10 @@ export const SPEAKER_PAGE: Copy<{
 }> = {
   bg: {
     allSpeakers: "Всички лектори",
+    crumb: "Лектори",
+    others: "Другите на сцената",
+    prev: "Преди",
+    next: "След",
     website: "Сайт",
     onStage: "На сцената",
     fullProgramme: "Цялата програма по часове",
@@ -587,6 +595,10 @@ export const SPEAKER_PAGE: Copy<{
   },
   en: {
     allSpeakers: "All speakers",
+    crumb: "Speakers",
+    others: "Others on the stage",
+    prev: "Before",
+    next: "After",
     website: "Website",
     onStage: "On stage",
     fullProgramme: "The full programme, hour by hour",

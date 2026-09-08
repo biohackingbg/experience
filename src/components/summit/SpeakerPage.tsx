@@ -36,7 +36,7 @@ function LinkOut({ href, label }: { href: string; label: string }) {
  * way to buy - and nothing else.
  */
 export async function SpeakerPage({ data, lang = "bg" }: { data: Data; lang?: Lang }) {
-  const { speaker: s, links, sessions } = data;
+  const { speaker: s, links, sessions, prev, next } = data;
   const c = SPEAKER_PAGE[lang];
   const pricing = await getPricing();
   const from = formatPrice(priceOf(pricing, cheapestOf(pricing)));
@@ -47,9 +47,15 @@ export async function SpeakerPage({ data, lang = "bg" }: { data: Data; lang?: La
       <SummitNav lang={lang} />
       <main className="px-5 pb-20 pt-10 sm:px-8 lg:px-10">
         <div className="mx-auto w-full max-w-5xl">
-          <Link href={lang === "en" ? "/en#lektori" : "/#lektori"} className="font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/50 transition-colors hover:text-bh-ink">
-            ← {c.allSpeakers}
-          </Link>
+          {/* The trail the site already uses for a section label, rather than
+              a button floating on its own: the eyebrow is this page's idiom. */}
+          <p className="bh-eyebrow font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/45">
+            Sofia Life Summit
+            <span className="mx-2 text-bh-ink/25">/</span>
+            <Link href={lang === "en" ? "/en#lektori" : "/#lektori"} className="text-bh-ink/70 underline-offset-4 transition-colors hover:text-bh-ink hover:underline">
+              {c.crumb}
+            </Link>
+          </p>
 
           <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,22rem)_1fr] lg:items-start">
             <div className="relative aspect-square overflow-hidden rounded-3xl bg-bh-forest">
@@ -110,6 +116,43 @@ export async function SpeakerPage({ data, lang = "bg" }: { data: Data; lang?: La
               {SALES_OPEN ? c.ctaButton(from) : c.ctaSoon}
             </Link>
           </section>
+
+          {(prev || next) && (
+            /* Reading one speaker should lead to the next: the two either side
+               of them in the line-up, with the whole list still one tap away. */
+            <section className="mt-14 border-t border-bh-ink/15 pt-8">
+              <div className="flex flex-wrap items-baseline justify-between gap-3">
+                <h2 className="text-lg font-bold tracking-tight text-bh-ink">{c.others}</h2>
+                <Link href={lang === "en" ? "/en#lektori" : "/#lektori"} className="text-sm font-semibold text-bh-pine underline underline-offset-4">
+                  {c.allSpeakers}
+                </Link>
+              </div>
+              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                {[
+                  { who: prev, label: c.prev },
+                  { who: next, label: c.next },
+                ].map(({ who, label }) =>
+                  who ? (
+                    <Link
+                      key={who.id}
+                      href={`${lang === "en" ? "/en" : ""}/lektor/${who.id}`}
+                      className="flex items-center gap-4 rounded-3xl bg-bh-cloud p-4 ring-1 ring-bh-ink/8 transition-transform hover:-translate-y-1"
+                    >
+                      <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-bh-forest">
+                        {who.photo && <Image src={who.photo} alt="" fill sizes="64px" className="object-cover object-top" />}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block font-mono text-[0.6rem] uppercase tracking-[0.2em] text-bh-ink/45">{label}</span>
+                        <span className="mt-0.5 block truncate font-semibold text-bh-ink">
+                          {[who.title, who.name].filter(Boolean).join(" ")}
+                        </span>
+                      </span>
+                    </Link>
+                  ) : null,
+                )}
+              </div>
+            </section>
+          )}
         </div>
       </main>
       <SummitFooter lang={lang} />

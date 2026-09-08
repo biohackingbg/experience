@@ -267,8 +267,20 @@ export async function moveSpeaker(id: string, dir: "up" | "down"): Promise<void>
  * Петров"), so the match is on the name being contained, not equal.
  */
 export async function getSpeakerPage(id: string, lang: Lang = "bg") {
-  const [row] = await getDb().select(cols).from(speakers).where(eq(speakers.id, id)).limit(1);
-  if (!row || row.pending || !row.announced) return null;
+  const all = await getDb().select(cols).from(speakers).orderBy(asc(speakers.sort), asc(speakers.name));
+  const line = all.filter((r) => r.announced && !r.pending);
+  const at = line.findIndex((r) => r.id === id);
+  if (at < 0) return null;
+  const row = line[at];
+
+  // Who is on either side in the line-up's own order, wrapping at the ends -
+  // reading one speaker should lead to the next, not to a dead end.
+  const neighbour = (i: number) => {
+    const r = line[(i + line.length) % line.length];
+    return r.id === row.id ? null : { id: r.id, name: r.name, title: r.title, photo: photoUrl(r) };
+  };
+  const prev = neighbour(at - 1);
+  const next = neighbour(at + 1);
 
   const { getProgram } = await import("@/lib/program-data");
   const program = await getProgram(lang);
@@ -287,7 +299,13 @@ export async function getSpeakerPage(id: string, lang: Lang = "bg") {
       .map((slot) => ({ day: day.day, date: day.date, time: slot.time, title: slot.title, note: slot.note, role: slot.role })),
   );
 
-  return { speaker: toSpeaker(row, lang), links: { website: row.website, linkedin: row.linkedin, instagram: row.instagram }, sessions };
+  return {
+    speaker: toSpeaker(row, lang),
+    links: { website: row.website, linkedin: row.linkedin, instagram: row.instagram },
+    sessions,
+    prev,
+    next,
+  };
 }
 
 /** Every announced speaker with a photo - the ones with a page worth listing. */
