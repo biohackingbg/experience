@@ -133,17 +133,23 @@ function Stat({
 function WeekStrip({ week }: { week: { day: string; label: string; orders: number; grossCents: number; today: boolean }[] }) {
   const max = week.reduce((m, d) => Math.max(m, d.orders), 0);
   return (
-    <div className="mt-6 flex h-44 items-end gap-3 sm:gap-5">
+    <div className="mt-6 flex h-full min-h-44 w-full items-end gap-3 sm:gap-5">
       {week.map((d) => {
         const h = max ? Math.max((d.orders / max) * 100, 8) : 8;
         const peak = max > 0 && d.orders === max;
         return (
           <div key={d.day} className="group relative flex flex-1 flex-col items-center justify-end" style={{ height: "100%" }}>
-            {peak && (
-              <span className="mb-2 rounded-md bg-[#0b2a22] px-2 py-0.5 text-[0.65rem] font-semibold text-white">
-                {d.orders}
-              </span>
-            )}
+            <span
+              className={`mb-2 rounded-md px-2 py-0.5 text-[0.65rem] font-semibold ${
+                peak
+                  ? "bg-[#0b2a22] text-white"
+                  : d.orders > 0
+                    ? "text-[#0b2a22]"
+                    : "text-[#0b2a22]/30"
+              }`}
+            >
+              {d.orders}
+            </span>
             <div
               className="w-full max-w-[3.25rem] rounded-full"
               style={{
@@ -350,12 +356,16 @@ export default async function AdminDashboard({
 
       {/* Middle band: week strip · prices · recent + countdown */}
       <div className="mt-6 grid gap-4 xl:grid-cols-4">
-        <section className="self-start rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6 xl:col-span-2">
+        {/* Not self-start: it stands beside the prices card and the two read
+            as one band when they end on the same line. */}
+        <section className="flex flex-col rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6 xl:col-span-2">
           <div className="flex items-baseline justify-between">
             <h2 className="text-lg font-bold tracking-tight">Поръчки тази седмица</h2>
             <span className="text-xs text-[#0b2a22]/55">{d.soldLast7Days} билета за 7 дни</span>
           </div>
-          <WeekStrip week={d.week} />
+          <div className="flex flex-1 items-end">
+            <WeekStrip week={d.week} />
+          </div>
         </section>
 
         <div className="self-start xl:col-span-1">
@@ -490,7 +500,7 @@ export default async function AdminDashboard({
         </div>
       </div>
 
-      <div className="mt-4 grid items-start gap-4 xl:grid-cols-2">
+      <div className="mt-4 flex flex-col gap-4">
         <WhenChart byHour={d.byHour} punch={d.punch} />
 
         {/* Abandoned: money that got as far as the checkout and stopped. One
