@@ -66,6 +66,25 @@ export function TierBars({ tiers }: { tiers: TierSales[] }) {
                   }}
                 />
               </div>
+
+              {/* A one-day ticket names its day, so this is where the two days
+                  split. Tickets sold or issued before the choice existed carry
+                  no day and admit either - counted apart rather than guessed. */}
+              {tier.days && tier.sold > 0 && (
+                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-bh-ink/60">
+                  <span>
+                    събота <span className="font-semibold text-bh-ink">{tier.days.saturday}</span>
+                  </span>
+                  <span>
+                    неделя <span className="font-semibold text-bh-ink">{tier.days.sunday}</span>
+                  </span>
+                  {tier.days.unset > 0 && (
+                    <span title="Продадени преди да има избор на ден - валидни и за двата дни.">
+                      без избран ден <span className="font-semibold text-bh-ink">{tier.days.unset}</span>
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}

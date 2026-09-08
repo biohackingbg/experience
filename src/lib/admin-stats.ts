@@ -7,7 +7,7 @@ import { genderSplit } from "@/lib/gender";
 import { orderItems, orders, signups, tickets } from "@/lib/db/schema";
 import { PENDING_HOLD_MINUTES } from "@/lib/orders";
 import { KEPT_CENTS, SOLD } from "@/lib/sold";
-import { TIERS, VAT_RATE, type TierId } from "@/lib/tickets";
+import { TIERS, VAT_RATE, type TierId, picksDay } from "@/lib/tickets";
 
 /**
  * Everything the dashboard shows, in one round of queries.
@@ -23,6 +23,12 @@ export type TierSales = {
   sold: number;
   capacity: number;
   grossCents: number;
+  /**
+   * For the tiers that admit one day: how the tickets split between the two.
+   * `unset` are the ones sold or issued before the choice existed - they
+   * admit either day, and pretending otherwise would misplan the room.
+   */
+  days?: { saturday: number; sunday: number; unset: number };
 };
 
 export type DailySales = {
@@ -114,7 +120,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   const sofiaDay = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia" });
   const weekDays = Array.from({ length: 7 }, (_, i) => sofiaDay.format(new Date(Date.now() - (6 - i) * 86_400_000)));
 
-  const [totals, perTierRows, dailyRows, recentRows, signupRow, last7Row, checkedInRow, dayRow, oddRows, hourRows, weekdayRows, punchRows, buyerNames] =
+  const [totals, perTierRows, dailyRows, recentRows, signupRow, last7Row, checkedInRow, daySplitRows, dayRow, oddRows, hourRows, weekdayRows, punchRows, buyerNames] =
     await Promise.all([
       db
         .select({
@@ -189,6 +195,19 @@ export async function getDashboardData(): Promise<DashboardData> {
           n: sql<number>`count(*) filter (where ${tickets.checkedInAt} is not null)::int`,
         })
         .from(tickets),
+
+      // A one-day ticket names its day; this is how the two days split.
+      db
+        .select({
+          tierId: tickets.tierId,
+          saturday: sql<number>`count(*) filter (where ${tickets.day} = 1)::int`,
+          sunday: sql<number>`count(*) filter (where ${tickets.day} = 2)::int`,
+          unset: sql<number>`count(*) filter (where ${tickets.day} is null)::int`,
+        })
+        .from(tickets)
+        .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
+        .where(SOLD)
+        .groupBy(tickets.tierId),
 
       db
         .select({
@@ -294,6 +313,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   }
 
   const soldByTier = new Map(perTierRows.map((r) => [r.tierId, r]));
+  const daysByTier = new Map(daySplitRows.map((r) => [r.tierId, r]));
 
   const perTier: TierSales[] = TIERS.map((tier) => ({
     id: tier.id,
@@ -301,6 +321,13 @@ export async function getDashboardData(): Promise<DashboardData> {
     capacity: tier.capacity,
     sold: soldByTier.get(tier.id)?.sold ?? 0,
     grossCents: soldByTier.get(tier.id)?.gross ?? 0,
+    days: picksDay(tier.id)
+      ? {
+          saturday: daysByTier.get(tier.id)?.saturday ?? 0,
+          sunday: daysByTier.get(tier.id)?.sunday ?? 0,
+          unset: daysByTier.get(tier.id)?.unset ?? 0,
+        }
+      : undefined,
   }));
 
   const grossCents = totals[0]?.gross ?? 0;
