@@ -154,7 +154,11 @@ export async function remindAbandonedOrder(reference: string): Promise<RemindRes
       createdAt: orders.createdAt,
       reminderSentAt: orders.reminderSentAt,
       lang: orders.lang,
-      bought: sql<boolean>`exists (select 1 from ${orders} p where p.email = ${orders.email} and p.status = 'paid')`,
+      // The outer table is spelled out: inside a select field Drizzle renders
+      // ${orders.email} unqualified, and an unqualified column inside the
+      // subquery binds to p - so this read "p.email = p.email" and called
+      // everyone a buyer the moment any paid order existed.
+      bought: sql<boolean>`exists (select 1 from ${orders} p where p.email = orders.email and p.status = 'paid')`,
     })
     .from(orders)
     .where(sql`${orders.reference} = ${reference}`)
