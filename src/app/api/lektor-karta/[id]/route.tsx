@@ -121,15 +121,22 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
             style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }}
           />
         )}
-        {/* The words sit on the picture, so the picture darkens under them. */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            display: "flex",
-            backgroundImage: `linear-gradient(to bottom, rgba(2,37,31,0.55) 0%, rgba(2,37,31,0) 28%, rgba(2,37,31,0.35) 55%, rgba(2,37,31,0.95) 82%)`,
-          }}
-        />
+        {/* The words sit on the picture, so the picture darkens under them.
+            Banded rather than a gradient: Satori puts the stops of a
+            multi-stop linear-gradient nowhere near where they are written -
+            measured, a stop at 72% still showed the bare photograph - while
+            flat bands land exactly where they are put. Enough of them, on a
+            curve, and the steps stop being visible. */}
+        <div style={{ position: "absolute", left: 0, right: 0, top: 0, height: "16%", display: "flex", flexDirection: "column" }}>
+          {Array.from({ length: 10 }, (_, i) => (
+            <div key={i} style={{ display: "flex", flexGrow: 1, background: `rgba(2,37,31,${(0.45 * (1 - i / 9) ** 1.6).toFixed(3)})` }} />
+          ))}
+        </div>
+        <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: "62%", display: "flex", flexDirection: "column" }}>
+          {Array.from({ length: 40 }, (_, i) => (
+            <div key={i} style={{ display: "flex", flexGrow: 1, background: `rgba(2,37,31,${Math.min(1, ((i + 1) / 40) ** 1.5 * 1.06).toFixed(3)})` }} />
+          ))}
+        </div>
 
         <div style={{ position: "relative", display: "flex", flexDirection: "column", justifyContent: "space-between", width: "100%", height: "100%", padding: pad }}>
           <div style={{ display: "flex", alignItems: "flex-start" }}>

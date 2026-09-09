@@ -134,6 +134,60 @@ function Banner({ p, ours, partner }: { p: BannerPreset; ours: string; partner: 
     );
   }
 
+  // Two sentences with the frame to themselves - but wearing the same
+  // furniture as every other post in the set: the mark top left, the event
+  // named top right, the date and the address along the foot.
+  if (layout === "statement") {
+    const u = w / 100;
+    return (
+      <div style={{ ...base, flexDirection: "column", justifyContent: "space-between", padding: u * 8 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={ours} alt="" height={u * 6} />
+          <div style={{ display: "flex", fontSize: u * 2.2, letterSpacing: u * 0.55, color: "rgba(255,255,255,0.55)", textTransform: "uppercase" }}>
+            [ Sofia Life Summit ]
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: u * 3,
+            fontFamily: "Sofia Sans",
+            fontWeight: 900,
+            fontSize: u * 8.4,
+            lineHeight: 1.06,
+            letterSpacing: -u * 0.22,
+            textTransform: "uppercase",
+          }}
+        >
+          <div style={{ display: "flex", color: "#ffffff" }}>Living longer is not enough.</div>
+          <div style={{ display: "flex", color: LIME }}>Healthspan is the real goal.</div>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "baseline",
+            justifyContent: "space-between",
+            paddingTop: u * 3,
+            borderTop: "1px solid rgba(255,255,255,0.15)",
+            fontSize: u * 2.2,
+            letterSpacing: u * 0.3,
+            textTransform: "uppercase",
+          }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: u * 0.8 }}>
+            <div style={{ display: "flex", color: "rgba(255,255,255,0.85)" }}>Sofia Life Summit 2026</div>
+            <div style={{ display: "flex", color: "rgba(255,255,255,0.6)" }}>7-8 November · Sofia</div>
+          </div>
+          <div style={{ display: "flex", color: LIME, letterSpacing: u * 0.06, textTransform: "none" }}>thelongevitysummit.eu</div>
+        </div>
+      </div>
+    );
+  }
+
   // One square that says the whole thing: the promise in three lines, the
   // where and when under it, and the two marks kept quiet at the foot.
   if (layout === "manifest") {

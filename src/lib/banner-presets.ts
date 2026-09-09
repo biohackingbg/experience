@@ -6,7 +6,7 @@
  * wider than it is tall, so a 4:1 design arrives with its logo row cut off.
  * Each preset here is drawn for its own frame instead.
  */
-export type BannerLayout = "strip" | "wide" | "square" | "story" | "manifest";
+export type BannerLayout = "strip" | "wide" | "square" | "story" | "manifest" | "statement";
 
 export type BannerPreset = {
   id: string;
@@ -47,6 +47,14 @@ export const BANNERS: BannerPreset[] = [
     height: 2400,
     layout: "manifest",
     note: "2400×2400 - квадратен пост с обещанието на събитието",
+  },
+  {
+    id: "li-healthspan",
+    label: "LinkedIn · healthspan",
+    width: 2400,
+    height: 2400,
+    layout: "statement",
+    note: "2400×2400 - две изречения и нищо друго",
   },
   {
     id: "x-header",

@@ -84,7 +84,7 @@ function DaysChart({ data }: { data: { day: string; views: number; visitors: num
           {data.map((d) => {
             const [, m, day] = d.day.split("-");
             return (
-              <div key={d.day} className="group relative flex flex-1 flex-col justify-end">
+              <div key={d.day} className="group relative flex h-full flex-1 flex-col justify-end">
                 <div
                   className="rounded-t bg-[#0E8C7D]"
                   style={{ height: `${max ? Math.max((d.views / max) * 100, 3) : 0}%` }}

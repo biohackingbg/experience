@@ -99,6 +99,30 @@ function initializePixel(id: string): Fbq {
 }
 
 /**
+ * The banner says the least the law allows: what is measured, that it needs
+ * consent, and where to read more - in the language of the page rather than
+ * both at once, which is what made it a wall of text.
+ */
+const COPY = {
+  bg: {
+    title: "Съгласие за маркетингови бисквитки",
+    body: "Мерим кои реклами водят до продажби. Само с твое съгласие.",
+    policy: "Поверителност",
+    accept: "Приемам",
+    decline: "Отказвам",
+    reopen: "Бисквитки",
+  },
+  en: {
+    title: "Consent for marketing cookies",
+    body: "We measure which ads lead to sales. Only with your consent.",
+    policy: "Privacy",
+    accept: "Accept",
+    decline: "Decline",
+    reopen: "Cookies",
+  },
+} as const;
+
+/**
  * Meta is privacy-off by default. The script is not even requested until a
  * visitor chooses marketing cookies; declining leaves the site fully usable.
  */
@@ -131,6 +155,7 @@ export function MetaPixel({ id }: { id: string | null }) {
 
   if (!id || !isConsentSurface(pathname) || choice === "pending") return null;
 
+  const t = COPY[pathname === "/en" || pathname.startsWith("/en/") ? "en" : "bg"];
   const showDialog = choice === null || settingsOpen;
   const accept = () => {
     remember("granted");
@@ -153,31 +178,34 @@ export function MetaPixel({ id }: { id: string | null }) {
           role="dialog"
           aria-labelledby="cookie-title"
           aria-describedby="cookie-description"
-          className="fixed inset-x-3 bottom-3 z-[100] mx-auto max-w-3xl rounded-3xl border border-bh-ink/15 bg-bh-paper p-5 shadow-2xl sm:p-6"
+          className="fixed inset-x-3 bottom-3 z-[100] mx-auto max-w-xl rounded-3xl border border-bh-ink/15 bg-bh-paper p-4 shadow-2xl sm:p-5"
         >
-          <h2 id="cookie-title" className="text-lg font-bold text-bh-ink">
-            Поверителност и Meta / Privacy and Meta
+          <h2 id="cookie-title" className="sr-only">
+            {t.title}
           </h2>
-          <p id="cookie-description" className="mt-2 text-sm leading-relaxed text-bh-ink/70">
-            С твое съгласие използваме Meta Pixel, за да измерваме кои реклами водят до интерес и продажби. При отказ сайтът и покупката работят нормално. / With your consent, Meta Pixel helps us measure ad results. The site and checkout work normally if you decline.
+          <p id="cookie-description" className="text-sm leading-relaxed text-bh-ink/75">
+            {t.body}{" "}
+            <Link href="/poveritelnost" className="underline underline-offset-2">
+              {t.policy}
+            </Link>
           </p>
-          <p className="mt-2 text-xs leading-relaxed text-bh-ink/55">
-            Подробности в <Link href="/poveritelnost" className="underline underline-offset-2">политиката за поверителност</Link>.
-          </p>
-          <div className="mt-5 grid gap-2 sm:grid-cols-2">
+          {/* Equal prominence, by the letter: same shape, same weight, same
+              size - the supervisory authorities read a bold accept beside a
+              faint decline as nudging. */}
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">
             <button
               type="button"
               onClick={accept}
-              className="bh-gradient rounded-full px-5 py-3 text-sm font-semibold text-bh-ink"
+              className="rounded-full border border-bh-ink bg-bh-ink px-5 py-2.5 text-sm font-semibold text-bh-paper"
             >
-              Приемам / Accept
+              {t.accept}
             </button>
             <button
               type="button"
               onClick={decline}
-              className="rounded-full border border-bh-ink/25 px-5 py-3 text-sm font-semibold text-bh-ink"
+              className="rounded-full border border-bh-ink bg-transparent px-5 py-2.5 text-sm font-semibold text-bh-ink"
             >
-              Без маркетинг / Decline
+              {t.decline}
             </button>
           </div>
         </section>
@@ -187,7 +215,7 @@ export function MetaPixel({ id }: { id: string | null }) {
           onClick={() => setSettingsOpen(true)}
           className="fixed bottom-3 left-3 z-40 rounded-full border border-bh-ink/15 bg-bh-paper/95 px-3 py-2 text-[11px] font-medium text-bh-ink/65 shadow-md backdrop-blur transition-colors hover:text-bh-ink"
         >
-          Бисквитки / Cookies
+          {t.reopen}
         </button>
       )}
     </>
