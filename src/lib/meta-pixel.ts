@@ -5,13 +5,14 @@ import { createHash } from "node:crypto";
 /**
  * Meta's pixel, and the same events sent again from the server.
  *
- * Both halves are inert until the two settings exist, so nothing here can
- * break a page or a payment before anyone has connected an account. The
- * server copy matters because a browser pixel is blocked for a large share
- * of visitors; sending the purchase again from the webhook, with the same
- * event id, lets Meta keep one of the two and drop the duplicate.
+ * Both halves are inert until the two settings exist. The browser component
+ * and checkout also require explicit marketing consent; callers of the server
+ * purchase function must enforce the same consent before invoking it.
  */
-export const pixelId = () => process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim() || null;
+export const pixelId = () => {
+  const value = process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim();
+  return value && /^\d+$/.test(value) ? value : null;
+};
 const accessToken = () => process.env.META_CAPI_TOKEN?.trim() || null;
 
 /** Meta wants email and phone hashed, lowercase and trimmed first. */
@@ -61,7 +62,7 @@ export async function sendPurchase(event: PurchaseEvent): Promise<void> {
   };
 
   try {
-    const res = await fetch(`https://graph.facebook.com/v21.0/${id}/events?access_token=${encodeURIComponent(token)}`, {
+    const res = await fetch(`https://graph.facebook.com/v26.0/${id}/events?access_token=${encodeURIComponent(token)}`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(body),

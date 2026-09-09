@@ -23,6 +23,11 @@ function randomCode(length: number): string {
   return out;
 }
 
+function safeMetaBrowserId(value?: string): string | null {
+  const clean = value?.trim();
+  return clean && clean.startsWith("fb.") && clean.length <= 500 ? clean : null;
+}
+
 export type CreateOrderInput = {
   /** 1 = Saturday, 2 = Sunday; only for the tiers that admit one day. */
   coreDay?: number | null;
@@ -37,6 +42,9 @@ export type CreateOrderInput = {
   termsText: string;
   utmSource?: string;
   utmCampaign?: string;
+  marketingConsentVersion?: string;
+  metaFbp?: string;
+  metaFbc?: string;
   /** A discount code as typed; resolved here, against the real gross. */
   promoCode?: string;
   lang?: "bg" | "en";
@@ -142,6 +150,9 @@ export async function createPendingOrder(
         termsText: input.termsText,
         utmSource: input.utmSource?.replace(/[^a-z0-9_.-]/g, "") || null,
         utmCampaign: input.utmCampaign?.replace(/[^a-z0-9_.-]/g, "") || null,
+        marketingConsentVersion: input.marketingConsentVersion || null,
+        metaFbp: safeMetaBrowserId(input.metaFbp),
+        metaFbc: safeMetaBrowserId(input.metaFbc),
         promoCode,
         discountCents,
         lang: input.lang ?? "bg",
@@ -188,6 +199,9 @@ export type PaidOrderSummary = {
     invoiceNumber: number | null;
     tickets: { code: string; tierName: string; day: number | null }[];
     lang: "bg" | "en";
+    marketingConsentVersion: string | null;
+    metaFbp: string | null;
+    metaFbc: string | null;
   };
 };
 
@@ -213,6 +227,9 @@ export async function markOrderPaid(
         email: orders.email,
         totalCents: orders.totalCents,
         lang: orders.lang,
+        marketingConsentVersion: orders.marketingConsentVersion,
+        metaFbp: orders.metaFbp,
+        metaFbc: orders.metaFbc,
       });
 
     if (updated.length === 0) return { issued: 0 };
@@ -265,6 +282,9 @@ export async function markOrderPaid(
         totalCents: order.totalCents,
         invoiceNumber: invoiced ? Number(invoiced.invoice_number) : null,
         lang: order.lang === "en" ? "en" : "bg",
+        marketingConsentVersion: order.marketingConsentVersion,
+        metaFbp: order.metaFbp,
+        metaFbc: order.metaFbc,
         tickets: rows.map((row) => ({
           code: row.code,
           tierName: getTier(row.tierId)?.name ?? row.tierId,

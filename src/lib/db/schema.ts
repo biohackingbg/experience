@@ -131,6 +131,15 @@ export const orders = pgTable(
     utmCampaign: text("utm_campaign"),
 
     /**
+     * Present only when the buyer explicitly accepted the matching version of
+     * the Meta disclosure. The browser identifiers exist only after that
+     * choice and improve server-side purchase matching without storing an IP.
+     */
+    marketingConsentVersion: text("marketing_consent_version"),
+    metaFbp: text("meta_fbp"),
+    metaFbc: text("meta_fbc"),
+
+    /**
      * The promo code used, and what it took off the gross. The order's
      * totals are already net of it; the invoice shows it as its own line so
      * the items and the total still add up in front of an accountant.

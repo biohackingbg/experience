@@ -4,6 +4,7 @@ import { useActionState, useEffect, useState } from "react";
 
 import { initialCheckoutState } from "@/lib/checkout-state";
 import { CHECKOUT, type Lang } from "@/lib/i18n";
+import { trackMetaEvent } from "@/lib/meta-browser";
 import { PURCHASE_TERMS_TEXT, PURCHASE_TERMS_TEXT_EN } from "@/lib/purchase-terms";
 import { TIERS, formatPrice, picksDay, splitVat } from "@/lib/tickets";
 import { type PromoPreview, checkPromo, startCheckout } from "./actions";
@@ -102,7 +103,19 @@ export function CheckoutForm({
   };
 
   return (
-    <form action={formAction} className="mt-10 grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+    <form
+      action={formAction}
+      onSubmit={() =>
+        trackMetaEvent("InitiateCheckout", {
+          content_ids: [tier.id],
+          content_type: "product",
+          currency: "EUR",
+          num_items: quantity,
+          value: total / 100,
+        })
+      }
+      className="mt-10 grid gap-10 lg:grid-cols-[1.1fr_0.9fr]"
+    >
       <input type="hidden" name="lang" value={lang} />
       {utm?.source && <input type="hidden" name="utmSource" value={utm.source} />}
       {utm?.campaign && <input type="hidden" name="utmCampaign" value={utm.campaign} />}

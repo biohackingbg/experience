@@ -1,10 +1,16 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { z } from "zod";
 
 import type { CheckoutState } from "@/lib/checkout-state";
 import { langOf } from "@/lib/i18n";
+import {
+  MARKETING_CONSENT_COOKIE,
+  MARKETING_CONSENT_VERSION,
+  hasMarketingConsent,
+} from "@/lib/marketing-consent";
+import { sendPurchase } from "@/lib/meta-pixel";
 import { sendTicketEmail } from "@/lib/email";
 import { createPendingOrder, markOrderPaid } from "@/lib/orders";
 import { alertSale } from "@/lib/sale-alert";
@@ -119,11 +125,20 @@ export async function startCheckout(
   const coreDay = picksDay(tier.id) ? (input.coreDay ?? null) : null;
 
   const lang = langOf(input.lang);
+  const cookieStore = await cookies();
+  const marketingConsent = hasMarketingConsent(
+    cookieStore.get(MARKETING_CONSENT_COOKIE)?.value,
+  );
   const order = await createPendingOrder({
     ...input,
     coreDay,
     lang,
     promoCode: input.promo,
+    marketingConsentVersion: marketingConsent
+      ? MARKETING_CONSENT_VERSION
+      : undefined,
+    metaFbp: marketingConsent ? cookieStore.get("_fbp")?.value : undefined,
+    metaFbc: marketingConsent ? cookieStore.get("_fbc")?.value : undefined,
     termsText: `${PURCHASE_TERMS_VERSION}${lang === "en" ? "-en" : ""}: ${lang === "en" ? PURCHASE_TERMS_TEXT_EN : PURCHASE_TERMS_TEXT}`,
   });
 
@@ -154,6 +169,16 @@ export async function startCheckout(
     const paid = await markOrderPaid(order.orderId, null);
     if (paid.order) {
       await alertSale(paid.order.reference);
+      if (paid.order.marketingConsentVersion === MARKETING_CONSENT_VERSION) {
+        await sendPurchase({
+          eventId: paid.order.reference,
+          email: paid.order.email,
+          value: paid.order.totalCents / 100,
+          currency: "EUR",
+          fbp: paid.order.metaFbp,
+          fbc: paid.order.metaFbc,
+        });
+      }
       await sendTicketEmail({
         to: paid.order.email,
         buyerName: paid.order.name,

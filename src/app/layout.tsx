@@ -88,8 +88,8 @@ export default function RootLayout({
         />
         <ViewTracker />
         {children}
-        {/* Nothing renders until the pixel id is set, so the site ships with
-            no advertising script on it. */}
+        {/* Even after an id is connected, Meta stays off until the visitor
+            makes an explicit marketing choice. */}
         <MetaPixel id={pixelId()} />
       </body>
     </html>
