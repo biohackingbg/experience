@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 
 import { HomeLink } from "@/components/admin/HomeLink";
-import { BANNERS } from "@/lib/banner-presets";
 
-import { BannerDownload } from "./BannerDownload";
 import { requireAccess } from "@/lib/access";
 import { getMarketing } from "@/lib/marketing";
 import { formatPrice } from "@/lib/tickets";
@@ -87,6 +85,7 @@ export default async function MarketingPage() {
                     <th className="px-3 py-2 font-medium">Души · 30 дни</th>
                     <th className="px-3 py-2 font-medium">Купили по линк</th>
                     <th className="px-3 py-2 font-medium">Цена на билет</th>
+                    <th className="px-3 py-2 font-medium">Върнати пари</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -102,6 +101,15 @@ export default async function MarketingPage() {
                       <td className="px-3 py-2 text-bh-ink/75">
                         {p.spendCents && p.taggedTickets ? `${formatPrice(Math.round(p.spendCents / p.taggedTickets))} €` : "-"}
                       </td>
+                      <td className="px-3 py-2">
+                        {p.spendCents ? (
+                          <span className={`font-semibold ${p.taggedGrossCents >= p.spendCents ? "text-[#0b6d61]" : "text-[#9c3d5c]"}`}>
+                            {(p.taggedGrossCents / p.spendCents).toFixed(1)}×
+                          </span>
+                        ) : (
+                          <span className="text-bh-ink/40">-</span>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -110,41 +118,82 @@ export default async function MarketingPage() {
           </section>
         )}
 
+        {/* Where the money leaks. By people rather than page views, because
+            one person opening the ticket page four times is one decision. */}
+        <section className="mt-6 rounded-3xl bg-bh-cloud p-6 ring-1 ring-bh-ink/6">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="text-lg font-bold tracking-tight text-bh-ink">Пътят до билет</h2>
+            <p className="text-xs text-bh-ink/50">последните 30 дни · по хора, не по отваряния</p>
+          </div>
+          {m.funnel.visitors === 0 ? (
+            <p className="mt-4 text-sm text-bh-ink/55">Още няма посещения за този период.</p>
+          ) : (
+            <>
+              <div className="mt-5 grid gap-3 sm:grid-cols-4">
+                {[
+                  { label: "На сайта", value: m.funnel.visitors, note: "различни хора" },
+                  { label: "Отвориха билети", value: m.funnel.ticketPage, note: "страницата за билети" },
+                  { label: "Стигнаха до плащане", value: m.funnel.checkouts, note: "започнати поръчки" },
+                  { label: "Платиха", value: m.funnel.paid, note: "завършени поръчки" },
+                ].map((step, i, all) => {
+                  const prev = i === 0 ? null : all[i - 1].value;
+                  const rate = prev && prev > 0 ? Math.round((step.value / prev) * 100) : null;
+                  return (
+                    <div key={step.label} className="rounded-2xl bg-bh-paper p-4 ring-1 ring-bh-ink/8">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="font-mono text-[0.6rem] uppercase tracking-[0.15em] text-bh-ink/50">{step.label}</span>
+                        {rate !== null && (
+                          <span className={`rounded-full px-2 py-0.5 text-[0.62rem] font-semibold ${rate >= 20 ? "bg-[#0E8C7D]/12 text-[#0b6d61]" : "bg-bh-ink/8 text-bh-ink/60"}`}>
+                            {rate}%
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-2 text-3xl font-black tracking-tight text-bh-ink">{step.value}</div>
+                      <div className="mt-0.5 text-xs text-bh-ink/50">{step.note}</div>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="mt-4 text-sm leading-relaxed text-bh-ink/65">
+                {m.funnel.ticketPage > 0 && m.funnel.paid > 0 ? (
+                  <>
+                    От сто души на сайта до билетите стигат{" "}
+                    <strong className="font-semibold text-bh-ink">{Math.round((m.funnel.ticketPage / m.funnel.visitors) * 100)}</strong>, а купуват{" "}
+                    <strong className="font-semibold text-bh-ink">{(m.funnel.paid / m.funnel.visitors * 100).toFixed(1)}</strong>.
+                  </>
+                ) : (
+                  <>Пътят се запълва с първите продажби за периода.</>
+                )}
+                {m.funnel.checkouts > m.funnel.paid && (
+                  <>
+                    {" "}
+                    <strong className="font-semibold text-[#9c3d5c]">{m.funnel.checkouts - m.funnel.paid}</strong> поръчки са започнати и
+                    не са платени - те са в „Недовършени поръчки“ на таблото.
+                  </>
+                )}
+              </p>
+              {m.tickets30 > 0 && (
+                <p className="mt-2 text-sm leading-relaxed text-bh-ink/65">
+                  {m.untaggedTickets30 === 0 ? (
+                    <>Всички продажби за периода носят етикет за канал.</>
+                  ) : (
+                    <>
+                      <strong className="font-semibold text-bh-ink">{m.untaggedTickets30}</strong> от продажбите идват без етикет -
+                      не се знае откъде. Слагай линковете с код от полето по-долу, за да не расте това число.
+                    </>
+                  )}
+                </p>
+              )}
+            </>
+          )}
+        </section>
+
         <section className="mt-6 rounded-3xl bg-bh-cloud p-6 ring-1 ring-bh-ink/6">
           <h2 className="text-lg font-bold tracking-tight text-bh-ink">Нова публикация или реклама</h2>
           <p className="mt-1 text-xs text-bh-ink/55">
             Показателите от платформата (достигнати, харесвания…) може да се допишат и по-късно с „Редактирай“.
           </p>
           <div className="mt-4"><CampaignForm /></div>
-        </section>
-
-        {/* Each network crops a cover to its own frame, so a banner drawn for
-            one arrives at the next with its logos cut off. These are drawn per
-            frame and carry the dates and the address from the site itself. */}
-        <section className="mt-6 rounded-3xl bg-bh-cloud p-6 ring-1 ring-bh-ink/6">
-          <h2 className="text-lg font-bold tracking-tight text-bh-ink">Банери за социалните мрежи</h2>
-          <p className="mt-1 max-w-2xl text-xs leading-relaxed text-bh-ink/55">
-            Всеки размер е нарисуван за рамката на своята мрежа, за да не се реже. Датите, мястото и
-            адресът идват от сайта - смениш ли ги там, банерите се сменят сами. Ако мрежата откаже PNG - LinkedIn понякога го прави - вземи JPEG от втория бутон.
-          </p>
-          <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {BANNERS.map((b) => (
-              <li key={b.id} className="flex flex-col rounded-2xl bg-bh-paper p-4 ring-1 ring-bh-ink/8">
-                <a href={`/api/banner/${b.id}`} target="_blank" rel="noopener noreferrer" className="block">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={`/api/banner/${b.id}`}
-                    alt=""
-                    className="w-full rounded-xl bg-[#02251f] object-contain"
-                    style={{ aspectRatio: `${b.width} / ${b.height}`, maxHeight: 150 }}
-                  />
-                </a>
-                <div className="mt-3 text-sm font-semibold text-bh-ink">{b.label}</div>
-                <div className="mt-0.5 text-xs text-bh-ink/55">{b.note}</div>
-                <BannerDownload id={b.id} width={b.width} height={b.height} />
-              </li>
-            ))}
-          </ul>
         </section>
 
         <section className="mt-6">

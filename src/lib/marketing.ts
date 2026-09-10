@@ -65,6 +65,19 @@ export type Marketing = {
   /** Spend per attributed ticket, or null with nothing to divide by. */
   costPerTicketCents: number | null;
   socialVisitors30: number;
+  /**
+   * Thirty days from the first page to the paid ticket. Where the number
+   * falls off is where the money is going, and it is the one thing an
+   * agency can act on without guessing.
+   */
+  funnel: {
+    visitors: number;
+    ticketPage: number;
+    checkouts: number;
+    paid: number;
+  };
+  /** Paid orders in the window whose source is unknown - untagged traffic. */
+  untaggedTickets30: number;
   /** Tickets sold in the last 30 days, all channels - the denominator that says how much is untracked. */
   tickets30: number;
 };
@@ -80,7 +93,7 @@ export async function getMarketing(): Promise<Marketing> {
   const db = getDb();
   const rows = await db.select().from(campaigns).orderBy(desc(campaigns.postedAt));
 
-  const [tagged, taggedVisits, perPlatformVisits, [totals30]] = await Promise.all([
+  const [tagged, taggedVisits, perPlatformVisits, [totals30], [reach30], [funnel30]] = await Promise.all([
     // Sales by campaign tag, paid and real only.
     db
       .select({
@@ -112,6 +125,25 @@ export async function getMarketing(): Promise<Marketing> {
       .from(orders)
       .innerJoin(orderItems, sql`${orderItems.orderId} = ${orders.id}`)
       .where(sql`${SOLD} and ${orders.paidAt} >= now() - interval '30 days'`),
+
+    // The funnel, by people rather than by page views: the same visitor
+    // opening the ticket page four times is one person deciding.
+    db
+      .select({
+        visitors: sql<number>`count(distinct ${siteViews.visitor})::int`,
+        ticketPage: sql<number>`count(distinct ${siteViews.visitor}) filter (where ${siteViews.path} like '/bilet%')::int`,
+      })
+      .from(siteViews)
+      .where(sql`${siteViews.createdAt} >= now() - interval '30 days'`),
+
+    db
+      .select({
+        checkouts: sql<number>`count(*) filter (where not ${orders.isTest})::int`,
+        paid: sql<number>`count(*) filter (where ${SOLD})::int`,
+        untagged: sql<number>`count(*) filter (where ${SOLD} and ${orders.utmSource} is null and ${orders.utmCampaign} is null)::int`,
+      })
+      .from(orders)
+      .where(sql`${orders.createdAt} >= now() - interval '30 days'`),
   ]);
 
   // Around-the-post numbers, one small pair of queries per campaign. The log
@@ -179,6 +211,13 @@ export async function getMarketing(): Promise<Marketing> {
     costPerTicketCents: taggedTickets > 0 && spendCents > 0 ? Math.round(spendCents / taggedTickets) : null,
     socialVisitors30: perPlatformVisits.filter((v) => v.platform !== "google").reduce((a, v) => a + v.n, 0),
     tickets30: totals30?.tickets ?? 0,
+    funnel: {
+      visitors: reach30?.visitors ?? 0,
+      ticketPage: reach30?.ticketPage ?? 0,
+      checkouts: funnel30?.checkouts ?? 0,
+      paid: funnel30?.paid ?? 0,
+    },
+    untaggedTickets30: funnel30?.untagged ?? 0,
   };
 }
 
