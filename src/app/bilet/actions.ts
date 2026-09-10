@@ -10,6 +10,7 @@ import {
   MARKETING_CONSENT_VERSION,
   hasMarketingConsent,
 } from "@/lib/marketing-consent";
+import { sendGaPurchase } from "@/lib/ga";
 import { sendPurchase } from "@/lib/meta-pixel";
 import { sendTicketEmail } from "@/lib/email";
 import { createPendingOrder, markOrderPaid } from "@/lib/orders";
@@ -82,6 +83,21 @@ function fail(
   return { status: "error", message, fieldErrors };
 }
 
+/**
+ * "GA1.1.1234567890.1234567890" carries the client id in its last two parts;
+ * the session id lives in a per-property cookie shaped "GS1.1.<id>.<n>...".
+ */
+function gaClientIdFrom(value?: string): string | undefined {
+  const parts = value?.split(".");
+  return parts && parts.length >= 4 ? parts.slice(-2).join(".") : undefined;
+}
+
+function gaSessionIdFrom(all: { name: string; value: string }[]): string | undefined {
+  const cookie = all.find((c) => c.name.startsWith("_ga_"));
+  const parts = cookie?.value.split(".");
+  return parts && parts.length >= 3 ? parts[2] : undefined;
+}
+
 export async function startCheckout(
   _prev: CheckoutState,
   formData: FormData,
@@ -137,6 +153,11 @@ export async function startCheckout(
     marketingConsentVersion: marketingConsent
       ? MARKETING_CONSENT_VERSION
       : undefined,
+    // GA's own identifiers, so a sale sent from the server lands on the
+    // session that came from the advert rather than on "direct". Read from
+    // the request, exactly like Meta's - nothing extra runs in the browser.
+    gaClientId: gaClientIdFrom(cookieStore.get("_ga")?.value),
+    gaSessionId: gaSessionIdFrom(cookieStore.getAll()),
     metaFbp: marketingConsent ? cookieStore.get("_fbp")?.value : undefined,
     metaFbc: marketingConsent ? cookieStore.get("_fbc")?.value : undefined,
     termsText: `${PURCHASE_TERMS_VERSION}${lang === "en" ? "-en" : ""}: ${lang === "en" ? PURCHASE_TERMS_TEXT_EN : PURCHASE_TERMS_TEXT}`,
@@ -169,6 +190,7 @@ export async function startCheckout(
     const paid = await markOrderPaid(order.orderId, null);
     if (paid.order) {
       await alertSale(paid.order.reference);
+      await sendGaPurchase(order.orderId);
       if (paid.order.marketingConsentVersion === MARKETING_CONSENT_VERSION) {
         await sendPurchase({
           eventId: paid.order.reference,

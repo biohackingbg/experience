@@ -28,6 +28,12 @@ function safeMetaBrowserId(value?: string): string | null {
   return clean && clean.startsWith("fb.") && clean.length <= 500 ? clean : null;
 }
 
+/** GA writes plain numbers and dots - anything else did not come from GA. */
+function safeGaId(value?: string): string | null {
+  const clean = value?.trim();
+  return clean && /^[0-9]+(\.[0-9]+)*$/.test(clean) && clean.length <= 64 ? clean : null;
+}
+
 export type CreateOrderInput = {
   /** 1 = Saturday, 2 = Sunday; only for the tiers that admit one day. */
   coreDay?: number | null;
@@ -43,6 +49,8 @@ export type CreateOrderInput = {
   utmSource?: string;
   utmCampaign?: string;
   marketingConsentVersion?: string;
+  gaClientId?: string;
+  gaSessionId?: string;
   metaFbp?: string;
   metaFbc?: string;
   /** A discount code as typed; resolved here, against the real gross. */
@@ -151,6 +159,8 @@ export async function createPendingOrder(
         utmSource: input.utmSource?.replace(/[^a-z0-9_.-]/g, "") || null,
         utmCampaign: input.utmCampaign?.replace(/[^a-z0-9_.-]/g, "") || null,
         marketingConsentVersion: input.marketingConsentVersion || null,
+        gaClientId: safeGaId(input.gaClientId),
+        gaSessionId: safeGaId(input.gaSessionId),
         metaFbp: safeMetaBrowserId(input.metaFbp),
         metaFbc: safeMetaBrowserId(input.metaFbc),
         promoCode,

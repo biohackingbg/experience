@@ -8,6 +8,7 @@ import { sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { orders } from "@/lib/db/schema";
 import { MARKETING_CONSENT_VERSION } from "@/lib/marketing-consent";
+import { sendGaPurchase } from "@/lib/ga";
 import { sendPurchase } from "@/lib/meta-pixel";
 import { issueCreditNote, markOrderPaid, markOrderRefunded } from "@/lib/orders";
 import { orderItems } from "@/lib/db/schema";
@@ -94,6 +95,10 @@ export async function POST(request: Request) {
         // either way, and a 500 here would have Stripe retry a paid order.
         if (order) {
           await alertSale(order.reference);
+          // Revenue is revenue whether or not the buyer let us measure them:
+          // this carries no device identifier of its own, and without it the
+          // agency's reports would show a fraction of the sales.
+          await sendGaPurchase(orderId);
           // A server event survives browser blockers, but it is still sent
           // only for the disclosure version the buyer explicitly accepted.
           if (order.marketingConsentVersion === MARKETING_CONSENT_VERSION) {

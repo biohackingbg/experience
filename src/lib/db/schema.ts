@@ -136,6 +136,13 @@ export const orders = pgTable(
      * choice and improve server-side purchase matching without storing an IP.
      */
     marketingConsentVersion: text("marketing_consent_version"),
+    /**
+     * Google Analytics' own identifiers, read from its cookies when the
+     * checkout opens. Without them a server-sent sale lands in GA as
+     * "direct" and no campaign ever gets credit for the money.
+     */
+    gaClientId: text("ga_client_id"),
+    gaSessionId: text("ga_session_id"),
     metaFbp: text("meta_fbp"),
     metaFbc: text("meta_fbc"),
 

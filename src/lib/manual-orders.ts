@@ -3,6 +3,7 @@ import "server-only";
 import { randomInt } from "node:crypto";
 import { desc, sql } from "drizzle-orm";
 
+import { sendGaPurchase } from "@/lib/ga";
 import { getDb } from "@/lib/db";
 import { orderItems, orders } from "@/lib/db/schema";
 import { sendProformaEmail, sendTicketEmail } from "@/lib/email";
@@ -197,6 +198,9 @@ export async function markBankOrderPaid(reference: string): Promise<"ok" | "not_
   const paid = await markOrderPaid(o.id, null);
   if (paid.order) {
     await alertSale(paid.order.reference);
+    // A bank transfer is a sale like any other; without this the money is
+    // missing from the reports and nobody can tell why the totals differ.
+    await sendGaPurchase(o.id);
     await sendTicketEmail({
       to: paid.order.email,
       buyerName: paid.order.name,

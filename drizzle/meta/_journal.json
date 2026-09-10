@@ -232,6 +232,13 @@
       "when": 1788965216286,
       "tag": "0031_meta_consent",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1789000000032,
+      "tag": "0033_ga_client",
+      "breakpoints": true
     }
   ]
 }
