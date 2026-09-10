@@ -33,7 +33,6 @@ async function strip(scale) {
     <rect width="375" height="98" fill="${INK}"/>
     <path d="M250 -10 L375 -10 L375 108 L190 108 Z" fill="${NEON}" opacity="0.10"/>
     <path d="M300 -10 L375 -10 L375 108 L240 108 Z" fill="#0ecdb7" opacity="0.10"/>
-    <circle cx="352" cy="24" r="5" fill="${NEON}"/>
   </svg>`;
   return sharp(Buffer.from(svg)).png().toBuffer();
 }

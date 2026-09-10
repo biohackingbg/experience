@@ -43,7 +43,9 @@ const COPY = {
     unnamed: "Без име - виж гърба",
     tier: "НИВО",
     where: "КЪДЕ",
-    venue: "Гранд Хотел Милениум",
+    // Short on purpose: the front truncates at about fifteen characters; the
+    // full name and the street are on the back.
+    venue: "Хотел Милениум",
     codeLabel: "Код на билета",
     addressLabel: "Адрес",
     address: "Гранд Хотел Милениум, бул. Витоша 89В, София",
@@ -68,7 +70,7 @@ const COPY = {
     unnamed: "Unnamed - see back",
     tier: "TIER",
     where: "WHERE",
-    venue: "Grand Hotel Millennium",
+    venue: "Hotel Millennium",
     codeLabel: "Ticket code",
     addressLabel: "Address",
     address: "Grand Hotel Millennium, 89B Vitosha Blvd, Sofia",
