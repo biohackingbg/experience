@@ -116,23 +116,22 @@ export async function buildWalletPass(ticket: TicketView): Promise<Buffer> {
     labelColor: "rgb(206, 248, 112)",
     // A ticket is one seat: passing it around only makes the second scan fail.
     sharingProhibited: true,
-    // The strip is a gradient already; the system's gloss would sit on top of it.
-    suppressStripShine: true,
   });
   pass.type = "eventTicket";
 
+  // The event's name is the logo, in the site's own face, so the one large
+  // field on the front is the person: what the door reads first.
   pass.headerFields.push({ key: "date", label: t.date, value: t.dateValue });
-  // No primary field: Wallet can only draw it huge, so the event's name is
-  // typography inside the strip instead, at a size chosen by eye.
+  pass.primaryFields.push({ key: "attendee", label: t.attendee, value: name });
   pass.secondaryFields.push(
-    { key: "attendee", label: t.attendee, value: name },
-    { key: "tier", label: t.tier, value: ticket.tierName, textAlignment: "PKTextAlignmentRight" },
+    { key: "tier", label: t.tier, value: ticket.tierName },
+    { key: "day", label: t.dayLabel, value: day, textAlignment: "PKTextAlignmentRight" },
   );
-  // Two fields here as well: Wallet sizes a lone field on this row to the
-  // width of the name above it, and a short name left the venue cut off.
+  // Two fields on each row: Wallet sizes a lone field to the column above
+  // it, and that once cut the venue short.
   pass.auxiliaryFields.push(
     { key: "where", label: t.where, value: t.venue },
-    { key: "day", label: t.dayLabel, value: day, textAlignment: "PKTextAlignmentRight" },
+    { key: "order", label: t.orderLabel, value: ticket.reference, textAlignment: "PKTextAlignmentRight" },
   );
   pass.backFields.push(
     { key: "code", label: t.codeLabel, value: ticket.code },

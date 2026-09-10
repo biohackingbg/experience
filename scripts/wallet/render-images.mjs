@@ -8,11 +8,12 @@ const INK = "#02251f";
 const NEON = "#cef870";
 const logoSvg = readFileSync("public/logo-dark.svg");
 
-// Wide logo: 160x50 points, the logo's own aspect (1412x381) decides the height.
-async function logo(scale) {
-  const w = 160 * scale;
-  const h = Math.round((381 / 1412) * w);
-  return sharp(logoSvg).resize(w, h).png().toBuffer();
+// The organiser's mark, cropped square from the wide logo, as the thumbnail
+// beside the name. The mark sits in the left 381 of the logo's 1412 units.
+async function thumbnail(scale) {
+  const px = 90 * scale;
+  const full = await sharp(logoSvg).resize(Math.round((1412 / 381) * px), px).png().toBuffer();
+  return sharp(full).extract({ left: 0, top: 0, width: px, height: px }).png().toBuffer();
 }
 
 // Square icon: the summit's initials on ink, the way the site's favicon reads.
@@ -25,11 +26,6 @@ async function icon(scale) {
   return sharp(Buffer.from(svg)).png().toBuffer();
 }
 
-// The strip carries the event's name as typography, in the site's display
-// face, at a size chosen by eye - Wallet's own primary field can only draw
-// it huge. Rendered in a headless browser because that is the one renderer
-// here that lays out a web font the way the site does; drawn once at 3x
-// and scaled down for the smaller densities.
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -37,47 +33,53 @@ import { join, resolve } from "node:path";
 
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 
-async function renderStrip3x() {
-  const dir = mkdtempSync(join(tmpdir(), "strip-"));
+// Renders one HTML fragment at 3x in a headless browser - the one renderer
+// here that lays out a web font the way the site does.
+function renderHtml(w, h, body, css) {
+  const dir = mkdtempSync(join(tmpdir(), "pass-"));
   const font = resolve("scripts/wallet/fonts/Unbounded-800.woff2");
-  // Ink at every edge, so the strip meets the pass's flat colour without a
-  // seam; a soft glow of pine with a breath of teal in the middle, and a
-  // fine grain over it all so the gradient reads as material, not as a fill.
-  const html = `<!doctype html><meta charset="utf-8"><style>
-    @font-face{font-family:U;src:url("file://${font}") format("woff2");font-weight:800}
-    html,body{margin:0;background:${INK}}
-    .s{position:relative;width:375px;height:98px;overflow:hidden;background:
-      radial-gradient(95% 62% at 74% 52%, rgba(20,100,85,.95) 0%, rgba(20,100,85,.55) 32%, rgba(2,37,31,0) 72%),
-      radial-gradient(50% 45% at 92% 18%, rgba(14,205,183,.22) 0%, rgba(2,37,31,0) 70%),
-      radial-gradient(40% 40% at 6% 88%, rgba(206,248,112,.10) 0%, rgba(2,37,31,0) 70%),
-      ${INK}}
-    .g{position:absolute;inset:0;opacity:.09;mix-blend-mode:soft-light;
-      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>")}
-    .t{position:absolute;left:16px;top:50%;transform:translateY(-50%);font:800 21px/1 U,sans-serif;letter-spacing:-.02em;color:#e9f0ec;text-transform:uppercase}
-    .t small{display:block;margin-top:7px;font:500 8.5px/1 -apple-system,Helvetica,Arial,sans-serif;letter-spacing:.22em;color:${NEON}}
-  </style><body><div class="s"><div class="g"></div>
-  <div class="t">Sofia Life Summit<small>LONGEVITY · SOFIA 2026</small></div></div>`;
-  const page = join(dir, "strip.html");
-  writeFileSync(page, html);
-  const out = join(dir, "strip.png");
+  const page = join(dir, "p.html");
+  writeFileSync(page, `<!doctype html><meta charset="utf-8"><style>
+    @font-face{font-family:U;src:url("file://${font}") format("woff2");font-weight:800;font-display:block}
+    html,body{margin:0;background:transparent}
+    .frame{position:relative;width:${w}px;height:${h}px;overflow:hidden}
+    ${css}</style><body><div class="frame">${body}</div>`);
+  const out = join(dir, "p.png");
   execFileSync(CHROME, [
     "--headless=new", "--disable-gpu", "--hide-scrollbars", "--allow-file-access-from-files",
-    "--force-device-scale-factor=3", "--window-size=375,98", `--screenshot=${out}`, `file://${page}`,
+    "--default-background-color=00000000", "--force-device-scale-factor=3",
+    // Lets the font arrive before the shot; without it the text is missing.
+    "--virtual-time-budget=4000",
+    `--window-size=${w},${h}`, `--screenshot=${out}`, `file://${page}`,
   ], { stdio: "ignore" });
   const buf = readFileSync(out);
   rmSync(dir, { recursive: true, force: true });
   return buf;
 }
 
-let strip3x;
-async function strip(scale) {
-  strip3x ??= await renderStrip3x();
-  if (scale === 3) return strip3x;
-  return sharp(strip3x).resize(375 * scale, 98 * scale).png().toBuffer();
-}
+const scaled = (buf3x, w, h) => async (scale) =>
+  scale === 3 ? buf3x : sharp(buf3x).resize(w * scale, h * scale).png().toBuffer();
+
+// The event's name as the logo, in the site's display face, with a quiet
+// line under it. 160x50 points is the most Wallet gives a logo.
+const logoPng = renderHtml(160, 50, `<div class="t">Sofia<br>Life Summit<small>LONGEVITY · SOFIA 2026</small></div>`, `
+  .frame{display:flex;align-items:center}
+  .t{font:800 14.5px/1.02 U,sans-serif;letter-spacing:-.02em;color:#e9f0ec;text-transform:uppercase;white-space:nowrap;padding-left:1px}
+  .t small{display:block;margin-top:5px;font:500 6.2px/1 -apple-system,Helvetica,Arial,sans-serif;letter-spacing:.2em;color:${NEON}}`);
+const logo = scaled(logoPng, 160, 50);
+
+// The whole front: ink with a glow of pine and a breath of teal. Wallet
+// blurs and slightly crops it, which is what makes the gradient velvet.
+const bgPng = renderHtml(180, 220, `<div class="b"></div>`, `
+  .b{width:180px;height:220px;background:
+    radial-gradient(90% 60% at 80% 28%, rgba(20,100,85,1) 0%, rgba(20,100,85,.55) 38%, rgba(2,37,31,0) 75%),
+    radial-gradient(60% 45% at 100% 8%, rgba(14,205,183,.30) 0%, rgba(2,37,31,0) 70%),
+    radial-gradient(70% 50% at 0% 100%, rgba(206,248,112,.14) 0%, rgba(2,37,31,0) 70%),
+    ${INK}}`);
+const background = scaled(bgPng, 180, 220);
 
 const out = {};
-for (const [name, fn] of [["icon", icon], ["logo", logo], ["strip", strip]]) {
+for (const [name, fn] of [["icon", icon], ["logo", logo], ["thumbnail", thumbnail], ["background", background]]) {
   for (const scale of [1, 2, 3]) {
     const key = scale === 1 ? `${name}.png` : `${name}@${scale}x.png`;
     out[key] = (await fn(scale)).toString("base64");
