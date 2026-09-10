@@ -1,13 +1,14 @@
 "use client";
 
 import { cookieValue } from "@/lib/consent-browser";
-import { gaId } from "@/lib/ga-id";
 import { MARKETING_CONSENT_COOKIE, hasMarketingConsent } from "@/lib/marketing-consent";
 
 type GaWindow = Window & {
   gtag?: (...args: unknown[]) => void;
   dataLayer?: unknown[];
+  /** Written into the page by the server when an account is connected. */
   __slsGaId?: string;
+  __slsGaLoaded?: string;
 };
 
 /**
@@ -19,10 +20,10 @@ type GaWindow = Window & {
  * an event sent into a missing tag disappears without a word.
  */
 function ensureGa(): GaWindow["gtag"] | null {
-  const id = gaId();
-  if (!id) return null;
   const w = window as GaWindow;
-  if (w.__slsGaId === id) return w.gtag ?? null;
+  const id = w.__slsGaId;
+  if (!id) return null;
+  if (w.__slsGaLoaded === id) return w.gtag ?? null;
 
   w.dataLayer ??= [];
   w.gtag ??= function gtag(...args: unknown[]) {
@@ -36,7 +37,7 @@ function ensureGa(): GaWindow["gtag"] | null {
   // The automatic page view would count only the first screen: a page change
   // here replaces the content without a page load.
   w.gtag("config", id, { send_page_view: false });
-  w.__slsGaId = id;
+  w.__slsGaLoaded = id;
   return w.gtag;
 }
 

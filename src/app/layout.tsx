@@ -7,7 +7,7 @@ import { MetaPixel } from "@/components/MetaPixel";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { ConsentBanner } from "@/components/ConsentBanner";
 import { pixelId } from "@/lib/meta-pixel";
-import { gaId } from "@/lib/ga-id";
+import { GA_ID_GLOBAL, gaId } from "@/lib/ga-id";
 import { META } from "@/lib/site-copy";
 import { formatPrice } from "@/lib/tickets";
 
@@ -94,6 +94,13 @@ export default function RootLayout({
         {/* Even after an id is connected, nothing loads until the visitor
             makes an explicit marketing choice - and the banner that asks for
             it appears as soon as any tag is connected. */}
+        {gaId() ? (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `window.${GA_ID_GLOBAL}=${JSON.stringify(gaId())}`,
+            }}
+          />
+        ) : null}
         <MetaPixel id={pixelId()} />
         <GoogleAnalytics />
         <ConsentBanner enabled={Boolean(pixelId() || gaId())} />

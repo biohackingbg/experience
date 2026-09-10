@@ -1,11 +1,17 @@
+import "server-only";
+
 /**
  * The measurement id, in one place.
  *
- * It is public by nature - it sits in the page for anyone to read - so the
- * same setting serves the browser tag and the server-side purchase, and
- * connecting an account is one variable rather than two that can disagree.
+ * Read at request time and handed to the browser in the page, rather than
+ * baked into the scripts at build: connecting an account is then a setting
+ * and a refresh, not a setting and a rebuild that whoever pasted the id has
+ * no way to know is needed.
  */
 export const gaId = () => {
-  const value = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim();
+  const value = process.env.GA_MEASUREMENT_ID?.trim();
   return value && /^G-[A-Z0-9]+$/i.test(value) ? value : null;
 };
+
+/** The name the browser side looks for. */
+export const GA_ID_GLOBAL = "__slsGaId";
