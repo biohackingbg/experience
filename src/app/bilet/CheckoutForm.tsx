@@ -1,9 +1,11 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import { initialCheckoutState } from "@/lib/checkout-state";
 import { CHECKOUT, type Lang } from "@/lib/i18n";
+import { consentPending, consentSnapshot, subscribeToConsent } from "@/lib/consent-browser";
+import { trackGaEvent } from "@/lib/ga-browser";
 import { trackMetaEvent } from "@/lib/meta-browser";
 import { PURCHASE_TERMS_TEXT, PURCHASE_TERMS_TEXT_EN } from "@/lib/purchase-terms";
 import { TIERS, formatPrice, picksDay, splitVat } from "@/lib/tickets";
@@ -67,6 +69,32 @@ export function CheckoutForm({
     }
   }, [state]);
 
+  // The tiers on screen are a product list, and saying so is what lets the
+  // reports show where people stop - a funnel that begins at the payment
+  // hides every decision made before it.
+  const listSent = useRef(false);
+  // Waits for the choice rather than firing on mount: most visitors answer
+  // the banner after the page has already drawn, and an event sent before
+  // that is simply dropped.
+  const consent = useSyncExternalStore(subscribeToConsent, consentSnapshot, consentPending);
+  useEffect(() => {
+    if (consent !== "granted" || listSent.current) return;
+    listSent.current = true;
+    trackGaEvent("view_item_list", {
+      item_list_id: "tickets",
+      item_list_name: "Билети",
+      currency: "EUR",
+      items: TIERS.map((t0, index) => ({
+        item_id: t0.id,
+        item_name: t0.name,
+        item_category: "Ticket",
+        index,
+        price: (prices[t0.id] ?? t0.listPriceCents) / 100,
+        quantity: 1,
+      })),
+    });
+  }, [consent, prices]);
+
   const [tierId, setTierId] = useState(() => {
     const wanted = TIERS.some((t) => t.id === initialTier) && !soldOut.includes(initialTier!) ? initialTier! : null;
     return wanted ?? TIERS.find((t) => !soldOut.includes(t.id))?.id ?? "plus";
@@ -105,15 +133,29 @@ export function CheckoutForm({
   return (
     <form
       action={formAction}
-      onSubmit={() =>
+      onSubmit={() => {
         trackMetaEvent("InitiateCheckout", {
           content_ids: [tier.id],
           content_type: "product",
           currency: "EUR",
           num_items: quantity,
           value: total / 100,
-        })
-      }
+        });
+        trackGaEvent("begin_checkout", {
+          currency: "EUR",
+          value: total / 100,
+          ...(promo?.ok ? { coupon: promoInput.trim().toUpperCase() } : {}),
+          items: [
+            {
+              item_id: tier.id,
+              item_name: tier.name,
+              item_category: "Ticket",
+              price: (prices[tier.id] ?? tier.listPriceCents) / 100,
+              quantity,
+            },
+          ],
+        });
+      }}
       className="mt-10 grid gap-10 lg:grid-cols-[1.1fr_0.9fr]"
     >
       <input type="hidden" name="lang" value={lang} />

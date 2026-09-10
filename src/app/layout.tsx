@@ -4,7 +4,10 @@ import "./globals.css";
 import { ViewTracker } from "@/components/ViewTracker";
 import { cheapestOf, getPricing, priceOf } from "@/lib/pricing";
 import { MetaPixel } from "@/components/MetaPixel";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
+import { ConsentBanner } from "@/components/ConsentBanner";
 import { pixelId } from "@/lib/meta-pixel";
+import { gaId } from "@/lib/ga-id";
 import { META } from "@/lib/site-copy";
 import { formatPrice } from "@/lib/tickets";
 
@@ -88,9 +91,12 @@ export default function RootLayout({
         />
         <ViewTracker />
         {children}
-        {/* Even after an id is connected, Meta stays off until the visitor
-            makes an explicit marketing choice. */}
+        {/* Even after an id is connected, nothing loads until the visitor
+            makes an explicit marketing choice - and the banner that asks for
+            it appears as soon as any tag is connected. */}
         <MetaPixel id={pixelId()} />
+        <GoogleAnalytics />
+        <ConsentBanner enabled={Boolean(pixelId() || gaId())} />
       </body>
     </html>
   );

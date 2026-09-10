@@ -3,6 +3,7 @@ import "server-only";
 import { sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
+import { gaId } from "@/lib/ga-id";
 import { orderItems, orders } from "@/lib/db/schema";
 
 /**
@@ -17,7 +18,6 @@ import { orderItems, orders } from "@/lib/db/schema";
  * Inert until both settings exist, so the site sends nothing until an
  * account is actually connected.
  */
-const measurementId = () => process.env.GA_MEASUREMENT_ID?.trim() || null;
 const apiSecret = () => process.env.GA_API_SECRET?.trim() || null;
 
 /**
@@ -29,7 +29,7 @@ const fallbackClientId = (reference: string) =>
   `${[...reference].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 1_000_000_007, 7)}.${Math.floor(Date.now() / 1000)}`;
 
 export async function sendGaPurchase(orderId: string): Promise<void> {
-  const id = measurementId();
+  const id = gaId();
   const secret = apiSecret();
   if (!id || !secret) return;
 
