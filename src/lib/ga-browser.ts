@@ -26,9 +26,14 @@ function ensureGa(): GaWindow["gtag"] | null {
   if (w.__slsGaLoaded === id) return w.gtag ?? null;
 
   w.dataLayer ??= [];
-  w.gtag ??= function gtag(...args: unknown[]) {
-    w.dataLayer!.push(args);
-  };
+  // Google's tag recognises a command by the `arguments` object it is pushed
+  // as; a plain array of the same values is read as data and quietly does
+  // nothing - the tag loads, the property registers, and not one hit leaves
+  // the browser. Hence the old-style function.
+  w.gtag ??= function gtag() {
+    // eslint-disable-next-line prefer-rest-params
+    w.dataLayer!.push(arguments);
+  } as (...args: unknown[]) => void;
   const script = document.createElement("script");
   script.async = true;
   script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`;
