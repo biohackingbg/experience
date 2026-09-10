@@ -8,12 +8,12 @@ const INK = "#02251f";
 const NEON = "#cef870";
 const logoSvg = readFileSync("public/logo-dark.svg");
 
-// The organiser's mark, cropped square from the wide logo, as the thumbnail
-// beside the name. The mark sits in the left 381 of the logo's 1412 units.
-async function thumbnail(scale) {
-  const px = 90 * scale;
-  const full = await sharp(logoSvg).resize(Math.round((1412 / 381) * px), px).png().toBuffer();
-  return sharp(full).extract({ left: 0, top: 0, width: px, height: px }).png().toBuffer();
+// The organiser's logo, top left, the way it sits on the site. 160x50
+// points is the most Wallet gives it; the logo's own aspect sets the height.
+async function logo(scale) {
+  const w = 160 * scale;
+  const h = Math.round((381 / 1412) * w);
+  return sharp(logoSvg).resize(w, h).png().toBuffer();
 }
 
 // Square icon: the summit's initials on ink, the way the site's favicon reads.
@@ -60,14 +60,6 @@ function renderHtml(w, h, body, css) {
 const scaled = (buf3x, w, h) => async (scale) =>
   scale === 3 ? buf3x : sharp(buf3x).resize(w * scale, h * scale).png().toBuffer();
 
-// The event's name as the logo, in the site's display face, with a quiet
-// line under it. 160x50 points is the most Wallet gives a logo.
-const logoPng = renderHtml(160, 50, `<div class="t">Sofia<br>Life Summit<small>LONGEVITY · SOFIA 2026</small></div>`, `
-  .frame{display:flex;align-items:center}
-  .t{font:800 14.5px/1.02 U,sans-serif;letter-spacing:-.02em;color:#e9f0ec;text-transform:uppercase;white-space:nowrap;padding-left:1px}
-  .t small{display:block;margin-top:5px;font:500 6.2px/1 -apple-system,Helvetica,Arial,sans-serif;letter-spacing:.2em;color:${NEON}}`);
-const logo = scaled(logoPng, 160, 50);
-
 // The whole front: ink with a glow of pine and a breath of teal. Wallet
 // blurs and slightly crops it, which is what makes the gradient velvet.
 const bgPng = renderHtml(180, 220, `<div class="b"></div>`, `
@@ -79,7 +71,7 @@ const bgPng = renderHtml(180, 220, `<div class="b"></div>`, `
 const background = scaled(bgPng, 180, 220);
 
 const out = {};
-for (const [name, fn] of [["icon", icon], ["logo", logo], ["thumbnail", thumbnail], ["background", background]]) {
+for (const [name, fn] of [["icon", icon], ["logo", logo], ["background", background]]) {
   for (const scale of [1, 2, 3]) {
     const key = scale === 1 ? `${name}.png` : `${name}@${scale}x.png`;
     out[key] = (await fn(scale)).toString("base64");

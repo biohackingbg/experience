@@ -41,7 +41,8 @@ const COPY = {
     attendee: "УЧАСТНИК",
     tier: "НИВО",
     dayLabel: "ДЕН",
-    bothDays: "събота и неделя",
+    bothDays: "двата дни",
+    tagline: "LONGEVITY · СОФИЯ 2026",
     where: "КЪДЕ",
     // Short on purpose: the front truncates at about fifteen characters; the
     // full name and the street are on the back.
@@ -68,7 +69,8 @@ const COPY = {
     attendee: "ATTENDEE",
     tier: "TIER",
     dayLabel: "DAY",
-    bothDays: "Saturday and Sunday",
+    bothDays: "both days",
+    tagline: "LONGEVITY · SOFIA 2026",
     where: "WHERE",
     venue: "Hotel Millennium",
     codeLabel: "Ticket code",
@@ -119,16 +121,17 @@ export async function buildWalletPass(ticket: TicketView): Promise<Buffer> {
   });
   pass.type = "eventTicket";
 
-  // The event's name is the logo, in the site's own face, so the one large
-  // field on the front is the person: what the door reads first.
+  // Top to bottom, the way the organiser wanted it read: their logo, the
+  // event, the person, then the particulars. Every row has more than one
+  // field - Wallet sizes a lone field to the column above it, and that once
+  // cut the venue short.
   pass.headerFields.push({ key: "date", label: t.date, value: t.dateValue });
-  pass.primaryFields.push({ key: "attendee", label: t.attendee, value: name });
+  pass.primaryFields.push({ key: "event", label: t.tagline, value: "Sofia Life Summit" });
   pass.secondaryFields.push(
-    { key: "tier", label: t.tier, value: ticket.tierName },
+    { key: "attendee", label: t.attendee, value: name },
+    { key: "tier", label: t.tier, value: ticket.tierName, textAlignment: "PKTextAlignmentCenter" },
     { key: "day", label: t.dayLabel, value: day, textAlignment: "PKTextAlignmentRight" },
   );
-  // Two fields on each row: Wallet sizes a lone field to the column above
-  // it, and that once cut the venue short.
   pass.auxiliaryFields.push(
     { key: "where", label: t.where, value: t.venue },
     { key: "reference", label: t.orderLabel, value: ticket.reference, textAlignment: "PKTextAlignmentRight" },
