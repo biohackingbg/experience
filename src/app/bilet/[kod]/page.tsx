@@ -64,12 +64,17 @@ export default async function TicketPage({
           </div>
 
           <div className="flex justify-center px-7 py-8">
-            <div
-              className="h-52 w-52 [&>svg]:h-full [&>svg]:w-full"
-              // Generated from the ticket code by the QR library - no user input.
-              dangerouslySetInnerHTML={{ __html: qr }}
-              aria-hidden
-            />
+            {/* Always ink on white, whatever the theme: a scanner needs the
+                contrast, and in dark mode the card behind it is nearly the
+                colour of the code. */}
+            <div className="rounded-2xl bg-white p-4">
+              <div
+                className="h-48 w-48 [&>svg]:h-full [&>svg]:w-full"
+                // Generated from the ticket code by the QR library - no user input.
+                dangerouslySetInnerHTML={{ __html: qr }}
+                aria-hidden
+              />
+            </div>
           </div>
 
           <p className="px-7 text-center font-mono text-2xl font-semibold tracking-[0.15em] text-bh-ink">
