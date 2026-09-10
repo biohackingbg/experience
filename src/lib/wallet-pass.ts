@@ -131,7 +131,7 @@ export async function buildWalletPass(ticket: TicketView): Promise<Buffer> {
   // it, and that once cut the venue short.
   pass.auxiliaryFields.push(
     { key: "where", label: t.where, value: t.venue },
-    { key: "order", label: t.orderLabel, value: ticket.reference, textAlignment: "PKTextAlignmentRight" },
+    { key: "reference", label: t.orderLabel, value: ticket.reference, textAlignment: "PKTextAlignmentRight" },
   );
   pass.backFields.push(
     { key: "code", label: t.codeLabel, value: ticket.code },
