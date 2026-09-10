@@ -177,7 +177,7 @@ export default async function TrafficPage({
             }
           />
           <Tile
-            label="В списъка за ранни билети"
+            label="В списъка за новини"
             value={d.signups}
             sub={`нови записвания за ${days} дни`}
           />

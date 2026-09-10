@@ -14,7 +14,12 @@ import {
 } from "drizzle-orm/pg-core";
 
 /**
- * Early-access signups (waitlist for the September ticket release).
+ * The mailing list: people who asked to hear about the event.
+ *
+ * It began as a waiting list for the ticket release and is now the list for
+ * event news - the programme, the workshops, changes to prices. The rows
+ * whose source starts with `waitlist:` are a different thing: someone who
+ * wants a place in a tier that is sold out.
  *
  * Data is deliberately minimal - GDPR data minimisation. We do not store IP
  * addresses or any tracking identifiers. What we do store is *proof of
