@@ -7,6 +7,7 @@ import { BOOKING, TICKET_PAGE } from "@/lib/i18n";
 import { getTicketPlaces, listWorkshops } from "@/lib/workshops";
 import { dayLabel } from "@/lib/tickets";
 import { findTicket } from "@/lib/tickets-lookup";
+import { walletConfigured } from "@/lib/wallet-pass";
 
 import { AttendeeForm } from "./AttendeeForm";
 import { Workshops } from "./Workshops";
@@ -77,6 +78,21 @@ export default async function TicketPage({
           <p className="mt-2 px-7 text-center text-xs text-bh-ink/50">
             {t.show}
           </p>
+
+          {walletConfigured() && !ticket.checkedInAt && (
+            <div className="mt-5 flex flex-col items-center gap-2 px-7 print:hidden">
+              <a
+                href={`/api/wallet/${encodeURIComponent(ticket.code)}`}
+                className="inline-flex items-center gap-2 rounded-xl bg-bh-ink px-4 py-2.5 text-sm font-semibold text-bh-paper"
+              >
+                <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden fill="currentColor">
+                  <path d="M3 6.5A2.5 2.5 0 0 1 5.5 4h13A2.5 2.5 0 0 1 21 6.5V8H3V6.5Zm0 3h18v8A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5v-8Zm12 3a1 1 0 0 0 0 2h3a1 1 0 1 0 0-2h-3Z" />
+                </svg>
+                {t.wallet}
+              </a>
+              <p className="text-center text-[0.7rem] text-bh-ink/45">{t.walletHint}</p>
+            </div>
+          )}
 
           <dl className="mt-7 divide-y divide-bh-ink/8 border-t border-bh-ink/8 text-sm">
             <div className="flex items-center gap-4 px-7 py-4">

@@ -26,7 +26,15 @@ export function isEmailConfigured(): boolean {
   return Boolean(process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
 }
 
+import { walletConfigured } from "@/lib/wallet-pass";
+
 const SITE = "https://thelongevitysummit.eu";
+
+/** A small link under the ticket button; on an iPhone the file opens straight into Wallet. */
+const walletLink = (code: string, en: boolean, f: string) =>
+  walletConfigured()
+    ? `<div style="margin-top:8px"><a href="${SITE}/api/wallet/${code}" style="font:500 12px/1 ${f};color:#146455;text-decoration:underline">${en ? "Add to Apple Wallet" : "Добави в Apple Wallet"}</a></div>`
+    : "";
 
 /**
  * The buyer's name is attacker-controlled at checkout and lands inside HTML.
@@ -73,6 +81,7 @@ function ticketRows(input: TicketEmailInput, open = "Отвори билета",
              style="display:inline-block;background:#146455;color:#f1f5f3;text-decoration:none;
                     font:600 13px/1 -apple-system,Segoe UI,Roboto,sans-serif;
                     padding:11px 18px;border-radius:999px">${open}</a>
+          ${walletLink(t.code, open !== "Отвори билета", "-apple-system,Segoe UI,Roboto,sans-serif")}
         </td>
       </tr>`,
     )
@@ -381,6 +390,7 @@ export function eventInfoHtml(input: EventInfoInput): string {
         </td>
         <td align="right" style="padding:12px 0;border-bottom:1px solid #dfe4e0">
           <a href="${SITE}/bilet/${t.code}" style="display:inline-block;background:#146455;color:#f1f5f3;text-decoration:none;font:600 13px/1 ${f};padding:11px 18px;border-radius:999px">${w.open}</a>
+          ${walletLink(t.code, en, f)}
         </td>
       </tr>`,
     )

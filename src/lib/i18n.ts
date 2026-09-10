@@ -96,9 +96,9 @@ export const CHECKOUT = {
 
 export const TICKET_PAGE = {
   bg: { ticketFor: "Билет за", show: "Покажи този код на входа", when: "Кога", where: "Къде", attendee: "Участник", order: "Поръчка", used: "Този билет вече е използван на", keep: "Запази страницата или я разпечатай. Билетът важи за един човек.", dates: "07-08 ноември 2026", venue: "Гранд Хотел Милениум, София",
-    whoTitle: "Име на участника", whoAsk: "За кого е този билет?", whoHint: "Ако билетът е за друг човек, напиши името му - така ще го намерим на входа и баджът ще е с неговото име. Ако е за теб, остави празно.", whoPlaceholder: "Име и фамилия", save: "Запиши", saving: "Записва…" },
+    whoTitle: "Име на участника", whoAsk: "За кого е този билет?", whoHint: "Ако билетът е за друг човек, напиши името му - така ще го намерим на входа и баджът ще е с неговото име. Ако е за теб, остави празно.", whoPlaceholder: "Име и фамилия", save: "Запиши", saving: "Записва…", wallet: "Добави в Apple Wallet", walletHint: "На iPhone билетът се появява сам на заключения екран в деня на събитието." },
   en: { ticketFor: "Ticket for", show: "Show this code at the entrance", when: "When", where: "Where", attendee: "Attendee", order: "Order", used: "This ticket was already used on", keep: "Save this page or print it. One ticket admits one person.", dates: "7-8 November 2026", venue: "Grand Hotel Millennium, Sofia",
-    whoTitle: "Attendee name", whoAsk: "Who is this ticket for?", whoHint: "If the ticket is for someone else, write their name - that is how we find them at the entrance and print their badge. If it is for you, leave it empty.", whoPlaceholder: "Full name", save: "Save", saving: "Saving…" },
+    whoTitle: "Attendee name", whoAsk: "Who is this ticket for?", whoHint: "If the ticket is for someone else, write their name - that is how we find them at the entrance and print their badge. If it is for you, leave it empty.", whoPlaceholder: "Full name", save: "Save", saving: "Saving…", wallet: "Add to Apple Wallet", walletHint: "On iPhone the ticket shows up on the lock screen by itself on the day." },
 } as const;
 
 export const RESEND_PAGE = {
