@@ -113,6 +113,8 @@ export async function buildWalletPass(ticket: TicketView): Promise<Buffer> {
     labelColor: "rgb(206, 248, 112)",
     // A ticket is one seat: passing it around only makes the second scan fail.
     sharingProhibited: true,
+    // The strip is a gradient already; the system's gloss would sit on top of it.
+    suppressStripShine: true,
   });
   pass.type = "eventTicket";
 

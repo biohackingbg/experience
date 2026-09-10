@@ -40,15 +40,22 @@ const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 async function renderStrip3x() {
   const dir = mkdtempSync(join(tmpdir(), "strip-"));
   const font = resolve("scripts/wallet/fonts/Unbounded-800.woff2");
+  // Ink at every edge, so the strip meets the pass's flat colour without a
+  // seam; a soft glow of pine with a breath of teal in the middle, and a
+  // fine grain over it all so the gradient reads as material, not as a fill.
   const html = `<!doctype html><meta charset="utf-8"><style>
     @font-face{font-family:U;src:url("file://${font}") format("woff2");font-weight:800}
     html,body{margin:0;background:${INK}}
-    .s{position:relative;width:375px;height:98px;overflow:hidden;background:${INK}}
-    .b1{position:absolute;left:190px;top:-10px;width:185px;height:118px;background:${NEON};opacity:.10;transform:skewX(-27deg);transform-origin:top left}
-    .b2{position:absolute;left:240px;top:-10px;width:135px;height:118px;background:#0ecdb7;opacity:.10;transform:skewX(-27deg);transform-origin:top left}
+    .s{position:relative;width:375px;height:98px;overflow:hidden;background:
+      radial-gradient(95% 62% at 74% 52%, rgba(20,100,85,.95) 0%, rgba(20,100,85,.55) 32%, rgba(2,37,31,0) 72%),
+      radial-gradient(50% 45% at 92% 18%, rgba(14,205,183,.22) 0%, rgba(2,37,31,0) 70%),
+      radial-gradient(40% 40% at 6% 88%, rgba(206,248,112,.10) 0%, rgba(2,37,31,0) 70%),
+      ${INK}}
+    .g{position:absolute;inset:0;opacity:.09;mix-blend-mode:soft-light;
+      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>")}
     .t{position:absolute;left:16px;top:50%;transform:translateY(-50%);font:800 21px/1 U,sans-serif;letter-spacing:-.02em;color:#e9f0ec;text-transform:uppercase}
     .t small{display:block;margin-top:7px;font:500 8.5px/1 -apple-system,Helvetica,Arial,sans-serif;letter-spacing:.22em;color:${NEON}}
-  </style><body><div class="s"><div class="b1"></div><div class="b2"></div>
+  </style><body><div class="s"><div class="g"></div>
   <div class="t">Sofia Life Summit<small>LONGEVITY · SOFIA 2026</small></div></div>`;
   const page = join(dir, "strip.html");
   writeFileSync(page, html);
