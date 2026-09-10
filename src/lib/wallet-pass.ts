@@ -40,7 +40,6 @@ const COPY = {
     date: "ДАТА",
     dateValue: "7–8 ноември",
     attendee: "УЧАСТНИК",
-    unnamed: "Без име - виж гърба",
     tier: "НИВО",
     where: "КЪДЕ",
     // Short on purpose: the front truncates at about fifteen characters; the
@@ -52,7 +51,7 @@ const COPY = {
     whenLabel: "Кога",
     when: "Събота и неделя, 7–8 ноември 2026. Регистрацията отваря в 8:30.",
     nameLabel: "Име на участника",
-    nameHint: "Ако билетът е за друг човек, отвори страницата на билета и напиши името му - така ще го намерим на входа и баджът ще е с неговото име.",
+    nameHint: "Показваме името от поръчката. Ако билетът е за друг човек, отвори страницата на билета, напиши името му и добави билета в Wallet отново - така ще го намерим на входа и баджът ще е с неговото име.",
     orderLabel: "Поръчка",
     pageLabel: "Страница на билета",
     helpLabel: "Въпроси",
@@ -67,7 +66,6 @@ const COPY = {
     date: "DATE",
     dateValue: "7–8 November",
     attendee: "ATTENDEE",
-    unnamed: "Unnamed - see back",
     tier: "TIER",
     where: "WHERE",
     venue: "Hotel Millennium",
@@ -77,7 +75,7 @@ const COPY = {
     whenLabel: "When",
     when: "Saturday and Sunday, 7–8 November 2026. Registration opens at 8:30.",
     nameLabel: "Attendee name",
-    nameHint: "If the ticket is for someone else, open the ticket page and write their name - that is how we find them at the entrance and print their badge.",
+    nameHint: "This is the name on the order. If the ticket is for someone else, open the ticket page, write their name and add the ticket to Wallet again - that is how we find them at the entrance and print their badge.",
     orderLabel: "Order",
     pageLabel: "Ticket page",
     helpLabel: "Questions",
@@ -95,6 +93,9 @@ export async function buildWalletPass(ticket: TicketView): Promise<Buffer> {
   if (!signerCert || !signerKey || !wwdr) throw new Error("Wallet signing material is not configured");
 
   const t = COPY[ticket.lang];
+  // An empty name means "it is for me" - the ticket page says so - so the
+  // buyer's name goes on the front, the way the door list already reads it.
+  const name = ticket.attendeeName ?? ticket.buyerName;
   const day = dayLabel(ticket.day, ticket.lang);
   const tier = day ? `${ticket.tierName} · ${day}` : ticket.tierName;
 
@@ -120,7 +121,7 @@ export async function buildWalletPass(ticket: TicketView): Promise<Buffer> {
   pass.headerFields.push({ key: "date", label: t.date, value: t.dateValue });
   pass.primaryFields.push({ key: "event", label: t.ticket, value: "Sofia Life Summit" });
   pass.secondaryFields.push(
-    { key: "attendee", label: t.attendee, value: ticket.attendeeName ?? t.unnamed },
+    { key: "attendee", label: t.attendee, value: name },
     { key: "tier", label: t.tier, value: tier, textAlignment: "PKTextAlignmentRight" },
   );
   pass.auxiliaryFields.push({ key: "where", label: t.where, value: t.venue });
@@ -128,7 +129,7 @@ export async function buildWalletPass(ticket: TicketView): Promise<Buffer> {
     { key: "code", label: t.codeLabel, value: ticket.code },
     { key: "when", label: t.whenLabel, value: t.when },
     { key: "address", label: t.addressLabel, value: t.address },
-    { key: "name", label: t.nameLabel, value: ticket.attendeeName ?? t.nameHint },
+    { key: "name", label: t.nameLabel, value: ticket.attendeeName ? ticket.attendeeName : `${ticket.buyerName}\n\n${t.nameHint}` },
     { key: "order", label: t.orderLabel, value: `${ticket.reference} · ${ticket.buyerName}` },
     { key: "page", label: t.pageLabel, value: `${SITE}/bilet/${ticket.code}` },
     { key: "help", label: t.helpLabel, value: t.help },
