@@ -25,16 +25,48 @@ async function icon(scale) {
   return sharp(Buffer.from(svg)).png().toBuffer();
 }
 
-// Strip behind the primary field: ink with a faint diagonal neon band, no
-// text - the words belong to the fields, where they can be in either language.
+// The strip carries the event's name as typography, in the site's display
+// face, at a size chosen by eye - Wallet's own primary field can only draw
+// it huge. Rendered in a headless browser because that is the one renderer
+// here that lays out a web font the way the site does; drawn once at 3x
+// and scaled down for the smaller densities.
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
+
+const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+
+async function renderStrip3x() {
+  const dir = mkdtempSync(join(tmpdir(), "strip-"));
+  const font = resolve("scripts/wallet/fonts/Unbounded-800.woff2");
+  const html = `<!doctype html><meta charset="utf-8"><style>
+    @font-face{font-family:U;src:url("file://${font}") format("woff2");font-weight:800}
+    html,body{margin:0;background:${INK}}
+    .s{position:relative;width:375px;height:98px;overflow:hidden;background:${INK}}
+    .b1{position:absolute;left:190px;top:-10px;width:185px;height:118px;background:${NEON};opacity:.10;transform:skewX(-27deg);transform-origin:top left}
+    .b2{position:absolute;left:240px;top:-10px;width:135px;height:118px;background:#0ecdb7;opacity:.10;transform:skewX(-27deg);transform-origin:top left}
+    .t{position:absolute;left:16px;top:50%;transform:translateY(-50%);font:800 21px/1 U,sans-serif;letter-spacing:-.02em;color:#e9f0ec;text-transform:uppercase}
+    .t small{display:block;margin-top:7px;font:500 8.5px/1 -apple-system,Helvetica,Arial,sans-serif;letter-spacing:.22em;color:${NEON}}
+  </style><body><div class="s"><div class="b1"></div><div class="b2"></div>
+  <div class="t">Sofia Life Summit<small>LONGEVITY · SOFIA 2026</small></div></div>`;
+  const page = join(dir, "strip.html");
+  writeFileSync(page, html);
+  const out = join(dir, "strip.png");
+  execFileSync(CHROME, [
+    "--headless=new", "--disable-gpu", "--hide-scrollbars", "--allow-file-access-from-files",
+    "--force-device-scale-factor=3", "--window-size=375,98", `--screenshot=${out}`, `file://${page}`,
+  ], { stdio: "ignore" });
+  const buf = readFileSync(out);
+  rmSync(dir, { recursive: true, force: true });
+  return buf;
+}
+
+let strip3x;
 async function strip(scale) {
-  const w = 375 * scale, h = 98 * scale;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 375 98">
-    <rect width="375" height="98" fill="${INK}"/>
-    <path d="M250 -10 L375 -10 L375 108 L190 108 Z" fill="${NEON}" opacity="0.10"/>
-    <path d="M300 -10 L375 -10 L375 108 L240 108 Z" fill="#0ecdb7" opacity="0.10"/>
-  </svg>`;
-  return sharp(Buffer.from(svg)).png().toBuffer();
+  strip3x ??= await renderStrip3x();
+  if (scale === 3) return strip3x;
+  return sharp(strip3x).resize(375 * scale, 98 * scale).png().toBuffer();
 }
 
 const out = {};

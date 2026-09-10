@@ -36,7 +36,6 @@ export function walletConfigured(): boolean {
 const COPY = {
   bg: {
     description: "Билет за Sofia Life Summit 2026",
-    ticket: "БИЛЕТ",
     date: "ДАТА",
     dateValue: "7–8 ноември",
     attendee: "УЧАСТНИК",
@@ -62,7 +61,6 @@ const COPY = {
   },
   en: {
     description: "Sofia Life Summit 2026 ticket",
-    ticket: "TICKET",
     date: "DATE",
     dateValue: "7–8 November",
     attendee: "ATTENDEE",
@@ -119,7 +117,8 @@ export async function buildWalletPass(ticket: TicketView): Promise<Buffer> {
   pass.type = "eventTicket";
 
   pass.headerFields.push({ key: "date", label: t.date, value: t.dateValue });
-  pass.primaryFields.push({ key: "event", label: t.ticket, value: "Sofia Life Summit" });
+  // No primary field: Wallet can only draw it huge, so the event's name is
+  // typography inside the strip instead, at a size chosen by eye.
   pass.secondaryFields.push(
     { key: "attendee", label: t.attendee, value: name },
     { key: "tier", label: t.tier, value: tier, textAlignment: "PKTextAlignmentRight" },
