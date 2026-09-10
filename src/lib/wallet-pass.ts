@@ -40,6 +40,8 @@ const COPY = {
     dateValue: "7–8 ноември",
     attendee: "УЧАСТНИК",
     tier: "НИВО",
+    dayLabel: "ДЕН",
+    bothDays: "събота и неделя",
     where: "КЪДЕ",
     // Short on purpose: the front truncates at about fifteen characters; the
     // full name and the street are on the back.
@@ -65,6 +67,8 @@ const COPY = {
     dateValue: "7–8 November",
     attendee: "ATTENDEE",
     tier: "TIER",
+    dayLabel: "DAY",
+    bothDays: "Saturday and Sunday",
     where: "WHERE",
     venue: "Hotel Millennium",
     codeLabel: "Ticket code",
@@ -94,8 +98,7 @@ export async function buildWalletPass(ticket: TicketView): Promise<Buffer> {
   // An empty name means "it is for me" - the ticket page says so - so the
   // buyer's name goes on the front, the way the door list already reads it.
   const name = ticket.attendeeName ?? ticket.buyerName;
-  const day = dayLabel(ticket.day, ticket.lang);
-  const tier = day ? `${ticket.tierName} · ${day}` : ticket.tierName;
+  const day = dayLabel(ticket.day, ticket.lang) ?? t.bothDays;
 
   const images = Object.fromEntries(
     Object.entries(WALLET_IMAGES).map(([name, b64]) => [name, Buffer.from(b64, "base64")]),
@@ -123,9 +126,14 @@ export async function buildWalletPass(ticket: TicketView): Promise<Buffer> {
   // typography inside the strip instead, at a size chosen by eye.
   pass.secondaryFields.push(
     { key: "attendee", label: t.attendee, value: name },
-    { key: "tier", label: t.tier, value: tier, textAlignment: "PKTextAlignmentRight" },
+    { key: "tier", label: t.tier, value: ticket.tierName, textAlignment: "PKTextAlignmentRight" },
   );
-  pass.auxiliaryFields.push({ key: "where", label: t.where, value: t.venue });
+  // Two fields here as well: Wallet sizes a lone field on this row to the
+  // width of the name above it, and a short name left the venue cut off.
+  pass.auxiliaryFields.push(
+    { key: "where", label: t.where, value: t.venue },
+    { key: "day", label: t.dayLabel, value: day, textAlignment: "PKTextAlignmentRight" },
+  );
   pass.backFields.push(
     { key: "code", label: t.codeLabel, value: ticket.code },
     { key: "when", label: t.whenLabel, value: t.when },
