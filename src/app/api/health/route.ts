@@ -80,7 +80,7 @@ export async function GET(request: Request) {
         ) as paid_no_tickets,
         count(*) filter (
           where o.status = 'paid' and o.paid_at > now() - interval '24 hours'
-            and o.invoice_number is null
+            and o.total_cents > 0 and o.invoice_number is null
         ) as paid_no_invoice,
         count(*) filter (
           where o.status = 'paid' and not o.is_test and o.total_cents > 0
