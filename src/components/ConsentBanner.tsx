@@ -16,25 +16,26 @@ import {
 type TaggedWindow = Window & { fbq?: (...args: unknown[]) => void };
 
 /**
- * The banner says the least the law allows, the way Stripe says it: one
- * sentence for what the cookies are for, one that leads to the details, two
- * equal buttons - in the language of the page rather than both at once.
- * Not Stripe's words, though: theirs are also "to improve your experience",
- * and ours are for measuring advertising and nothing else.
+ * Stripe's cookie banner, one to one: their sentence, their card, their two
+ * equal buttons - measured off stripe.com rather than remembered. Only the
+ * accent is ours. "Improve your experience" is true here too: the analytics
+ * half of what the visitor accepts is what tells us which pages work.
  */
 const COPY = {
   bg: {
-    title: "Съгласие за маркетингови бисквитки",
-    body: "Използваме бисквитки за измерване на рекламата.",
-    policy: "Прочети политиката за поверителност.",
+    title: "Съгласие за бисквитки",
+    body: "Използваме бисквитки, за да подобрим изживяването ти и за маркетинг. Прочети нашата ",
+    policy: "политика за бисквитки",
+    tail: ".",
     accept: "Приемам всички",
     decline: "Отказвам всички",
     reopen: "Бисквитки",
   },
   en: {
-    title: "Consent for marketing cookies",
-    body: "We use cookies to measure our advertising.",
-    policy: "Read our privacy policy.",
+    title: "Cookie consent",
+    body: "We use cookies to improve your experience and for marketing. Read our ",
+    policy: "cookie policy",
+    tail: ".",
     accept: "Accept all",
     decline: "Reject all",
     reopen: "Cookies",
@@ -87,41 +88,44 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
   return (
     <>
       {showDialog ? (
-        <section
-          role="dialog"
-          aria-labelledby="cookie-title"
-          aria-describedby="cookie-description"
-          className="fixed inset-x-3 bottom-3 z-[100] mx-auto max-w-xl rounded-3xl border border-bh-ink/15 bg-bh-paper p-4 shadow-2xl sm:p-5"
-        >
-          <h2 id="cookie-title" className="sr-only">
-            {t.title}
-          </h2>
-          <p id="cookie-description" className="text-sm leading-relaxed text-bh-ink/75">
-            {t.body}{" "}
-            <Link href="/poveritelnost" className="underline underline-offset-2">
-              {t.policy}
-            </Link>
-          </p>
-          {/* Equal prominence, by the letter: same shape, same weight, same
-              size - the supervisory authorities read a bold accept beside a
-              faint decline as nudging. */}
-          <div className="mt-4 grid gap-2 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={accept}
-              className="rounded-full border border-bh-ink bg-bh-ink px-5 py-2.5 text-sm font-semibold text-bh-paper"
-            >
-              {t.accept}
-            </button>
-            <button
-              type="button"
-              onClick={decline}
-              className="rounded-full border border-bh-ink bg-transparent px-5 py-2.5 text-sm font-semibold text-bh-ink"
-            >
-              {t.decline}
-            </button>
-          </div>
-        </section>
+        // Stripe's numbers: a 380px card in the bottom-left corner, 18px of
+        // padding, 6px corners, a soft shadow; 14px text; two identical
+        // 36px buttons with a hairline border, 8px apart.
+        <div className="fixed inset-x-0 bottom-0 z-[100] px-4 pb-4">
+          <section
+            role="dialog"
+            aria-labelledby="cookie-title"
+            aria-describedby="cookie-description"
+            className="flex max-w-[380px] flex-col gap-[14px] rounded-[6px] bg-white p-[18px] shadow-[0_4px_24px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.03)]"
+          >
+            <h2 id="cookie-title" className="sr-only">
+              {t.title}
+            </h2>
+            <p id="cookie-description" className="text-[14px] leading-[1.4] text-[#5a6677]">
+              {t.body}
+              <Link href="/poveritelnost" className="underline underline-offset-2">
+                {t.policy}
+              </Link>
+              {t.tail}
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={accept}
+                className="rounded-[4px] border border-[rgba(20,100,85,0.3)] bg-transparent px-6 py-[10.5px] text-[12px] leading-[12px] text-[#146455]"
+              >
+                {t.accept}
+              </button>
+              <button
+                type="button"
+                onClick={decline}
+                className="rounded-[4px] border border-[rgba(20,100,85,0.3)] bg-transparent px-6 py-[10.5px] text-[12px] leading-[12px] text-[#146455]"
+              >
+                {t.decline}
+              </button>
+            </div>
+          </section>
+        </div>
       ) : (
         <button
           type="button"
