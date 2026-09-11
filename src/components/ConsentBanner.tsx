@@ -16,25 +16,27 @@ import {
 type TaggedWindow = Window & { fbq?: (...args: unknown[]) => void };
 
 /**
- * The banner says the least the law allows: what is measured, that it needs
- * consent, and where to read more - in the language of the page rather than
- * both at once, which is what made it a wall of text.
+ * The banner says the least the law allows, the way Stripe says it: one
+ * sentence for what the cookies are for, one that leads to the details, two
+ * equal buttons - in the language of the page rather than both at once.
+ * Not Stripe's words, though: theirs are also "to improve your experience",
+ * and ours are for measuring advertising and nothing else.
  */
 const COPY = {
   bg: {
     title: "Съгласие за маркетингови бисквитки",
-    body: "Мерим кои реклами водят до продажби. Само с твое съгласие.",
-    policy: "Поверителност",
-    accept: "Приемам",
-    decline: "Отказвам",
+    body: "Използваме бисквитки за измерване на рекламата.",
+    policy: "Прочети политиката за поверителност.",
+    accept: "Приемам всички",
+    decline: "Отказвам всички",
     reopen: "Бисквитки",
   },
   en: {
     title: "Consent for marketing cookies",
-    body: "We measure which ads lead to sales. Only with your consent.",
-    policy: "Privacy",
-    accept: "Accept",
-    decline: "Decline",
+    body: "We use cookies to measure our advertising.",
+    policy: "Read our privacy policy.",
+    accept: "Accept all",
+    decline: "Reject all",
     reopen: "Cookies",
   },
 } as const;
