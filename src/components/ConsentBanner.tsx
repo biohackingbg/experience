@@ -17,29 +17,19 @@ type TaggedWindow = Window & { fbq?: (...args: unknown[]) => void };
 
 /**
  * Stripe's cookie banner, one to one: their sentence, their card, their two
- * equal buttons - measured off stripe.com rather than remembered. Only the
- * accent is ours. "Improve your experience" is true here too: the analytics
- * half of what the visitor accepts is what tells us which pages work.
+ * equal buttons - measured off stripe.com rather than remembered, and in
+ * English on every page, the way theirs is. Only the accent is ours.
+ * "Improve your experience" is true here too: the analytics half of what the
+ * visitor accepts is what tells us which pages work.
  */
 const COPY = {
-  bg: {
-    title: "Съгласие за бисквитки",
-    body: "Използваме бисквитки, за да подобрим изживяването ти и за маркетинг. Прочети нашата ",
-    policy: "политика за бисквитки",
-    tail: ".",
-    accept: "Приемам всички",
-    decline: "Отказвам всички",
-    reopen: "Бисквитки",
-  },
-  en: {
-    title: "Cookie consent",
-    body: "We use cookies to improve your experience and for marketing. Read our ",
-    policy: "cookie policy",
-    tail: ".",
-    accept: "Accept all",
-    decline: "Reject all",
-    reopen: "Cookies",
-  },
+  title: "Cookie consent",
+  body: "We use cookies to improve your experience and for marketing. Read our ",
+  policy: "cookie policy",
+  tail: ".",
+  accept: "Accept all",
+  decline: "Reject all",
+  reopen: "Cookies",
 } as const;
 
 /** Google names the per-property cookie after the measurement id, so it can
@@ -66,7 +56,7 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
 
   if (!enabled || !isConsentSurface(pathname) || choice === "pending") return null;
 
-  const t = COPY[pathname === "/en" || pathname.startsWith("/en/") ? "en" : "bg"];
+  const t = COPY;
   const showDialog = choice === null || settingsOpen;
   const accept = () => {
     rememberConsent("granted");
