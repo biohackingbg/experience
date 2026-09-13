@@ -5,7 +5,7 @@ import { sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { orderItems, orders } from "@/lib/db/schema";
 import { sendSaleAlert } from "@/lib/email";
-import { SOLD } from "@/lib/sold";
+import { SALE } from "@/lib/sold";
 import { TIERS } from "@/lib/tickets";
 
 /**
@@ -28,12 +28,14 @@ export async function alertSale(reference: string): Promise<void> {
       .from(orders)
       .where(sql`${orders.reference} = ${reference}`)
       .limit(1);
-    if (!o || o.isTest) return;
+    // A ticket issued at no charge is the team's own doing; nobody needs
+    // waking for it.
+    if (!o || o.isTest || o.totalCents === 0) return;
     const [sold] = await db
       .select({ n: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int` })
       .from(orderItems)
       .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
-      .where(SOLD);
+      .where(SALE);
     await sendSaleAlert({
       reference: o.reference,
       buyerName: o.name,

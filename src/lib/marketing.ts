@@ -5,7 +5,7 @@ import { desc, eq, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { campaigns, orderItems, orders, siteViews } from "@/lib/db/schema";
 import { PLATFORMS } from "@/lib/marketing-options";
-import { SOLD } from "@/lib/sold";
+import { SALE } from "@/lib/sold";
 
 /**
  * What marketing did and what it brought.
@@ -104,7 +104,7 @@ export async function getMarketing(): Promise<Marketing> {
       })
       .from(orders)
       .innerJoin(orderItems, sql`${orderItems.orderId} = ${orders.id}`)
-      .where(sql`${SOLD} and (${orders.utmCampaign} is not null or ${orders.utmSource} is not null)`)
+      .where(sql`${SALE} and (${orders.utmCampaign} is not null or ${orders.utmSource} is not null)`)
       .groupBy(orders.utmCampaign, orders.utmSource),
     db
       .select({ campaign: siteViews.utmCampaign, n: sql<number>`count(distinct ${siteViews.visitor})::int` })
@@ -124,7 +124,7 @@ export async function getMarketing(): Promise<Marketing> {
       .select({ tickets: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int` })
       .from(orders)
       .innerJoin(orderItems, sql`${orderItems.orderId} = ${orders.id}`)
-      .where(sql`${SOLD} and ${orders.paidAt} >= now() - interval '30 days'`),
+      .where(sql`${SALE} and ${orders.paidAt} >= now() - interval '30 days'`),
 
     // The funnel, by people rather than by page views: the same visitor
     // opening the ticket page four times is one person deciding.
@@ -139,8 +139,8 @@ export async function getMarketing(): Promise<Marketing> {
     db
       .select({
         checkouts: sql<number>`count(*) filter (where not ${orders.isTest})::int`,
-        paid: sql<number>`count(*) filter (where ${SOLD})::int`,
-        untagged: sql<number>`count(*) filter (where ${SOLD} and ${orders.utmSource} is null and ${orders.utmCampaign} is null)::int`,
+        paid: sql<number>`count(*) filter (where ${SALE})::int`,
+        untagged: sql<number>`count(*) filter (where ${SALE} and ${orders.utmSource} is null and ${orders.utmCampaign} is null)::int`,
       })
       .from(orders)
       .where(sql`${orders.createdAt} >= now() - interval '30 days'`),
@@ -164,7 +164,7 @@ export async function getMarketing(): Promise<Marketing> {
           .from(orders)
           .innerJoin(orderItems, sql`${orderItems.orderId} = ${orders.id}`)
           .where(
-            sql`${SOLD} and ${orders.paidAt} >= ${start}::timestamptz and ${orders.paidAt} < ${start}::timestamptz + interval '${sql.raw(WINDOW)}'`,
+            sql`${SALE} and ${orders.paidAt} >= ${start}::timestamptz and ${orders.paidAt} < ${start}::timestamptz + interval '${sql.raw(WINDOW)}'`,
           ),
       ]);
       return { id: c.id, visitors: v?.n ?? 0, tickets: t?.n ?? 0 };

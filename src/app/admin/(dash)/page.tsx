@@ -231,7 +231,7 @@ export default async function AdminDashboard({
   // The one sentence the morning glance is for: are we on pace to fill the
   // room, at the pace we are actually selling at?
   const daysLeft = d.daysToEvent;
-  const seatsLeft = Math.max(0, d.capacityTotal - d.ticketsSold);
+  const seatsLeft = Math.max(0, d.capacityTotal - d.ticketsSold - d.ticketsComped);
   const neededPerDay = seatsLeft / daysLeft;
   const pacePerDay = d.soldLast7Days / 7;
   const onPace = seatsLeft === 0 || pacePerDay >= neededPerDay;
@@ -374,6 +374,30 @@ export default async function AdminDashboard({
 
         <div className="flex flex-col gap-4 xl:col-span-1 xl:row-span-2">
           <TierBars tiers={d.perTier} />
+
+          {/* Seated, not sold: the tickets the team gives away - speakers,
+              partners, its own. Kept out of every sales figure above and
+              shown here instead, so a free ticket never reads as revenue
+              and never disappears either. */}
+          <section className="rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6">
+            <div className="flex items-baseline justify-between gap-4">
+              <h2 className="text-lg font-bold tracking-tight">Безплатни билети</h2>
+              <Link href="/admin/izdai" className="text-xs font-semibold text-[#146455] underline underline-offset-2">Издай</Link>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-4xl font-black tracking-tight">{d.ticketsComped}</span>
+              <span className="text-sm text-[#0b2a22]/55">{d.ticketsComped === 1 ? "билет" : "билета"} · не се броят като продажби, заемат места</span>
+            </div>
+            {d.compedByTier.length > 0 && (
+              <ul className="mt-3 flex flex-wrap gap-2">
+                {d.compedByTier.map((t) => (
+                  <li key={t.id} className="rounded-full bg-[#e7f6f1] px-3 py-1 text-xs font-semibold text-[#0b2a22]">
+                    {t.name} · {t.count}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
 
           <section className="relative overflow-hidden rounded-3xl bg-[#0b2a22] p-6 text-white">
             <div aria-hidden className="pointer-events-none absolute -right-16 -top-10 h-56 w-56 rounded-full border-[18px] border-[#146455]/50" />

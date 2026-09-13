@@ -3,7 +3,7 @@ import "server-only";
 import { desc, eq, sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
-import { SOLD } from "@/lib/sold";
+import { SALE } from "@/lib/sold";
 import { budgets, deckLinks, expenses, orders } from "@/lib/db/schema";
 import { CATEGORIES, EXPENSE_STATUS, MONEY, TIERS, categoryLabel, type CategoryId, type ExpenseStatus } from "@/lib/finance-options";
 import { DELIVERABLES, parseDeliverables, type DeliverableId } from "@/lib/finance-options";
@@ -88,7 +88,7 @@ export async function getFinances(): Promise<Finances> {
         n: sql<number>`count(*)::int`,
       })
       .from(orders)
-      .where(SOLD),
+      .where(SALE),
     db
       .select({
         id: deckLinks.id,

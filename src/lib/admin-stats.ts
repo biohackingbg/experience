@@ -6,7 +6,7 @@ import { getDb } from "@/lib/db";
 import { genderSplit } from "@/lib/gender";
 import { orderItems, orders, signups, tickets } from "@/lib/db/schema";
 import { PENDING_HOLD_MINUTES } from "@/lib/orders";
-import { KEPT_CENTS, SOLD } from "@/lib/sold";
+import { COMPED, KEPT_CENTS, SALE, SOLD } from "@/lib/sold";
 import { TIERS, VAT_RATE, type TierId, picksDay } from "@/lib/tickets";
 
 /**
@@ -84,6 +84,9 @@ export type DashboardData = {
   /** Bank-transfer orders still waiting for the money. */
   bankPending: number;
   ticketsSold: number;
+  /** Issued at no charge - speakers, partners, the team. Seated, not sold. */
+  ticketsComped: number;
+  compedByTier: { id: TierId; name: string; count: number }[];
   capacityTotal: number;
   /** Paid tickets in the last seven days - the pace the room is filling at. */
   soldLast7Days: number;
@@ -120,13 +123,13 @@ export async function getDashboardData(): Promise<DashboardData> {
   const sofiaDay = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia" });
   const weekDays = Array.from({ length: 7 }, (_, i) => sofiaDay.format(new Date(Date.now() - (6 - i) * 86_400_000)));
 
-  const [totals, perTierRows, dailyRows, recentRows, signupRow, last7Row, checkedInRow, daySplitRows, dayRow, oddRows, hourRows, weekdayRows, punchRows, buyerNames] =
+  const [totals, perTierRows, dailyRows, recentRows, signupRow, last7Row, checkedInRow, daySplitRows, dayRow, oddRows, hourRows, weekdayRows, punchRows, buyerNames, compedRows] =
     await Promise.all([
       db
         .select({
-          gross: sql<number>`coalesce(sum(${KEPT_CENTS}) filter (where ${SOLD}), 0)::int`,
-          vat: sql<number>`coalesce(sum(round(${orders.vatCents} * ${KEPT_CENTS}::numeric / nullif(${orders.totalCents}, 0))) filter (where ${SOLD}), 0)::int`,
-          paid: sql<number>`count(*) filter (where ${SOLD})::int`,
+          gross: sql<number>`coalesce(sum(${KEPT_CENTS}) filter (where ${SALE}), 0)::int`,
+          vat: sql<number>`coalesce(sum(round(${orders.vatCents} * ${KEPT_CENTS}::numeric / nullif(${orders.totalCents}, 0))) filter (where ${SALE}), 0)::int`,
+          paid: sql<number>`count(*) filter (where ${SALE})::int`,
           refunded: sql<number>`count(*) filter (where not ${orders.isTest} and (${orders.status} = 'refunded' or coalesce(${orders.refundedCents}, 0) >= ${orders.totalCents}))::int`,
           test: sql<number>`count(*) filter (where ${orders.isTest})::int`,
           // Still inside the seat hold - a payment may yet land.
@@ -147,7 +150,7 @@ export async function getDashboardData(): Promise<DashboardData> {
         })
         .from(orderItems)
         .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
-        .where(SOLD)
+        .where(SALE)
         .groupBy(orderItems.tierId),
 
       db
@@ -157,7 +160,7 @@ export async function getDashboardData(): Promise<DashboardData> {
           gross: sql<number>`coalesce(sum(${orders.totalCents}), 0)::int`,
         })
         .from(orders)
-        .where(sql`${SOLD} and ${orders.paidAt} is not null`)
+        .where(sql`${SALE} and ${orders.paidAt} is not null`)
         .groupBy(sql`to_char(${orders.paidAt}, 'YYYY-MM-DD')`)
         .orderBy(sql`to_char(${orders.paidAt}, 'YYYY-MM-DD')`),
 
@@ -188,7 +191,7 @@ export async function getDashboardData(): Promise<DashboardData> {
         .select({ n: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int` })
         .from(orderItems)
         .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
-        .where(sql`${SOLD} and ${orders.paidAt} > now() - interval '7 days'`),
+        .where(sql`${SALE} and ${orders.paidAt} > now() - interval '7 days'`),
 
       db
         .select({
@@ -216,7 +219,7 @@ export async function getDashboardData(): Promise<DashboardData> {
         })
         .from(orderItems)
         .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
-        .where(SOLD),
+        .where(SALE),
 
       // Paid orders that do not add up: counted as an order but with no
       // tickets or items behind them, or paid with nothing from Stripe and
@@ -255,7 +258,7 @@ export async function getDashboardData(): Promise<DashboardData> {
           count: sql<number>`count(*)::int`,
         })
         .from(orders)
-        .where(sql`${SOLD} and ${orders.paidAt} is not null`)
+        .where(sql`${SALE} and ${orders.paidAt} is not null`)
         .groupBy(sql`extract(hour from ${orders.paidAt} at time zone 'Europe/Sofia')`),
 
       db
@@ -264,7 +267,7 @@ export async function getDashboardData(): Promise<DashboardData> {
           count: sql<number>`count(*)::int`,
         })
         .from(orders)
-        .where(sql`${SOLD} and ${orders.paidAt} is not null`)
+        .where(sql`${SALE} and ${orders.paidAt} is not null`)
         .groupBy(sql`extract(isodow from ${orders.paidAt} at time zone 'Europe/Sofia')`),
 
       // Day and hour together: the pattern reads down the columns, a single
@@ -276,7 +279,7 @@ export async function getDashboardData(): Promise<DashboardData> {
           count: sql<number>`count(*)::int`,
         })
         .from(orders)
-        .where(sql`${SOLD} and ${orders.paidAt} > now() - interval '21 days'`)
+        .where(sql`${SALE} and ${orders.paidAt} > now() - interval '21 days'`)
         .groupBy(
           sql`to_char(${orders.paidAt} at time zone 'Europe/Sofia', 'YYYY-MM-DD')`,
           sql`extract(hour from ${orders.paidAt} at time zone 'Europe/Sofia')`,
@@ -284,6 +287,14 @@ export async function getDashboardData(): Promise<DashboardData> {
 
       // Only the names, for the aggregate estimate of who is buying.
       db.select({ name: orders.name }).from(orders).where(SOLD),
+
+      // Tickets issued at no charge: seated, not sold. Their own card.
+      db
+        .select({ tierId: tickets.tierId, count: sql<number>`count(*)::int` })
+        .from(tickets)
+        .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
+        .where(COMPED)
+        .groupBy(tickets.tierId),
     ]);
 
   // Items for the listed orders, fetched separately and stitched in JS. A
@@ -360,6 +371,8 @@ export async function getDashboardData(): Promise<DashboardData> {
     testOrders: totals[0]?.test ?? 0,
     bankPending: totals[0]?.bank ?? 0,
     ticketsSold: perTier.reduce((sum, t) => sum + t.sold, 0),
+    ticketsComped: compedRows.reduce((sum, r) => sum + r.count, 0),
+    compedByTier: TIERS.map((tier) => ({ id: tier.id, name: tier.name, count: compedRows.find((r) => r.tierId === tier.id)?.count ?? 0 })).filter((t) => t.count > 0),
     capacityTotal: TIERS.reduce((sum, t) => sum + t.capacity, 0),
     soldLast7Days: last7Row[0]?.n ?? 0,
     soldToday: dayRow[0]?.today ?? 0,

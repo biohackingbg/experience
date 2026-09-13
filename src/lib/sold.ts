@@ -15,3 +15,14 @@ export const SOLD = sql`${orders.status} = 'paid' and not ${orders.isTest} and (
 
 /** Money actually kept on a sold order, after any partial refund. */
 export const KEPT_CENTS = sql<number>`(${orders.totalCents} - coalesce(${orders.refundedCents}, 0))`;
+
+/**
+ * A sale, as opposed to a seat: a sold order that money changed hands for.
+ * A ticket issued at no charge - a speaker's, a partner's, the team's own -
+ * admits a person and takes a seat, but it is not a sale, and counting it as
+ * one would flatter every number the team steers by.
+ */
+export const SALE = sql`${SOLD} and ${orders.totalCents} > 0`;
+
+/** The other half: sold, seated, and free. */
+export const COMPED = sql`${SOLD} and ${orders.totalCents} = 0`;

@@ -5,7 +5,7 @@ import { desc, eq, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { orderItems, orders, promoCodes } from "@/lib/db/schema";
 import { PENDING_HOLD_MINUTES } from "@/lib/orders-const";
-import { SOLD } from "@/lib/sold";
+import { SALE } from "@/lib/sold";
 
 /**
  * Discount codes, resolved against the gross the buyer is about to pay.
@@ -94,7 +94,7 @@ export type PromoRow = {
 
 export async function listPromos(): Promise<PromoRow[]> {
   const db = getDb();
-  const paidWithCode = sql`${orders.promoCode} is not null and ${SOLD}`;
+  const paidWithCode = sql`${orders.promoCode} is not null and ${SALE}`;
   const [codes, usageRows, ticketRows] = await Promise.all([
     db.select().from(promoCodes).orderBy(desc(promoCodes.createdAt)),
     db

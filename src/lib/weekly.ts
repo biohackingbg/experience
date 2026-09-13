@@ -5,7 +5,7 @@ import { sql } from "drizzle-orm";
 import { getDashboardData } from "@/lib/admin-stats";
 import { getDb } from "@/lib/db";
 import { orderItems, orders, siteViews } from "@/lib/db/schema";
-import { SOLD } from "@/lib/sold";
+import { SALE } from "@/lib/sold";
 import { formatPrice } from "@/lib/tickets";
 
 /**
@@ -22,7 +22,7 @@ export type Weekly = { subject: string; text: string; html: string };
 export async function buildWeekly(): Promise<Weekly> {
   const db = getDb();
   const window = (from: number, to: number) =>
-    sql`${SOLD} and ${orders.paidAt} >= ${weekAgo(from)} and ${orders.paidAt} < ${weekAgo(to)}`;
+    sql`${SALE} and ${orders.paidAt} >= ${weekAgo(from)} and ${orders.paidAt} < ${weekAgo(to)}`;
 
   const [d, [thisWeek], [lastWeek], [visits]] = await Promise.all([
     getDashboardData(),
@@ -48,7 +48,7 @@ export async function buildWeekly(): Promise<Weekly> {
       .where(sql`${siteViews.createdAt} >= ${weekAgo(1)}`),
   ]);
 
-  const seatsLeft = Math.max(0, d.capacityTotal - d.ticketsSold);
+  const seatsLeft = Math.max(0, d.capacityTotal - d.ticketsSold - d.ticketsComped);
   const perWeekNeeded = (seatsLeft / d.daysToEvent) * 7;
   const change = lastWeek.tickets === 0 ? null : Math.round(((thisWeek.tickets - lastWeek.tickets) / lastWeek.tickets) * 100);
   const weeksLeft = Math.max(1, Math.round(d.daysToEvent / 7));
