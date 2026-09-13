@@ -8,6 +8,29 @@ const INK = "#02251f";
 const LIME = "#cef870";
 const TEAL = "#5fd4c0";
 
+/**
+ * The event's name as a solid tag rather than loose type on the picture: a
+ * pale photograph, or a face near the top, swallowed the old white text and
+ * no scrim short of a black bar would have saved it.
+ */
+const Tag = ({ size, pad }: { size: number; pad: number }) => (
+  <div
+    style={{
+      display: "flex",
+      background: "rgba(2,37,31,0.88)",
+      color: LIME,
+      fontWeight: 700,
+      fontSize: size,
+      letterSpacing: Math.round(size * 0.28),
+      textTransform: "uppercase",
+      padding: `${Math.round(pad * 0.55)}px ${pad}px ${Math.round(pad * 0.55)}px ${pad + Math.round(size * 0.28)}px`,
+      borderRadius: 999,
+    }}
+  >
+    Sofia Life Summit
+  </div>
+);
+
 /** The shapes a card gets posted in. */
 const SIZES = {
   portrait: { width: 1080, height: 1350 },
@@ -82,8 +105,8 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
             <div style={{ display: "flex", width: 420, height: h, background: "#0a3229" }} />
           )}
           <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", flexGrow: 1, padding: "54px 60px" }}>
-            <div style={{ display: "flex", fontSize: 20, letterSpacing: 6, color: "rgba(255,255,255,0.7)", textTransform: "uppercase" }}>
-              [ Sofia Life Summit ]
+            <div style={{ display: "flex" }}>
+              <Tag size={18} pad={22} />
             </div>
             <div style={{ display: "flex", flexDirection: "column" }}>
               <div style={{ display: "flex", fontSize: 18, letterSpacing: 6, color: LIME, textTransform: "uppercase", marginBottom: 10 }}>
@@ -127,30 +150,16 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
             measured, a stop at 72% still showed the bare photograph - while
             flat bands land exactly where they are put. Enough of them, on a
             curve, and the steps stop being visible. */}
-        <div style={{ position: "absolute", left: 0, right: 0, top: 0, height: "16%", display: "flex", flexDirection: "column" }}>
-          {Array.from({ length: 10 }, (_, i) => (
-            <div key={i} style={{ display: "flex", flexGrow: 1, background: `rgba(2,37,31,${(0.45 * (1 - i / 9) ** 1.6).toFixed(3)})` }} />
-          ))}
-        </div>
+        {/* No band at the top any more: the tag carries its own ground. */}
         <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: "62%", display: "flex", flexDirection: "column" }}>
-          {Array.from({ length: 40 }, (_, i) => (
-            <div key={i} style={{ display: "flex", flexGrow: 1, background: `rgba(2,37,31,${Math.min(1, ((i + 1) / 40) ** 1.5 * 1.06).toFixed(3)})` }} />
+          {Array.from({ length: 96 }, (_, i) => (
+            <div key={i} style={{ display: "flex", flexGrow: 1, background: `rgba(2,37,31,${Math.min(1, ((i + 1) / 96) ** 1.5 * 1.06).toFixed(3)})` }} />
           ))}
         </div>
 
         <div style={{ position: "relative", display: "flex", flexDirection: "column", justifyContent: "space-between", width: "100%", height: "100%", padding: pad }}>
           <div style={{ display: "flex", alignItems: "flex-start" }}>
-            <div
-              style={{
-                display: "flex",
-                fontSize: Math.round(w * 0.028),
-                letterSpacing: Math.round(w * 0.008),
-                color: "rgba(255,255,255,0.85)",
-                textTransform: "uppercase",
-              }}
-            >
-              [ Sofia Life Summit ]
-            </div>
+            <Tag size={Math.round(w * 0.026)} pad={Math.round(w * 0.028)} />
           </div>
 
           <div style={{ display: "flex", flexDirection: "column" }}>
