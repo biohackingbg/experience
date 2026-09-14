@@ -135,9 +135,8 @@ export default async function DeckPage() {
               <table className="w-full min-w-[72rem] text-left text-sm">
                 <thead>
                   <tr className="border-b border-bh-ink/10 font-mono text-[0.65rem] uppercase tracking-[0.15em] text-bh-ink/50">
-                    <th className="px-5 py-3 font-medium">За кого</th>
+                    <th className="sticky left-0 z-10 border-r border-bh-ink/10 bg-bh-cloud px-4 py-3 font-medium">За кого</th>
                     <th className="px-5 py-3 font-medium">Етап · води · бележки</th>
-                    <th className="px-5 py-3 font-medium">Линк</th>
                     <th className="px-5 py-3 font-medium">Отваряния</th>
                     <th className="px-5 py-3 font-medium">Последно</th>
                     <th className="px-5 py-3 font-medium">Създаден</th>
@@ -156,7 +155,32 @@ export default async function DeckPage() {
                         // the name stays level with the fields that belong to it.
                         className={`border-b border-bh-ink/8 last:border-0 [&>td]:align-top ${off ? "text-bh-ink/45" : ""}`}
                       >
-                        <td className={`px-5 py-3 font-medium ${off ? "" : "text-bh-ink"}`}>{l.label}</td>
+                        <td className={`sticky left-0 z-10 border-r border-bh-ink/10 bg-bh-cloud px-4 py-3 font-medium ${off ? "" : "text-bh-ink"}`}>
+                          {/* Name, token and the copy button all in one sticky
+                              column: a table with `table-layout: auto` sizes
+                              a column to its widest content regardless of a
+                              width class on the td itself, so what actually
+                              holds this one to a size a phone can show without
+                              scrolling is the explicit width on each child -
+                              the thing a link created on a phone needs to be
+                              usable at all is the copy button staying on
+                              screen next to it, not split into a column of
+                              its own that scrolls away. */}
+                          <span className="block w-32 truncate" title={l.label}>
+                            {l.label}
+                          </span>
+                          <div className="mt-1.5 flex w-32 flex-col items-start gap-1 font-normal">
+                            <a
+                              href={url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="max-w-full truncate font-mono text-[0.68rem] text-bh-ink/70 underline-offset-2 hover:underline"
+                            >
+                              …/{l.token}
+                            </a>
+                            <CopyLink url={url} />
+                          </div>
+                        </td>
                         <td className="px-5 py-3 align-top">
                           <PipelineEditor
                             id={l.id}
@@ -175,19 +199,6 @@ export default async function DeckPage() {
                             stages={STAGES}
                             action={updateDeckLink}
                           />
-                        </td>
-                        <td className="px-5 py-3">
-                          <div className="flex items-center gap-2">
-                            <a
-                              href={url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="max-w-[9rem] truncate font-mono text-xs text-bh-ink/70 underline-offset-2 hover:underline"
-                            >
-                              …/{l.token}
-                            </a>
-                            <CopyLink url={url} />
-                          </div>
                         </td>
                         <td className="px-5 py-3 align-top">
                           {l.views === 0 ? (

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { logout } from "@/app/admin/actions";
 import type { Access } from "@/lib/access";
 
+import { MobileMenu } from "./MobileMenu";
 import { NavLink } from "./NavLink";
 
 /**
@@ -127,11 +128,16 @@ export function AdminShell({ access, children }: { access: Access; children: Rea
             ) : (
               <div className="flex-1 text-sm text-[#0b2a22]/60">Sofia Life Summit · админ</div>
             )}
-            <div className="flex items-center gap-3 lg:hidden">
-              {menu.slice(0, 4).map((m) => (
-                <Link key={m.href} href={m.href} className="text-xs font-semibold text-[#0b2a22]/70">{m.label}</Link>
-              ))}
-            </div>
+            <MobileMenu
+              menu={menu}
+              admin={admin}
+              label={access.label}
+              subtitle={admin ? "hi@biohacking.bg" : `достъп до ${menu.length} ${menu.length === 1 ? "страница" : "страници"}`}
+              logoutAction={logout}
+              keyIcon={I.key}
+              globeIcon={I.globe}
+              outIcon={I.out}
+            />
             <div className="hidden items-center gap-3 sm:flex">
               {admin ? (
                 // eslint-disable-next-line @next/next/no-img-element
