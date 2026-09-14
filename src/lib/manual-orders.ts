@@ -7,6 +7,8 @@ import { sendGaPurchase } from "@/lib/ga";
 import { getDb } from "@/lib/db";
 import { orderItems, orders } from "@/lib/db/schema";
 import { sendProformaEmail, sendTicketEmail } from "@/lib/email";
+import { MARKETING_CONSENT_VERSION } from "@/lib/marketing-consent";
+import { sendPurchase } from "@/lib/meta-pixel";
 import { PENDING_HOLD_MINUTES } from "@/lib/orders-const";
 import { alertSale } from "@/lib/sale-alert";
 import { markOrderPaid } from "@/lib/orders";
@@ -201,6 +203,18 @@ export async function markBankOrderPaid(reference: string): Promise<"ok" | "not_
     // A bank transfer is a sale like any other; without this the money is
     // missing from the reports and nobody can tell why the totals differ.
     await sendGaPurchase(o.id);
+    if (paid.order.marketingConsentVersion === MARKETING_CONSENT_VERSION) {
+      await sendPurchase({
+        eventId: paid.order.reference,
+        email: paid.order.email,
+        value: paid.order.totalCents / 100,
+        currency: "EUR",
+        fbp: paid.order.metaFbp,
+        fbc: paid.order.metaFbc,
+        clientIp: paid.order.metaClientIp,
+        userAgent: paid.order.metaUserAgent,
+      });
+    }
     await sendTicketEmail({
       to: paid.order.email,
       buyerName: paid.order.name,

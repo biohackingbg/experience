@@ -28,6 +28,19 @@ function safeMetaBrowserId(value?: string): string | null {
   return clean && clean.startsWith("fb.") && clean.length <= 500 ? clean : null;
 }
 
+/** IPv4, or IPv6 with its own colons - either way, not whatever free text a
+    spoofed header could carry, and not the "unknown" the caller falls back
+    to when there is no forwarded-for header at all. */
+function safeClientIp(value?: string): string | null {
+  const clean = value?.trim();
+  return clean && clean.length <= 45 && /^[0-9a-fA-F.:]+$/.test(clean) ? clean : null;
+}
+
+function safeUserAgent(value?: string): string | null {
+  const clean = value?.trim();
+  return clean && clean.length <= 500 ? clean : null;
+}
+
 /** GA writes plain numbers and dots - anything else did not come from GA. */
 function safeGaId(value?: string): string | null {
   const clean = value?.trim();
@@ -53,6 +66,8 @@ export type CreateOrderInput = {
   gaSessionId?: string;
   metaFbp?: string;
   metaFbc?: string;
+  metaClientIp?: string;
+  metaUserAgent?: string;
   /** A discount code as typed; resolved here, against the real gross. */
   promoCode?: string;
   lang?: "bg" | "en";
@@ -163,6 +178,8 @@ export async function createPendingOrder(
         gaSessionId: safeGaId(input.gaSessionId),
         metaFbp: safeMetaBrowserId(input.metaFbp),
         metaFbc: safeMetaBrowserId(input.metaFbc),
+        metaClientIp: safeClientIp(input.metaClientIp),
+        metaUserAgent: safeUserAgent(input.metaUserAgent),
         promoCode,
         discountCents,
         lang: input.lang ?? "bg",
@@ -212,6 +229,8 @@ export type PaidOrderSummary = {
     marketingConsentVersion: string | null;
     metaFbp: string | null;
     metaFbc: string | null;
+    metaClientIp: string | null;
+    metaUserAgent: string | null;
   };
 };
 
@@ -240,6 +259,8 @@ export async function markOrderPaid(
         marketingConsentVersion: orders.marketingConsentVersion,
         metaFbp: orders.metaFbp,
         metaFbc: orders.metaFbc,
+        metaClientIp: orders.metaClientIp,
+        metaUserAgent: orders.metaUserAgent,
       });
 
     if (updated.length === 0) return { issued: 0 };
@@ -295,6 +316,8 @@ export async function markOrderPaid(
         marketingConsentVersion: order.marketingConsentVersion,
         metaFbp: order.metaFbp,
         metaFbc: order.metaFbc,
+        metaClientIp: order.metaClientIp,
+        metaUserAgent: order.metaUserAgent,
         tickets: rows.map((row) => ({
           code: row.code,
           tierName: getTier(row.tierId)?.name ?? row.tierId,

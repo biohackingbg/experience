@@ -160,6 +160,11 @@ export async function startCheckout(
     gaSessionId: gaSessionIdFrom(cookieStore.getAll()),
     metaFbp: marketingConsent ? cookieStore.get("_fbp")?.value : undefined,
     metaFbc: marketingConsent ? cookieStore.get("_fbc")?.value : undefined,
+    // Meta's own guidance ranks these among the parameters worth the most to
+    // a Conversions API match; captured here, at the one point in the whole
+    // flow where there is a real visitor and a real request to read them from.
+    metaClientIp: marketingConsent && ip !== "unknown" ? ip : undefined,
+    metaUserAgent: marketingConsent ? head.get("user-agent") ?? undefined : undefined,
     termsText: `${PURCHASE_TERMS_VERSION}${lang === "en" ? "-en" : ""}: ${lang === "en" ? PURCHASE_TERMS_TEXT_EN : PURCHASE_TERMS_TEXT}`,
   });
 
@@ -199,6 +204,8 @@ export async function startCheckout(
           currency: "EUR",
           fbp: paid.order.metaFbp,
           fbc: paid.order.metaFbc,
+          clientIp: paid.order.metaClientIp,
+          userAgent: paid.order.metaUserAgent,
         });
       }
       await sendTicketEmail({

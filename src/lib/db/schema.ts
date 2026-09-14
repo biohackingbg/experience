@@ -150,6 +150,14 @@ export const orders = pgTable(
     gaSessionId: text("ga_session_id"),
     metaFbp: text("meta_fbp"),
     metaFbc: text("meta_fbc"),
+    /**
+     * The buyer's IP and browser at checkout, read the same way and under
+     * the same consent as fbp/fbc. Meta's own match-quality guidance ranks
+     * these two among the parameters worth the most to a Conversions API
+     * event - without them, Purchase still arrives, but matches worse.
+     */
+    metaClientIp: text("meta_client_ip"),
+    metaUserAgent: text("meta_user_agent"),
 
     /**
      * The promo code used, and what it took off the gross. The order's

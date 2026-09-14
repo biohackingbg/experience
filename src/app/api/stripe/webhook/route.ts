@@ -109,6 +109,8 @@ export async function POST(request: Request) {
               currency: "EUR",
               fbp: order.metaFbp,
               fbc: order.metaFbc,
+              clientIp: order.metaClientIp,
+              userAgent: order.metaUserAgent,
             });
           }
           const sent = await sendTicketEmail({
