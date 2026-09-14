@@ -108,9 +108,12 @@ export default function RootLayout({
         ) : null}
         <ViewTracker />
         {children}
-        {/* Even after an id is connected, nothing loads until the visitor
-            makes an explicit marketing choice - and the banner that asks for
-            it appears as soon as any tag is connected. */}
+        {/* Meta and GA4's own scripts still wait on an explicit marketing
+            choice - the banner that asks for it appears as soon as any of
+            the three below is connected. GTM's container is the one
+            exception (see GoogleTagManager): it loads for everyone, and
+            leaves the actual gating to Consent Mode and to each tag inside
+            it. */}
         {gaId() ? (
           <script
             dangerouslySetInnerHTML={{
