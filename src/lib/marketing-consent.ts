@@ -3,7 +3,7 @@
  * can ask visitors again instead of silently reusing an older choice.
  */
 export const MARKETING_CONSENT_COOKIE = "sls_marketing_consent";
-export const MARKETING_CONSENT_VERSION = "meta-ga-v2-2026-09-10";
+export const MARKETING_CONSENT_VERSION = "meta-ga-gtm-v3-2026-09-14";
 export const MARKETING_CONSENT_MAX_AGE = 60 * 60 * 24 * 180;
 
 export type MarketingConsent = "granted" | "denied";

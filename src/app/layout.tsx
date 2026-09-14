@@ -5,9 +5,11 @@ import { ViewTracker } from "@/components/ViewTracker";
 import { cheapestOf, getPricing, priceOf } from "@/lib/pricing";
 import { MetaPixel } from "@/components/MetaPixel";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
+import { GoogleTagManager } from "@/components/GoogleTagManager";
 import { ConsentBanner } from "@/components/ConsentBanner";
 import { pixelId } from "@/lib/meta-pixel";
 import { GA_ID_GLOBAL, gaId } from "@/lib/ga-id";
+import { GTM_ID_GLOBAL, gtmId } from "@/lib/gtm-id";
 import { META } from "@/lib/site-copy";
 import { formatPrice } from "@/lib/tickets";
 
@@ -101,9 +103,17 @@ export default function RootLayout({
             }}
           />
         ) : null}
+        {gtmId() ? (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `window.${GTM_ID_GLOBAL}=${JSON.stringify(gtmId())}`,
+            }}
+          />
+        ) : null}
         <MetaPixel id={pixelId()} />
         <GoogleAnalytics />
-        <ConsentBanner enabled={Boolean(pixelId() || gaId())} />
+        <GoogleTagManager />
+        <ConsentBanner enabled={Boolean(pixelId() || gaId() || gtmId())} />
       </body>
     </html>
   );
