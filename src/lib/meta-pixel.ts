@@ -9,8 +9,15 @@ import { createHash } from "node:crypto";
  * and checkout also require explicit marketing consent; callers of the server
  * purchase function must enforce the same consent before invoking it.
  */
+/**
+ * Deliberately not `NEXT_PUBLIC_META_PIXEL_ID`: that prefix has Next.js
+ * freeze the value into the build the moment it is written, wherever it is
+ * read from - a setting change would then need a rebuild nobody knows to
+ * trigger, which is exactly how a wrong id once sat here for days unnoticed.
+ * Read per request instead, the same way the analytics ids are.
+ */
 export const pixelId = () => {
-  const value = process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim();
+  const value = process.env.META_PIXEL_ID?.trim();
   return value && /^\d+$/.test(value) ? value : null;
 };
 const accessToken = () => process.env.META_CAPI_TOKEN?.trim() || null;
