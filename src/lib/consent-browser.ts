@@ -52,6 +52,17 @@ export function shouldTrack(pathname: string): boolean {
 
 export function rememberConsent(choice: MarketingConsent): void {
   document.cookie = `${encodeURIComponent(MARKETING_CONSENT_COOKIE)}=${encodeURIComponent(marketingConsentValue(choice))}; Max-Age=${MARKETING_CONSENT_MAX_AGE}; Path=/; SameSite=Lax; Secure`;
+  // Google Consent Mode: the same choice, told to Google's own tags in their
+  // own vocabulary. `gtag` here is the bootstrap stub the layout defines on
+  // every page a Google product is connected to (before this can ever run) -
+  // optional-chained because a site with only Meta connected never sets it.
+  const state = choice === "granted" ? "granted" : "denied";
+  (window as Window & { gtag?: (...args: unknown[]) => void }).gtag?.("consent", "update", {
+    ad_storage: state,
+    ad_user_data: state,
+    ad_personalization: state,
+    analytics_storage: state,
+  });
   window.dispatchEvent(new Event(CONSENT_EVENT));
 }
 

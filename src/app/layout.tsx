@@ -91,6 +91,21 @@ export default function RootLayout({
             __html: `(function(){var d=document.documentElement;try{var t=localStorage.getItem('bh-theme');if(t!=='dark'&&t!=='light'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}d.dataset.theme=t}catch(e){d.dataset.theme='light'}d.classList.add('js')})()`,
           }}
         />
+        {/* Google Consent Mode's default, set before anything Google could
+            run - which on this site is nothing at all until a visitor grants
+            it, so there is no ambiguous window for `wait_for_update` to
+            cover. Runs on every visit, whatever the choice ends up being:
+            Consent Mode has to see a denied default before it can see the
+            update rememberConsent sends once there is a real choice.
+            `gtag` is a plain dataLayer-pusher here, not the analytics script
+            - that only loads once consent is actually granted. */}
+        {gaId() || gtmId() ? (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied'});`,
+            }}
+          />
+        ) : null}
         <ViewTracker />
         {children}
         {/* Even after an id is connected, nothing loads until the visitor
