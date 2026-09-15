@@ -84,6 +84,7 @@ export default async function MarketingPage() {
                     <th className="px-3 py-2 font-medium">Платено</th>
                     <th className="px-3 py-2 font-medium">Души · 30 дни</th>
                     <th className="px-3 py-2 font-medium">Купили по линк</th>
+                    <th className="px-3 py-2 font-medium">Конверсия</th>
                     <th className="px-3 py-2 font-medium">Цена на билет</th>
                     <th className="px-3 py-2 font-medium">Върнати пари</th>
                   </tr>
@@ -97,6 +98,9 @@ export default async function MarketingPage() {
                       <td className="px-3 py-2 text-bh-ink/75">{p.visitors30}</td>
                       <td className="px-3 py-2 font-semibold text-[#0b6d61]">
                         {p.taggedTickets}{p.taggedTickets ? <span className="ml-1 text-xs font-normal text-bh-ink/55">· {formatPrice(p.taggedGrossCents)} €</span> : null}
+                      </td>
+                      <td className="px-3 py-2 text-bh-ink/75">
+                        {p.conversionRate !== null ? `${p.conversionRate}%` : "-"}
                       </td>
                       <td className="px-3 py-2 text-bh-ink/75">
                         {p.spendCents && p.taggedTickets ? `${formatPrice(Math.round(p.spendCents / p.taggedTickets))} €` : "-"}

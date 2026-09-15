@@ -39,6 +39,8 @@ export type CampaignRow = {
   taggedVisitors: number;
   taggedTickets: number;
   taggedGrossCents: number;
+  /** Conversion rate: tickets bought / people who clicked the tagged link, as %. */
+  conversionRate: number | null;
   /** Distinct people arriving from this platform in the 48h after posting. */
   windowVisitors: number;
   /** Tickets paid in the same 48h, from anywhere. */
@@ -54,6 +56,8 @@ export type PlatformSummary = {
   visitors30: number;
   taggedTickets: number;
   taggedGrossCents: number;
+  /** Conversion rate: tickets / tagged visitors on this platform. */
+  conversionRate: number | null;
 };
 
 export type Marketing = {
@@ -175,11 +179,14 @@ export async function getMarketing(): Promise<Marketing> {
 
   const list: CampaignRow[] = rows.map((c) => {
     const sales = tagged.filter((t) => c.utmCampaign && t.campaign === c.utmCampaign);
+    const taggedVisitors = c.utmCampaign ? (visitsByTag.get(c.utmCampaign) ?? 0) : 0;
+    const taggedTickets = sales.reduce((a, s) => a + s.tickets, 0);
     return {
       ...c,
-      taggedVisitors: c.utmCampaign ? (visitsByTag.get(c.utmCampaign) ?? 0) : 0,
-      taggedTickets: sales.reduce((a, s) => a + s.tickets, 0),
+      taggedVisitors,
+      taggedTickets,
       taggedGrossCents: sales.reduce((a, s) => a + s.gross, 0),
+      conversionRate: taggedVisitors > 0 ? Math.round((taggedTickets / taggedVisitors) * 10000) / 100 : null,
       windowVisitors: win.get(c.id)?.visitors ?? 0,
       windowTickets: win.get(c.id)?.tickets ?? 0,
     };
@@ -189,14 +196,17 @@ export async function getMarketing(): Promise<Marketing> {
     const mine = list.filter((c) => c.platform === p.id);
     // Sales tagged with this platform as source, whether or not the campaign code matched a row.
     const sales = tagged.filter((t) => t.source === p.id);
+    const platformTaggedVisitors = mine.reduce((a, c) => a + c.taggedVisitors, 0);
+    const platformTaggedTickets = sales.reduce((a, s) => a + s.tickets, 0);
     return {
       platform: p.id,
       label: p.label,
       items: mine.length,
       spendCents: mine.reduce((a, c) => a + c.spendCents, 0),
       visitors30: perPlatformVisits.find((v) => v.platform === p.id)?.n ?? 0,
-      taggedTickets: sales.reduce((a, s) => a + s.tickets, 0),
+      taggedTickets: platformTaggedTickets,
       taggedGrossCents: sales.reduce((a, s) => a + s.gross, 0),
+      conversionRate: platformTaggedVisitors > 0 ? Math.round((platformTaggedTickets / platformTaggedVisitors) * 10000) / 100 : null,
     };
   }).filter((p) => p.items > 0 || p.visitors30 > 0 || p.taggedTickets > 0);
 

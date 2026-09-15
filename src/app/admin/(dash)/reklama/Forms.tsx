@@ -180,6 +180,10 @@ export function CampaignItem({ c }: { c: CampaignRow }) {
           </dd>
         </div>
         <div>
+          <dt className="font-mono text-[0.6rem] uppercase tracking-[0.15em] text-bh-ink/45">Конверсия</dt>
+          <dd className="mt-0.5 font-semibold text-bh-ink">{c.conversionRate !== null ? `${c.conversionRate}%` : "-"}</dd>
+        </div>
+        <div>
           <dt className="font-mono text-[0.6rem] uppercase tracking-[0.15em] text-bh-ink/45">От {platformLabel(c.platform)} · 48 ч</dt>
           <dd className="mt-0.5 font-semibold text-bh-ink">{c.windowVisitors} души</dd>
         </div>
