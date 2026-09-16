@@ -95,6 +95,16 @@ export function DocumentForm({ partners }: { partners: PartnerOption[] }) {
 
       <div className="mt-4 rounded-2xl bg-bh-cloud p-3 ring-1 ring-bh-ink/8">
         <div className="font-mono text-[0.62rem] uppercase tracking-[0.18em] text-bh-ink/50">Какво се фактурира</div>
+        {/* Column headings, not placeholders: a placeholder disappears the
+            moment something is typed, and then the bare number box at the end
+            is anyone's guess. Hidden below sm, where the row stacks and each
+            field carries its own placeholder instead. */}
+        <div className="mt-2 hidden grid-cols-[1fr_9rem_6rem_auto] gap-2 px-3 text-xs text-bh-ink/55 sm:grid">
+          <span>Описание</span>
+          <span>Ед. цена без ДДС</span>
+          <span>Количество</span>
+          <span />
+        </div>
         {lines.map((l, i) => (
           <div key={i} className="mt-2 grid gap-2 sm:grid-cols-[1fr_9rem_6rem_auto]">
             <input
@@ -117,8 +127,8 @@ export function DocumentForm({ partners }: { partners: PartnerOption[] }) {
               value={l.qty}
               onChange={(e) => setLine(i, { qty: e.target.value })}
               inputMode="numeric"
+              placeholder="количество"
               className={field}
-              title="количество"
             />
             <button
               type="button"
@@ -138,13 +148,22 @@ export function DocumentForm({ partners }: { partners: PartnerOption[] }) {
         </button>
       </div>
 
-      <div className="mt-3 grid gap-2 sm:grid-cols-[8rem_12rem_1fr]">
-        <input name="dueDays" type="number" min={1} max={90} defaultValue={7} className={field} title="дни за плащане" />
-        <select name="lang" defaultValue="bg" className={field}>
-          <option value="bg">документ на български</option>
-          <option value="en">двуезичен (EN/BG)</option>
-        </select>
-        <input name="note" placeholder="бележка за нас (не излиза на документа)" className={field} />
+      <div className="mt-3 grid gap-2 sm:grid-cols-[11rem_13rem_1fr]">
+        <label className="text-xs text-bh-ink/55">
+          Срок за плащане (дни)
+          <input name="dueDays" type="number" min={1} max={90} defaultValue={7} className={`${field} mt-1`} />
+        </label>
+        <label className="text-xs text-bh-ink/55">
+          Език на документа
+          <select name="lang" defaultValue="bg" className={`${field} mt-1`}>
+            <option value="bg">български</option>
+            <option value="en">двуезичен (EN/BG)</option>
+          </select>
+        </label>
+        <label className="text-xs text-bh-ink/55">
+          Бележка за нас
+          <input name="note" placeholder="не излиза на документа" className={`${field} mt-1`} />
+        </label>
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
