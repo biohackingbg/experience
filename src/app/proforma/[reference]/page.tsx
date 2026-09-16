@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 
 import { ProformaDocument } from "@/components/ProformaDocument";
 import { PrintButton } from "@/components/admin/PrintButton";
+import { getDocumentProforma } from "@/lib/documents";
 import { getProforma } from "@/lib/manual-orders";
 import { checkRateLimit } from "@/lib/rate-limit";
 
@@ -17,7 +18,10 @@ export default async function ProformaPage({ params }: { params: Promise<{ refer
   const head = await headers();
   const ip = head.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   if (!checkRateLimit(`proforma:${ip}`).allowed) notFound();
-  const p = await getProforma(decodeURIComponent(reference).toUpperCase());
+  // Two kinds of proforma live at this address: a ticket order's, and one
+  // raised for something that is not a ticket. The reference says which.
+  const ref = decodeURIComponent(reference).toUpperCase();
+  const p = (await getProforma(ref)) ?? (await getDocumentProforma(ref));
   if (!p) notFound();
   return (
     <div className="bh-doc min-h-screen px-5 py-10 text-bh-ink sm:px-8 print:p-0">

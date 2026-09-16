@@ -4,6 +4,7 @@ import { inArray, sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { orderItems, orders } from "@/lib/db/schema";
+import { type DateRange, inRange, listDocumentInvoices } from "@/lib/documents";
 
 /** Everything an invoice has to print, in one read. */
 export type InvoiceData = {
@@ -20,7 +21,12 @@ export type InvoiceData = {
   totalCents: number;
   vatRateBp: number;
   currency: string;
-  items: { tierName: string; unitPriceCents: number; quantity: number }[];
+  /**
+   * `description` is set on documents that are not tickets - a sponsorship
+   * package, a fee - and is printed as it stands instead of the ticket
+   * wording. Ticket lines leave it unset and read "Билет ... - ниво".
+   */
+  items: { tierName: string; description?: string; unitPriceCents: number; quantity: number }[];
   /** Taken off the items' sum before VAT was worked out; zero for most orders. */
   discountCents: number;
   promoCode: string | null;
@@ -86,28 +92,72 @@ export async function getInvoice(reference: string): Promise<InvoiceData | null>
   return { ...row, number: row.number, issuedAt: row.issuedAt, items };
 }
 
-/** Newest first, for the admin list. */
-export async function listInvoices(limit = 200) {
+export type InvoiceListRow = {
+  number: number | null;
+  issuedAt: Date | null;
+  reference: string;
+  name: string;
+  email: string;
+  company: string | null;
+  totalCents: number;
+  discountCents: number | null;
+  promoCode: string | null;
+  refundedCents: number | null;
+  status: string;
+  creditNoteNumber: number | null;
+  /** Not a ticket order: a sponsorship or a fee, with no ticket mail behind it. */
+  isDocument: boolean;
+};
+
+/**
+ * Newest first, for the admin list - ticket invoices and the ones raised for
+ * everything else, in one run. They share a numbering sequence, so showing
+ * them apart would make the series look full of holes.
+ */
+export async function listInvoices(range?: DateRange, limit = 200): Promise<InvoiceListRow[]> {
   const db = getDb();
-  return db
-    .select({
-      number: orders.invoiceNumber,
-      issuedAt: orders.invoicedAt,
-      reference: orders.reference,
-      name: orders.name,
-      email: orders.email,
-      company: orders.invoiceCompany,
-      totalCents: orders.totalCents,
-      discountCents: orders.discountCents,
-      promoCode: orders.promoCode,
-      refundedCents: orders.refundedCents,
-      status: orders.status,
-      creditNoteNumber: orders.creditNoteNumber,
-    })
-    .from(orders)
-    .where(sql`${orders.invoiceNumber} is not null`)
-    .orderBy(sql`${orders.invoiceNumber} desc`)
-    .limit(limit);
+  const [ticketRows, documentRows] = await Promise.all([
+    db
+      .select({
+        number: orders.invoiceNumber,
+        issuedAt: orders.invoicedAt,
+        reference: orders.reference,
+        name: orders.name,
+        email: orders.email,
+        company: orders.invoiceCompany,
+        totalCents: orders.totalCents,
+        discountCents: orders.discountCents,
+        promoCode: orders.promoCode,
+        refundedCents: orders.refundedCents,
+        status: orders.status,
+        creditNoteNumber: orders.creditNoteNumber,
+      })
+      .from(orders)
+      .where(sql.join([sql`${orders.invoiceNumber} is not null`, ...inRange("invoiced_at", range)], sql` and `))
+      .orderBy(sql`${orders.invoiceNumber} desc`)
+      .limit(limit),
+    listDocumentInvoices(range),
+  ]);
+
+  const merged: InvoiceListRow[] = [
+    ...ticketRows.map((r) => ({ ...r, isDocument: false })),
+    ...documentRows.map((d) => ({
+      number: d.number,
+      issuedAt: d.issuedAt,
+      reference: d.reference,
+      name: d.buyerName,
+      email: d.buyerEmail,
+      company: d.company,
+      totalCents: d.totalCents,
+      discountCents: 0,
+      promoCode: null,
+      refundedCents: null,
+      status: d.status,
+      creditNoteNumber: null,
+      isDocument: true,
+    })),
+  ];
+  return merged.sort((a, b) => (b.number ?? 0) - (a.number ?? 0)).slice(0, limit);
 }
 
 /**
@@ -119,9 +169,10 @@ export type InvoiceExportRow = InvoiceData & {
   status: string;
   refundedCents: number | null;
   refundedAt: Date | null;
+  isDocument: boolean;
 };
 
-export async function getAllInvoices(): Promise<InvoiceExportRow[]> {
+export async function getAllInvoices(range?: DateRange): Promise<InvoiceExportRow[]> {
   const db = getDb();
   const rows = await db
     .select({
@@ -150,10 +201,16 @@ export async function getAllInvoices(): Promise<InvoiceExportRow[]> {
       paymentMethod: orders.paymentMethod,
     })
     .from(orders)
-    .where(sql`${orders.invoiceNumber} is not null and ${orders.invoicedAt} is not null`)
+    .where(
+      sql.join(
+        [sql`${orders.invoiceNumber} is not null`, sql`${orders.invoicedAt} is not null`, ...inRange("invoiced_at", range)],
+        sql` and `,
+      ),
+    )
     .orderBy(sql`${orders.invoiceNumber} asc`);
 
-  if (rows.length === 0) return [];
+  const documentRows = await listDocumentInvoices(range);
+  if (rows.length === 0) return documentRows;
 
   const items = await db
     .select({
@@ -172,10 +229,14 @@ export async function getAllInvoices(): Promise<InvoiceExportRow[]> {
     byOrder.set(it.orderId, arr);
   }
 
-  return rows.map(({ id, ...r }) => ({
+  const ticketRows: InvoiceExportRow[] = rows.map(({ id, ...r }) => ({
     ...r,
     number: r.number as number,
     issuedAt: r.issuedAt as Date,
     items: byOrder.get(id) ?? [],
+    isDocument: false,
   }));
+
+  // One ascending run, the way the series was drawn.
+  return [...ticketRows, ...documentRows].sort((a, b) => a.number - b.number);
 }

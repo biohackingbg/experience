@@ -149,8 +149,14 @@ function Lines({ inv, lang, dim, sign }: { inv: InvoiceData; lang: Lang; dim: st
           {inv.items.map((item) => (
             <tr key={item.tierName} className="border-t border-bh-ink/8 align-top">
               <td className="py-3 pr-4">
-                {label(lang, "ticket")} - {item.tierName}
-                <span className="block text-xs text-bh-ink/50">{label(lang, "venue")}</span>
+                {item.description ? (
+                  item.description
+                ) : (
+                  <>
+                    {label(lang, "ticket")} - {item.tierName}
+                    <span className="block text-xs text-bh-ink/50">{label(lang, "venue")}</span>
+                  </>
+                )}
               </td>
               <td className="py-3 text-right tabular-nums">{formatPrice(item.unitPriceCents)}</td>
               <td className="py-3 text-right tabular-nums">

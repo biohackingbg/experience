@@ -45,6 +45,7 @@ const MENU = [
   { page: "podgotovka" as const, href: "/admin/podgotovka", label: "Подготовка", icon: I.check },
   { page: "prezentaciya" as const, href: "/admin/prezentaciya", label: "Презентация", icon: I.deck },
   { page: "fakturi" as const, href: "/admin/fakturi", label: "Фактури", icon: I.file },
+  { page: "dokumenti" as const, href: "/admin/dokumenti", label: "Проформи (спонсори)", icon: I.wallet },
   { page: "zapisvaniya" as const, href: "/admin/zapisvaniya", label: "Записвания", icon: I.list },
   { page: "pisma" as const, href: "/admin/pisma", label: "Писма", icon: I.mail },
   { page: "reklama" as const, href: "/admin/reklama", label: "Реклама", icon: I.mega },

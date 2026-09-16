@@ -3,6 +3,7 @@ export const PAGES = [
   { id: "tablo", label: "Табло (продажби)", href: "/admin", sensitive: true },
   { id: "finansi", label: "Финанси", href: "/admin/finansi", sensitive: true },
   { id: "fakturi", label: "Фактури", href: "/admin/fakturi", sensitive: true },
+  { id: "dokumenti", label: "Проформи и фактури (не билети)", href: "/admin/dokumenti", sensitive: true },
   { id: "zapisvaniya", label: "Записвания", href: "/admin/zapisvaniya", sensitive: true },
   { id: "pisma", label: "Писма", href: "/admin/pisma", sensitive: true },
   { id: "poseshteniya", label: "Посещения", href: "/admin/poseshteniya", sensitive: false },

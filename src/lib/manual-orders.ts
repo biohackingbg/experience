@@ -255,7 +255,8 @@ export type Proforma = {
   totalCents: number;
   vatRateBp: number;
   currency: string;
-  items: { tierName: string; unitPriceCents: number; quantity: number }[];
+  /** Set on non-ticket documents; printed instead of the ticket wording. */
+  items: { tierName: string; description?: string; unitPriceCents: number; quantity: number }[];
   paid: boolean;
   bank: BankDetails;
 };

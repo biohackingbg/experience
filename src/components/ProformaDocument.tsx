@@ -55,7 +55,13 @@ export function ProformaDocument({ p }: { p: Proforma }) {
         <tbody>
           {p.items.map((it) => (
             <tr key={it.tierName} className="border-t border-bh-ink/8 align-top">
-              <td className="py-3 pr-4">Билет за Sofia Life Summit - {it.tierName}<span className="block text-xs text-bh-ink/50">07-08 ноември 2026, Гранд Хотел Милениум, София</span></td>
+              <td className="py-3 pr-4">
+                {it.description ? (
+                  it.description
+                ) : (
+                  <>Билет за Sofia Life Summit - {it.tierName}<span className="block text-xs text-bh-ink/50">07-08 ноември 2026, Гранд Хотел Милениум, София</span></>
+                )}
+              </td>
               <td className="py-3 text-right tabular-nums">{formatPrice(it.unitPriceCents)}</td>
               <td className="py-3 text-right tabular-nums">{it.quantity}</td>
               <td className="py-3 text-right tabular-nums">{formatPrice(it.unitPriceCents * it.quantity)}</td>

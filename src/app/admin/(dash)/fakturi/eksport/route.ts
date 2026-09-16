@@ -31,10 +31,16 @@ function bgDate(d: Date | null): string {
  * The full invoice run as CSV - one row per invoice, for the accountant.
  * Guarded here too: a route handler is its own entry point.
  */
-export async function GET() {
+/** YYYY-MM-DD or nothing: anything else is ignored rather than guessed at. */
+const day = (v: string | null) => (v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : undefined);
+
+export async function GET(request: Request) {
   if (!(await canAccess("fakturi"))) return new NextResponse("Няма достъп.", { status: 403 });
 
-  const rows = await getAllInvoices();
+  const params = new URL(request.url).searchParams;
+  const from = day(params.get("ot"));
+  const to = day(params.get("do"));
+  const rows = await getAllInvoices({ from, to });
   const header = [
     "Номер",
     "Дата",
@@ -56,6 +62,7 @@ export async function GET() {
     "Дата на връщане",
     "Кредитно известие №",
     "КИ дата",
+    "Вид",
   ];
   const lines = rows.map((r) =>
     [
@@ -79,12 +86,15 @@ export async function GET() {
       bgDate(r.refundedAt),
       r.creditNoteNumber ? invoiceNo(r.creditNoteNumber) : "",
       bgDate(r.creditNotedAt),
+      r.isDocument ? "услуга / спонсорство" : "билети",
     ]
       .map(cell)
       .join(SEP),
   );
 
-  const stamp = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia" }).format(new Date());
+  // The file says which period it holds, so three exports in a folder are
+  // still tellable apart a month later.
+  const stamp = from || to ? `${from ?? "nachalo"}_${to ?? "dnes"}` : new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia" }).format(new Date());
   const body = BOM + [header.map(cell).join(SEP), ...lines].join("\r\n") + "\r\n";
 
   return new NextResponse(body, {

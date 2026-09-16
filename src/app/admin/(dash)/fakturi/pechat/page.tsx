@@ -18,10 +18,17 @@ export const dynamic = "force-dynamic";
  * PDF" produces a single file with the whole run. No server-side PDF engine
  * needed, and the document is the very same component the buyer sees.
  */
-export default async function PrintAllInvoicesPage() {
+const day = (v: string | undefined) => (v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : undefined);
+
+export default async function PrintAllInvoicesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ot?: string; do?: string }>;
+}) {
   await requireAccess("fakturi");
 
-  const rows = await getAllInvoices();
+  const sp = await searchParams;
+  const rows = await getAllInvoices({ from: day(sp.ot), to: day(sp.do) });
 
   return (
     <div className="bh-doc min-h-screen px-5 py-10 text-bh-ink sm:px-8 print:p-0">

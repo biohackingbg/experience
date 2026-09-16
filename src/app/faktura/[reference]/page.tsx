@@ -7,6 +7,7 @@ import { InvoiceDocument } from "@/components/InvoiceDocument";
 import { isAdmin } from "@/lib/admin-auth";
 import type { Lang } from "@/lib/i18n";
 import { PrintButton } from "./PrintButton";
+import { getDocumentInvoice } from "@/lib/documents";
 import { getInvoice } from "@/lib/invoices";
 import { checkRateLimit } from "@/lib/rate-limit";
 
@@ -37,7 +38,10 @@ export default async function InvoicePage({
   const ip = head.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   if (!checkRateLimit(`faktura:${ip}`).allowed) notFound();
 
-  const inv = await getInvoice(decodeURIComponent(reference).toUpperCase());
+  // A ticket order's invoice, or one raised for something that is not a
+  // ticket - both are numbered from the same run and print the same sheet.
+  const ref = decodeURIComponent(reference).toUpperCase();
+  const inv = (await getInvoice(ref)) ?? (await getDocumentInvoice(ref));
   if (!inv) notFound();
 
   // The same page serves the buyer and the team. The buyer's way back is

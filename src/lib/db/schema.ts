@@ -350,6 +350,67 @@ export const deckLinks = pgTable(
 );
 
 /**
+ * Proformas and invoices for everything that is not a ticket: a sponsorship
+ * package, a workshop fee, a service.
+ *
+ * Deliberately not an `orders` row. An order's quantity mints a ticket, takes
+ * a seat out of a tier's capacity and counts as a sale in every report and in
+ * the advert events - none of which a sponsorship invoice should ever do. The
+ * one thing it does share is `invoice_number_seq`, because the numbering run
+ * has to be whole: фактури, кредитни известия and these sit in one series.
+ */
+export const documents = pgTable("documents", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  /** Own prefix, so a lookup can tell a document from an order's reference. */
+  reference: text("reference").notNull().unique(),
+  /** proforma until the money lands, invoice after - one row, two stages. */
+  kind: text("kind").notNull().default("proforma"),
+  /** open | paid | cancelled */
+  status: text("status").notNull().default("open"),
+  /** The partner pipeline row this was raised against, when there is one. */
+  deckLinkId: uuid("deck_link_id").references(() => deckLinks.id, { onDelete: "set null" }),
+
+  buyerName: text("buyer_name").notNull(),
+  buyerEmail: text("buyer_email").notNull(),
+  company: text("company"),
+  vatNumber: text("vat_number"),
+  address: text("address"),
+
+  subtotalCents: integer("subtotal_cents").notNull(),
+  vatCents: integer("vat_cents").notNull(),
+  totalCents: integer("total_cents").notNull(),
+  vatRateBp: integer("vat_rate_bp").notNull(),
+  currency: text("currency").notNull().default("EUR"),
+
+  /** Drawn from invoice_number_seq, and only when the document is paid. */
+  invoiceNumber: bigint("invoice_number", { mode: "number" }),
+  invoicedAt: timestamp("invoiced_at", { withTimezone: true }),
+  /** What the proforma asks to be paid by. */
+  dueAt: timestamp("due_at", { withTimezone: true }),
+
+  note: text("note"),
+  lang: text("lang").notNull().default("bg"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }),
+});
+
+export const documentLines = pgTable(
+  "document_lines",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    documentId: uuid("document_id")
+      .notNull()
+      .references(() => documents.id, { onDelete: "cascade" }),
+    /** Free text - this is the whole point of these documents. */
+    description: text("description").notNull(),
+    unitPriceCents: integer("unit_price_cents").notNull(),
+    quantity: integer("quantity").notNull(),
+    position: integer("position").notNull().default(0),
+  },
+  (table) => [index("document_lines_document_id_idx").on(table.documentId)],
+);
+
+/**
  * Whether each thing a partner promised has arrived. One row per
  * (partner, kind), created the first time someone ticks or dates it; a
  * promise with no row is simply "waiting, no date". The promise itself
