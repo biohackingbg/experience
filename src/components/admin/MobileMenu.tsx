@@ -18,7 +18,7 @@ import { NavLink } from "./NavLink";
  * sheet after a tap - the pathname effect below does it explicitly.
  */
 export function MobileMenu({
-  menu,
+  groups,
   admin,
   label,
   subtitle,
@@ -27,7 +27,7 @@ export function MobileMenu({
   globeIcon,
   outIcon,
 }: {
-  menu: { href: string; label: string; icon: React.ReactNode }[];
+  groups: { title: string; items: { href: string; label: string; icon: React.ReactNode }[] }[];
   admin: boolean;
   label: string;
   subtitle: string;
@@ -89,12 +89,16 @@ export function MobileMenu({
             <p className="mt-4 px-2 text-sm font-semibold text-[#0b2a22]">{label}</p>
             <p className="px-2 text-xs text-[#0b2a22]/55">{subtitle}</p>
 
-            <p className="mt-6 px-3 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-[#0b2a22]/45">Меню</p>
-            <div className="mt-2 flex flex-col gap-0.5">
-              {menu.map((m) => (
-                <NavLink key={m.href} href={m.href} label={m.label} icon={m.icon} />
-              ))}
-            </div>
+            {groups.map((g) => (
+              <div key={g.title} className="mt-6">
+                <p className="px-3 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-[#0b2a22]/45">{g.title}</p>
+                <div className="mt-2 flex flex-col gap-0.5">
+                  {g.items.map((m) => (
+                    <NavLink key={m.href} href={m.href} label={m.label} icon={m.icon} />
+                  ))}
+                </div>
+              </div>
+            ))}
 
             <p className="mt-6 px-3 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-[#0b2a22]/45">Общи</p>
             <div className="mt-2 flex flex-col gap-0.5">

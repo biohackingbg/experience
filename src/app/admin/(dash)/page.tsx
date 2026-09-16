@@ -354,10 +354,9 @@ export default async function AdminDashboard({
         </section>
       )}
 
-      {/* Middle band: week strip · prices · recent + countdown */}
+      {/* Как върви: the week just gone, the pace it implies, and the day the
+          room runs out at that pace. One question, three answers, one band. */}
       <div className="mt-6 grid gap-4 xl:grid-cols-4">
-        {/* Not self-start: it stands beside the prices card and the two read
-            as one band when they end on the same line. */}
         <section className="flex flex-col rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6 xl:col-span-2">
           <div className="flex items-baseline justify-between">
             <h2 className="text-lg font-bold tracking-tight">Поръчки тази седмица</h2>
@@ -368,160 +367,134 @@ export default async function AdminDashboard({
           </div>
         </section>
 
-        <div className="flex xl:col-span-1">
-          <PriceStages pricing={pricing} sold={d.ticketsSold} />
-        </div>
-
-        <div className="flex flex-col gap-4 xl:col-span-1 xl:row-span-2">
-          <TierBars tiers={d.perTier} />
-
-          {/* Seated, not sold: the tickets the team gives away - speakers,
-              partners, its own. Kept out of every sales figure above and
-              shown here instead, so a free ticket never reads as revenue
-              and never disappears either. */}
-          <section className="rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6">
-            <div className="flex items-baseline justify-between gap-4">
-              <h2 className="text-lg font-bold tracking-tight">Безплатни билети</h2>
-              <Link href="/admin/izdai" className="text-xs font-semibold text-[#146455] underline underline-offset-2">Издай</Link>
+        <section className="rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6">
+          <h2 className="text-lg font-bold tracking-tight">Темпо</h2>
+          <p className="mt-1 text-xs text-[#0b2a22]/50">По продажбите от последните 7 дни.</p>
+          <dl className="mt-4 flex flex-col gap-3 text-sm">
+            <div className="flex items-baseline justify-between gap-3">
+              <dt className="text-[#0b2a22]/60">на ден сега</dt>
+              <dd className="font-semibold tabular-nums">{fmt1(pacePerDay)}</dd>
             </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-4xl font-black tracking-tight">{d.ticketsComped}</span>
-              <span className="text-sm text-[#0b2a22]/55">{d.ticketsComped === 1 ? "билет" : "билета"} · не се броят като продажби, заемат места</span>
+            <div className="flex items-baseline justify-between gap-3">
+              <dt className="text-[#0b2a22]/60">нужни на ден</dt>
+              <dd className={`font-semibold tabular-nums ${onPace ? "" : "text-[#9c3d5c]"}`}>{fmt1(neededPerDay)}</dd>
             </div>
-            {d.compedByTier.length > 0 && (
-              <ul className="mt-3 flex flex-wrap gap-2">
-                {d.compedByTier.map((t) => (
-                  <li key={t.id} className="rounded-full bg-[#e7f6f1] px-3 py-1 text-xs font-semibold text-[#0b2a22]">
-                    {t.name} · {t.count}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <section className="relative overflow-hidden rounded-3xl bg-[#0b2a22] p-6 text-white">
-            <div aria-hidden className="pointer-events-none absolute -right-16 -top-10 h-56 w-56 rounded-full border-[18px] border-[#146455]/50" />
-            <div aria-hidden className="pointer-events-none absolute -bottom-20 -right-6 h-56 w-56 rounded-full border-[18px] border-[#146455]/30" />
-            <h2 className="relative text-lg font-bold tracking-tight">До събитието</h2>
-            <div className="relative mt-4 text-5xl font-black tracking-tight">
-              {daysLeft} <span className="text-2xl font-semibold text-white/60">{daysLeft === 1 ? "ден" : "дни"}</span>
+            <div className="flex items-baseline justify-between gap-3 border-t border-[#0b2a22]/8 pt-3">
+              <dt className="text-[#0b2a22]/60">при това темпо до 7 ноември</dt>
+              <dd className="font-semibold tabular-nums">
+                ~{Math.round(d.ticketsSold + pacePerDay * daysLeft)} билета
+              </dd>
             </div>
-            <p className="relative mt-3 text-sm text-white/65">07-08 ноември · Гранд Хотел Милениум</p>
-            <p className="relative mt-1 text-xs text-white/45">остават {seatsLeft} места</p>
-          </section>
+          </dl>
+          <Link
+            href="/admin/zapisvaniya"
+            className="mt-5 flex items-baseline justify-between gap-3 border-t border-[#0b2a22]/8 pt-4 text-sm transition-colors hover:text-[#146455]"
+          >
+            <span className="text-[#0b2a22]/60">списък за новини</span>
+            <span className="font-semibold tabular-nums">
+              {d.signupCount}
+              {d.signupWeek > 0 && <span className="ml-1 text-xs font-normal text-[#146455]">+{d.signupWeek}</span>}
+            </span>
+          </Link>
+        </section>
 
-          {/* The card above used to stretch to the bottom of the row and leave
-              a hand's width of empty green. The space now answers the question
-              the countdown asks: at this rate, where does it end? */}
-          <section className="rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6">
-            <h2 className="text-lg font-bold tracking-tight">Темпо</h2>
-            <p className="mt-1 text-xs text-[#0b2a22]/50">По продажбите от последните 7 дни.</p>
-            <dl className="mt-4 flex flex-col gap-3 text-sm">
-              <div className="flex items-baseline justify-between gap-3">
-                <dt className="text-[#0b2a22]/60">на ден сега</dt>
-                <dd className="font-semibold tabular-nums">{fmt1(pacePerDay)}</dd>
-              </div>
-              <div className="flex items-baseline justify-between gap-3">
-                <dt className="text-[#0b2a22]/60">нужни на ден</dt>
-                <dd className={`font-semibold tabular-nums ${onPace ? "" : "text-[#9c3d5c]"}`}>{fmt1(neededPerDay)}</dd>
-              </div>
-              <div className="flex items-baseline justify-between gap-3 border-t border-[#0b2a22]/8 pt-3">
-                <dt className="text-[#0b2a22]/60">при това темпо до 7 ноември</dt>
-                <dd className="font-semibold tabular-nums">
-                  ~{Math.round(d.ticketsSold + pacePerDay * daysLeft)} билета
-                </dd>
-              </div>
-            </dl>
-            <Link
-              href="/admin/zapisvaniya"
-              className="mt-5 flex items-baseline justify-between gap-3 border-t border-[#0b2a22]/8 pt-4 text-sm transition-colors hover:text-[#146455]"
-            >
-              <span className="text-[#0b2a22]/60">списък за новини</span>
-              <span className="font-semibold tabular-nums">
-                {d.signupCount}
-                {d.signupWeek > 0 && <span className="ml-1 text-xs font-normal text-[#146455]">+{d.signupWeek}</span>}
-              </span>
-            </Link>
-          </section>
-
-          {/* Who is buying - the one thing an advert needs and the checkout
-              never asks. Estimated from the name, so the card says so and
-              carries its own unknown rather than rounding it away. */}
-          {(() => {
-            const b = d.buyers;
-            const known = b.female + b.male;
-            if (known === 0) return null;
-            const fp = Math.round((b.female / known) * 100);
-            return (
-              <section className="rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6">
-                <h2 className="text-lg font-bold tracking-tight">Кой купува</h2>
-                <p className="mt-1 text-xs text-[#0b2a22]/50">Приблизително, по имената на купувачите.</p>
-                <div className="mt-4 flex h-3 overflow-hidden rounded-full bg-[#0b2a22]/8">
-                  <div style={{ width: `${fp}%` }} className="bg-[#C4607F]" />
-                  <div style={{ width: `${100 - fp}%` }} className="bg-[#0E8C7D]" />
-                </div>
-                <div className="mt-3 flex flex-wrap justify-between gap-x-4 gap-y-1 text-sm">
-                  <span className="inline-flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#C4607F]" />
-                    жени <strong className="font-semibold tabular-nums">{fp}%</strong>
-                    <span className="text-xs text-[#0b2a22]/45">({b.female})</span>
-                  </span>
-                  <span className="inline-flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#0E8C7D]" />
-                    мъже <strong className="font-semibold tabular-nums">{100 - fp}%</strong>
-                    <span className="text-xs text-[#0b2a22]/45">({b.male})</span>
-                  </span>
-                </div>
-                {b.unknown > 0 && (
-                  <p className="mt-3 text-xs text-[#0b2a22]/45">
-                    {b.unknown} {b.unknown === 1 ? "име не се чете" : "имена не се четат"} - чужди или фирмени, извън сметката.
-                  </p>
-                )}
-              </section>
-            );
-          })()}
-        </div>
-
-        {/* The sales themselves, where the eye lands first: paid and refunded
-            only, with the unfinished ones kept further down. */}
-        <section className="rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6 xl:col-span-2">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-lg font-bold tracking-tight">Последни продажби</h2>
-            <a href="#porachki" className="rounded-full border border-[#0b2a22]/20 px-3 py-1.5 text-xs font-semibold transition-colors hover:border-[#0b2a22]">всички</a>
+        <section className="relative overflow-hidden rounded-3xl bg-[#0b2a22] p-6 text-white">
+          <div aria-hidden className="pointer-events-none absolute -right-16 -top-10 h-56 w-56 rounded-full border-[18px] border-[#146455]/50" />
+          <div aria-hidden className="pointer-events-none absolute -bottom-20 -right-6 h-56 w-56 rounded-full border-[18px] border-[#146455]/30" />
+          <h2 className="relative text-lg font-bold tracking-tight">До събитието</h2>
+          <div className="relative mt-4 text-5xl font-black tracking-tight">
+            {daysLeft} <span className="text-2xl font-semibold text-white/60">{daysLeft === 1 ? "ден" : "дни"}</span>
           </div>
-          {d.recent.filter((o) => !o.isTest).length === 0 ? (
-            <p className="mt-5 text-sm text-[#0b2a22]/55">Още няма поръчки.</p>
-          ) : (
-            <ul className="mt-5 grid gap-4 sm:grid-cols-2">
-              {d.recent.filter((o) => !o.isTest).slice(0, 14).map((o) => (
-                <li key={o.reference} className="flex items-start gap-3">
-                  <span
-                    className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${
-                      o.status === "paid" ? "bg-[#146455]" : o.status === "refunded" ? "bg-[#C4607F]" : "bg-[#0b2a22]/25"
-                    }`}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-medium">{o.name}</div>
-                    <div className="text-xs text-[#0b2a22]/55">{o.items} · <Money cents={o.totalCents} /></div>
-                    <div className="text-[0.68rem] text-[#0b2a22]/45">{when(o)}</div>
-                  </div>
+          <p className="relative mt-3 text-sm text-white/65">07-08 ноември · Гранд Хотел Милениум</p>
+          <p className="relative mt-1 text-xs text-white/45">остават {seatsLeft} места</p>
+        </section>
+      </div>
+
+      {/* Залата: how full, at which tier, at what price - and the seats that
+          were given rather than sold, which take a place without paying for
+          one. Four answers to the same question, side by side. */}
+      <div className="mt-4 grid gap-4 xl:grid-cols-4">
+        <section className="rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6">
+          <h2 className="text-lg font-bold tracking-tight">Запълване</h2>
+          <Gauge pct={soldPct} />
+          <div className="mt-5 flex flex-wrap justify-center gap-4 text-xs text-[#0b2a22]/65">
+            <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-[#146455]" />продадени {d.ticketsSold}</span>
+            <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-[#c9cfca]" />свободни {seatsLeft}</span>
+          </div>
+        </section>
+
+        <div className="flex">
+          <TierBars tiers={d.perTier} />
+        </div>
+
+        {/* Seated, not sold: the tickets the team gives away - speakers,
+            partners, its own. Kept out of every sales figure above and
+            shown here instead, so a free ticket never reads as revenue
+            and never disappears either. */}
+        <section className="rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6">
+          <div className="flex items-baseline justify-between gap-4">
+            <h2 className="text-lg font-bold tracking-tight">Безплатни билети</h2>
+            <Link href="/admin/izdai" className="text-xs font-semibold text-[#146455] underline underline-offset-2">Издай</Link>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-4xl font-black tracking-tight">{d.ticketsComped}</span>
+            <span className="text-sm text-[#0b2a22]/55">{d.ticketsComped === 1 ? "билет" : "билета"} · не се броят като продажби, заемат места</span>
+          </div>
+          {d.compedByTier.length > 0 && (
+            <ul className="mt-3 flex flex-wrap gap-2">
+              {d.compedByTier.map((t) => (
+                <li key={t.id} className="rounded-full bg-[#e7f6f1] px-3 py-1 text-xs font-semibold text-[#0b2a22]">
+                  {t.name} · {t.count}
                 </li>
               ))}
             </ul>
           )}
         </section>
 
-        <div className="flex flex-col gap-4 self-start xl:col-span-1">
-          <section className="rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6">
-            <h2 className="text-lg font-bold tracking-tight">Запълване</h2>
-            <Gauge pct={soldPct} />
-            <div className="mt-5 flex flex-wrap justify-center gap-4 text-xs text-[#0b2a22]/65">
-              <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-[#146455]" />продадени {d.ticketsSold}</span>
-              <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-[#c9cfca]" />свободни {seatsLeft}</span>
-            </div>
-          </section>
-          <SiteNoticeCard notice={notice} />
+        <div className="flex">
+          <PriceStages pricing={pricing} sold={d.ticketsSold} />
         </div>
+      </div>
+
+      {/* Публиката и съобщението към нея. */}
+      <div className="mt-4 grid gap-4 xl:grid-cols-2">
+        {/* Who is buying - the one thing an advert needs and the checkout
+            never asks. Estimated from the name, so the card says so and
+            carries its own unknown rather than rounding it away. */}
+        {(() => {
+          const b = d.buyers;
+          const known = b.female + b.male;
+          if (known === 0) return null;
+          const fp = Math.round((b.female / known) * 100);
+          return (
+            <section className="rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6">
+              <h2 className="text-lg font-bold tracking-tight">Кой купува</h2>
+              <p className="mt-1 text-xs text-[#0b2a22]/50">Приблизително, по имената на купувачите.</p>
+              <div className="mt-4 flex h-3 overflow-hidden rounded-full bg-[#0b2a22]/8">
+                <div style={{ width: `${fp}%` }} className="bg-[#C4607F]" />
+                <div style={{ width: `${100 - fp}%` }} className="bg-[#0E8C7D]" />
+              </div>
+              <div className="mt-3 flex flex-wrap justify-between gap-x-4 gap-y-1 text-sm">
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#C4607F]" />
+                  жени <strong className="font-semibold tabular-nums">{fp}%</strong>
+                  <span className="text-xs text-[#0b2a22]/45">({b.female})</span>
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#0E8C7D]" />
+                  мъже <strong className="font-semibold tabular-nums">{100 - fp}%</strong>
+                  <span className="text-xs text-[#0b2a22]/45">({b.male})</span>
+                </span>
+              </div>
+              {b.unknown > 0 && (
+                <p className="mt-3 text-xs text-[#0b2a22]/45">
+                  {b.unknown} {b.unknown === 1 ? "име не се чете" : "имена не се четат"} - чужди или фирмени, извън сметката.
+                </p>
+              )}
+            </section>
+          );
+        })()}
+        <SiteNoticeCard notice={notice} />
       </div>
 
       <div className="mt-4 flex flex-col gap-4">

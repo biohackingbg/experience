@@ -38,30 +38,74 @@ const I = {
   out: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M8 4H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3M12 7l3 3-3 3M15 10H8"/></svg>,
 };
 
-const MENU = [
-  { page: "tablo" as const, href: "/admin", label: "Табло", icon: I.grid },
-  { page: "finansi" as const, href: "/admin/finansi", label: "Финанси", icon: I.wallet },
-  { page: "poseshteniya" as const, href: "/admin/poseshteniya", label: "Посещения", icon: I.chart },
-  { page: "podgotovka" as const, href: "/admin/podgotovka", label: "Подготовка", icon: I.check },
-  { page: "prezentaciya" as const, href: "/admin/prezentaciya", label: "Презентация", icon: I.deck },
-  { page: "fakturi" as const, href: "/admin/fakturi", label: "Фактури", icon: I.file },
-  { page: "dokumenti" as const, href: "/admin/dokumenti", label: "Проформи (спонсори)", icon: I.wallet },
-  { page: "zapisvaniya" as const, href: "/admin/zapisvaniya", label: "Записвания", icon: I.list },
-  { page: "pisma" as const, href: "/admin/pisma", label: "Писма", icon: I.mail },
-  { page: "reklama" as const, href: "/admin/reklama", label: "Реклама", icon: I.mega },
-  { page: "promo" as const, href: "/admin/promo", label: "Промо кодове", icon: I.tag },
-  { page: "programa" as const, href: "/admin/programa", label: "Програма", icon: I.clock },
-  { page: "lektori" as const, href: "/admin/lektori", label: "Лектори", icon: I.person },
-  { page: "vhod" as const, href: "/admin/vhod", label: "Вход на събитието", icon: I.door },
-  { page: "izdai" as const, href: "/admin/izdai", label: "Издаване на билети", icon: I.ticket },
-  { page: "rabotilnici" as const, href: "/admin/rabotilnici", label: "Работилници", icon: I.hands },
-  { page: "logistika" as const, href: "/admin/logistika", label: "Логистика на лекторите", icon: I.plane },
-  { page: "smeni" as const, href: "/admin/smeni", label: "Смени", icon: I.rota },
+/**
+ * The menu, grouped by the question being asked rather than by the order the
+ * pages happened to be built in.
+ *
+ * Eighteen entries in one list is a list nobody reads to the end: "Фактури",
+ * "Проформи", "Издаване" and "Финанси" sat in four different places, and so
+ * did the four pages the event itself runs on. Six short groups can be
+ * scanned; one long column has to be searched.
+ */
+const GROUPS = [
+  {
+    title: "Продажби",
+    items: [
+      { page: "tablo" as const, href: "/admin", label: "Табло", icon: I.grid },
+      { page: "izdai" as const, href: "/admin/izdai", label: "Издаване на билети", icon: I.ticket },
+    ],
+  },
+  {
+    title: "Пари",
+    items: [
+      { page: "finansi" as const, href: "/admin/finansi", label: "Финанси", icon: I.wallet },
+      { page: "fakturi" as const, href: "/admin/fakturi", label: "Фактури", icon: I.file },
+      { page: "dokumenti" as const, href: "/admin/dokumenti", label: "Проформи (спонсори)", icon: I.file },
+    ],
+  },
+  {
+    title: "Публика",
+    items: [
+      { page: "zapisvaniya" as const, href: "/admin/zapisvaniya", label: "Записвания", icon: I.list },
+      { page: "pisma" as const, href: "/admin/pisma", label: "Писма", icon: I.mail },
+      { page: "poseshteniya" as const, href: "/admin/poseshteniya", label: "Посещения", icon: I.chart },
+    ],
+  },
+  {
+    title: "Маркетинг",
+    items: [
+      { page: "reklama" as const, href: "/admin/reklama", label: "Реклама", icon: I.mega },
+      { page: "promo" as const, href: "/admin/promo", label: "Промо кодове", icon: I.tag },
+      { page: "prezentaciya" as const, href: "/admin/prezentaciya", label: "Презентация (партньори)", icon: I.deck },
+    ],
+  },
+  {
+    title: "Програма",
+    items: [
+      { page: "programa" as const, href: "/admin/programa", label: "Програма", icon: I.clock },
+      { page: "lektori" as const, href: "/admin/lektori", label: "Лектори", icon: I.person },
+      { page: "rabotilnici" as const, href: "/admin/rabotilnici", label: "Работилници", icon: I.hands },
+    ],
+  },
+  {
+    title: "Събитието",
+    items: [
+      { page: "podgotovka" as const, href: "/admin/podgotovka", label: "Подготовка", icon: I.check },
+      { page: "vhod" as const, href: "/admin/vhod", label: "Вход на събитието", icon: I.door },
+      { page: "smeni" as const, href: "/admin/smeni", label: "Смени", icon: I.rota },
+      { page: "logistika" as const, href: "/admin/logistika", label: "Логистика на лекторите", icon: I.plane },
+    ],
+  },
 ];
 
 export function AdminShell({ access, children }: { access: Access; children: React.ReactNode }) {
   const admin = access.kind === "admin";
-  const menu = MENU.filter((m) => admin || access.scopes.includes(m.page));
+  // A group nobody on this grant can open is dropped whole, heading and all.
+  const groups = GROUPS.map((g) => ({
+    ...g,
+    items: g.items.filter((m) => admin || access.scopes.includes(m.page)),
+  })).filter((g) => g.items.length > 0);
+  const pageCount = groups.reduce((a, g) => a + g.items.length, 0);
   return (
     <div
       className="bh-admin min-h-screen bg-[#e9ebe8] p-3 text-[#0b2a22] sm:p-5"
@@ -84,12 +128,16 @@ export function AdminShell({ access, children }: { access: Access; children: Rea
             <span className="mt-2 block font-mono text-[0.62rem] uppercase tracking-[0.2em] text-[#0b2a22]/45">Sofia Life Summit · админ</span>
           </Link>
 
-          <p className="mt-8 px-3 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-[#0b2a22]/45">Меню</p>
-          <nav className="mt-2 flex flex-col gap-0.5">
-            {menu.map((m) => (
-              <NavLink key={m.href} href={m.href} label={m.label} icon={m.icon} />
-            ))}
-          </nav>
+          {groups.map((g) => (
+            <div key={g.title} className="mt-6 first:mt-8">
+              <p className="px-3 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-[#0b2a22]/45">{g.title}</p>
+              <nav className="mt-2 flex flex-col gap-0.5">
+                {g.items.map((m) => (
+                  <NavLink key={m.href} href={m.href} label={m.label} icon={m.icon} />
+                ))}
+              </nav>
+            </div>
+          ))}
 
           <p className="mt-8 px-3 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-[#0b2a22]/45">Общи</p>
           <nav className="mt-2 flex flex-col gap-0.5">
@@ -130,10 +178,10 @@ export function AdminShell({ access, children }: { access: Access; children: Rea
               <div className="flex-1 text-sm text-[#0b2a22]/60">Sofia Life Summit · админ</div>
             )}
             <MobileMenu
-              menu={menu}
+              groups={groups}
               admin={admin}
               label={access.label}
-              subtitle={admin ? "hi@biohacking.bg" : `достъп до ${menu.length} ${menu.length === 1 ? "страница" : "страници"}`}
+              subtitle={admin ? "hi@biohacking.bg" : `достъп до ${pageCount} ${pageCount === 1 ? "страница" : "страници"}`}
               logoutAction={logout}
               keyIcon={I.key}
               globeIcon={I.globe}
@@ -150,7 +198,7 @@ export function AdminShell({ access, children }: { access: Access; children: Rea
               )}
               <div className="leading-tight">
                 <div className="text-sm font-semibold">{access.label}</div>
-                <div className="text-xs text-[#0b2a22]/55">{admin ? "hi@biohacking.bg" : `достъп до ${menu.length} ${menu.length === 1 ? "страница" : "страници"}`}</div>
+                <div className="text-xs text-[#0b2a22]/55">{admin ? "hi@biohacking.bg" : `достъп до ${pageCount} ${pageCount === 1 ? "страница" : "страници"}`}</div>
               </div>
             </div>
           </header>
