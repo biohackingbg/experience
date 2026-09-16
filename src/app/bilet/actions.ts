@@ -20,10 +20,14 @@ import { discountFor, promoReasonText, resolvePromo } from "@/lib/promo";
 import { PURCHASE_TERMS_TEXT, PURCHASE_TERMS_TEXT_EN, PURCHASE_TERMS_VERSION } from "@/lib/purchase-terms";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
-import { SALES_OPEN, TIERS, getTier, picksDay } from "@/lib/tickets";
+import { GALA, SALES_OPEN, TIERS, getTier, picksDay } from "@/lib/tickets";
 
 const schema = z.object({
-  tierId: z.enum(TIERS.map((t) => t.id) as [string, ...string[]]),
+  // The gala is sold through this same action - one payment path, one order
+  // shape, one webhook - but it is not one of the summit tiers.
+  // The gala leads the list only because the tuple's first element has to be
+  // a fixed one for the type to hold; order means nothing to the check.
+  tierId: z.enum([GALA.id, ...TIERS.map((t) => t.id)] as [string, ...string[]]),
   quantity: z.coerce.number().int().min(1).max(10),
   /** Only the one-day tiers send it; checked against the tier below. */
   coreDay: z.coerce.number().int().min(1).max(2).optional(),
@@ -221,6 +225,14 @@ export async function startCheckout(
     return { status: "redirect", redirectUrl: `${origin}/bilet/uspeh?ref=${order.reference}&lang=${lang}` };
   }
 
+  // What the buyer sees on the Stripe page and on the card statement. Only
+  // the dates differ: the gala is one evening, not the two-day summit.
+  const productName = `Sofia Life Summit - ${tier.name}`;
+  const productNote =
+    tier.id === GALA.id
+      ? "07 ноември 2026 · Гала вечеря · Гранд Хотел Милениум, София"
+      : "07-08 ноември 2026, Гранд Хотел Милениум, София";
+
   const session = await getStripe().checkout.sessions.create({
     mode: "payment",
     locale: lang === "en" ? "en" : "bg",
@@ -239,8 +251,8 @@ export async function startCheckout(
               currency: "eur",
               unit_amount: order.totalCents,
               product_data: {
-                name: `Sofia Life Summit - ${tier.name} × ${input.quantity}`,
-                description: `07-08 ноември 2026, Гранд Хотел Милениум, София · код ${order.promoCode}`,
+                name: `${productName} × ${input.quantity}`,
+                description: `${productNote} · код ${order.promoCode}`,
               },
             },
           }
@@ -252,8 +264,8 @@ export async function startCheckout(
               // record cannot disagree. VAT is already inside it.
               unit_amount: order.unitPriceCents,
               product_data: {
-                name: `Sofia Life Summit - ${tier.name}`,
-                description: "07-08 ноември 2026, Гранд Хотел Милениум, София",
+                name: productName,
+                description: productNote,
               },
             },
           },

@@ -464,6 +464,51 @@ export const TIER_FEATURES: Record<string, Copy<{ features: string[]; absent: st
   },
 };
 
+/**
+ * The gala dinner: a separate evening with its own ticket.
+ *
+ * The number of couverts is deliberately absent. "Местата са ограничени" is
+ * the whole of what the page says; the count lives in the code, stops the
+ * sale on its own, and is nobody's business on the way in.
+ */
+export const GALA_SECTION: Copy<{
+  eyebrow: string;
+  title: string;
+  when: string;
+  body: string;
+  cause: string;
+  priceLabel: string;
+  limited: string;
+  buy: string;
+  soldOut: string;
+  soldOutNote: string;
+}> = {
+  bg: {
+    eyebrow: "Гала вечеря",
+    title: "07 ноември · Гала вечеря с Ники Кънчев и Мария Илиева",
+    when: "07 ноември 2026 · Гранд Хотел Милениум, София",
+    body: "Каним ви на Гала вечеря с участието на Ники Кънчев и Мария Илиева.",
+    cause: "Събитието се организира с благотворителна цел. Подкрепената кауза ще бъде обявена на по-късен етап.",
+    priceLabel: "Стойност на куверта",
+    limited: "Местата са ограничени.",
+    buy: "Запази място",
+    soldOut: "Местата свършиха",
+    soldOutNote: "Всички куверти са резервирани.",
+  },
+  en: {
+    eyebrow: "Gala dinner",
+    title: "7 November · Gala dinner with Niki Kanchev and Maria Ilieva",
+    when: "7 November 2026 · Grand Hotel Millennium, Sofia",
+    body: "You are invited to a gala dinner with Niki Kanchev and Maria Ilieva.",
+    cause: "The evening is held for charity. The cause it supports will be announced at a later stage.",
+    priceLabel: "Couvert",
+    limited: "Places are limited.",
+    buy: "Reserve a place",
+    soldOut: "Fully booked",
+    soldOutNote: "Every couvert has been taken.",
+  },
+};
+
 export const REGISTER: Copy<{
   eyebrow: string;
   title: string;

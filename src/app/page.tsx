@@ -8,6 +8,7 @@ import { SummitSpeakers } from "@/components/summit/SummitSpeakers";
 import { SummitTracks } from "@/components/summit/SummitTracks";
 import { SummitProgram } from "@/components/summit/SummitProgram";
 import { SummitTickets } from "@/components/summit/SummitTickets";
+import { SummitGala } from "@/components/summit/SummitGala";
 import { SummitRegister } from "@/components/summit/SummitRegister";
 import { SummitSponsors } from "@/components/summit/SummitSponsors";
 import { SummitOrganizers } from "@/components/summit/SummitOrganizers";
@@ -52,6 +53,7 @@ export default async function Home() {
         <SummitPartners />
         <SummitProgram />
         <SummitTickets />
+        <SummitGala />
         <SummitRegister />
         <SummitSponsors />
         <SummitOrganizers />

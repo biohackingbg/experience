@@ -45,6 +45,7 @@ export function CheckoutForm({
   soldOut = [],
   lang = "bg",
   utm,
+  only,
 }: {
   initialTier?: string;
   /** Per tier, VAT included, decided on the server for the stage the site is on. */
@@ -54,6 +55,13 @@ export function CheckoutForm({
   lang?: Lang;
   /** Campaign tags from the URL, written onto the order so marketing can count it. */
   utm?: { source?: string; campaign?: string };
+  /**
+   * Sells one thing rather than the three tiers - the gala dinner, which is
+   * a separate evening and not a level of the same ticket. The picker and
+   * the day question disappear; everything else about the form is identical,
+   * so there is one checkout, one order shape and one webhook.
+   */
+  only?: { id: string; name: string; priceCents: number };
 }) {
   const [state, formAction, pending] = useActionState(
     startCheckout,
@@ -81,21 +89,24 @@ export function CheckoutForm({
     if (consent !== "granted" || listSent.current) return;
     listSent.current = true;
     trackGaEvent("view_item_list", {
-      item_list_id: "tickets",
-      item_list_name: "Билети",
+      item_list_id: only ? only.id : "tickets",
+      item_list_name: only ? only.name : "Билети",
       currency: "EUR",
-      items: TIERS.map((t0, index) => ({
-        item_id: t0.id,
-        item_name: t0.name,
-        item_category: "Ticket",
-        index,
-        price: (prices[t0.id] ?? t0.listPriceCents) / 100,
-        quantity: 1,
-      })),
+      items: only
+        ? [{ item_id: only.id, item_name: only.name, item_category: "Ticket", index: 0, price: only.priceCents / 100, quantity: 1 }]
+        : TIERS.map((t0, index) => ({
+            item_id: t0.id,
+            item_name: t0.name,
+            item_category: "Ticket",
+            index,
+            price: (prices[t0.id] ?? t0.listPriceCents) / 100,
+            quantity: 1,
+          })),
     });
-  }, [consent, prices]);
+  }, [consent, prices, only]);
 
   const [tierId, setTierId] = useState(() => {
+    if (only) return only.id;
     const wanted = TIERS.some((t) => t.id === initialTier) && !soldOut.includes(initialTier!) ? initialTier! : null;
     return wanted ?? TIERS.find((t) => !soldOut.includes(t.id))?.id ?? "plus";
   });
@@ -106,7 +117,11 @@ export function CheckoutForm({
   const [promo, setPromo] = useState<PromoPreview | null>(null);
   const [checking, setChecking] = useState(false);
 
-  const tier = TIERS.find((t) => t.id === tierId)!;
+  // With `only` the product is handed in rather than looked up: it is not in
+  // TIERS, so the lookup below would come back empty and take the page with it.
+  const tier = only
+    ? { id: only.id, name: only.name, listPriceCents: only.priceCents }
+    : TIERS.find((t) => t.id === tierId)!;
   const gross = (prices[tier.id] ?? tier.listPriceCents) * quantity;
   // Preview only - the server resolves the code again when the order is made.
   const discount =
@@ -162,6 +177,15 @@ export function CheckoutForm({
       {utm?.source && <input type="hidden" name="utmSource" value={utm.source} />}
       {utm?.campaign && <input type="hidden" name="utmCampaign" value={utm.campaign} />}
       <div>
+        {only ? (
+          /* One product, so there is nothing to choose: the name and the
+             price are stated, and the id rides along hidden. */
+          <div className="flex items-center justify-between gap-4 rounded-2xl bh-mint px-5 py-4 ring-1 ring-bh-pine">
+            <input type="hidden" name="tierId" value={only.id} />
+            <span className="font-semibold text-bh-ink">{only.name}</span>
+            <span className="font-semibold text-bh-ink">{formatPrice(only.priceCents)} €</span>
+          </div>
+        ) : (
         <fieldset>
           <legend className="font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/50">
             {t.tier}
@@ -200,8 +224,9 @@ export function CheckoutForm({
             })}
           </div>
         </fieldset>
+        )}
 
-        {picksDay(tierId) && (
+        {!only && picksDay(tierId) && (
           /* CORE promised "a day of your choice" and nothing ever asked
              which - so the buyer answers here and the day rides on the
              ticket, instead of being settled at the door. */

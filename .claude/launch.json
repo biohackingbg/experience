@@ -5,7 +5,7 @@
       "name": "biohacking-experience-dev",
       "runtimeExecutable": "/Users/ema/.nvm/versions/node/v24.18.0/bin/node",
       "runtimeArgs": ["/Users/ema/Desktop/biohacking-experience/scripts/dev-entry.cjs", "dev", "--webpack"],
-      "port": 3000,
+      "port": 3100,
       "autoPort": true
     }
   ]

@@ -166,8 +166,32 @@ export const TIERS: Tier[] = [
   },
 ];
 
+/**
+ * The gala dinner: a separate evening, sold as its own ticket.
+ *
+ * Deliberately not in TIERS. That list is iterated in a dozen places that
+ * all mean "a ticket to the summit" - the price cards, the comparison
+ * table, the checkout's tier picker, the early-bird staging, and, most
+ * damagingly, the sum of `capacity` that the dashboard reads as the size of
+ * the hall. Two hundred couverts are not two hundred more seats in the room.
+ *
+ * It is shaped as a Tier so `getTier` can resolve it, which is the one
+ * chokepoint every ticket name passes through - the door scanner, the
+ * badges, the emails and the exports all read correctly for free. The two
+ * prices are equal because a couvert has no early-bird stage.
+ */
+export const GALA: Tier = {
+  id: "gala" as TierId,
+  name: "Гала вечеря",
+  earlyPriceCents: 12000,
+  listPriceCents: 12000,
+  capacity: 200,
+  features: [],
+  absent: [],
+};
+
 export function getTier(id: string): Tier | undefined {
-  return TIERS.find((t) => t.id === id);
+  return TIERS.find((t) => t.id === id) ?? (id === GALA.id ? GALA : undefined);
 }
 
 /** Whether the launch prices still apply. */
