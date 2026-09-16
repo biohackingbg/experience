@@ -178,8 +178,17 @@ export async function revokeLink(id: string): Promise<void> {
     .where(and(eq(deckLinks.id, id), isNull(deckLinks.revokedAt)));
 }
 
-/** Pipeline fields - the notes a sales conversation leaves behind. */
-export async function updateLinkPipeline(
+/**
+ * The row is edited from two pages now, so it is written in two halves.
+ *
+ * They were one function that set every column at once, which is safe only
+ * while a single form owns them all: the moment one page stopped submitting
+ * the deal fields, that same write would have blanked them. Each half now
+ * touches only its own columns.
+ */
+
+/** The conversation: where it stands, who leads it, what is owed next. */
+export async function updateLinkConversation(
   id: string,
   input: {
     /** Omitted or undefined keeps the current name; never blanked from here. */
@@ -188,6 +197,19 @@ export async function updateLinkPipeline(
     note: string | null;
     nextStep: string | null;
     owner: string | null;
+  },
+): Promise<void> {
+  const { label, ...rest } = input;
+  await getDb()
+    .update(deckLinks)
+    .set({ ...rest, ...(label ? { label } : {}), updatedAt: new Date() })
+    .where(eq(deckLinks.id, id));
+}
+
+/** The deal: package, money, barter and what the partner delivers. */
+export async function updateLinkDeal(
+  id: string,
+  input: {
     tier: TierId | null;
     amountCents: number | null;
     money: MoneyId | null;
@@ -196,10 +218,9 @@ export async function updateLinkPipeline(
     ticketsCount: number | null;
   },
 ): Promise<void> {
-  const { label, ...rest } = input;
   await getDb()
     .update(deckLinks)
-    .set({ ...rest, ...(label ? { label } : {}), updatedAt: new Date() })
+    .set({ ...input, updatedAt: new Date() })
     .where(eq(deckLinks.id, id));
 }
 

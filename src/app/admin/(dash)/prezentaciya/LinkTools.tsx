@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 
 import { createDeckLink, createDeckLinksBulk, type LinkFormState } from "./actions";
 import { MONEY, TIERS } from "@/lib/finance-options";
-import { DELIVERABLES, deliverableShort, parseDeliverables } from "@/lib/finance-options";
+import { deliverableShort, parseDeliverables } from "@/lib/finance-options";
 
 // Lives here, not in actions.ts: a "use server" module may export only
 // async functions - an exported object fails the build.
@@ -249,77 +249,14 @@ export function PipelineEditor({
         placeholder="бележка - с кого говорихме, какво казаха"
         className="min-w-0 w-full rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm leading-relaxed text-bh-ink placeholder:text-bh-ink/35"
       />
-      {/* The deal itself. Net of VAT, in euros - the accountant's number,
-          not the invoice total. */}
-      <div className="grid grid-cols-[minmax(0,1fr)_7rem_minmax(0,1fr)] gap-2">
-        <select
-          name="tier"
-          defaultValue={tier ?? ""}
-          className="min-w-0 w-full rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink"
-        >
-          <option value="">пакет</option>
-          {TIERS.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.label}
-            </option>
-          ))}
-        </select>
-        <input
-          type="text"
-          inputMode="decimal"
-          name="amount"
-          defaultValue={amountCents === null ? "" : String(amountCents / 100)}
-          placeholder="€ без ДДС"
-          className="min-w-0 w-full rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35"
-        />
-        <select
-          name="money"
-          defaultValue={money ?? ""}
-          className="min-w-0 w-full rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink"
-        >
-          <option value="">парите</option>
-          {MONEY.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.label}
-            </option>
-          ))}
-        </select>
-      </div>
-      {/* Product is valued but never counted as income - see finances.ts. */}
-      <div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-2">
-        <input
-          type="text"
-          inputMode="decimal"
-          name="inKind"
-          defaultValue={inKindCents === null ? "" : String(inKindCents / 100)}
-          placeholder="бартер / продукти, € без ДДС"
-          className="min-w-0 w-full rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35"
-        />
-        <input
-          type="number"
-          inputMode="numeric"
-          min={0}
-          name="tickets"
-          defaultValue={ticketsCount ?? ""}
-          placeholder="билети"
-          className="min-w-0 w-full rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35"
-        />
-      </div>
-      <fieldset className="flex flex-wrap gap-x-4 gap-y-1.5 rounded-xl border border-bh-ink/15 px-3 py-2">
-        <legend className="px-1 font-mono text-[0.6rem] uppercase tracking-[0.15em] text-bh-ink/55">Какво дава</legend>
-        {DELIVERABLES.map((d) => (
-          <label key={d.id} className="flex items-center gap-1.5 text-xs text-bh-ink">
-            <input
-              type="checkbox"
-              name="deliverables"
-              value={d.id}
-              defaultChecked={parseDeliverables(deliverables).includes(d.id)}
-              className="h-3.5 w-3.5 accent-[#146455]"
-            />
-            {d.label}
-          </label>
-        ))}
-      </fieldset>
+      {/* The deal - package, money, barter, what they deliver - is edited in
+          Подготовка, where the same things get a date and get ticked off.
+          Кept out of this panel on purpose: three jobs in one form inside a
+          table cell was the reason it felt cramped. */}
+      <p className="rounded-xl bg-bh-cloud px-3 py-2 text-xs leading-relaxed text-bh-ink/60">
+        Пакетът, сумата, бартерът и какво дава партньорът се попълват в{" "}
+        <a href="/admin/podgotovka" className="font-semibold underline underline-offset-2">Подготовка</a>.
+      </p>
       <input
         type="text"
         name="nextStep"

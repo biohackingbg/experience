@@ -3,9 +3,11 @@ import Link from "next/link";
 
 import { HomeLink } from "@/components/admin/HomeLink";
 import { requireAccess } from "@/lib/access";
+import { STAGES } from "@/lib/deck-links";
+import { DELIVERABLES, MONEY, TIERS } from "@/lib/finance-options";
 import { getPreparation } from "@/lib/preparation";
 
-import { markReceived, saveContact, saveDeliverable } from "./actions";
+import { markReceived, saveContact, saveDeal, saveDeliverable } from "./actions";
 
 export const metadata: Metadata = {
   title: "Подготовка | Администрация",
@@ -46,11 +48,12 @@ export default async function PreparationPage() {
           <HomeLink />
         </div>
         <p className="mt-4 max-w-2xl text-sm leading-relaxed text-bh-ink/60">
-          Всичко, което потвърдените партньори са обещали - щандове, продукти,
-          лектори, билети - и дали вече е при нас. Какво обещава всеки се
-          отбелязва на неговия ред в{" "}
-          <Link href="/admin/prezentaciya" className="underline underline-offset-2">Презентация</Link>;
-          тук се отмята кога пристига, със срок и лице за контакт.
+          Сделката с всеки партньор и това, което е обещал - пакет, сума, бартер,
+          щандове, продукти, лектори, билети - и дали вече е при нас. Тук се
+          попълва какво е уговорено и тук се отмята кога пристига, със срок и
+          лице за контакт. В{" "}
+          <Link href="/admin/prezentaciya" className="underline underline-offset-2">Презентация</Link>{" "}
+          остава самият разговор: етап, кой води и какво се очаква от нас.
         </p>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
@@ -82,8 +85,8 @@ export default async function PreparationPage() {
 
         {p.partners.length === 0 ? (
           <p className="mt-10 rounded-2xl bg-bh-cloud px-6 py-8 text-center text-sm text-bh-ink/55 ring-1 ring-bh-ink/8">
-            Няма потвърдени партньори с уговорени неща. Отбележи какво дава всеки
-            на реда му в Презентация и той ще се появи тук.
+            Още няма партньори. Направи линк за компанията в „Презентация“ и тя
+            се появява тук, за да ѝ запишеш сделката.
           </p>
         ) : (
           <div className="mt-10 flex flex-col gap-5">
@@ -91,11 +94,23 @@ export default async function PreparationPage() {
               <section key={partner.id} className="rounded-2xl bg-bh-cloud p-6 ring-1 ring-bh-ink/8">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <h2 className="text-lg font-bold tracking-tight text-bh-ink">
+                    <h2 className="flex flex-wrap items-center gap-2 text-lg font-bold tracking-tight text-bh-ink">
                       {partner.label}
-                      <span className={`ml-3 text-sm font-semibold ${partner.received === partner.total ? "text-[#0b6d61]" : "text-bh-ink/50"}`}>
-                        {partner.received}/{partner.total}
+                      {/* The stage matters here now: unsigned partners appear
+                          too, so the amount can be written while it is still
+                          being negotiated. */}
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-[0.62rem] font-semibold uppercase tracking-wide ${
+                          partner.stage === "confirmed" ? "bg-[#0E8C7D]/15 text-[#0b6d61]" : "bg-bh-ink/8 text-bh-ink/55"
+                        }`}
+                      >
+                        {STAGES.find((s) => s.id === partner.stage)?.label ?? partner.stage}
                       </span>
+                      {partner.total > 0 && (
+                        <span className={`text-sm font-semibold ${partner.received === partner.total ? "text-[#0b6d61]" : "text-bh-ink/50"}`}>
+                          {partner.received}/{partner.total}
+                        </span>
+                      )}
                     </h2>
                     {partner.owner && <p className="mt-0.5 text-xs text-bh-ink/55">води {partner.owner}</p>}
                     {partner.items.some((i) => i.kind === "tickets") && (
@@ -117,8 +132,69 @@ export default async function PreparationPage() {
                   </form>
                 </div>
 
+                {/* The deal, written here rather than in Презентация: the
+                    package and the money belong next to the things they buy,
+                    and the promise is now made on the page where it is also
+                    ticked off. */}
+                <form action={saveDeal} className="mt-4 rounded-2xl bg-bh-paper p-4 ring-1 ring-bh-ink/8">
+                  <input type="hidden" name="linkId" value={partner.id} />
+                  <div className="font-mono text-[0.6rem] uppercase tracking-[0.15em] text-bh-ink/50">Сделката · суми без ДДС</div>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <select name="tier" defaultValue={partner.tier ?? ""} className={input}>
+                      <option value="">пакет</option>
+                      {TIERS.map((t) => (
+                        <option key={t.id} value={t.id}>{t.label}</option>
+                      ))}
+                    </select>
+                    <input
+                      name="amount"
+                      inputMode="decimal"
+                      defaultValue={partner.amountCents === null ? "" : String(partner.amountCents / 100)}
+                      placeholder="€ сума"
+                      className={`${input} w-28`}
+                    />
+                    <select name="money" defaultValue={partner.money ?? ""} className={input}>
+                      <option value="">парите</option>
+                      {MONEY.map((m) => (
+                        <option key={m.id} value={m.id}>{m.label}</option>
+                      ))}
+                    </select>
+                    <input
+                      name="inKind"
+                      inputMode="decimal"
+                      defaultValue={partner.inKindCents === null ? "" : String(partner.inKindCents / 100)}
+                      placeholder="€ бартер"
+                      className={`${input} w-28`}
+                    />
+                    <input
+                      name="tickets"
+                      type="number"
+                      min={0}
+                      defaultValue={partner.ticketsCount ?? ""}
+                      placeholder="билети"
+                      className={`${input} w-24`}
+                    />
+                  </div>
+                  <fieldset className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
+                    <legend className="font-mono text-[0.6rem] uppercase tracking-[0.15em] text-bh-ink/50">Какво дава</legend>
+                    {DELIVERABLES.map((d) => (
+                      <label key={d.id} className="flex items-center gap-1.5 text-xs text-bh-ink">
+                        <input
+                          type="checkbox"
+                          name="deliverables"
+                          value={d.id}
+                          defaultChecked={partner.items.some((i) => i.kind === d.id)}
+                          className="h-3.5 w-3.5 accent-[#146455]"
+                        />
+                        {d.label}
+                      </label>
+                    ))}
+                  </fieldset>
+                  <button type="submit" className={`${small} mt-3`}>Запиши сделката</button>
+                </form>
+
                 {partner.items.length === 0 ? (
-                  <p className="mt-4 text-sm text-bh-ink/50">Потвърден, но без отбелязано какво дава.</p>
+                  <p className="mt-4 text-sm text-bh-ink/50">Още нищо не е уговорено - отбележи го отгоре.</p>
                 ) : (
                   <ul className="mt-4 divide-y divide-bh-ink/8">
                     {partner.items.map((item) => (
@@ -163,7 +239,7 @@ export default async function PreparationPage() {
                           <input type="hidden" name="linkId" value={partner.id} />
                           <input type="hidden" name="kind" value={item.kind} />
                           <input name="due" type="date" defaultValue={item.dueDate ?? ""} className={`${input} w-36`} />
-                          <input name="note" defaultValue={item.note ?? ""} placeholder="бележка: размер, брой, кой носи" className={`${input} w-64`} />
+                          <input name="note" defaultValue={item.note ?? ""} placeholder="къде е, размер, брой, кой носи" className={`${input} w-64`} />
                           <button type="submit" className={small}>Запиши</button>
                         </form>
                       </li>

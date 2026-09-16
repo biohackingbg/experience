@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, isNull, ne } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { deckLinks, deliverableStatus } from "@/lib/db/schema";
@@ -42,6 +42,13 @@ export type PrepPartner = {
   contactName: string | null;
   contactEmail: string | null;
   contactPhone: string | null;
+  /** The deal, edited here now rather than in Презентация. */
+  stage: string;
+  tier: string | null;
+  amountCents: number | null;
+  money: string | null;
+  inKindCents: number | null;
+  ticketsCount: number | null;
   items: PrepItem[];
   received: number;
   total: number;
@@ -68,9 +75,17 @@ export async function getPreparation(): Promise<Preparation> {
         contactPhone: deckLinks.contactPhone,
         deliverables: deckLinks.deliverables,
         ticketsCount: deckLinks.ticketsCount,
+        stage: deckLinks.stage,
+        tier: deckLinks.tier,
+        amountCents: deckLinks.amountCents,
+        money: deckLinks.money,
+        inKindCents: deckLinks.inKindCents,
       })
       .from(deckLinks)
-      .where(and(eq(deckLinks.stage, "confirmed"), isNull(deckLinks.revokedAt))),
+      // Not confirmed-only any more: the package and the amount are agreed
+      // while the deal is still being talked about, and this is where they
+      // are written now. A partner who said no is the only one left out.
+      .where(and(ne(deckLinks.stage, "declined"), isNull(deckLinks.revokedAt))),
     db.select().from(deliverableStatus),
   ]);
 
@@ -102,15 +117,26 @@ export async function getPreparation(): Promise<Preparation> {
       contactName: l.contactName,
       contactEmail: l.contactEmail,
       contactPhone: l.contactPhone,
+      stage: l.stage,
+      tier: l.tier,
+      amountCents: l.amountCents,
+      money: l.money,
+      inKindCents: l.inKindCents,
+      ticketsCount: l.ticketsCount,
       items,
       received: items.filter((i) => i.receivedAt).length,
       total: items.length,
     };
   });
 
-  // The most outstanding first - the page is a to-do list, not a directory.
+  // Signed deals first - they are the ones with something to deliver - then
+  // the most outstanding. The page is a to-do list, not a directory.
+  const signed = (p: PrepPartner) => (p.stage === "confirmed" ? 0 : 1);
   partners.sort(
-    (a, b) => b.total - b.received - (a.total - a.received) || a.label.localeCompare(b.label, "bg"),
+    (a, b) =>
+      signed(a) - signed(b) ||
+      b.total - b.received - (a.total - a.received) ||
+      a.label.localeCompare(b.label, "bg"),
   );
 
   const all = partners.flatMap((p) => p.items);
@@ -145,6 +171,21 @@ export async function setDeliverable(
     .insert(deliverableStatus)
     .values({ linkId, kind, ...set })
     .onConflictDoUpdate({ target: [deliverableStatus.linkId, deliverableStatus.kind], set });
+}
+
+/** The deal itself, written from this page now. Net of VAT, in cents. */
+export async function setDeal(
+  linkId: string,
+  deal: {
+    tier: string | null;
+    amountCents: number | null;
+    money: string | null;
+    inKindCents: number | null;
+    deliverables: string | null;
+    ticketsCount: number | null;
+  },
+): Promise<void> {
+  await getDb().update(deckLinks).set({ ...deal, updatedAt: new Date() }).where(eq(deckLinks.id, linkId));
 }
 
 export async function setContact(

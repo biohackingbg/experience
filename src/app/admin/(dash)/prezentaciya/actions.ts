@@ -3,8 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { canAccess } from "@/lib/access";
-import { createLink, createLinks, isMoney, isStage, isTier, reactivateLink, regenerateToken, revokeLink, updateLinkPipeline } from "@/lib/deck-links";
-import { isDeliverable } from "@/lib/finance-options";
+import { createLink, createLinks, isStage, reactivateLink, regenerateToken, revokeLink, updateLinkConversation } from "@/lib/deck-links";
 
 export type LinkFormState = { status: "idle" | "ok" | "error"; message?: string };
 
@@ -60,40 +59,14 @@ export async function updateDeckLink(
     return t.length ? t : null;
   };
 
-  // Money is typed in euros, whole or with a comma; stored net, in cents.
-  const amountRaw = String(formData.get("amount") ?? "").replace(/\s/g, "").replace(",", ".");
-  const amountCents = amountRaw ? Math.round(Number(amountRaw) * 100) : null;
-  if (amountCents !== null && (!Number.isFinite(amountCents) || amountCents < 0)) {
-    return { status: "error", message: "Сумата не е число." };
-  }
-  const tier = formData.get("tier");
-  const money = formData.get("money");
-
-  // Barter is valued the same way as cash but stored apart from it.
-  const inKindRaw = String(formData.get("inKind") ?? "").replace(/\s/g, "").replace(",", ".");
-  const inKindCents = inKindRaw ? Math.round(Number(inKindRaw) * 100) : null;
-  if (inKindCents !== null && (!Number.isFinite(inKindCents) || inKindCents < 0)) {
-    return { status: "error", message: "Стойността на бартера не е число." };
-  }
-  const deliverables = formData.getAll("deliverables").filter(isDeliverable);
-  const ticketsRaw = String(formData.get("tickets") ?? "").trim();
-  const ticketsCount = ticketsRaw ? Number.parseInt(ticketsRaw, 10) : null;
-  if (ticketsCount !== null && (!Number.isInteger(ticketsCount) || ticketsCount < 0)) {
-    return { status: "error", message: "Билетите трябва да са цяло число." };
-  }
-
-  await updateLinkPipeline(id, {
+  // The deal - package, money, barter, deliverables - is written from
+  // Подготовка and deliberately not touched here.
+  await updateLinkConversation(id, {
     label: clean(formData.get("label"), 80) ?? undefined,
     stage,
     note: clean(formData.get("note"), 1000),
     nextStep: clean(formData.get("nextStep"), 300),
     owner: clean(formData.get("owner"), 40),
-    tier: isTier(tier) ? tier : null,
-    amountCents,
-    money: isMoney(money) ? money : null,
-    inKindCents,
-    deliverables: deliverables.length ? deliverables.join(",") : null,
-    ticketsCount,
   });
   revalidatePath("/admin/prezentaciya");
   return { status: "ok", message: "Записано." };
