@@ -64,7 +64,7 @@ export function rememberConsent(choice: MarketingConsent): void {
     ad_personalization: state,
     analytics_storage: state,
     personalization_storage: state,
-    functionality_storage: "granted",
+    functionality_storage: state,
     security_storage: "granted",
   });
   window.dispatchEvent(new Event(CONSENT_EVENT));

@@ -93,10 +93,11 @@ export default function RootLayout({
           }}
         />
         {/* Google Consent Mode, set before GTM or anything Google can run.
-            All seven signals, so no tool reads one as "unknown": security and
-            functionality storage are strictly necessary (the consent cookie
-            itself, the theme) and granted from the start; the other five
-            follow the single marketing choice the banner asks for.
+            All seven signals, so no tool reads one as "unknown". Security
+            storage is granted from the start; the other six, functionality
+            storage included (the agency's call - it gates their tags, not the
+            site's own theme or consent cookie), follow the single choice the
+            banner asks for.
 
             The default is denied on every visit, and a stored "yes" is
             replayed as an update straight after it. Without that replay the
@@ -106,7 +107,7 @@ export default function RootLayout({
         {gaId() || gtmId() ? (
           <script
             dangerouslySetInnerHTML={{
-              __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',personalization_storage:'denied',functionality_storage:'granted',security_storage:'granted'});try{var m=document.cookie.match(/(?:^|; )${MARKETING_CONSENT_COOKIE}=([^;]*)/);if(m&&decodeURIComponent(m[1])===${JSON.stringify(marketingConsentValue("granted"))}){gtag('consent','update',{ad_storage:'granted',ad_user_data:'granted',ad_personalization:'granted',analytics_storage:'granted',personalization_storage:'granted'});}}catch(e){}`,
+              __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',personalization_storage:'denied',functionality_storage:'denied',security_storage:'granted'});try{var m=document.cookie.match(/(?:^|; )${MARKETING_CONSENT_COOKIE}=([^;]*)/);if(m&&decodeURIComponent(m[1])===${JSON.stringify(marketingConsentValue("granted"))}){gtag('consent','update',{ad_storage:'granted',ad_user_data:'granted',ad_personalization:'granted',analytics_storage:'granted',personalization_storage:'granted',functionality_storage:'granted'});}}catch(e){}`,
             }}
           />
         ) : null}
