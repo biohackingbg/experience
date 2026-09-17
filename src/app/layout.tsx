@@ -8,6 +8,7 @@ import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { GoogleTagManager } from "@/components/GoogleTagManager";
 import { ConsentBanner } from "@/components/ConsentBanner";
 import { pixelId } from "@/lib/meta-pixel";
+import { MARKETING_CONSENT_COOKIE, marketingConsentValue } from "@/lib/marketing-consent";
 import { GA_ID_GLOBAL, gaId } from "@/lib/ga-id";
 import { GTM_ID_GLOBAL, gtmId } from "@/lib/gtm-id";
 import { META } from "@/lib/site-copy";
@@ -91,18 +92,21 @@ export default function RootLayout({
             __html: `(function(){var d=document.documentElement;try{var t=localStorage.getItem('bh-theme');if(t!=='dark'&&t!=='light'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}d.dataset.theme=t}catch(e){d.dataset.theme='light'}d.classList.add('js')})()`,
           }}
         />
-        {/* Google Consent Mode's default, set before anything Google could
-            run - which on this site is nothing at all until a visitor grants
-            it, so there is no ambiguous window for `wait_for_update` to
-            cover. Runs on every visit, whatever the choice ends up being:
-            Consent Mode has to see a denied default before it can see the
-            update rememberConsent sends once there is a real choice.
-            `gtag` is a plain dataLayer-pusher here, not the analytics script
-            - that only loads once consent is actually granted. */}
+        {/* Google Consent Mode, set before GTM or anything Google can run.
+            All seven signals, so no tool reads one as "unknown": security and
+            functionality storage are strictly necessary (the consent cookie
+            itself, the theme) and granted from the start; the other five
+            follow the single marketing choice the banner asks for.
+
+            The default is denied on every visit, and a stored "yes" is
+            replayed as an update straight after it. Without that replay the
+            update only ever happened in the moment of the click, so a visitor
+            who accepted yesterday was measured as refused today. `gtag` here
+            is a plain dataLayer-pusher, not the analytics script. */}
         {gaId() || gtmId() ? (
           <script
             dangerouslySetInnerHTML={{
-              __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied'});`,
+              __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',personalization_storage:'denied',functionality_storage:'granted',security_storage:'granted'});try{var m=document.cookie.match(/(?:^|; )${MARKETING_CONSENT_COOKIE}=([^;]*)/);if(m&&decodeURIComponent(m[1])===${JSON.stringify(marketingConsentValue("granted"))}){gtag('consent','update',{ad_storage:'granted',ad_user_data:'granted',ad_personalization:'granted',analytics_storage:'granted',personalization_storage:'granted'});}}catch(e){}`,
             }}
           />
         ) : null}

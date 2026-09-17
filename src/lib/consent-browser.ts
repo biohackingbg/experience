@@ -57,11 +57,15 @@ export function rememberConsent(choice: MarketingConsent): void {
   // every page a Google product is connected to (before this can ever run) -
   // optional-chained because a site with only Meta connected never sets it.
   const state = choice === "granted" ? "granted" : "denied";
+  // The same seven signals the layout's default sets; keep the two in step.
   (window as Window & { gtag?: (...args: unknown[]) => void }).gtag?.("consent", "update", {
     ad_storage: state,
     ad_user_data: state,
     ad_personalization: state,
     analytics_storage: state,
+    personalization_storage: state,
+    functionality_storage: "granted",
+    security_storage: "granted",
   });
   window.dispatchEvent(new Event(CONSENT_EVENT));
 }
