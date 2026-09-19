@@ -192,6 +192,26 @@ export function CampaignItem({ c }: { c: CampaignRow }) {
           <dd className="mt-0.5 font-semibold text-bh-ink">{c.windowTickets} <span className="text-xs font-normal text-bh-ink/55">от всички канали</span></dd>
         </div>
       </dl>
+      {c.tips.length > 0 && (
+        /* Read off the row's own numbers - see tipsFor in marketing.ts. A row
+           with too little traffic says so rather than inventing a finding. */
+        <ul className="mt-3 flex flex-col gap-1.5">
+          {c.tips.map((tip) => (
+            <li
+              key={tip.text}
+              className={`rounded-xl px-3 py-2 text-xs leading-relaxed ${
+                tip.tone === "warn"
+                  ? "bg-[#C4607F]/10 text-[#9c3d5c]"
+                  : tip.tone === "good"
+                    ? "bg-[#0E8C7D]/12 text-[#0b6d61]"
+                    : "bg-bh-ink/5 text-bh-ink/65"
+              }`}
+            >
+              {tip.text}
+            </li>
+          ))}
+        </ul>
+      )}
       {link && (
         <p className="mt-3 truncate font-mono text-[0.68rem] text-bh-ink/50" title={link}>{link}</p>
       )}

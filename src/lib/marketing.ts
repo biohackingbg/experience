@@ -4,7 +4,7 @@ import { desc, eq, sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { campaigns, orderItems, orders, siteViews } from "@/lib/db/schema";
-import { PLATFORMS } from "@/lib/marketing-options";
+import { PLATFORMS, platformLabel } from "@/lib/marketing-options";
 import { SALE } from "@/lib/sold";
 
 /**
@@ -19,6 +19,54 @@ import { SALE } from "@/lib/sold";
  */
 
 const WINDOW = "48 hours";
+
+export type Tip = { tone: "warn" | "good" | "info"; text: string };
+
+/** Below this many visitors a rate is noise, not a finding. */
+const ENOUGH = 30;
+
+/**
+ * The advice a row can give about itself.
+ *
+ * Only from numbers already on the page - nothing is collected for this.
+ * Silence is deliberate: a row with too little traffic says nothing rather
+ * than dressing up a coincidence as a conclusion.
+ */
+function tipsFor(c: Omit<CampaignRow, "tips">, averageRate: number | null): Tip[] {
+  const out: Tip[] = [];
+
+  if (!c.utmCampaign) {
+    out.push({ tone: "warn", text: "Няма код. Продажбите от тази реклама не могат да се разпознаят - направи линка с бутона „Копирай линка“." });
+    return out;
+  }
+
+  if (c.taggedVisitors === 0) {
+    out.push(
+      c.windowVisitors > 0
+        ? { tone: "warn", text: `Линкът с код не е сложен в рекламата: от ${platformLabel(c.platform)} са дошли ${c.windowVisitors} души, но нито един по линка.` }
+        : { tone: "info", text: "Още никой не е дошъл по линка." },
+    );
+    return out;
+  }
+
+  if (c.taggedVisitors >= ENOUGH && c.taggedTickets === 0) {
+    out.push({ tone: "warn", text: `${c.taggedVisitors} души дойдоха, но никой не купи. Провери накъде води линкът и дали обещанието в рекламата отговаря на страницата.` });
+  }
+
+  if (c.conversionRate !== null && c.taggedVisitors >= ENOUGH && averageRate !== null) {
+    if (c.taggedTickets > 0 && c.conversionRate > averageRate * 1.2) {
+      out.push({ tone: "good", text: `Работи по-добре от останалите: ${c.conversionRate}% срещу ${averageRate}% средно. Струва си повече бюджет.` });
+    } else if (c.conversionRate < averageRate * 0.8) {
+      out.push({ tone: "info", text: `Под средното: ${c.conversionRate}% срещу ${averageRate}%. Сравни с макета, който работи най-добре.` });
+    }
+  }
+
+  if (c.taggedVisitors > 0 && c.taggedVisitors < ENOUGH) {
+    out.push({ tone: "info", text: `Само ${c.taggedVisitors} души по линка - твърде малко, за да се съди. Изчакай да станат поне ${ENOUGH}.` });
+  }
+
+  return out;
+}
 
 export type CampaignRow = {
   id: string;
@@ -41,6 +89,8 @@ export type CampaignRow = {
   taggedGrossCents: number;
   /** Conversion rate: tickets bought / people who clicked the tagged link, as %. */
   conversionRate: number | null;
+  /** What to do about this row, read off its own numbers. */
+  tips: Tip[];
   /** Distinct people arriving from this platform in the 48h after posting. */
   windowVisitors: number;
   /** Tickets paid in the same 48h, from anywhere. */
@@ -187,10 +237,19 @@ export async function getMarketing(): Promise<Marketing> {
       taggedTickets,
       taggedGrossCents: sales.reduce((a, s) => a + s.gross, 0),
       conversionRate: taggedVisitors > 0 ? Math.round((taggedTickets / taggedVisitors) * 10000) / 100 : null,
+      tips: [],
       windowVisitors: win.get(c.id)?.visitors ?? 0,
       windowTickets: win.get(c.id)?.tickets ?? 0,
     };
   });
+
+  // The yardstick the tips compare against: how the rows with enough traffic
+  // convert, taken together rather than one by one.
+  const measurable = list.filter((c) => c.taggedVisitors >= ENOUGH);
+  const pooledVisitors = measurable.reduce((a, c) => a + c.taggedVisitors, 0);
+  const pooledTickets = measurable.reduce((a, c) => a + c.taggedTickets, 0);
+  const averageRate = pooledVisitors > 0 ? Math.round((pooledTickets / pooledVisitors) * 10000) / 100 : null;
+  for (const row of list) row.tips = tipsFor(row, averageRate);
 
   const platforms: PlatformSummary[] = PLATFORMS.map((p) => {
     const mine = list.filter((c) => c.platform === p.id);
