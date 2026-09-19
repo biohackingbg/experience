@@ -1,8 +1,19 @@
 /** Option lists for the marketing log, importable by client forms (no server code here). */
 
+const INSTAGRAM_HOSTS = ["instagram.com", "l.instagram.com", "www.instagram.com"];
+const FACEBOOK_HOSTS = ["facebook.com", "m.facebook.com", "l.facebook.com", "lm.facebook.com", "www.facebook.com"];
+
 export const PLATFORMS = [
-  { id: "instagram", label: "Instagram", hosts: ["instagram.com", "l.instagram.com", "www.instagram.com"] },
-  { id: "facebook", label: "Facebook", hosts: ["facebook.com", "m.facebook.com", "l.facebook.com", "lm.facebook.com", "www.facebook.com"] },
+  /**
+   * Paid Meta campaigns are bought once and shown across Facebook and
+   * Instagram, so splitting them between those two would divide one budget's
+   * results in half. Its referrer hosts are both networks', which is what
+   * the "around the post" window counts; the tagged link is what ties a sale
+   * to it either way.
+   */
+  { id: "meta", label: "Meta реклами (FB + IG)", hosts: [...FACEBOOK_HOSTS, ...INSTAGRAM_HOSTS] },
+  { id: "instagram", label: "Instagram", hosts: INSTAGRAM_HOSTS },
+  { id: "facebook", label: "Facebook", hosts: FACEBOOK_HOSTS },
   { id: "linkedin", label: "LinkedIn", hosts: ["linkedin.com", "www.linkedin.com", "lnkd.in"] },
   { id: "tiktok", label: "TikTok", hosts: ["tiktok.com", "www.tiktok.com", "vm.tiktok.com"] },
   { id: "youtube", label: "YouTube", hosts: ["youtube.com", "www.youtube.com", "youtu.be", "m.youtube.com"] },
