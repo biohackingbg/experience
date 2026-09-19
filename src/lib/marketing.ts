@@ -41,9 +41,15 @@ function tipsFor(c: Omit<CampaignRow, "tips">, averageRate: number | null): Tip[
   }
 
   if (c.taggedVisitors === 0) {
+    // Nobody has arrived by this code yet. That reads the same whether the
+    // link was never put in the ad or the ad simply has not been clicked
+    // yet, so it says both rather than accusing.
     out.push(
       c.windowVisitors > 0
-        ? { tone: "warn", text: `Линкът с код не е сложен в рекламата: от ${platformLabel(c.platform)} са дошли ${c.windowVisitors} души, но нито един по линка.` }
+        ? {
+            tone: "info",
+            text: `Още никой не е дошъл по линка, а от ${platformLabel(c.platform)} идват ${c.windowVisitors} души за 48 ч. Ако рекламата вече върви с този адрес, изчакай първите кликове; ако не - провери дали е запазен с „Publish“.`,
+          }
         : { tone: "info", text: "Още никой не е дошъл по линка." },
     );
     return out;
