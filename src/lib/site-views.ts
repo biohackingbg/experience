@@ -42,6 +42,36 @@ export function visitorHash(ip: string, userAgent: string): string {
     .slice(0, 22);
 }
 
+/**
+ * The campaign this visitor arrived by earlier today.
+ *
+ * An advert drops someone on the home page with the tags in the address;
+ * every link from there to the checkout is a plain one, so by the time an
+ * order is placed the tags are long gone and the sale files itself under
+ * "no known source". The visit that carried them is already recorded, so
+ * the order is matched back to it here instead.
+ *
+ * Nothing new is stored and nothing is read from the visitor's device: the
+ * same one-way daily code the view was written under is computed again from
+ * the request. It changes at midnight, which is also why this looks no
+ * further back than a day.
+ */
+export async function lastCampaignOf(
+  visitor: string,
+): Promise<{ source: string | null; campaign: string } | null> {
+  const [row] = await getDb()
+    .select({ source: siteViews.utmSource, campaign: siteViews.utmCampaign })
+    .from(siteViews)
+    .where(
+      sql`${siteViews.visitor} = ${visitor}
+          and ${siteViews.utmCampaign} is not null
+          and ${siteViews.createdAt} >= now() - interval '24 hours'`,
+    )
+    .orderBy(sql`${siteViews.createdAt} desc`)
+    .limit(1);
+  return row?.campaign ? { source: row.source, campaign: row.campaign } : null;
+}
+
 /** Query strings carry campaign tags and sometimes an email; the path is enough. */
 export function cleanPath(raw: string): string | null {
   const path = raw.split("?")[0]?.split("#")[0]?.trim() ?? "";

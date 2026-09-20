@@ -19,6 +19,7 @@ import { createWaitlistSignup } from "@/lib/signups";
 import { discountFor, promoReasonText, resolvePromo } from "@/lib/promo";
 import { PURCHASE_TERMS_TEXT, PURCHASE_TERMS_TEXT_EN, PURCHASE_TERMS_VERSION } from "@/lib/purchase-terms";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { lastCampaignOf, visitorHash } from "@/lib/site-views";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { GALA, SALES_OPEN, TIERS, getTier, picksDay } from "@/lib/tickets";
 
@@ -144,6 +145,21 @@ export async function startCheckout(
   }
   const coreDay = picksDay(tier.id) ? (input.coreDay ?? null) : null;
 
+  // The tags are on the address of the advert's landing page, not on the
+  // checkout the buyer reaches from it, so most orders arrive without them.
+  // The visit that carried them was recorded, under a code computed from
+  // this same request - so when the form brings none, the sale is matched
+  // back to that visit rather than counted as coming from nowhere.
+  let utmSource = input.utmSource;
+  let utmCampaign = input.utmCampaign;
+  if (!utmCampaign && ip !== "unknown") {
+    const seen = await lastCampaignOf(visitorHash(ip, head.get("user-agent") ?? ""));
+    if (seen) {
+      utmCampaign = seen.campaign;
+      utmSource = utmSource ?? seen.source ?? undefined;
+    }
+  }
+
   const lang = langOf(input.lang);
   const cookieStore = await cookies();
   const marketingConsent = hasMarketingConsent(
@@ -151,6 +167,8 @@ export async function startCheckout(
   );
   const order = await createPendingOrder({
     ...input,
+    utmSource,
+    utmCampaign,
     coreDay,
     lang,
     promoCode: input.promo,
