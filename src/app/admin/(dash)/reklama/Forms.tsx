@@ -75,11 +75,12 @@ export function CampaignForm() {
   );
 }
 
-function Copy({ text }: { text: string }) {
+function Copy({ text, label }: { text: string; label: string }) {
   const [done, setDone] = useState(false);
   return (
     <button
       type="button"
+      title={text}
       onClick={async () => {
         await navigator.clipboard.writeText(text);
         setDone(true);
@@ -87,7 +88,7 @@ function Copy({ text }: { text: string }) {
       }}
       className={small}
     >
-      {done ? "Копиран ✓" : "Копирай линка"}
+      {done ? "Копиран ✓" : label}
     </button>
   );
 }
@@ -99,6 +100,9 @@ export function CampaignItem({ c }: { c: CampaignRow }) {
   const [editing, setEditing] = useState(false);
   const [state, action, pending] = useActionState(editCampaign, idle);
   const link = c.utmCampaign ? campaignLink(c.platform, c.utmCampaign) : null;
+  // An advert for a ticket should land on the ticket page, not the home
+  // page, so the second link saves editing the address by hand every time.
+  const ticketLink = c.utmCampaign ? campaignLink(c.platform, c.utmCampaign, "/bilet") : null;
 
   if (editing) {
     return (
@@ -137,7 +141,8 @@ export function CampaignItem({ c }: { c: CampaignRow }) {
           {c.note && <div className="mt-0.5 text-xs text-bh-ink/55">{c.note}</div>}
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {link && <Copy text={link} />}
+          {link && <Copy text={link} label="Линк · начална" />}
+          {ticketLink && <Copy text={ticketLink} label="Линк · билети" />}
           <button type="button" onClick={() => setEditing(true)} className={small}>Редактирай</button>
           <form
             action={removeCampaign}

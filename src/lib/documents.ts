@@ -6,6 +6,7 @@ import { asc, desc, eq, sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { deckLinks, documentLines, documents } from "@/lib/db/schema";
+import { sendDocumentEmail } from "@/lib/email";
 import { type BankDetails, getBankDetails } from "@/lib/manual-orders";
 import { CURRENCY, VAT_RATE } from "@/lib/tickets";
 
@@ -107,6 +108,19 @@ export async function createDocument(input: DocumentInput): Promise<{ reference:
         position: i,
       })),
     );
+  });
+
+  // The proforma is of no use sitting in the admin: it goes to the buyer the
+  // moment it exists, the same way a bank-transfer ticket order's does.
+  await sendDocumentEmail("proforma", {
+    to: input.buyerEmail,
+    buyerName: input.buyerName,
+    company: input.company,
+    reference,
+    totalCents,
+    items: input.lines.map((l) => `${l.quantity}× ${l.description}`).join(", "),
+    dueAt: new Date(Date.now() + input.dueDays * 86_400_000),
+    bank: await getBankDetails(),
   });
 
   return { reference };
@@ -259,10 +273,39 @@ export async function markDocumentPaid(reference: string): Promise<number | null
 
   // The pipeline is where the team reads the money from; leaving it on
   // "договорено" after the cash is in makes Финанси understate the bank.
-  const [doc] = await db.select({ deckLinkId: documents.deckLinkId }).from(documents).where(eq(documents.reference, reference)).limit(1);
+  const [doc] = await db
+    .select({
+      deckLinkId: documents.deckLinkId,
+      buyerEmail: documents.buyerEmail,
+      buyerName: documents.buyerName,
+      company: documents.company,
+      totalCents: documents.totalCents,
+    })
+    .from(documents)
+    .where(eq(documents.reference, reference))
+    .limit(1);
   if (doc?.deckLinkId) {
     await db.update(deckLinks).set({ money: "paid", updatedAt: new Date() }).where(eq(deckLinks.id, doc.deckLinkId));
   }
+
+  if (doc) {
+    const lines = await db
+      .select({ description: documentLines.description, quantity: documentLines.quantity })
+      .from(documentLines)
+      .innerJoin(documents, eq(documents.id, documentLines.documentId))
+      .where(eq(documents.reference, reference))
+      .orderBy(asc(documentLines.position));
+    await sendDocumentEmail("invoice", {
+      to: doc.buyerEmail,
+      buyerName: doc.buyerName,
+      company: doc.company,
+      reference,
+      totalCents: doc.totalCents,
+      items: lines.map((l) => `${l.quantity}× ${l.description}`).join(", "),
+      invoiceNumber: Number(row.invoice_number),
+    });
+  }
+
   return Number(row.invoice_number);
 }
 
