@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { canAccess } from "@/lib/access";
-import { cancelDocument, createDocument, isDocumentReference, markDocumentPaid } from "@/lib/documents";
+import { cancelDocument, createDocument, isDocumentReference, markDocumentPaid, resendDocument } from "@/lib/documents";
 
 export type DocState = { status: "idle" | "ok" | "error"; message?: string; reference?: string };
 
@@ -66,7 +66,29 @@ export async function createDoc(_prev: DocState, formData: FormData): Promise<Do
     lang,
   });
   done();
-  return { status: "ok", reference, message: `Проформата е готова (${reference}). Отвори я и я прати на ${buyerEmail}.` };
+  return { status: "ok", reference, message: `Проформата е готова (${reference}) и вече е изпратена на ${buyerEmail}.` };
+}
+
+export type SendState = { status: "idle" | "ok" | "error"; message?: string };
+
+/** Sends the proforma or the invoice again, by hand. */
+export async function sendDoc(_prev: SendState, formData: FormData): Promise<SendState> {
+  if (!(await canAccess("dokumenti"))) return { status: "error", message: "Няма достъп." };
+  const reference = String(formData.get("reference") ?? "").trim().toUpperCase();
+  const kind = formData.get("kind") === "invoice" ? "invoice" : "proforma";
+  if (!isDocumentReference(reference)) return { status: "error", message: "Невалиден номер." };
+
+  const r = await resendDocument(reference, kind);
+  done();
+  if (r === "sent") return { status: "ok", message: `${kind === "invoice" ? "Фактурата" : "Проформата"} е изпратена.` };
+  return {
+    status: "error",
+    message: {
+      not_found: "Документът не е намерен или е отказан.",
+      no_invoice: "Още няма фактура - маркирай документа като платен.",
+      failed: "Изпращането не мина. Провери дневника.",
+    }[r],
+  };
 }
 
 export async function payDoc(formData: FormData): Promise<void> {

@@ -5,7 +5,7 @@ import { useActionState, useState } from "react";
 import { TIERS as PACKAGES } from "@/lib/finance-options";
 import { formatPrice } from "@/lib/tickets";
 
-import { type DocState, createDoc } from "./actions";
+import { type DocState, type SendState, createDoc, sendDoc } from "./actions";
 
 const idle: DocState = { status: "idle" };
 const field = "w-full min-w-0 rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35";
@@ -190,6 +190,27 @@ export function DocumentForm({ partners }: { partners: PartnerOption[] }) {
           )}
         </p>
       )}
+    </form>
+  );
+}
+
+const sendIdle: SendState = { status: "idle" };
+
+/** "Send it again" for one document, with the answer beside the button. */
+export function SendButton({ reference, kind, label }: { reference: string; kind: "proforma" | "invoice"; label: string }) {
+  const [state, action, pending] = useActionState(sendDoc, sendIdle);
+  return (
+    <form action={action} className="flex items-center gap-2">
+      <input type="hidden" name="reference" value={reference} />
+      <input type="hidden" name="kind" value={kind} />
+      <button
+        type="submit"
+        disabled={pending}
+        className="rounded-full border border-bh-ink/20 px-3 py-1.5 text-xs font-semibold text-bh-ink transition-colors hover:border-bh-ink disabled:opacity-50"
+      >
+        {pending ? "Изпраща…" : state.status === "ok" ? "Изпратено ✓" : label}
+      </button>
+      {state.status === "error" && <span className="text-xs text-red-600">{state.message}</span>}
     </form>
   );
 }

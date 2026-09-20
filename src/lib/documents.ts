@@ -309,6 +309,33 @@ export async function markDocumentPaid(reference: string): Promise<number | null
   return Number(row.invoice_number);
 }
 
+/**
+ * Sends the document again, to the address it was raised for.
+ *
+ * The letters go out by themselves - the proforma when it is raised, the
+ * invoice when the money is marked in - so this is for the times that is not
+ * enough: a buyer who deleted it, an address that bounced, a colleague who
+ * needs it forwarded.
+ */
+export async function resendDocument(reference: string, kind: "proforma" | "invoice"): Promise<"sent" | "not_found" | "no_invoice" | "failed"> {
+  const d = await loadDocument(reference);
+  if (!d || d.status === "cancelled") return "not_found";
+  if (kind === "invoice" && !d.invoiceNumber) return "no_invoice";
+
+  const ok = await sendDocumentEmail(kind, {
+    to: d.buyerEmail,
+    buyerName: d.buyerName,
+    company: d.company,
+    reference: d.reference,
+    totalCents: d.totalCents,
+    items: d.lines.map((l) => `${l.quantity}× ${l.description}`).join(", "),
+    dueAt: kind === "proforma" ? d.dueAt : null,
+    invoiceNumber: d.invoiceNumber,
+    bank: kind === "proforma" ? await getBankDetails() : undefined,
+  });
+  return ok ? "sent" : "failed";
+}
+
 /** Nothing came of it. The document keeps its history; it just stops counting. */
 export async function cancelDocument(reference: string): Promise<boolean> {
   const [row] = await getDb()

@@ -8,7 +8,7 @@ import { listDocuments, listPartnersForDocuments } from "@/lib/documents";
 import { formatPrice } from "@/lib/tickets";
 
 import { cancelDoc, payDoc } from "./actions";
-import { DocumentForm } from "./Forms";
+import { DocumentForm, SendButton } from "./Forms";
 
 export const metadata: Metadata = {
   title: "Проформи и фактури | Администрация",
@@ -107,6 +107,8 @@ export default async function DocumentsPage() {
                         Фактура
                       </Link>
                     )}
+                    {d.status !== "cancelled" && <SendButton reference={d.reference} kind="proforma" label="Изпрати проформа" />}
+                    {d.invoiceNumber && <SendButton reference={d.reference} kind="invoice" label="Изпрати фактура" />}
                     {d.status === "open" && (
                       <>
                         <form action={payDoc}>
