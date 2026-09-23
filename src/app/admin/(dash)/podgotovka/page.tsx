@@ -4,10 +4,11 @@ import Link from "next/link";
 import { HomeLink } from "@/components/admin/HomeLink";
 import { requireAccess } from "@/lib/access";
 import { STAGES } from "@/lib/deck-links";
-import { DELIVERABLES, MONEY, TIERS } from "@/lib/finance-options";
+import { DELIVERABLES } from "@/lib/finance-options";
 import { getPreparation } from "@/lib/preparation";
 
-import { markReceived, saveContact, saveDeal, saveDeliverable } from "./actions";
+import { markReceived, saveContact, saveDeliverable } from "./actions";
+import { DealForm } from "./DealForm";
 
 export const metadata: Metadata = {
   title: "Подготовка | Администрация",
@@ -136,62 +137,17 @@ export default async function PreparationPage() {
                     package and the money belong next to the things they buy,
                     and the promise is now made on the page where it is also
                     ticked off. */}
-                <form action={saveDeal} className="mt-4 rounded-2xl bg-bh-paper p-4 ring-1 ring-bh-ink/8">
-                  <input type="hidden" name="linkId" value={partner.id} />
-                  <div className="font-mono text-[0.6rem] uppercase tracking-[0.15em] text-bh-ink/50">Сделката · суми без ДДС</div>
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <select name="tier" defaultValue={partner.tier ?? ""} className={input}>
-                      <option value="">пакет</option>
-                      {TIERS.map((t) => (
-                        <option key={t.id} value={t.id}>{t.label}</option>
-                      ))}
-                    </select>
-                    <input
-                      name="amount"
-                      inputMode="decimal"
-                      defaultValue={partner.amountCents === null ? "" : String(partner.amountCents / 100)}
-                      placeholder="€ сума"
-                      className={`${input} w-28`}
-                    />
-                    <select name="money" defaultValue={partner.money ?? ""} className={input}>
-                      <option value="">парите</option>
-                      {MONEY.map((m) => (
-                        <option key={m.id} value={m.id}>{m.label}</option>
-                      ))}
-                    </select>
-                    <input
-                      name="inKind"
-                      inputMode="decimal"
-                      defaultValue={partner.inKindCents === null ? "" : String(partner.inKindCents / 100)}
-                      placeholder="€ бартер"
-                      className={`${input} w-28`}
-                    />
-                    <input
-                      name="tickets"
-                      type="number"
-                      min={0}
-                      defaultValue={partner.ticketsCount ?? ""}
-                      placeholder="билети"
-                      className={`${input} w-24`}
-                    />
-                  </div>
-                  <fieldset className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
-                    <legend className="font-mono text-[0.6rem] uppercase tracking-[0.15em] text-bh-ink/50">Какво дава</legend>
-                    {DELIVERABLES.map((d) => (
-                      <label key={d.id} className="flex items-center gap-1.5 text-xs text-bh-ink">
-                        <input
-                          type="checkbox"
-                          name="deliverables"
-                          value={d.id}
-                          defaultChecked={partner.items.some((i) => i.kind === d.id)}
-                          className="h-3.5 w-3.5 accent-[#146455]"
-                        />
-                        {d.label}
-                      </label>
-                    ))}
-                  </fieldset>
-                  <button type="submit" className={`${small} mt-3`}>Запиши сделката</button>
-                </form>
+                <DealForm
+                  partner={{
+                    id: partner.id,
+                    tier: partner.tier,
+                    amountCents: partner.amountCents,
+                    money: partner.money,
+                    inKindCents: partner.inKindCents,
+                    ticketsCount: partner.ticketsCount,
+                    checked: DELIVERABLES.filter((d) => partner.items.some((i) => i.kind === d.id)).map((d) => d.id),
+                  }}
+                />
 
                 {partner.items.length === 0 ? (
                   <p className="mt-4 text-sm text-bh-ink/50">Още нищо не е уговорено - отбележи го отгоре.</p>

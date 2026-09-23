@@ -38,38 +38,61 @@ export async function saveDeliverable(formData: FormData): Promise<void> {
   done();
 }
 
+export type DealState = { status: "idle" | "ok" | "error"; message?: string };
+
+/**
+ * Typed in euros, whole or with a decimal point; stored net, in cents.
+ *
+ * "bad" rather than null for anything else: a stray "лв", a thousands comma
+ * in "1,800" or a slipped letter used to be written as an empty amount, so
+ * the number quietly disappeared and the form looked as if it had ignored
+ * the click.
+ */
+function euros(v: FormDataEntryValue | null): number | null | "bad" {
+  const raw = String(v ?? "").replace(/\s/g, "").replace("€", "").replace(",", ".");
+  if (!raw) return null;
+  if (!/^\d+(\.\d{1,2})?$/.test(raw)) return "bad";
+  const n = Math.round(Number(raw) * 100);
+  return Number.isFinite(n) ? n : "bad";
+}
+
 /**
  * The deal: package, money, barter and what the partner gives. Moved here
  * from Презентация, so the promise is made where it is also ticked off.
  */
-export async function saveDeal(formData: FormData): Promise<void> {
-  if (!(await canAccess("podgotovka"))) return;
+export async function saveDeal(_prev: DealState, formData: FormData): Promise<DealState> {
+  if (!(await canAccess("podgotovka"))) return { status: "error", message: "Няма достъп - влез пак." };
   const linkId = String(formData.get("linkId") ?? "");
-  if (!UUID.test(linkId)) return;
+  if (!UUID.test(linkId)) return { status: "error", message: "Партньорът не е разпознат. Презареди страницата." };
 
-  // Typed in euros, whole or with a comma; stored net, in cents. A value
-  // that is not a number is left alone rather than written as zero.
-  const cents = (v: FormDataEntryValue | null) => {
-    const raw = String(v ?? "").replace(/\s/g, "").replace(",", ".");
-    if (!raw) return null;
-    const n = Math.round(Number(raw) * 100);
-    return Number.isFinite(n) && n >= 0 ? n : null;
-  };
+  const amountCents = euros(formData.get("amount"));
+  if (amountCents === "bad") return { status: "error", message: "Сумата - само цифри: 1800 или 1800.50." };
+  const inKindCents = euros(formData.get("inKind"));
+  if (inKindCents === "bad") return { status: "error", message: "Бартерът - само цифри: 1800 или 1800.50." };
+
+  const ticketsRaw = String(formData.get("tickets") ?? "").trim();
+  const ticketsCount = ticketsRaw ? Number.parseInt(ticketsRaw, 10) : null;
+  if (ticketsRaw && !(Number.isInteger(ticketsCount) && (ticketsCount ?? 0) >= 0)) {
+    return { status: "error", message: "Билетите - цял брой, 0 или повече." };
+  }
+
   const tier = formData.get("tier");
   const money = formData.get("money");
   const deliverables = formData.getAll("deliverables").filter(isDeliverable);
-  const ticketsRaw = String(formData.get("tickets") ?? "").trim();
-  const ticketsCount = ticketsRaw ? Number.parseInt(ticketsRaw, 10) : null;
 
   await setDeal(linkId, {
     tier: isTier(tier) ? tier : null,
-    amountCents: cents(formData.get("amount")),
+    amountCents,
     money: isMoney(money) ? money : null,
-    inKindCents: cents(formData.get("inKind")),
+    inKindCents,
     deliverables: deliverables.length ? deliverables.join(",") : null,
-    ticketsCount: Number.isInteger(ticketsCount) && (ticketsCount ?? 0) >= 0 ? ticketsCount : null,
+    ticketsCount,
   });
   done();
+  return {
+    status: "ok",
+    message: amountCents === null ? "Записано - без сума." : "Записано.",
+  };
 }
 
 export async function saveContact(formData: FormData): Promise<void> {
