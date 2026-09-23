@@ -50,12 +50,7 @@ export const PROGRAM: Day[] = [
         time: "10:00-10:25",
         title: "Откриване: да живеем по-дълго. Но и по-добре.",
         note: "Българска Лонджевити Асоциация и Biohacking BG откриват събитието заедно и поставят големия въпрос: как превръщаме науката за дълголетието в по-добър живот за всеки?",
-        people: [
-          "Д-р Райна Стоянова",
-          "Мария Силвестър",
-          "Dominik Thor",
-          "Rocio Salas-Whalen",
-        ],
+        people: ["Д-р Райна Стоянова", "Dominik Thor", "Rocio Salas-Whalen"],
       },
       {
         time: "10:25-11:20",
@@ -136,14 +131,14 @@ export const PROGRAM: Day[] = [
         time: "17:10-18:00",
         title: "DIVA Live: жената, енергията и възрастта като сила",
         note: "Разговор на живо за женската идентичност, сцена, тяло, самочувствие и грижата за себе си през различните десетилетия.",
-        role: "Водещ: Мария Силвестър",
+        role: "Водещ: Джулия Димитрова",
         people: ["Мария Илиева"],
       },
       {
         time: "18:00",
-        title: "Финал на ден 1 • покана за благотворителна гала вечеря",
-        note: "Вечер, в която дълголетието среща солидарността, общността и смисъла.",
-        people: ["Д-р Райна Стоянова", "Мария Силвестър"],
+        title: "Край на ден 1",
+        note: "Благотворителната гала вечеря е същата вечер, с отделна покана и отделен билет.",
+        pause: true,
       },
     ],
   },
@@ -180,18 +175,16 @@ export const PROGRAM: Day[] = [
       {
         time: "12:00-12:55",
         title: "Кожата като огледало на стареенето",
-        note: "Кожата като биомаркер, слънце и exposome, ASIA синдром, микропластмаси, ендокринни нарушители и по-информиран избор на козметика.",
+        note: "Кожата като биомаркер, слънце и exposome, микропластмаси, ендокринни нарушители и по-информиран избор на козметика.",
         role: "Модератор: Радина Денкова",
-        people: ["Melanie Angelova", "Мартин Генов", "Симеон Личев"],
+        people: ["Melanie Angelova", "Симеон Личев"],
       },
       { time: "12:55-13:50", title: "Обяд • meet the experts", pause: true },
       {
         time: "13:50-15:25",
         title: "Какво наистина работи? Хранене, добавки, NAD⁺, инфузии и превенция",
         note: "Без маркетингов шум: доказателства срещу hype, хранене и добавки за дълъг живот, NAD⁺, венозни инфузии - ползи, рискове и етика - плюс превенция и ранно откриване на онкологични заболявания.",
-        role: "Водещ и модератор: Кристина Газиева",
         people: [
-          "Екатерина Куртева",
           "Анелия Биволарска",
           "Silvena Rowe",
           "Иван Манчев",
@@ -297,11 +290,11 @@ export const PROGRAM_EN: SlotEn[][] = [
     {
       title: "DIVA Live: women, energy and age as strength",
       note: "A live conversation about female identity, the stage, the body, confidence and self-care through the decades.",
-      role: "Host: Maria Silvester",
+      role: "Host: Julia Dimitrova",
     },
     {
-      title: "End of day 1 \u00b7 invitation to the charity gala dinner",
-      note: "An evening where longevity meets solidarity, community and meaning.",
+      title: "End of day 1",
+      note: "The charity gala dinner is the same evening, by separate invitation and a separate ticket.",
     },
   ],
   [
@@ -318,14 +311,13 @@ export const PROGRAM_EN: SlotEn[][] = [
     { title: "Coffee \u00b7 move break" },
     {
       title: "The skin as a mirror of ageing",
-      note: "The skin as a biomarker, sun and the exposome, ASIA syndrome, microplastics, endocrine disruptors and a better-informed choice of cosmetics.",
+      note: "The skin as a biomarker, sun and the exposome, microplastics, endocrine disruptors and a better-informed choice of cosmetics.",
       role: "Moderator: Radina Denkova",
     },
     { title: "Lunch \u00b7 meet the experts" },
     {
       title: "What actually works? Nutrition, supplements, NAD\u207a, infusions and prevention",
       note: "Without the marketing noise: evidence against hype, nutrition and supplements for a long life, NAD\u207a, intravenous infusions - benefits, risks and ethics - plus prevention and early detection of cancer.",
-      role: "Host and moderator: Kristina Gazieva",
     },
     { title: "Coffee \u00b7 longevity lab" },
     {
