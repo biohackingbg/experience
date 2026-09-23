@@ -132,7 +132,9 @@ const documentSample: DocumentEmailInput = {
   company: "Пример ООД",
   reference: "DOC-ПРИМЕР",
   totalCents: 216000,
-  items: "1× Партньорски пакет GOLD · Sofia Life Summit 2026",
+  // No package name in the sample: a level here reads as if the system had
+  // decided one, and nothing in it ever does - the line comes from the deal.
+  items: "1× Партньорски пакет · Sofia Life Summit 2026",
   dueAt: inDays(7),
   bank: bankSample,
 };
