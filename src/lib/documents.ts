@@ -6,7 +6,7 @@ import { asc, desc, eq, sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { deckLinks, documentLines, documents } from "@/lib/db/schema";
-import { sendDocumentEmail } from "@/lib/email";
+import { type DocumentEmailInput, sendDocumentEmail } from "@/lib/email";
 import { type BankDetails, getBankDetails } from "@/lib/manual-orders";
 import { CURRENCY, VAT_RATE } from "@/lib/tickets";
 
@@ -438,4 +438,75 @@ export async function listPartnersForDocuments() {
     .from(deckLinks)
     .where(sql`${deckLinks.stage} = 'confirmed' and ${deckLinks.amountCents} is not null`)
     .orderBy(desc(deckLinks.amountCents));
+}
+
+export type SentDocumentMail = {
+  kind: "proforma" | "invoice";
+  /** Where it went. */
+  to: string;
+  /** The company, or the contact when there is no company. */
+  who: string;
+  /** When the letter left. */
+  sentAt: Date;
+  reference: string;
+  input: DocumentEmailInput;
+};
+
+/**
+ * The last proforma or invoice letter that went to a partner, ready to be
+ * rendered again.
+ *
+ * Inferred rather than archived: nothing keeps a copy of a sent letter, but
+ * both of these leave at a moment the row records - the proforma when the
+ * document is raised, the invoice when it is marked paid. Re-rendering from
+ * the row is therefore the same letter, unless the wording was edited in
+ * between, which is why the page says when it went.
+ */
+export async function latestDocumentMail(kind: "proforma" | "invoice"): Promise<SentDocumentMail | null> {
+  const db = getDb();
+  const where =
+    kind === "invoice"
+      ? sql`${documents.invoiceNumber} is not null and ${documents.invoicedAt} is not null`
+      : sql`${documents.status} <> 'cancelled'`;
+  const [row] = await db
+    .select({
+      reference: documents.reference,
+      buyerName: documents.buyerName,
+      buyerEmail: documents.buyerEmail,
+      company: documents.company,
+      totalCents: documents.totalCents,
+      dueAt: documents.dueAt,
+      invoiceNumber: documents.invoiceNumber,
+      createdAt: documents.createdAt,
+      invoicedAt: documents.invoicedAt,
+    })
+    .from(documents)
+    .where(where)
+    .orderBy(desc(kind === "invoice" ? documents.invoicedAt : documents.createdAt))
+    .limit(1);
+  if (!row) return null;
+
+  const lines = await db
+    .select({ description: documentLines.description, quantity: documentLines.quantity })
+    .from(documentLines)
+    .innerJoin(documents, eq(documents.id, documentLines.documentId))
+    .where(eq(documents.reference, row.reference))
+    .orderBy(asc(documentLines.position));
+
+  return {
+    kind,
+    to: row.buyerEmail,
+    who: row.company ?? row.buyerName,
+    sentAt: (kind === "invoice" ? row.invoicedAt : row.createdAt) ?? row.createdAt,
+    reference: row.reference,
+    input: {
+      to: row.buyerEmail,
+      buyerName: row.buyerName,
+      company: row.company,
+      reference: row.reference,
+      totalCents: row.totalCents,
+      items: lines.map((l) => `${l.quantity}× ${l.description}`).join(", "),
+      ...(kind === "proforma" ? { dueAt: row.dueAt, bank: await getBankDetails() } : { invoiceNumber: row.invoiceNumber }),
+    },
+  };
 }

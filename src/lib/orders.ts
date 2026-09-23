@@ -455,3 +455,58 @@ export async function issueCreditNote(orderId: string): Promise<number | null> {
   );
   return row ? Number(row.credit_note_number) : null;
 }
+
+export type SentTicketMail = {
+  to: string;
+  who: string;
+  sentAt: Date;
+  reference: string;
+  input: { to: string; buyerName: string; reference: string; totalCents: number; invoiceNumber: number | null; tickets: { code: string; tierName: string }[] };
+};
+
+/**
+ * The last ticket letter that went out, ready to be rendered again.
+ *
+ * Inferred from the order rather than archived: the letter leaves when the
+ * payment is confirmed, so `paid_at` is the moment it left. A resend from
+ * the admin is not recorded, so the date is the first send.
+ */
+export async function latestTicketMail(): Promise<SentTicketMail | null> {
+  const db = getDb();
+  const [order] = await db
+    .select({
+      reference: orders.reference,
+      name: orders.name,
+      email: orders.email,
+      totalCents: orders.totalCents,
+      invoiceNumber: orders.invoiceNumber,
+      paidAt: orders.paidAt,
+    })
+    .from(orders)
+    .where(sql`${orders.status} = 'paid' and ${orders.paidAt} is not null`)
+    .orderBy(sql`${orders.paidAt} desc`)
+    .limit(1);
+  if (!order) return null;
+
+  const rows = await db
+    .select({ code: tickets.code, tierName: orderItems.tierName })
+    .from(tickets)
+    .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
+    .innerJoin(orderItems, sql`${orderItems.orderId} = ${orders.id} and ${orderItems.tierId} = ${tickets.tierId}`)
+    .where(sql`${orders.reference} = ${order.reference}`);
+
+  return {
+    to: order.email,
+    who: order.name,
+    sentAt: order.paidAt ?? new Date(),
+    reference: order.reference,
+    input: {
+      to: order.email,
+      buyerName: order.name,
+      reference: order.reference,
+      totalCents: order.totalCents,
+      invoiceNumber: order.invoiceNumber,
+      tickets: rows,
+    },
+  };
+}

@@ -28,6 +28,8 @@ import {
   waitlistEmailParts,
 } from "@/lib/email";
 import { buildDigest } from "@/lib/digest";
+import { latestDocumentMail } from "@/lib/documents";
+import { latestTicketMail } from "@/lib/orders";
 import { getMailTexts } from "@/lib/mail-texts";
 import { daysToEvent } from "@/lib/event-mail";
 
@@ -75,6 +77,11 @@ export type MailPreview = {
   /** Null for the plain-text letters - an alert is not a newsletter. */
   html: string | null;
   text: string;
+  /**
+   * Set when the preview is the real last letter rather than the sample -
+   * who got it and when, so nobody reads invented numbers as a record.
+   */
+  real?: { who: string; to: string; sentAt: Date };
 };
 
 const ticketSample: TicketEmailInput = {
@@ -174,16 +181,20 @@ export async function mailPreview(kind: MailKind): Promise<MailPreview> {
   // The preview must show the wording as it is now, not as it shipped.
   const t = await getMailTexts();
   switch (kind) {
-    case "bilet":
+    case "bilet": {
+      const sent = await latestTicketMail();
+      const input = sent?.input ? { ...ticketSample, ...sent.input } : ticketSample;
       return {
         kind,
         group: "kupuvachi",
         title: "Билетът",
         when: "Веднага след потвърдено плащане, автоматично. Един път на поръчка; „Прати пак“ в Dashboard го праща отново.",
-        subject: `Билетът ти за Sofia Life Summit · ${ticketSample.reference}`,
-        html: ticketEmailHtml(ticketSample, t),
-        text: ticketEmailText(ticketSample, t),
+        subject: `Билетът ти за Sofia Life Summit · ${input.reference}`,
+        html: ticketEmailHtml(input, t),
+        text: ticketEmailText(input, t),
+        ...(sent ? { real: { who: sent.who, to: sent.to, sentAt: sent.sentAt } } : {}),
       };
+    }
     case "proforma":
       return {
         kind,
@@ -231,7 +242,11 @@ export async function mailPreview(kind: MailKind): Promise<MailPreview> {
       };
     }
     case "dokument-proforma": {
-      const m = documentEmailParts("proforma", documentSample, t);
+      // The last one that actually went, when there is one: for a sponsor
+      // letter the question is what this partner received, not what the
+      // template looks like.
+      const sent = await latestDocumentMail("proforma");
+      const m = documentEmailParts("proforma", sent?.input ?? documentSample, t);
       return {
         kind,
         group: "firmi",
@@ -240,10 +255,12 @@ export async function mailPreview(kind: MailKind): Promise<MailPreview> {
         subject: m.subject,
         html: m.html,
         text: m.text,
+        ...(sent ? { real: { who: sent.who, to: sent.to, sentAt: sent.sentAt } } : {}),
       };
     }
     case "dokument-faktura": {
-      const m = documentEmailParts("invoice", invoiceSample, t);
+      const sent = await latestDocumentMail("invoice");
+      const m = documentEmailParts("invoice", sent?.input ?? invoiceSample, t);
       return {
         kind,
         group: "firmi",
@@ -252,6 +269,7 @@ export async function mailPreview(kind: MailKind): Promise<MailPreview> {
         subject: m.subject,
         html: m.html,
         text: m.text,
+        ...(sent ? { real: { who: sent.who, to: sent.to, sentAt: sent.sentAt } } : {}),
       };
     }
     case "byuletin":

@@ -16,6 +16,9 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
+const bgWhen = (d: Date) =>
+  d.toLocaleDateString("bg-BG", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "Europe/Sofia" });
+
 /**
  * Every mail a buyer can receive, shown as the buyer sees it, and the one
  * that is sent by hand - the mail before the event - with its controls.
@@ -36,7 +39,9 @@ export default async function MailPage() {
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-bh-ink/60">
               Всяко писмо, което сайтът праща - до купувачи, до спонсори и фирми, и до
               нас - показано както го вижда получателят. Данните в примерите са
-              измислени; само дневната справка е днешната истинска. Под всяко писмо
+              измислени навсякъде, освен където пише друго: билетът, проформата и
+              фактурата до партньори показват последното наистина изпратено писмо, а
+              дневната справка е днешната истинска. Под всяко писмо
               можеш да смениш думите му: оформлението, бутоните и таблиците остават
               непокътнати.
             </p>
@@ -93,6 +98,14 @@ export default async function MailPage() {
                       </a>
                     </div>
                     <p className="mt-1 text-xs leading-relaxed text-bh-ink/55">{m.when}</p>
+                    {m.real && (
+                      /* Not the template with invented numbers - the letter
+                         this partner actually got, rebuilt from their row. */
+                      <p className="mt-2 rounded-xl bg-[#0E8C7D]/10 px-3 py-2 text-xs leading-relaxed text-[#0b6d61]">
+                        Показаното е последното изпратено:{" "}
+                        <strong className="font-semibold">{m.real.who}</strong>, {bgWhen(m.real.sentAt)}, на {m.real.to}.
+                      </p>
+                    )}
                     <p className="mt-3 text-sm text-bh-ink">
                       <span className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-bh-ink/50">Тема · </span>
                       {m.subject}
