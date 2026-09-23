@@ -4,7 +4,7 @@ import { desc, eq, sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { SALE } from "@/lib/sold";
-import { budgets, deckLinks, expenses, orders } from "@/lib/db/schema";
+import { budgets, deckLinks, documents, expenses, orders } from "@/lib/db/schema";
 import { CATEGORIES, EXPENSE_STATUS, MONEY, TIERS, categoryLabel, type CategoryId, type ExpenseStatus } from "@/lib/finance-options";
 import { DELIVERABLES, parseDeliverables, type DeliverableId } from "@/lib/finance-options";
 
@@ -35,6 +35,17 @@ export type SponsorRow = {
   ticketsCount: number;
 };
 
+/** A proforma or invoice raised here for something outside the pipeline. */
+export type DocumentIncomeRow = {
+  id: string;
+  reference: string;
+  who: string;
+  netCents: number;
+  status: string;
+  invoiceNumber: number | null;
+  createdAt: Date;
+};
+
 export type ExpenseRow = {
   id: string;
   date: Date;
@@ -61,6 +72,19 @@ export type Finances = {
     deliverableCounts: { id: DeliverableId; label: string; n: number }[];
     ticketsTotal: number;
   };
+  /**
+   * Money invoiced from „Проформи и фактури“ that no pipeline row speaks for:
+   * a fee, a service, a sponsor who was never entered as a deal. Documents
+   * raised against a partner are left out on purpose - that partner's row
+   * already carries the amount, and counting both would book it twice.
+   */
+  documents: {
+    rows: DocumentIncomeRow[];
+    /** Marked paid, so an invoice was raised and the money is in. */
+    paidNetCents: number;
+    /** Proformas still waiting for the transfer. */
+    openNetCents: number;
+  };
   expenses: {
     rows: ExpenseRow[];
     byCategory: { id: string; label: string; plannedCents: number; committedCents: number; budgetCents: number | null }[];
@@ -81,7 +105,7 @@ export type Finances = {
 
 export async function getFinances(): Promise<Finances> {
   const db = getDb();
-  const [ticketRow, sponsorRows, expenseRows, budgetRows] = await Promise.all([
+  const [ticketRow, sponsorRows, documentRows, expenseRows, budgetRows] = await Promise.all([
     db
       .select({
         net: sql<number>`coalesce(sum(${orders.subtotalCents}), 0)::int`,
@@ -106,6 +130,19 @@ export async function getFinances(): Promise<Finances> {
       // links made for a post or the team never carry an amount.
       .where(sql`${deckLinks.stage} = 'confirmed' and (${deckLinks.amountCents} is not null or ${deckLinks.inKindCents} is not null)`)
       .orderBy(desc(deckLinks.amountCents)),
+    db
+      .select({
+        id: documents.id,
+        reference: documents.reference,
+        who: sql<string>`coalesce(${documents.company}, ${documents.buyerName})`,
+        netCents: documents.subtotalCents,
+        status: documents.status,
+        invoiceNumber: documents.invoiceNumber,
+        createdAt: documents.createdAt,
+      })
+      .from(documents)
+      .where(sql`${documents.deckLinkId} is null and ${documents.status} <> 'cancelled'`)
+      .orderBy(desc(documents.createdAt)),
     db.select().from(expenses).orderBy(desc(expenses.date)),
     db.select().from(budgets),
   ]);
@@ -121,6 +158,9 @@ export async function getFinances(): Promise<Finances> {
   const sAgreed = sumWhere("agreed") + sponsors.filter((r) => !r.money).reduce((a, r) => a + r.amountCents, 0);
   const sInvoiced = sumWhere("invoiced");
   const sPaid = sumWhere("paid");
+
+  const docPaid = documentRows.filter((d) => d.status === "paid").reduce((a, d) => a + d.netCents, 0);
+  const docOpen = documentRows.filter((d) => d.status === "open").reduce((a, d) => a + d.netCents, 0);
 
   const budget = new Map(budgetRows.map((b) => [b.category, b.amountCents]));
   const live = expenseRows.filter((e) => e.status !== "cancelled");
@@ -155,6 +195,7 @@ export async function getFinances(): Promise<Finances> {
       })).filter((d) => d.n > 0),
       ticketsTotal: sponsors.reduce((a, r) => a + r.ticketsCount, 0),
     },
+    documents: { rows: documentRows, paidNetCents: docPaid, openNetCents: docOpen },
     expenses: {
       rows: expenseRows,
       byCategory,
@@ -164,8 +205,8 @@ export async function getFinances(): Promise<Finances> {
       budgetCents: budgetRows.reduce((a, b) => a + b.amountCents, 0),
     },
     result: {
-      actualCents: ticketsNet + sPaid - ePaid,
-      forecastCents: ticketsNet + sAgreed + sInvoiced + sPaid - ePlanned,
+      actualCents: ticketsNet + sPaid + docPaid - ePaid,
+      forecastCents: ticketsNet + sAgreed + sInvoiced + sPaid + docPaid + docOpen - ePlanned,
     },
   };
 }
@@ -233,6 +274,13 @@ export function financesCsv(f: Finances): string {
     if (s.inKindCents) {
       lines.push(["бартер", "", "спонсор", s.label, s.deliverables.join(", "), pkg, "продукти / услуги", eur(s.inKindCents)].map(q).join(";"));
     }
+  }
+  for (const d of f.documents.rows) {
+    lines.push(
+      ["приход", d.createdAt.toISOString().slice(0, 10), "фактура", d.who, d.reference, "", d.status === "paid" ? "платено" : "фактурирано", eur(d.netCents)]
+        .map(q)
+        .join(";"),
+    );
   }
   for (const e of f.expenses.rows) {
     lines.push(["разход", e.date.toISOString().slice(0, 10), categoryLabel(e.category), e.supplier, e.description ?? "", e.invoiceNo ?? "", EXPENSE_STATUS.find((s) => s.id === e.status)?.label ?? e.status, eur(e.amountCents)].map(q).join(";"));

@@ -110,6 +110,19 @@ export async function createDocument(input: DocumentInput): Promise<{ reference:
     );
   });
 
+  // A proforma against a partner moves that deal from "договорено" to
+  // "фактурирано", so Финанси stops counting the money as merely promised.
+  // Guarded, so re-invoicing a partner who has already paid cannot walk the
+  // row backwards.
+  if (input.deckLinkId) {
+    await db.execute(
+      sql`update ${deckLinks}
+          set money = 'invoiced', updated_at = now()
+          where ${deckLinks.id} = ${input.deckLinkId}
+            and (money is null or money = 'agreed')`,
+    );
+  }
+
   // The proforma is of no use sitting in the admin: it goes to the buyer the
   // moment it exists, the same way a bank-transfer ticket order's does.
   await sendDocumentEmail("proforma", {

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { HomeLink } from "@/components/admin/HomeLink";
+import { invoiceNo } from "@/components/InvoiceDocument";
 import { requireAccess } from "@/lib/access";
 import { MONEY, TIERS } from "@/lib/deck-links";
 import { deliverableShort } from "@/lib/finance-options";
@@ -44,8 +45,8 @@ export default async function FinancesPage() {
   await requireAccess("finansi");
   const f = await getFinances();
 
-  const incomeForecast = f.tickets.netCents + f.sponsors.totalCents;
-  const incomeCash = f.tickets.netCents + f.sponsors.paidCents;
+  const incomeForecast = f.tickets.netCents + f.sponsors.totalCents + f.documents.paidNetCents + f.documents.openNetCents;
+  const incomeCash = f.tickets.netCents + f.sponsors.paidCents + f.documents.paidNetCents;
 
   return (
     <div className="min-h-screen rounded-[1.75rem] bg-bh-paper px-5 py-10 sm:px-8 lg:px-10">
@@ -68,6 +69,8 @@ export default async function FinancesPage() {
         <p className="mt-4 max-w-2xl text-sm leading-relaxed text-bh-ink/60">
           Всичко е нето, без ДДС. Това е погледът на организатора, не счетоводството - книгите са при
           счетоводителя. Спонсорите идват от партньорския пипелайн: потвърден партньор със сума е сделка.
+          Фактура, издадена от „Проформи и фактури“ на някой, който не е сделка в „Презентация“, влиза
+          отделно - в „Други фактури“.
         </p>
 
         {/* The result, first and largest: cash beside forecast. */}
@@ -87,7 +90,7 @@ export default async function FinancesPage() {
         {/* Income */}
         <section className="mt-12">
           <h2 className="text-lg font-bold tracking-tight text-bh-ink">Приходи</h2>
-          <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-2xl bg-bh-cloud p-5 ring-1 ring-bh-ink/8">
               <div className="font-mono text-[0.62rem] uppercase tracking-[0.18em] text-bh-ink/50">Билети · нето</div>
               <div className="mt-2 text-2xl font-black text-bh-ink"><Eur cents={f.tickets.netCents} /></div>
@@ -106,12 +109,59 @@ export default async function FinancesPage() {
               <div className="mt-2 text-2xl font-black text-bh-ink"><Eur cents={f.sponsors.paidCents} /></div>
               <div className="mt-1 text-xs text-bh-ink/55">фактурирано, още неплатено <Eur cents={f.sponsors.invoicedCents} /></div>
             </div>
+            {/* Income raised from the documents page against no pipeline row -
+                a fee, a service, a sponsor never entered as a deal. Without
+                this card that money is invoiced and paid and shows nowhere. */}
+            <div className="rounded-2xl bg-bh-cloud p-5 ring-1 ring-bh-ink/8">
+              <div className="font-mono text-[0.62rem] uppercase tracking-[0.18em] text-bh-ink/50">Други фактури · в сметката</div>
+              <div className="mt-2 text-2xl font-black text-bh-ink"><Eur cents={f.documents.paidNetCents} /></div>
+              <div className="mt-1 text-xs text-bh-ink/55">
+                {f.documents.openNetCents > 0 ? (
+                  <>проформи, още неплатени <Eur cents={f.documents.openNetCents} /></>
+                ) : (
+                  "без партньор в „Презентация“"
+                )}
+              </div>
+            </div>
           </div>
+
+          {f.documents.rows.length > 0 && (
+            <div className="mt-4 rounded-2xl bg-bh-cloud p-5 ring-1 ring-bh-ink/8">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <h3 className="text-sm font-bold tracking-tight text-bh-ink">Други фактури</h3>
+                <Link href="/admin/dokumenti" className="font-mono text-[0.62rem] uppercase tracking-[0.18em] text-bh-ink/50 underline underline-offset-2 hover:text-bh-ink">
+                  Проформи и фактури
+                </Link>
+              </div>
+              <ul className="mt-3 divide-y divide-bh-ink/8 text-sm">
+                {f.documents.rows.map((d) => (
+                  <li key={d.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                    <span className="min-w-0">
+                      <span className="font-medium text-bh-ink">{d.who}</span>
+                      <span className="ml-2 font-mono text-xs text-bh-ink/55">{d.reference}</span>
+                      <span className={`ml-2 rounded-full px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide ${d.status === "paid" ? STATUS_TONE.paid : STATUS_TONE.invoiced}`}>
+                        {d.status === "paid" ? `фактура № ${invoiceNo(d.invoiceNumber ?? 0)}` : "проформа"}
+                      </span>
+                    </span>
+                    <span className="font-semibold text-bh-ink"><Eur cents={d.netCents} /></span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 text-xs text-bh-ink/55">
+                Нето, без ДДС. Фактура, издадена срещу партньор от „Презентация“, не е тук - сумата ѝ стои
+                при спонсора, в таблицата отгоре.
+              </p>
+            </div>
+          )}
 
           <div className="mt-4 overflow-x-auto rounded-2xl bg-bh-cloud ring-1 ring-bh-ink/8">
             {f.sponsors.rows.length === 0 ? (
               <p className="px-6 py-8 text-center text-sm text-bh-ink/55">
-                Още няма сделка със сума. В „Презентация“ сложи етап „потвърдил“ и сума на партньора - и се появява тук.
+                Още няма сделка със сума. Сумата се пише в{" "}
+                <Link href="/admin/podgotovka" className="underline underline-offset-2">Подготовка</Link>, в блока
+                „Сделката“; етапът „потвърдил“ се слага в{" "}
+                <Link href="/admin/prezentaciya" className="underline underline-offset-2">Презентация</Link>. С двете
+                заедно партньорът се появява тук.
               </p>
             ) : (
               <table className="w-full min-w-[56rem] text-left text-sm">
