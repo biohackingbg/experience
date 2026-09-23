@@ -1,8 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
-import { DELIVERABLES, MONEY, TIERS, type DeliverableId } from "@/lib/finance-options";
+import { DELIVERABLES, MONEY, TIERS, type DeliverableId, tierMenuLabel, tierPriceCents } from "@/lib/finance-options";
 
 import { type DealState, saveDeal } from "./actions";
 
@@ -32,22 +32,34 @@ export type DealFields = {
  */
 export function DealForm({ partner }: { partner: DealFields }) {
   const [state, action, pending] = useActionState(saveDeal, idle);
+  const [tier, setTier] = useState(partner.tier ?? "");
+  const [amount, setAmount] = useState(partner.amountCents === null ? "" : String(partner.amountCents / 100));
+
+  // What the deck asks for this package, beside what was agreed. Shown, never
+  // enforced: packages get discounted, split and bundled, and a form that
+  // argued with the person filling it in would be wrong more often than right.
+  const listCents = tierPriceCents(tier);
+  const agreedCents = /^\d+([.,]\d{1,2})?$/.test(amount.trim().replace(/\s/g, ""))
+    ? Math.round(Number(amount.trim().replace(/\s/g, "").replace(",", ".")) * 100)
+    : null;
+  const gap = listCents !== null && agreedCents !== null && agreedCents !== listCents;
 
   return (
     <form action={action} className="mt-4 rounded-2xl bg-bh-paper p-4 ring-1 ring-bh-ink/8">
       <input type="hidden" name="linkId" value={partner.id} />
       <div className="font-mono text-[0.6rem] uppercase tracking-[0.15em] text-bh-ink/50">Сделката · суми без ДДС</div>
       <div className="mt-2 flex flex-wrap items-center gap-2">
-        <select name="tier" defaultValue={partner.tier ?? ""} className={input}>
+        <select name="tier" value={tier} onChange={(e) => setTier(e.target.value)} className={input}>
           <option value="">пакет</option>
           {TIERS.map((t) => (
-            <option key={t.id} value={t.id}>{t.label}</option>
+            <option key={t.id} value={t.id}>{tierMenuLabel(t)}</option>
           ))}
         </select>
         <input
           name="amount"
           inputMode="decimal"
-          defaultValue={partner.amountCents === null ? "" : String(partner.amountCents / 100)}
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
           placeholder="€ сума"
           className={`${input} w-28`}
         />
@@ -73,6 +85,12 @@ export function DealForm({ partner }: { partner: DealFields }) {
           className={`${input} w-24`}
         />
       </div>
+      {gap && (
+        <p className="mt-2 text-[0.68rem] text-bh-ink/55">
+          По презентация пакетът е {(listCents / 100).toLocaleString("bg-BG")} € нето; в сделката стои{" "}
+          {(agreedCents / 100).toLocaleString("bg-BG")} €. Ако е договорено така, остави го.
+        </p>
+      )}
       <fieldset className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
         <legend className="font-mono text-[0.6rem] uppercase tracking-[0.15em] text-bh-ink/50">Какво дава</legend>
         {DELIVERABLES.map((d) => (

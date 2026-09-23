@@ -5,18 +5,49 @@
  * touched the DB the build would drag postgres into the browser bundle.
  */
 
-/** The packages as the deck sells them; "extra" covers the à-la-carte items. */
+/**
+ * The packages as the deck sells them, at the deck's prices.
+ *
+ * `priceCents` is the list price, net of VAT, and exists so a form can show
+ * what the package costs beside its name - never to fill an amount in by
+ * itself. A deal is whatever was agreed, and a package that quietly
+ * overwrote a negotiated number would be worse than no help at all.
+ *
+ * `label` stays the bare name because it is also what an invoice line is
+ * built from; the price is added only where a menu is drawn.
+ *
+ * "both" is the old lump for the two events together, kept so the partners
+ * who carry it do not lose their package; the three "+" levels below are
+ * what the deck actually sells.
+ */
 export const TIERS = [
-  { id: "village", label: "Village щанд" },
-  { id: "silver", label: "Сребърен" },
-  { id: "gold", label: "Златен" },
-  { id: "platinum", label: "Платинен" },
-  { id: "both", label: "Двете събития" },
-  { id: "extra", label: "Екстра" },
-  { id: "media", label: "Медиен / бартер" },
+  { id: "village", label: "Village щанд", priceCents: 250000 },
+  { id: "silver", label: "Сребърен", priceCents: 350000 },
+  { id: "gold", label: "Златен", priceCents: 550000 },
+  { id: "platinum", label: "Платинен", priceCents: 950000 },
+  { id: "silver-plus", label: "Сребърен + (двете събития)", priceCents: 1000000 },
+  { id: "gold-plus", label: "Златен + (двете събития)", priceCents: 1200000 },
+  { id: "platinum-plus", label: "Платинен + (двете събития)", priceCents: 1700000 },
+  { id: "recovery", label: "Партньор на Recovery", priceCents: 450000 },
+  { id: "movement", label: "Партньор на Движение", priceCents: 300000 },
+  { id: "workshop", label: "Презентация / уъркшоп", priceCents: 450000 },
+  { id: "bag", label: "Материал във фестивалната чанта", priceCents: 50000 },
+  { id: "both", label: "Двете събития", priceCents: null },
+  { id: "extra", label: "Екстра", priceCents: null },
+  { id: "media", label: "Медиен / бартер", priceCents: null },
+  { id: "custom", label: "Друго / по договаряне", priceCents: null },
 ] as const;
 export type TierId = (typeof TIERS)[number]["id"];
 export const isTier = (v: unknown): v is TierId => TIERS.some((t) => t.id === v);
+
+/** "Златен · 5 500 €" for a menu; the bare name when the package has no list price. */
+export function tierMenuLabel(t: { label: string; priceCents: number | null }): string {
+  if (t.priceCents === null) return t.label;
+  return `${t.label} · ${(t.priceCents / 100).toLocaleString("bg-BG")} €`;
+}
+
+export const tierPriceCents = (id: string | null | undefined): number | null =>
+  TIERS.find((t) => t.id === id)?.priceCents ?? null;
 
 /** Where the cash is. Agreed money is a promise; paid money is in the bank. */
 export const MONEY = [
