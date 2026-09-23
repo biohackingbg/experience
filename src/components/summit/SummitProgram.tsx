@@ -94,7 +94,22 @@ export async function SummitProgram({ lang = "bg" }: { lang?: Lang }) {
 
                         {slot.people && slot.people.length > 0 && (
                           <p className="mt-1 text-xs font-medium leading-snug text-bh-pine">
-                            {slot.people.join(" · ")}
+                            {slot.people.map((person, k) => (
+                              <span key={person}>
+                                {k > 0 && " · "}
+                                {person}
+                                {/* Said quietly and next to the name, rather
+                                    than as a warning: the programme is
+                                    preliminary anyway, and a reader deciding
+                                    on a ticket deserves to know which names
+                                    are still being settled. */}
+                                {slot.unconfirmed?.includes(person) && (
+                                  <span className="ml-1 whitespace-nowrap font-mono text-[0.58rem] uppercase tracking-[0.12em] text-bh-ink/40">
+                                    ({lang === "en" ? "to be confirmed" : "очаква потвърждение"})
+                                  </span>
+                                )}
+                              </span>
+                            ))}
                           </p>
                         )}
                       </div>

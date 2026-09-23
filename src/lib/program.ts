@@ -22,7 +22,32 @@ export type Slot = {
   people?: string[];
   /** Registration, coffee, lunch - rendered quietly. */
   pause?: boolean;
+  /**
+   * Which of `people` are still to be confirmed, spelled as they are shown -
+   * so the English page can mark a transliterated name too. Filled by
+   * `getProgram` from `UNCONFIRMED`, never written by hand.
+   */
+  unconfirmed?: string[];
 };
+
+/**
+ * Speakers the organisers have not yet confirmed.
+ *
+ * They stay on the programme, marked, rather than disappearing from it: a
+ * name taken down and put back reads as a cancellation, and the page already
+ * says the schedule is preliminary. Names are written exactly as the slots
+ * below spell them; the English page matches the transliteration.
+ */
+export const UNCONFIRMED: string[] = [
+  "Dominik Thor",
+  "Sara Hägg",
+  "Louise Newson",
+  "Brad Currier",
+  "Melanie Angelova",
+  "Симеон Личев",
+  "Анелия Биволарска",
+  "Guido Axmann",
+];
 
 export type Day = {
   day: string;

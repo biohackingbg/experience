@@ -6,7 +6,7 @@ import { getDb } from "@/lib/db";
 import { sessions } from "@/lib/db/schema";
 import type { Lang } from "@/lib/i18n";
 import { latin } from "@/lib/latin";
-import { PROGRAM_EN, type Day, PROGRAM, type Slot } from "@/lib/program";
+import { PROGRAM_EN, type Day, PROGRAM, type Slot, UNCONFIRMED } from "@/lib/program";
 import { PROGRAM_SECTION } from "@/lib/site-copy";
 
 /**
@@ -61,13 +61,25 @@ export async function getProgram(lang: Lang = "bg"): Promise<Day[]> {
   // Names are transliterated rather than translated: a name is the same name
   // in both languages, only written in the reader's alphabet.
   const people = (list?: string[]) => (en ? list?.map(latin) : list);
+  // The names to mark, spelled the way this language shows them.
+  const unconfirmed = (list?: string[]) => {
+    const hits = (list ?? []).filter((n) => UNCONFIRMED.includes(n));
+    return hits.length ? (en ? hits.map(latin) : hits) : undefined;
+  };
   if (rows.length === 0) {
     return PROGRAM.map((d, i) => ({
       ...d,
       ...meta0[i],
       slots: d.slots.map((s, j) => {
         const t = en ? PROGRAM_EN[i]?.[j] : undefined;
-        return { ...s, title: t?.title || s.title, note: t?.note || s.note, role: t?.role || s.role, people: people(s.people) };
+        return {
+          ...s,
+          title: t?.title || s.title,
+          note: t?.note || s.note,
+          role: t?.role || s.role,
+          people: people(s.people),
+          unconfirmed: unconfirmed(s.people),
+        };
       }),
     }));
   }
@@ -83,6 +95,7 @@ export async function getProgram(lang: Lang = "bg"): Promise<Day[]> {
         note: (lang === "en" ? r.noteEn : null) || r.note || undefined,
         role: (lang === "en" ? r.roleEn : null) || r.role || undefined,
         people: peopleList(r.people).length ? people(peopleList(r.people)) : undefined,
+        unconfirmed: unconfirmed(peopleList(r.people)),
         pause: r.pause || undefined,
       })),
   }));
