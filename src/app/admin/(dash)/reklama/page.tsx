@@ -172,7 +172,7 @@ export default async function MarketingPage() {
                   <>
                     {" "}
                     <strong className="font-semibold text-[#9c3d5c]">{m.funnel.checkouts - m.funnel.paid}</strong> поръчки са започнати и
-                    не са платени - те са в „Недовършени поръчки“ на таблото.
+                    не са платени - те са в „Недовършени поръчки“ в Dashboard.
                   </>
                 )}
               </p>

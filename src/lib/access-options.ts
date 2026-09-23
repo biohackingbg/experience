@@ -1,6 +1,6 @@
 /** The admin pages a grant can open. Client-safe: the access form draws checkboxes from it. */
 export const PAGES = [
-  { id: "tablo", label: "Табло (продажби)", href: "/admin", sensitive: true },
+  { id: "tablo", label: "Dashboard (продажби)", href: "/admin", sensitive: true },
   { id: "finansi", label: "Финанси", href: "/admin/finansi", sensitive: true },
   { id: "fakturi", label: "Фактури", href: "/admin/fakturi", sensitive: true },
   { id: "dokumenti", label: "Проформи и фактури (не билети)", href: "/admin/dokumenti", sensitive: true },

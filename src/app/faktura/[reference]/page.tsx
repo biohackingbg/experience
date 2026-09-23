@@ -63,7 +63,7 @@ export default async function InvoicePage({
             href={admin ? "/admin" : "/"}
             className="font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/50 transition-colors hover:text-bh-ink"
           >
-            {admin ? "← Към таблото" : "← Към сайта"}
+            {admin ? "← Към Dashboard" : "← Към сайта"}
           </Link>
           <div className="flex items-center gap-4">
             <Link

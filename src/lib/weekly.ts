@@ -66,7 +66,7 @@ export async function buildWeekly(): Promise<Weekly> {
   ];
 
   const f = "-apple-system,Segoe UI,Roboto,sans-serif";
-  const text = [`Sofia Life Summit · седмица до ${dateLabel}`, "", ...lines.map(([k, v]) => `${k}: ${v}`), "", "Табло: https://thelongevitysummit.eu/admin"].join("\n");
+  const text = [`Sofia Life Summit · седмица до ${dateLabel}`, "", ...lines.map(([k, v]) => `${k}: ${v}`), "", "Dashboard: https://thelongevitysummit.eu/admin"].join("\n");
   const html = `<!doctype html><html lang="bg"><body style="margin:0;padding:24px;background:#f2f2ee">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#f8f8f5;border-radius:18px;padding:32px"><tr><td>
     <div style="font:400 12px/1 ${f};letter-spacing:2px;text-transform:uppercase;color:#14645599">Sofia Life Summit · седмица до ${dateLabel}</div>
@@ -74,7 +74,7 @@ export async function buildWeekly(): Promise<Weekly> {
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:20px">
       ${lines.map(([k, v]) => `<tr><td style="padding:10px 12px 10px 0;border-top:1px solid #dfe4e0;font:600 13px/1.4 ${f};color:#02251f;white-space:nowrap;vertical-align:top">${k}</td><td style="padding:10px 0;border-top:1px solid #dfe4e0;font:400 14px/1.5 ${f};color:#02251fb3">${v}</td></tr>`).join("")}
     </table>
-    <p style="margin:26px 0 0"><a href="https://thelongevitysummit.eu/admin" style="display:inline-block;background:#146455;color:#f1f5f3;text-decoration:none;font:600 13px/1 ${f};padding:12px 20px;border-radius:999px">Отвори таблото</a></p>
+    <p style="margin:26px 0 0"><a href="https://thelongevitysummit.eu/admin" style="display:inline-block;background:#146455;color:#f1f5f3;text-decoration:none;font:600 13px/1 ${f};padding:12px 20px;border-radius:999px">Отвори Dashboard</a></p>
   </td></tr></table></body></html>`;
 
   return { subject, text, html };

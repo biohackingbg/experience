@@ -96,7 +96,7 @@ export async function GET(request: Request) {
     if (Number(row.paid_no_tickets)) failures.push(`${row.paid_no_tickets} платени поръчки от 24ч БЕЗ билети`);
     if (Number(row.paid_no_invoice)) failures.push(`${row.paid_no_invoice} платени поръчки от 24ч БЕЗ фактура`);
     if (Number(row.refunded_no_note)) failures.push(`${row.refunded_no_note} върнати поръчки БЕЗ кредитно известие`);
-    if (Number(row.paid_no_payment)) failures.push(`${row.paid_no_payment} платени поръчки БЕЗ плащане в Stripe (виж „Проверка“ в таблото)`);
+    if (Number(row.paid_no_payment)) failures.push(`${row.paid_no_payment} платени поръчки БЕЗ плащане в Stripe (виж „Проверка“ в Dashboard)`);
   } catch (error) {
     failures.push(`База данни: ${error instanceof Error ? error.message : String(error)}`);
   }

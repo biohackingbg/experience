@@ -51,7 +51,7 @@ const GROUPS = [
   {
     title: "Продажби",
     items: [
-      { page: "tablo" as const, href: "/admin", label: "Табло", icon: I.grid },
+      { page: "tablo" as const, href: "/admin", label: "Dashboard", icon: I.grid },
       { page: "izdai" as const, href: "/admin/izdai", label: "Издаване на билети", icon: I.ticket },
     ],
   },
@@ -122,7 +122,7 @@ export function AdminShell({ access, children }: { access: Access; children: Rea
     >
       <div className="mx-auto flex min-h-[calc(100vh-2.5rem)] max-w-[110rem] gap-4 rounded-[2rem] bg-white p-3 shadow-[0_20px_60px_-30px_rgba(2,37,31,.35)] sm:p-4">
         <aside className="hidden w-64 shrink-0 flex-col rounded-[1.5rem] bg-[#f6f7f5] px-4 py-6 lg:flex">
-          <Link href="/admin" className="block px-2" aria-label="Biohacking Experience - табло">
+          <Link href="/admin" className="block px-2" aria-label="Biohacking Experience - Dashboard">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.svg" alt="Biohacking Experience" className="h-9 w-auto max-w-full" />
             <span className="mt-2 block font-mono text-[0.62rem] uppercase tracking-[0.2em] text-[#0b2a22]/45">Sofia Life Summit · админ</span>

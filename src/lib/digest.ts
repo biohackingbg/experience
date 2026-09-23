@@ -118,12 +118,12 @@ export async function buildDigest(): Promise<Digest> {
     ...(remindList.length
       ? [
           "",
-          "За напомняне (бутонът е в таблото):",
+          "За напомняне (бутонът е в Dashboard):",
           ...remindList.map((o) => `- ${o.name} · ${o.items} · ${o.email}`),
         ]
       : []),
     "",
-    "Табло: https://thelongevitysummit.eu/admin",
+    "Dashboard: https://thelongevitysummit.eu/admin",
   ].join("\n");
 
   const f = "-apple-system,Segoe UI,Roboto,sans-serif";
@@ -150,7 +150,7 @@ export async function buildDigest(): Promise<Digest> {
       </table>
       ${
         remindList.length
-          ? `<p style="margin:22px 0 6px;font:600 13px/1.4 ${f};color:#02251f">За напомняне (бутонът е в таблото)</p>
+          ? `<p style="margin:22px 0 6px;font:600 13px/1.4 ${f};color:#02251f">За напомняне (бутонът е в Dashboard)</p>
       ${remindList
         .map(
           (o) =>
@@ -162,7 +162,7 @@ export async function buildDigest(): Promise<Digest> {
       <p style="margin:26px 0 0">
         <a href="https://thelongevitysummit.eu/admin"
            style="display:inline-block;background:#146455;color:#f1f5f3;text-decoration:none;font:600 13px/1 ${f};padding:12px 20px;border-radius:999px">
-          Отвори таблото
+          Отвори Dashboard
         </a>
       </p>
     </td></tr>
