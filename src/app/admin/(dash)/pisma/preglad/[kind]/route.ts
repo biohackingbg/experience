@@ -8,7 +8,14 @@ export async function GET(_req: Request, ctx: { params: Promise<{ kind: string }
   if (!(await canAccess("pisma"))) return new Response("unauthorized", { status: 401 });
   const { kind } = await ctx.params;
   if (!isMailKind(kind)) return new Response("not found", { status: 404 });
-  return new Response(mailPreview(kind).html, {
+  const mail = await mailPreview(kind);
+  // A plain-text letter has no page to show; it is served as what it is.
+  if (mail.html === null) {
+    return new Response(mail.text, {
+      headers: { "content-type": "text/plain; charset=utf-8", "x-robots-tag": "noindex" },
+    });
+  }
+  return new Response(mail.html, {
     headers: {
       "content-type": "text/html; charset=utf-8",
       // Nothing in here may run or reach out; it is a picture of an email.

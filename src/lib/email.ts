@@ -2,6 +2,7 @@ import "server-only";
 
 import { Resend } from "resend";
 
+import { type MailTexts, defaultMailTexts, getMailTexts, mailText } from "@/lib/mail-texts";
 import { DAY_LABEL, formatPrice } from "@/lib/tickets";
 
 /**
@@ -21,6 +22,9 @@ function getResend(): Resend | null {
   client ??= new Resend(key);
   return client;
 }
+
+/** Subject, HTML and plain text of one letter, built without sending it. */
+export type MailParts = { subject: string; html: string; text: string };
 
 export function isEmailConfigured(): boolean {
   return Boolean(process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
@@ -93,11 +97,11 @@ function ticketRows(input: TicketEmailInput, open = "Отвори билета",
  * and Outlook ignores most modern layout. Tables and inline CSS are what
  * actually renders everywhere.
  */
-export function ticketEmailHtml(input: TicketEmailInput): string {
+export function ticketEmailHtml(input: TicketEmailInput, t: MailTexts = defaultMailTexts): string {
   const en = input.lang === "en";
   const w = en
     ? { lost: `Lost this email later? Get your tickets again: ${SITE}/bilet/moite?lang=en`, ready: "Your ticket is ready", hi: `Hi ${esc(input.buyerName)}! ${input.totalCents > 0 ? "Your payment is confirmed. " : ""}Open your ticket below and keep it - you will need it at the entrance.`, open: "Open ticket", code: "Code", dates: "7-8 November 2026", venue: "Grand Hotel Millennium, Sofia", order: "Order", invoice: "Invoice", noPay: "no payment", other: "Is a ticket for someone else? Open it and write their name - that is how we find them at the entrance and print their badge.", foot: "Questions? Reply to this email or write to hi@biohacking.bg. Sofia Life Summit is organised jointly by the Bulgarian Longevity Association and Biohacking.bg." }
-    : { lost: `Изгуби писмото? Билетите се изпращат наново оттук: ${SITE}/bilet/moite`, ready: "Билетът ти е готов", hi: `Здравей, ${esc(input.buyerName)}! ${input.totalCents > 0 ? "Плащането е потвърдено. " : ""}Отвори билета си по-долу и го запази - ще ти трябва на входа.`, open: "Отвори билета", code: "Код", dates: "07-08 ноември 2026", venue: "Гранд Хотел Милениум, София", order: "Поръчка", invoice: "Фактура", noPay: "без заплащане", other: "Билет за друг човек? Отвори го и напиши името му - така ще го намерим на входа и баджът ще е с неговото име.", foot: "Ако имаш въпрос, отговори на това писмо или пиши на hi@biohacking.bg. Sofia Life Summit се организира съвместно от Bulgarian Longevity Association и Biohacking.bg." };
+    : { lost: `Изгуби писмото? Билетите се изпращат наново оттук: ${SITE}/bilet/moite`, ready: mailText(t, "bilet.zaglavie", {}, "html"), hi: mailText(t, "bilet.uvod", { "име": esc(input.buyerName), "плащане": input.totalCents > 0 ? "Плащането е потвърдено. " : "" }, "html"), open: "Отвори билета", code: "Код", dates: "07-08 ноември 2026", venue: "Гранд Хотел Милениум, София", order: "Поръчка", invoice: "Фактура", noPay: "без заплащане", other: mailText(t, "bilet.drug", {}, "html"), foot: mailText(t, "bilet.podpis", {}, "html") };
   return `<!doctype html>
 <html lang="${en ? "en" : "bg"}"><body style="margin:0;padding:24px;background:#f2f2ee">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
@@ -157,7 +161,7 @@ export function ticketEmailHtml(input: TicketEmailInput): string {
 </body></html>`;
 }
 
-export function ticketEmailText(input: TicketEmailInput): string {
+export function ticketEmailText(input: TicketEmailInput, t: MailTexts = defaultMailTexts): string {
   const list = input.tickets
     .map((t) => `- ${t.tierName} · ${t.code}\n  ${SITE}/bilet/${t.code}`)
     .join("\n");
@@ -180,9 +184,7 @@ export function ticketEmailText(input: TicketEmailInput): string {
   }
 
   return [
-    `Здравей, ${esc(input.buyerName)}!`,
-    "",
-    input.totalCents > 0 ? "Плащането е потвърдено, билетът ти е готов." : "Билетът ти е готов.",
+    mailText(t, "bilet.uvod", { "име": input.buyerName, "плащане": input.totalCents > 0 ? "Плащането е потвърдено. " : "" }),
     "",
     list,
     "",
@@ -190,15 +192,16 @@ export function ticketEmailText(input: TicketEmailInput): string {
     `Поръчка ${input.reference} · ${formatPrice(input.totalCents)} €`,
     ...(input.invoiceNumber ? [`Фактура: ${SITE}/faktura/${input.reference}`] : []),
     "",
-    "Билет за друг човек? Отвори го и напиши името му - така ще го намерим на входа.",
+    mailText(t, "bilet.drug"),
     "",
-    "Въпроси: hi@biohacking.bg",
+    mailText(t, "bilet.podpis"),
   ].join("\n");
 }
 
 export async function sendTicketEmail(input: TicketEmailInput): Promise<boolean> {
   const resend = getResend();
   const from = process.env.EMAIL_FROM;
+  const t = await getMailTexts();
 
   if (!resend || !from) {
     console.warn("[email] not configured - skipping ticket email");
@@ -210,8 +213,8 @@ export async function sendTicketEmail(input: TicketEmailInput): Promise<boolean>
       from,
       to: input.to,
       subject: input.lang === "en" ? `Your Sofia Life Summit ticket · ${input.reference}` : `Билетът ти за Sofia Life Summit · ${input.reference}`,
-      html: ticketEmailHtml(input),
-      text: ticketEmailText(input),
+      html: ticketEmailHtml(input, t),
+      text: ticketEmailText(input, t),
     });
 
     if (error) {
@@ -243,7 +246,7 @@ export type ReminderEmailInput = {
  * charged and nothing is held, offers the door, and promises not to write
  * again - which the reminder_sent_at column then enforces.
  */
-export function reminderEmailHtml(input: ReminderEmailInput): string {
+export function reminderEmailHtml(input: ReminderEmailInput, t: MailTexts = defaultMailTexts): string {
   const p = `font:400 15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251fb3`;
   if (input.lang === "en") {
     return `<!doctype html>
@@ -270,12 +273,10 @@ export function reminderEmailHtml(input: ReminderEmailInput): string {
         Sofia Life Summit
       </div>
       <h1 style="margin:14px 0 0;font:800 26px/1.15 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f">
-        Поръчката ти остана недовършена
+        ${mailText(t, "napomnyane.zaglavie", {}, "html")}
       </h1>
       <p style="margin:14px 0 0;${p}">
-        Здравей, ${esc(input.buyerName)}! Започна поръчка за
-        <strong style="color:#02251f">${esc(input.items)}</strong> за Sofia Life Summit,
-        но плащането не беше завършено. Нищо не е таксувано и място не е запазено.
+        ${mailText(t, "napomnyane.uvod", { "име": esc(input.buyerName), "какво": `<strong style="color:#02251f">${esc(input.items)}</strong>` }, "html")}
       </p>
       <p style="margin:14px 0 0;${p}">
         Ако все още искаш да си там на 07-08 ноември, довърши поръчката оттук${
@@ -291,8 +292,7 @@ export function reminderEmailHtml(input: ReminderEmailInput): string {
       </p>
       <div style="margin-top:26px;height:3px;background:#cef870;border-radius:2px"></div>
       <p style="margin:22px 0 0;font:400 12px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f80">
-        Ако вече не искаш билет, това е единственото напомняне, което ще получиш.
-        Въпроси: отговори на това писмо или пиши на hi@biohacking.bg.
+        ${mailText(t, "napomnyane.podpis", {}, "html")}
         Поръчка ${input.reference}.
       </p>
     </td></tr>
@@ -300,7 +300,7 @@ export function reminderEmailHtml(input: ReminderEmailInput): string {
 </body></html>`;
 }
 
-export function reminderEmailText(input: ReminderEmailInput): string {
+export function reminderEmailText(input: ReminderEmailInput, t: MailTexts = defaultMailTexts): string {
   if (input.lang === "en") {
     return [
       `Hi ${input.buyerName}!`,
@@ -316,18 +316,15 @@ export function reminderEmailText(input: ReminderEmailInput): string {
     ].join("\n");
   }
   return [
-    `Здравей, ${input.buyerName}!`,
-    "",
-    `Започна поръчка за ${input.items} за Sofia Life Summit, но плащането не беше завършено.`,
-    "Нищо не е таксувано и място не е запазено.",
+    mailText(t, "napomnyane.uvod", { "име": input.buyerName, "какво": input.items }),
     "",
     `Ако все още искаш да си там на 07-08 ноември, довърши поръчката оттук${
       input.offer ? ` (${input.offer} още важат)` : ""
     }:`,
     `${SITE}${input.resumePath}`,
     "",
-    "Ако вече не искаш билет, това е единственото напомняне, което ще получиш.",
-    `Въпроси: hi@biohacking.bg · Поръчка ${input.reference}`,
+    mailText(t, "napomnyane.podpis"),
+    `Поръчка ${input.reference}`,
   ].join("\n");
 }
 
@@ -339,13 +336,14 @@ export async function sendReminderEmail(input: ReminderEmailInput): Promise<stri
     console.warn("[email] not configured - skipping reminder email");
     return null;
   }
+  const t = await getMailTexts();
   try {
     const { data, error } = await resend.emails.send({
       from,
       to: input.to,
       subject: input.lang === "en" ? `Your Sofia Life Summit ticket is waiting · ${input.reference}` : `Билетът ти за Sofia Life Summit чака · ${input.reference}`,
-      html: reminderEmailHtml(input),
-      text: reminderEmailText(input),
+      html: reminderEmailHtml(input, t),
+      text: reminderEmailText(input, t),
     });
     if (error) {
       console.error("[email] reminder send failed:", error);
@@ -374,13 +372,13 @@ const VENUE_MAPS = "https://maps.google.com/?q=Grand+Hotel+Millennium+Sofia";
  * ask that saves the door queue - name the person on each ticket. Sent to
  * every buyer once, by hand, from the admin.
  */
-export function eventInfoHtml(input: EventInfoInput): string {
+export function eventInfoHtml(input: EventInfoInput, t: MailTexts = defaultMailTexts): string {
   const f = "-apple-system,Segoe UI,Roboto,sans-serif";
   const p = `font:400 15px/1.6 ${f};color:#02251fb3`;
   const en = input.lang === "en";
   const w = en
     ? { title: `See you in ${input.daysLeft} ${input.daysLeft === 1 ? "day" : "days"}`, hi: `Hi ${esc(input.buyerName)}! Everything you need for the day.`, when: "When", whenV: "<strong style=\"color:#02251f\">7-8 November 2026</strong><br>Registration opens at 09:00, the programme starts at 10:00.", where: "Where", whereV: `<strong style="color:#02251f">Grand Hotel Millennium</strong><br>89B Vitosha Blvd, Sofia · <a href="${VENUE_MAPS}" style="color:#146455;font-weight:600">map</a>`, prog: "Programme", progV: `<a href="${SITE}/programa" style="color:#146455;font-weight:600">Speakers and the programme by the hour</a>`, tickets: "Your tickets", show: "Show the QR code at the entrance - on your phone or printed. One ticket admits one person.", noName: "no attendee name", open: "Open ticket", other: "Is a ticket for someone else? Open it and write their name - that is how we find them at the entrance and print their badge.", foot: `Questions? Reply to this email or write to hi@biohacking.bg. Order ${input.reference}. Sofia Life Summit is organised jointly by the Bulgarian Longevity Association and Biohacking.bg.` }
-    : { title: `Виждаме се след ${input.daysLeft} ${input.daysLeft === 1 ? "ден" : "дни"}`, hi: `Здравей, ${esc(input.buyerName)}! Ето всичко, което ти трябва за деня.`, when: "Кога", whenV: "<strong style=\"color:#02251f\">07-08 ноември 2026</strong><br>Регистрацията отваря в 09:00, програмата започва в 10:00.", where: "Къде", whereV: `<strong style="color:#02251f">Гранд Хотел Милениум</strong><br>бул. „Витоша“ 89Б, София · <a href="${VENUE_MAPS}" style="color:#146455;font-weight:600">карта</a>`, prog: "Програма", progV: `<a href="${SITE}/#program" style="color:#146455;font-weight:600">Лектори и програма по часове</a>`, tickets: "Билетите ти", show: "Покажи QR кода на входа - от телефона или разпечатан. Всеки билет е за един човек.", noName: "без име на участник", open: "Отвори билета", other: "Билет за друг човек? Отвори го и напиши името му - така ще го намерим на входа и баджът ще е с неговото име.", foot: `Въпроси: отговори на това писмо или пиши на hi@biohacking.bg. Поръчка ${input.reference}. Sofia Life Summit се организира съвместно от Bulgarian Longevity Association и Biohacking.bg.` };
+    : { title: `Виждаме се след ${input.daysLeft} ${input.daysLeft === 1 ? "ден" : "дни"}`, hi: mailText(t, "predi.uvod", { "име": esc(input.buyerName) }, "html"), when: "Кога", whenV: `<strong style="color:#02251f">07-08 ноември 2026</strong><br>${mailText(t, "predi.chasove", {}, "html")}`, where: "Къде", whereV: `<strong style="color:#02251f">Гранд Хотел Милениум</strong><br>бул. „Витоша“ 89Б, София · <a href="${VENUE_MAPS}" style="color:#146455;font-weight:600">карта</a>`, prog: "Програма", progV: `<a href="${SITE}/#program" style="color:#146455;font-weight:600">Лектори и програма по часове</a>`, tickets: "Билетите ти", show: mailText(t, "predi.vhod", {}, "html"), noName: "без име на участник", open: "Отвори билета", other: mailText(t, "bilet.drug", {}, "html"), foot: mailText(t, "predi.podpis", { "поръчка": esc(input.reference) }, "html") };
   const rows = input.tickets
     .map(
       (t) => `<tr>
@@ -438,7 +436,7 @@ export function eventInfoHtml(input: EventInfoInput): string {
 </body></html>`;
 }
 
-export function eventInfoText(input: EventInfoInput): string {
+export function eventInfoText(input: EventInfoInput, t: MailTexts = defaultMailTexts): string {
   if (input.lang === "en") {
     return [
       `Hi ${input.buyerName}! See you in ${input.daysLeft} ${input.daysLeft === 1 ? "day" : "days"} at Sofia Life Summit.`,
@@ -456,20 +454,20 @@ export function eventInfoText(input: EventInfoInput): string {
     ].join("\n");
   }
   return [
-    `Здравей, ${input.buyerName}! Виждаме се след ${input.daysLeft} ${input.daysLeft === 1 ? "ден" : "дни"} на Sofia Life Summit.`,
+    `${mailText(t, "predi.uvod", { "име": input.buyerName })} Виждаме се след ${input.daysLeft} ${input.daysLeft === 1 ? "ден" : "дни"}.`,
     "",
-    "КОГА: 07-08 ноември 2026. Регистрацията отваря в 09:00, програмата започва в 10:00.",
+    `КОГА: 07-08 ноември 2026. ${mailText(t, "predi.chasove")}`,
     `КЪДЕ: Гранд Хотел Милениум, бул. „Витоша“ 89Б, София · ${VENUE_MAPS}`,
     `ПРОГРАМА: ${SITE}/#program`,
     "",
-    "БИЛЕТИТЕ ТИ (покажи QR кода на входа, от телефона или разпечатан; всеки билет е за един човек):",
+    `БИЛЕТИТЕ ТИ · ${mailText(t, "predi.vhod")}`,
     ...input.tickets.map(
       (t) => `- ${t.tierName}${t.attendeeName ? ` · ${t.attendeeName}` : ""} · ${t.code}\n  ${SITE}/bilet/${t.code}`,
     ),
     "",
-    "Билет за друг човек? Отвори го и напиши името му - така ще го намерим на входа.",
+    mailText(t, "bilet.drug"),
     "",
-    `Въпроси: hi@biohacking.bg · Поръчка ${input.reference}`,
+    mailText(t, "predi.podpis", { "поръчка": input.reference }),
   ].join("\n");
 }
 
@@ -489,14 +487,15 @@ export async function sendEventInfoBatch(inputs: EventInfoInput[]): Promise<{ ok
   const from = process.env.EMAIL_FROM;
   if (!resend || !from) return { ok: false, error: "not configured" };
   if (inputs.length === 0) return { ok: true };
+  const t = await getMailTexts();
   try {
     const { error } = await resend.batch.send(
       inputs.map((input) => ({
         from,
         to: input.to,
         subject: eventInfoSubject(input.daysLeft, input.lang),
-        html: eventInfoHtml(input),
-        text: eventInfoText(input),
+        html: eventInfoHtml(input, t),
+        text: eventInfoText(input, t),
       })),
     );
     if (error) {
@@ -521,11 +520,12 @@ export type ProformaEmailInput = {
   lang?: "bg" | "en";
 };
 
-/** A bank-transfer order: what to pay, where, until when, and the proforma to attach to the transfer. */
-export async function sendProformaEmail(input: ProformaEmailInput): Promise<boolean> {
-  const resend = getResend();
-  const from = process.env.EMAIL_FROM;
-  if (!resend || !from) return false;
+/**
+ * A bank-transfer ticket order: what to pay, where, until when, and the
+ * proforma to attach to the transfer. Built apart from the sending, so the
+ * team can read the letter on the Писма page without anything going out.
+ */
+function proformaParts(input: ProformaEmailInput, t: MailTexts = defaultMailTexts): MailParts {
   const f = "-apple-system,Segoe UI,Roboto,sans-serif";
   const due = input.dueAt.toLocaleDateString("bg-BG", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "Europe/Sofia" });
   const row = (k: string, v: string) => `<tr><td style="padding:8px 12px 8px 0;font:600 13px/1.4 ${f};color:#02251f;white-space:nowrap">${k}</td><td style="padding:8px 0;font:400 14px/1.5 ${f};color:#02251f">${v}</td></tr>`;
@@ -535,7 +535,7 @@ export async function sendProformaEmail(input: ProformaEmailInput): Promise<bool
     <img src="${SITE}/email-logo.png" width="200" height="54" alt="Biohacking Experience" style="display:block;border:0;width:200px;height:auto;margin:0 0 22px">
     <div style="font:400 12px/1 ${f};letter-spacing:2px;text-transform:uppercase;color:#14645599">Sofia Life Summit</div>
     <h1 style="margin:14px 0 0;font:800 26px/1.15 ${f};color:#02251f">${en ? "Proforma invoice for" : "Проформа за"} ${esc(input.items)}</h1>
-    <p style="margin:14px 0 0;font:400 15px/1.6 ${f};color:#02251fb3">${en ? `Hi ${esc(input.buyerName)}! Your seats are held until <strong style="color:#02251f">${due}</strong>. Once the transfer arrives we send the invoice and the tickets to this address.` : `Здравей, ${esc(input.buyerName)}! Местата са запазени до <strong style="color:#02251f">${due}</strong>. След като преводът пристигне, изпращаме фактурата и билетите на този адрес.`}</p>
+    <p style="margin:14px 0 0;font:400 15px/1.6 ${f};color:#02251fb3">${en ? `Hi ${esc(input.buyerName)}! Your seats are held until <strong style="color:#02251f">${due}</strong>. Once the transfer arrives we send the invoice and the tickets to this address.` : mailText(t, "proforma.uvod", { "име": esc(input.buyerName), "срок": `<strong style="color:#02251f">${due}</strong>` }, "html")}</p>
     <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:18px;border-top:1px solid #dfe4e0;border-bottom:1px solid #dfe4e0;width:100%">
       ${row(en ? "Amount" : "Сума", `${formatPrice(input.totalCents)} € ${en ? "incl. VAT" : "с ДДС"}`)}
       ${row(en ? "Beneficiary" : "Получател", esc(input.bank.holder || "-"))}
@@ -545,11 +545,11 @@ export async function sendProformaEmail(input: ProformaEmailInput): Promise<bool
       ${row(en ? "Reference" : "Основание", `Sofia Life Summit · ${input.reference}`)}
     </table>
     <p style="margin:22px 0 0"><a href="${SITE}/proforma/${input.reference}" style="display:inline-block;background:#146455;color:#f1f5f3;text-decoration:none;font:600 14px/1 ${f};padding:14px 22px;border-radius:999px">${en ? "Open the proforma" : "Отвори проформата"}</a></p>
-    <p style="margin:22px 0 0;font:400 12px/1.6 ${f};color:#02251f80">${en ? "Questions? Reply to this email or write to hi@biohacking.bg." : "Въпроси: отговори на това писмо или пиши на hi@biohacking.bg."}</p>
+    <p style="margin:22px 0 0;font:400 12px/1.6 ${f};color:#02251f80">${en ? "Questions? Reply to this email or write to hi@biohacking.bg." : mailText(t, "proforma.podpis", {}, "html")}</p>
   </td></tr></table></body></html>`;
   const text = [
-    `Здравей, ${input.buyerName}! Проформа за ${input.items} - Sofia Life Summit.`,
-    `Местата са запазени до ${due}. След превода изпращаме фактурата и билетите.`,
+    `Проформа за ${input.items} - Sofia Life Summit.`,
+    mailText(t, "proforma.uvod", { "име": input.buyerName, "срок": due }),
     "",
     `Сума: ${formatPrice(input.totalCents)} € с ДДС`,
     `Получател: ${input.bank.holder || "-"}`,
@@ -557,10 +557,21 @@ export async function sendProformaEmail(input: ProformaEmailInput): Promise<bool
     `Основание: Sofia Life Summit · ${input.reference}`,
     "",
     `Проформа: ${SITE}/proforma/${input.reference}`,
-    "Въпроси: hi@biohacking.bg",
+    mailText(t, "proforma.podpis"),
   ].join("\n");
+  return { subject: en ? `Proforma invoice for Sofia Life Summit tickets · ${input.reference}` : `Проформа за билети Sofia Life Summit · ${input.reference}`, html, text };
+}
+
+export const proformaEmailSubject = (input: ProformaEmailInput, t?: MailTexts): string => proformaParts(input, t).subject;
+export const proformaEmailHtml = (input: ProformaEmailInput, t?: MailTexts): string => proformaParts(input, t).html;
+export const proformaEmailText = (input: ProformaEmailInput, t?: MailTexts): string => proformaParts(input, t).text;
+
+export async function sendProformaEmail(input: ProformaEmailInput): Promise<boolean> {
+  const resend = getResend();
+  const from = process.env.EMAIL_FROM;
+  if (!resend || !from) return false;
   try {
-    const { error } = await resend.emails.send({ from, to: input.to, subject: en ? `Proforma invoice for Sofia Life Summit tickets · ${input.reference}` : `Проформа за билети Sofia Life Summit · ${input.reference}`, html, text });
+    const { error } = await resend.emails.send({ from, to: input.to, ...proformaParts(input, await getMailTexts()) });
     if (error) {
       console.error("[email] proforma send failed:", error);
       return false;
@@ -585,19 +596,7 @@ export type DocumentEmailInput = {
   bank?: { holder: string; iban: string; bic: string; bank: string };
 };
 
-/**
- * The proforma for something that is not a ticket, and the invoice that
- * follows it. One function for both: the two letters differ by a heading,
- * a link and whether the bank details are still needed, and keeping them
- * apart was how the wording drifted between them.
- */
-export async function sendDocumentEmail(
-  kind: "proforma" | "invoice",
-  input: DocumentEmailInput,
-): Promise<boolean> {
-  const resend = getResend();
-  const from = process.env.EMAIL_FROM;
-  if (!resend || !from) return false;
+function documentParts(kind: "proforma" | "invoice", input: DocumentEmailInput, t: MailTexts = defaultMailTexts): MailParts {
   const f = "-apple-system,Segoe UI,Roboto,sans-serif";
   const proforma = kind === "proforma";
   const due = input.dueAt
@@ -617,9 +616,10 @@ export async function sendDocumentEmail(
       : "";
 
   const heading = proforma ? `Проформа за ${esc(input.items)}` : `Фактура за ${esc(input.items)}`;
+  const name = input.buyerName ? `, ${esc(input.buyerName)}` : "";
   const intro = proforma
-    ? `Здравейте${input.buyerName ? `, ${esc(input.buyerName)}` : ""}! Изпращаме проформа фактура${due ? ` с падеж <strong style="color:#02251f">${due}</strong>` : ""}. След получаване на превода издаваме фактурата.`
-    : `Здравейте${input.buyerName ? `, ${esc(input.buyerName)}` : ""}! Благодарим за плащането. Прилагаме фактура${input.invoiceNumber ? ` № ${String(input.invoiceNumber).padStart(10, "0")}` : ""}.`;
+    ? mailText(t, "dokument.uvod-proforma", { "име": name, "падеж": due ? ` с падеж <strong style="color:#02251f">${due}</strong>` : "" }, "html")
+    : mailText(t, "dokument.uvod-faktura", { "име": name, "номер": input.invoiceNumber ? ` № ${String(input.invoiceNumber).padStart(10, "0")}` : "" }, "html");
 
   const html = `<!doctype html><html lang="bg"><body style="margin:0;padding:24px;background:#f2f2ee">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#f8f8f5;border-radius:18px;padding:32px"><tr><td>
@@ -633,11 +633,15 @@ export async function sendDocumentEmail(
       ${bankRows}
     </table>
     <p style="margin:22px 0 0"><a href="${url}" style="display:inline-block;background:#146455;color:#f1f5f3;text-decoration:none;font:600 14px/1 ${f};padding:14px 22px;border-radius:999px">${proforma ? "Отвори проформата" : "Отвори фактурата"}</a></p>
-    <p style="margin:22px 0 0;font:400 12px/1.6 ${f};color:#02251f80">Въпроси: отговорете на това писмо или пишете на hi@biohacking.bg.</p>
+    <p style="margin:22px 0 0;font:400 12px/1.6 ${f};color:#02251f80">${mailText(t, "dokument.podpis", {}, "html")}</p>
   </td></tr></table></body></html>`;
 
+  const plainName = input.buyerName ? `, ${input.buyerName}` : "";
   const text = [
     `${proforma ? "Проформа" : "Фактура"} за ${input.items} - Sofia Life Summit.`,
+    proforma
+      ? mailText(t, "dokument.uvod-proforma", { "име": plainName, "падеж": due ? ` с падеж ${due}` : "" })
+      : mailText(t, "dokument.uvod-faktura", { "име": plainName, "номер": input.invoiceNumber ? ` № ${String(input.invoiceNumber).padStart(10, "0")}` : "" }),
     `Сума: ${formatPrice(input.totalCents)} € с ДДС`,
     ...(proforma && due ? [`Плащане до: ${due}`] : []),
     ...(proforma && input.bank
@@ -649,17 +653,29 @@ export async function sendDocumentEmail(
       : []),
     "",
     `${proforma ? "Проформа" : "Фактура"}: ${url}`,
-    "Въпроси: hi@biohacking.bg",
+    mailText(t, "dokument.podpis"),
   ].join("\n");
 
+  return { subject: `${proforma ? "Проформа" : "Фактура"} · Sofia Life Summit · ${input.reference}`, html, text };
+}
+
+export const documentEmailParts = documentParts;
+
+/**
+ * The proforma for something that is not a ticket, and the invoice that
+ * follows it. One function for both: the two letters differ by a heading,
+ * a link and whether the bank details are still needed, and keeping them
+ * apart was how the wording drifted between them.
+ */
+export async function sendDocumentEmail(
+  kind: "proforma" | "invoice",
+  input: DocumentEmailInput,
+): Promise<boolean> {
+  const resend = getResend();
+  const from = process.env.EMAIL_FROM;
+  if (!resend || !from) return false;
   try {
-    const { error } = await resend.emails.send({
-      from,
-      to: input.to,
-      subject: `${proforma ? "Проформа" : "Фактура"} · Sofia Life Summit · ${input.reference}`,
-      html,
-      text,
-    });
+    const { error } = await resend.emails.send({ from, to: input.to, ...documentParts(kind, input, await getMailTexts()) });
     if (error) {
       console.error("[email] document send failed:", error);
       return false;
@@ -671,40 +687,49 @@ export async function sendDocumentEmail(
   }
 }
 
+export type WaitlistEmailInput = { to: string; tierName: string; tierId: string; left: number };
+
 /** "A seat freed up" to someone on the waiting list. One line, one link, no pressure. */
-export async function sendWaitlistEmail(input: { to: string; tierName: string; tierId: string; left: number }): Promise<boolean> {
-  const resend = getResend();
-  const from = process.env.EMAIL_FROM;
-  if (!resend || !from) return false;
+function waitlistParts(input: WaitlistEmailInput, t: MailTexts = defaultMailTexts): MailParts {
   const f = "-apple-system,Segoe UI,Roboto,sans-serif";
   const link = `${SITE}/bilet?nivo=${input.tierId}`;
+  const places = input.left === 1 ? "едно място" : `${input.left} места`;
+  const heading = mailText(t, "chakasht.zaglavie", { "ниво": esc(input.tierName) }, "html");
   const html = `<!doctype html><html lang="bg"><body style="margin:0;padding:24px;background:#f2f2ee">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#f8f8f5;border-radius:18px;padding:32px"><tr><td>
     <img src="${SITE}/email-logo.png" width="200" height="54" alt="Biohacking Experience" style="display:block;border:0;width:200px;height:auto;margin:0 0 22px">
     <div style="font:400 12px/1 ${f};letter-spacing:2px;text-transform:uppercase;color:#14645599">Sofia Life Summit</div>
-    <h1 style="margin:14px 0 0;font:800 26px/1.15 ${f};color:#02251f">Освободи се място от ${input.tierName}</h1>
-    <p style="margin:14px 0 0;font:400 15px/1.6 ${f};color:#02251fb3">Записа се да ти пишем, ако се освободи място от това ниво. Освободиха се ${input.left === 1 ? "едно място" : `${input.left} места`} - първите, които купят, ги вземат.</p>
+    <h1 style="margin:14px 0 0;font:800 26px/1.15 ${f};color:#02251f">${heading}</h1>
+    <p style="margin:14px 0 0;font:400 15px/1.6 ${f};color:#02251fb3">${mailText(t, "chakasht.tekst", { "места": places }, "html")}</p>
     <p style="margin:22px 0 0"><a href="${link}" style="display:inline-block;background:#146455;color:#f1f5f3;text-decoration:none;font:600 14px/1 ${f};padding:14px 22px;border-radius:999px">Купи билет ${input.tierName}</a></p>
-    <p style="margin:22px 0 0;font:400 12px/1.6 ${f};color:#02251f80">Пишем ти само този път. Ако мястото вече е заето, когато отвориш, съжаляваме - и благодарим за интереса. Въпроси: hi@biohacking.bg.</p>
+    <p style="margin:22px 0 0;font:400 12px/1.6 ${f};color:#02251f80">${mailText(t, "chakasht.podpis", {}, "html")}</p>
   </td></tr></table></body></html>`;
   const text = [
-    `Освободи се място от ${input.tierName} на Sofia Life Summit.`,
-    `Записа се да ти пишем, ако се освободи място. Освободиха се ${input.left} - първите, които купят, ги вземат.`,
+    `${mailText(t, "chakasht.zaglavie", { "ниво": input.tierName })} · Sofia Life Summit`,
+    mailText(t, "chakasht.tekst", { "места": places }),
     "",
     link,
     "",
-    "Пишем ти само този път. Въпроси: hi@biohacking.bg",
+    mailText(t, "chakasht.podpis"),
   ].join("\n");
+  return { subject: `${mailText(t, "chakasht.zaglavie", { "ниво": input.tierName })} · Sofia Life Summit`, html, text };
+}
+
+export const waitlistEmailParts = waitlistParts;
+
+export async function sendWaitlistEmail(input: WaitlistEmailInput): Promise<boolean> {
+  const resend = getResend();
+  const from = process.env.EMAIL_FROM;
+  if (!resend || !from) return false;
   try {
-    const { error } = await resend.emails.send({ from, to: input.to, subject: `Освободи се място от ${input.tierName} · Sofia Life Summit`, html, text });
+    const { error } = await resend.emails.send({ from, to: input.to, ...waitlistParts(input, await getMailTexts()) });
     return !error;
   } catch {
     return false;
   }
 }
 
-/** One line to the team when money lands. Deliberately plain: it is a nudge, not a report. */
-export async function sendSaleAlert(input: {
+export type SaleAlertInput = {
   reference: string;
   buyerName: string;
   items: string;
@@ -712,26 +737,31 @@ export async function sendSaleAlert(input: {
   method: "card" | "bank" | "admin";
   soldTotal: number;
   capacity: number;
-}): Promise<boolean> {
+};
+
+/** One line to the team when money lands. Deliberately plain: it is a nudge, not a report. */
+export function saleAlertParts(input: SaleAlertInput): { subject: string; text: string } {
+  const how = input.method === "card" ? "с карта" : input.method === "bank" ? "по банков път" : "издаден от екипа";
+  const money = input.totalCents > 0 ? `${formatPrice(input.totalCents)} €` : "безплатен";
+  return {
+    subject: `Продажба: ${input.items} · ${money}`,
+    text: [
+      `${input.items} за ${input.buyerName} - ${money} (${how}).`,
+      `Поръчка ${input.reference}.`,
+      "",
+      `Продадени общо: ${input.soldTotal} от ${input.capacity}.`,
+      "https://thelongevitysummit.eu/admin",
+    ].join("\n"),
+  };
+}
+
+export async function sendSaleAlert(input: SaleAlertInput): Promise<boolean> {
   const resend = getResend();
   const from = process.env.EMAIL_FROM;
   const to = process.env.SALES_ALERT_EMAIL ?? process.env.DIGEST_EMAIL ?? "hi@biohacking.bg";
   if (!resend || !from) return false;
-  const how = input.method === "card" ? "с карта" : input.method === "bank" ? "по банков път" : "издаден от екипа";
-  const money = input.totalCents > 0 ? `${formatPrice(input.totalCents)} €` : "безплатен";
   try {
-    const { error } = await resend.emails.send({
-      from,
-      to,
-      subject: `Продажба: ${input.items} · ${money}`,
-      text: [
-        `${input.items} за ${input.buyerName} - ${money} (${how}).`,
-        `Поръчка ${input.reference}.`,
-        "",
-        `Продадени общо: ${input.soldTotal} от ${input.capacity}.`,
-        "https://thelongevitysummit.eu/admin",
-      ].join("\n"),
-    });
+    const { error } = await resend.emails.send({ from, to, ...saleAlertParts(input) });
     return !error;
   } catch {
     return false;
@@ -909,15 +939,9 @@ export type AccessLinkInput = { to: string; label: string; link: string; pages: 
  * The letter says how long the link lasts and that the session it opens
  * lasts longer still, so nobody has to guess whether to keep it.
  */
-export async function sendAccessLinkEmail(input: AccessLinkInput): Promise<boolean> {
-  const resend = getResend();
-  const from = process.env.EMAIL_FROM;
-  if (!resend || !from) return false;
+export function accessLinkParts(input: AccessLinkInput, t: MailTexts = defaultMailTexts): MailParts {
   const pages = input.pages.map((p) => `<li style="margin:2px 0">${esc(p)}</li>`).join("");
-  try {
-    const { error } = await resend.emails.send({
-      from,
-      to: input.to,
+  return {
       subject: "Вход към администрацията на Sofia Life Summit",
       html: `<!doctype html><html lang="bg"><body style="margin:0;background:#f1f5f3;padding:28px 16px">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:20px;padding:32px">
@@ -925,7 +949,7 @@ export async function sendAccessLinkEmail(input: AccessLinkInput): Promise<boole
       <div style="font:700 13px/1 -apple-system,Segoe UI,Roboto,sans-serif;letter-spacing:2px;text-transform:uppercase;color:#14645599">Sofia Life Summit</div>
       <h1 style="margin:12px 0 16px;font:800 20px/1.3 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f">Вход за ${esc(input.label)}</h1>
       <p style="margin:0 0 20px;font:400 15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f">
-        Натисни бутона, за да влезеш. Връзката важи месец, а след влизане оставаш вписан(а) три месеца.
+        ${mailText(t, "dostap.uvod", {}, "html")}
       </p>
       <p style="margin:0 0 24px">
         <a href="${esc(input.link)}" style="display:inline-block;background:#146455;color:#f1f5f3;text-decoration:none;
@@ -934,7 +958,7 @@ export async function sendAccessLinkEmail(input: AccessLinkInput): Promise<boole
       <p style="margin:0 0 6px;font:600 13px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f">Отваря:</p>
       <ul style="margin:0 0 20px;padding-left:18px;font:400 13px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f99">${pages}</ul>
       <p style="margin:0;padding-top:16px;border-top:1px solid #dfe4e0;font:400 12px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f80">
-        Ако не си искал(а) вход, просто изтрий това писмо - никой не е влязъл.
+        ${mailText(t, "dostap.podpis", {}, "html")}
       </p>
     </td></tr>
   </table>
@@ -942,14 +966,22 @@ export async function sendAccessLinkEmail(input: AccessLinkInput): Promise<boole
       text: [
         `Вход за ${input.label}`,
         "",
-        "Връзката важи месец. След влизане оставаш вписан(а) три месеца:",
+        mailText(t, "dostap.uvod"),
         input.link,
         "",
         `Отваря: ${input.pages.join(", ")}`,
         "",
-        "Ако не си искал(а) вход, изтрий това писмо.",
+        mailText(t, "dostap.podpis"),
       ].join("\n"),
-    });
+  };
+}
+
+export async function sendAccessLinkEmail(input: AccessLinkInput): Promise<boolean> {
+  const resend = getResend();
+  const from = process.env.EMAIL_FROM;
+  if (!resend || !from) return false;
+  try {
+    const { error } = await resend.emails.send({ from, to: input.to, ...accessLinkParts(input, await getMailTexts()) });
     if (error) {
       console.error("[email] access link failed:", error);
       return false;
