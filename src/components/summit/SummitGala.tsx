@@ -26,7 +26,7 @@ export async function SummitGala({ lang = "bg" }: { lang?: Lang }) {
     <section id="gala" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
         <Reveal>
-          <div className="bh-forest bh-gradient-outline rounded-3xl p-8 text-bh-paper sm:p-12">
+          <div className="bh-forest bh-gradient-outline bh-mesh relative overflow-hidden rounded-3xl p-8 text-bh-paper sm:p-12">
             <p className="bh-eyebrow font-mono text-xs uppercase tracking-[0.25em] text-bh-paper/50">
               {c.eyebrow}
             </p>

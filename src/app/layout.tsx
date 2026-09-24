@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Sofia_Sans, Geologica, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ViewTracker } from "@/components/ViewTracker";
+import { MeshParallax } from "@/components/summit/MeshParallax";
 import { cheapestOf, getPricing, priceOf } from "@/lib/pricing";
 import { MetaPixel } from "@/components/MetaPixel";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
@@ -112,6 +113,7 @@ export default function RootLayout({
           />
         ) : null}
         <ViewTracker />
+        <MeshParallax />
         {children}
         {/* Meta and GA4's own scripts still wait on an explicit marketing
             choice - the banner that asks for it appears as soon as any of

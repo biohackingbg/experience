@@ -120,7 +120,7 @@ export async function SpeakerPage({ data, lang = "bg" }: { data: Data; lang?: La
             </section>
           )}
 
-          <section className="mt-14 rounded-3xl bg-bh-forest p-8 text-bh-paper sm:p-10">
+          <section className="bh-mesh relative mt-14 overflow-hidden rounded-3xl bg-bh-forest p-8 text-bh-paper sm:p-10">
             <h2 className="max-w-xl text-2xl font-bold leading-snug tracking-tight sm:text-3xl">{c.ctaTitle}</h2>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-bh-paper/70">{c.ctaBody}</p>
             <Link

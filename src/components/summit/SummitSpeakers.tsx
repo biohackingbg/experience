@@ -40,7 +40,7 @@ export async function SummitSpeakers({ lang = "bg" }: { lang?: Lang }) {
             one reason left to leave an address. It stands here rather than
             beside the ticket cards, where a free option costs sales. */}
         <Reveal className="mt-14">
-          <div className="bh-forest rounded-3xl p-8 text-bh-paper sm:p-10">
+          <div className="bh-forest bh-mesh relative overflow-hidden rounded-3xl p-8 text-bh-paper sm:p-10">
             <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-bh-paper/50">
               {LIST[lang].eyebrow}
             </p>

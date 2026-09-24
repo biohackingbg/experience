@@ -106,9 +106,9 @@ export async function SummitTickets({ lang = "bg" }: { lang?: Lang }) {
                   before reading a single price. `tone` carries the foreground
                   colours that have to invert along with the surface. */}
               <div
-                className={`relative flex h-full flex-col rounded-3xl p-8 ${
+                className={`relative flex h-full flex-col overflow-hidden rounded-3xl p-8 ${
                   featured
-                    ? "bh-forest bh-gradient-outline text-bh-paper"
+                    ? "bh-forest bh-gradient-outline bh-mesh text-bh-paper"
                     : "bh-mint text-bh-ink"
                 }`}
               >

@@ -168,7 +168,7 @@ export function SummitHero({
 
             {/* two square stats, one light one dark, like the reference */}
             <div className="grid grid-cols-2 gap-3">
-              <article className="bh-forest rounded-3xl p-5 text-bh-paper">
+              <article className="bh-forest bh-mesh relative overflow-hidden rounded-3xl p-5 text-bh-paper">
                 <People className="h-6 w-6 text-bh-lime" />
                 <div className="mt-3 text-3xl font-black tracking-tight">
                   1 000+

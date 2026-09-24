@@ -334,16 +334,23 @@ body {
 }
 
 /*
- * The wireframe mesh behind the dark hero card.
+ * The wireframe mesh behind the dark cards.
  *
- * The artwork itself, not a mask: CSS masks are subject to the image's
+ * The artwork itself, not a CSS mask: masks are subject to the image's
  * origin, and an effect that silently disappears in one browser is worse
  * than a slightly larger file. 267 KB, in line with the other hero art.
+ *
+ * It moves with the page rather than on a timer - MeshParallax writes
+ * `--mesh-p` as the card crosses the viewport, and the tilt and drift are
+ * read from it here. At the default of 0 the mesh simply sits still, which
+ * is what a reader who has asked for less motion, or who has JavaScript
+ * off, gets.
  *
  * Bled 20% past the edges so the drift never swings an edge into view, and
  * clipped by the card's own overflow.
  */
 .bh-mesh::before {
+  --mesh-p: 0;
   content: "";
   position: absolute;
   inset: -20%;
@@ -353,25 +360,19 @@ body {
   background-repeat: no-repeat;
   opacity: 0.55;
   pointer-events: none;
-  animation: bh-mesh-morph 28s ease-in-out infinite alternate;
+  /* The perspective is what keeps it three-dimensional: the grid leans away
+     from the reader as the card climbs the screen, rather than sliding. */
+  transform: perspective(900px) rotateX(calc(var(--mesh-p) * -8deg))
+    rotateY(calc(var(--mesh-p) * 7deg))
+    translate3d(calc(var(--mesh-p) * -2%), calc(var(--mesh-p) * 9%), 0) scale(1.12);
+  will-change: transform;
 }
 
-/* Slow enough to be felt rather than watched: the grid drifts and tilts, and
-   the perspective makes a flat texture read as a surface bending in depth. */
-@keyframes bh-mesh-morph {
-  from {
-    transform: perspective(900px) rotateX(6deg) rotateY(-9deg) scale(1.05) translate3d(-1%, 1%, 0);
-  }
-  50% {
-    transform: perspective(900px) rotateX(-5deg) rotateY(7deg) scale(1.15) translate3d(2%, -2%, 0);
-  }
-  to {
-    transform: perspective(900px) rotateX(9deg) rotateY(11deg) scale(1.07) translate3d(-2%, 2%, 0);
-  }
-}
-
+/* The mesh is texture, never content: a card that is mostly logos or faces
+   reads worse with a grid behind it, so it opts out rather than opting in. */
 @media (prefers-reduced-motion: reduce) {
   .bh-mesh::before {
-    animation: none;
+    transform: scale(1.12);
+    will-change: auto;
   }
 }

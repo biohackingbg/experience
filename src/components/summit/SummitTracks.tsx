@@ -106,7 +106,7 @@ export function SummitTracks({ lang = "bg" }: { lang?: Lang }) {
 
           {/* ── Ours ─────────────────────────────────────────────────────── */}
           <Reveal delay={110}>
-            <article className="bh-forest flex h-full flex-col rounded-3xl p-7 text-bh-paper">
+            <article className="bh-forest bh-mesh relative flex h-full flex-col overflow-hidden rounded-3xl p-7 text-bh-paper">
               <div className="flex items-start justify-between gap-4">
                 <People className="h-8 w-8 shrink-0 text-bh-lime" />
                 {/* Always the lime mark: the card is dark in both themes now,
