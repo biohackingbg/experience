@@ -122,18 +122,21 @@ export function SummitHero({
             </div>
           </div>
 
-          {/* The dark welcome card from the reference, in our forest. */}
+          {/* The dark welcome card from the reference, in our forest, over a
+              wireframe mesh that drifts in depth. The mesh is a ::before on
+              the card (see .bh-mesh), so it needs the stacking context and
+              the clip; the contents sit above it on their own. */}
           <article
-            className="hu-rise bh-forest flex flex-col justify-between gap-6 rounded-3xl p-6 text-bh-paper"
+            className="hu-rise bh-forest bh-mesh relative flex flex-col justify-between gap-6 overflow-hidden rounded-3xl p-6 text-bh-paper"
             style={{ animationDelay: "160ms" }}
           >
-            <div className="flex items-start justify-between gap-4">
+            <div className="relative flex items-start justify-between gap-4">
               <span className="rounded-full border border-bh-paper/30 px-4 py-1.5 font-mono text-xs uppercase tracking-[0.15em] text-bh-paper/90">
                 {c.venue}
               </span>
               <Hotel className="h-8 w-8 shrink-0 text-bh-lime" />
             </div>
-            <p className="text-sm leading-relaxed text-bh-paper/80">
+            <p className="relative text-sm leading-relaxed text-bh-paper/80">
               {c.welcome}
             </p>
           </article>
