@@ -338,7 +338,12 @@ body {
  *
  * The artwork itself, not a CSS mask: masks are subject to the image's
  * origin, and an effect that silently disappears in one browser is worse
- * than a slightly larger file. 267 KB, in line with the other hero art.
+ * than a slightly larger file. 260 KB, in line with the other hero art.
+ *
+ * Tiled at a fixed size rather than stretched to cover: `cover` sized the
+ * grid to the card, so the same mesh came out fine on a small card and
+ * coarse across a wide one. The file is mirrored in both directions, which
+ * is what lets it repeat without a seam.
  *
  * It moves with the page rather than on a timer - MeshParallax writes
  * `--mesh-p` as the card crosses the viewport, and the tilt and drift are
@@ -355,9 +360,9 @@ body {
   position: absolute;
   inset: -20%;
   background-image: url("/mesh.webp");
-  background-size: cover;
+  background-size: 900px auto;
   background-position: center;
-  background-repeat: no-repeat;
+  background-repeat: repeat;
   opacity: 0.55;
   pointer-events: none;
   /* The perspective is what keeps it three-dimensional: the grid leans away
