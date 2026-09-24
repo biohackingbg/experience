@@ -39,7 +39,7 @@ export default async function SpeakerKitPage({ params }: { params: Promise<{ tok
     <div className="min-h-screen bg-bh-paper px-5 py-12 text-bh-ink sm:px-8">
       <div className="mx-auto w-full max-w-3xl">
         <p className="font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">Sofia Life Summit · 07-08 ноември 2026</p>
-        <h1 className="mt-3 text-3xl font-black uppercase tracking-tight sm:text-4xl">
+        <h1 className="mt-3 font-display text-3xl font-[900] uppercase tracking-tight sm:text-4xl">
           Материали за {speaker.title ? `${speaker.title} ` : ""}{speaker.name}
         </h1>
         <p className="mt-4 max-w-2xl text-sm leading-relaxed text-bh-ink/70">

@@ -68,7 +68,7 @@ export default async function DeckPage() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">Админ</p>
-            <h1 className="mt-2 text-3xl font-black uppercase tracking-tight text-bh-ink">
+            <h1 className="mt-2 font-display text-3xl font-[900] uppercase tracking-tight text-bh-ink">
               Партньорска презентация
             </h1>
           </div>

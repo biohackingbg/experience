@@ -64,7 +64,7 @@ export default async function SignupsPage() {
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">
               Админ
             </p>
-            <h1 className="mt-2 text-3xl font-black uppercase tracking-tight text-bh-ink">
+            <h1 className="mt-2 font-display text-3xl font-[900] uppercase tracking-tight text-bh-ink">
               Записвания
             </h1>
           </div>

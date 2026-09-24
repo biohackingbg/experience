@@ -44,7 +44,7 @@ export default async function DoorPage({
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">
               Проверка
             </p>
-            <h1 className="mt-2 text-2xl font-black uppercase tracking-tight text-bh-ink">
+            <h1 className="mt-2 font-display text-2xl font-[900] uppercase tracking-tight text-bh-ink">
               Вход
             </h1>
           </div>

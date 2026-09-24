@@ -15,7 +15,7 @@ export function ProformaDocument({ p }: { p: Proforma }) {
     <article className="rounded-3xl p-8 ring-1 ring-bh-ink/10 sm:p-10 print:rounded-none print:p-0 print:ring-0">
       <header className="flex flex-wrap items-start justify-between gap-6 border-b border-bh-ink/15 pb-6">
         <div>
-          <h1 className="text-2xl font-black uppercase tracking-tight">Проформа фактура</h1>
+          <h1 className="font-display text-2xl font-[900] uppercase tracking-tight">Проформа фактура</h1>
           <p className="mt-1 font-mono text-sm text-bh-ink/60">№ {p.reference}</p>
           {p.paid && <p className="mt-2 inline-block rounded-full bg-[#0E8C7D]/15 px-3 py-1 text-xs font-semibold text-[#0b6d61]">платена - фактурата е издадена</p>}
         </div>

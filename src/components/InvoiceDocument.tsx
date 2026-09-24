@@ -225,7 +225,7 @@ export function InvoiceDocument({ inv, lang = "bg" }: { inv: InvoiceData; lang?:
     <article className="rounded-3xl p-8 ring-1 ring-bh-ink/10 sm:p-10 print:rounded-none print:p-0 print:ring-0">
       <header className="flex flex-wrap items-start justify-between gap-6 border-b border-bh-ink/15 pb-6">
         <div>
-          <h1 className="text-2xl font-black uppercase tracking-tight">{label(lang, "invoice")}</h1>
+          <h1 className="font-display text-2xl font-[900] uppercase tracking-tight">{label(lang, "invoice")}</h1>
           <p className="mt-1 font-mono text-sm text-bh-ink/60">№ {invoiceNo(inv.number)}</p>
         </div>
         <dl className="text-right text-sm">
@@ -274,7 +274,7 @@ export function CreditNoteDocument({ inv, lang = "bg" }: { inv: InvoiceData; lan
     <article className="rounded-3xl p-8 ring-1 ring-bh-ink/10 sm:p-10 print:rounded-none print:p-0 print:ring-0">
       <header className="flex flex-wrap items-start justify-between gap-6 border-b border-bh-ink/15 pb-6">
         <div>
-          <h1 className="text-2xl font-black uppercase tracking-tight">{label(lang, "creditNote")}</h1>
+          <h1 className="font-display text-2xl font-[900] uppercase tracking-tight">{label(lang, "creditNote")}</h1>
           <p className="mt-1 font-mono text-sm text-bh-ink/70">№ {invoiceNo(inv.creditNoteNumber ?? 0)}</p>
           <p className="mt-2 text-sm text-bh-ink/70">
             {label(lang, "toInvoice")} {invoiceNo(inv.number)} {label(lang, "of")} {bgDate(inv.issuedAt)}

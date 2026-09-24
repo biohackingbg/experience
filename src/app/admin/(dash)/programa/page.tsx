@@ -28,7 +28,7 @@ export default async function ProgramAdminPage() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">Админ</p>
-            <h1 className="mt-2 text-3xl font-black uppercase tracking-tight text-bh-ink">Програма</h1>
+            <h1 className="mt-2 font-display text-3xl font-[900] uppercase tracking-tight text-bh-ink">Програма</h1>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {rows.some((r) => !r.titleEn) && (

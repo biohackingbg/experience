@@ -84,7 +84,7 @@ export default function TermsPage() {
           ← Обратно към сайта
         </Link>
 
-        <h1 className="mt-8 text-[clamp(2rem,4.5vw,3rem)] font-black uppercase leading-[0.95] tracking-tight text-bh-ink">
+        <h1 className="mt-8 text-[clamp(2rem,4.5vw,3rem)] font-display font-[900] uppercase leading-[0.95] tracking-tight text-bh-ink">
           Общи условия за продажба на билети
         </h1>
         <p className="mt-4 font-mono text-xs uppercase tracking-[0.15em] text-bh-ink/45">

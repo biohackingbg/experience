@@ -122,7 +122,7 @@ export async function SummitTickets({ lang = "bg" }: { lang?: Lang }) {
                   </span>
                 ) : null}
 
-                <h3 className="text-xl font-black uppercase tracking-tight">
+                <h3 className="font-display text-xl font-[900] uppercase tracking-tight">
                   {tier.name}
                 </h3>
                 {(TIER_FEATURES[tier.id]?.[lang].tagline ?? tier.tagline) ? (
@@ -142,7 +142,7 @@ export async function SummitTickets({ lang = "bg" }: { lang?: Lang }) {
                       <span className="text-2xl font-semibold">€</span>
                     </div>
                   ) : (
-                    <div className="text-3xl font-black uppercase leading-tight tracking-tight">
+                    <div className="font-display text-3xl font-[900] uppercase leading-tight tracking-tight">
                       {SALES_SOON_LABEL}
                     </div>
                   )}
@@ -228,7 +228,7 @@ export async function SummitTickets({ lang = "bg" }: { lang?: Lang }) {
             highlights; the table is where the three get compared row by row,
             which a stack of bullet lists cannot do. */}
         <Reveal className="mt-14">
-          <h3 className="text-xl font-black uppercase tracking-tight text-bh-ink">
+          <h3 className="font-display text-xl font-[900] uppercase tracking-tight text-bh-ink">
             {c.compare}
           </h3>
           <div className="mt-5 overflow-x-auto">

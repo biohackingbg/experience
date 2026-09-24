@@ -35,7 +35,7 @@ export default async function MailPage() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">Админ</p>
-            <h1 className="mt-2 text-3xl font-black uppercase tracking-tight text-bh-ink">Писма</h1>
+            <h1 className="mt-2 font-display text-3xl font-[900] uppercase tracking-tight text-bh-ink">Писма</h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-bh-ink/60">
               Всяко писмо, което сайтът праща - до купувачи, до спонсори и фирми, и до
               нас - показано както го вижда получателят. Данните в примерите са

@@ -42,7 +42,7 @@ export async function SummitProgram({ lang = "bg" }: { lang?: Lang }) {
               <div className="bh-mint h-full overflow-hidden rounded-3xl">
                 <div className="bh-day-header bg-bh-ink px-7 py-6 text-bh-paper">
                   <div className="flex items-baseline gap-3">
-                    <span className="text-xl font-black uppercase tracking-tight">
+                    <span className="font-display text-xl font-[900] uppercase tracking-tight">
                       {d.day}
                     </span>
                     <span className="font-mono text-sm text-bh-lime">
