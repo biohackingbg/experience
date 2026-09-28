@@ -8,7 +8,7 @@ import { orderItems, orders, tickets } from "@/lib/db/schema";
 import { PENDING_HOLD_MINUTES } from "@/lib/orders-const";
 import { resolvePromo } from "@/lib/promo";
 import { getPricing, priceOf } from "@/lib/pricing";
-import { CURRENCY, GALA, TIERS, VAT_RATE, getTier, picksDay, splitVat } from "@/lib/tickets";
+import { CURRENCY, TIERS, VAT_RATE, getTier, picksDay, splitVat } from "@/lib/tickets";
 
 export { PENDING_HOLD_MINUTES };
 
@@ -108,11 +108,9 @@ export async function createPendingOrder(
   // Resolved once, before the lock is taken. Everything downstream - the row,
   // the total and the Stripe line item - uses this answer, so the launch
   // prices being closed mid-request cannot record one price and charge another.
-  // The staged price table is built from TIERS alone, so anything sold
-  // outside that list - the gala dinner - has no entry in it and would
-  // otherwise price at undefined, writing NaN into the order and handing
-  // Stripe a broken amount. A product with no stage price is charged its
-  // own, which is also the right answer for a flat-priced couvert.
+  // Falls back to the list price rather than trusting the staged table to
+  // hold every tier: a missing entry would price at undefined, write NaN
+  // into the order and hand Stripe a broken amount.
   const unitPriceCents = priceOf(await getPricing(), tier) ?? tier.listPriceCents;
   const grossCents = unitPriceCents * input.quantity;
 
@@ -349,9 +347,7 @@ export async function getRemainingAll(): Promise<Record<string, number>> {
     )
     .groupBy(orderItems.tierId);
   const out: Record<string, number> = {};
-  // The gala is counted here too - the checkout has to know when it is full -
-  // but it stays out of TIERS, so no hall figure gains its 200 places.
-  for (const t of [...TIERS, GALA]) out[t.id] = Math.max(0, t.capacity - (rows.find((r) => r.tierId === t.id)?.n ?? 0));
+  for (const t of TIERS) out[t.id] = Math.max(0, t.capacity - (rows.find((r) => r.tierId === t.id)?.n ?? 0));
   return out;
 }
 
