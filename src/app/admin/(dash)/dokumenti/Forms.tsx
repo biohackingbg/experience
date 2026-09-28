@@ -5,7 +5,7 @@ import { useActionState, useState } from "react";
 import { TIERS as PACKAGES } from "@/lib/finance-options";
 import { formatPrice } from "@/lib/tickets";
 
-import { type DocState, type SendState, createDoc, sendDoc } from "./actions";
+import { type DeleteState, type DocState, type SendState, createDoc, deleteDoc, sendDoc } from "./actions";
 
 const idle: DocState = { status: "idle" };
 const field = "w-full min-w-0 rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35";
@@ -209,6 +209,39 @@ export function SendButton({ reference, kind, label }: { reference: string; kind
         className="rounded-full border border-bh-ink/20 px-3 py-1.5 text-xs font-semibold text-bh-ink transition-colors hover:border-bh-ink disabled:opacity-50"
       >
         {pending ? "Изпраща…" : state.status === "ok" ? "Изпратено ✓" : label}
+      </button>
+      {state.status === "error" && <span className="text-xs text-red-600">{state.message}</span>}
+    </form>
+  );
+}
+
+const deleteIdle: DeleteState = { status: "idle" };
+
+/**
+ * Deletes a proforma, asking once first.
+ *
+ * Two presses rather than a browser confirm: the row sits between "Платена"
+ * and "Откажи", and a single click next to those should not be able to
+ * destroy anything. Offered only where there is no invoice - the page hides
+ * it, and the action refuses it in any case.
+ */
+export function DeleteButton({ reference }: { reference: string }) {
+  const [state, action, pending] = useActionState(deleteDoc, deleteIdle);
+  const [armed, setArmed] = useState(false);
+
+  return (
+    <form action={action} className="flex items-center gap-2">
+      <input type="hidden" name="reference" value={reference} />
+      <button
+        type={armed ? "submit" : "button"}
+        onClick={armed ? undefined : () => setArmed(true)}
+        onBlur={() => setArmed(false)}
+        disabled={pending}
+        className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-50 ${
+          armed ? "bg-red-600 text-white" : "text-bh-ink/50 hover:text-red-600"
+        }`}
+      >
+        {pending ? "Трие…" : armed ? "Наистина изтрий" : "Изтрий"}
       </button>
       {state.status === "error" && <span className="text-xs text-red-600">{state.message}</span>}
     </form>

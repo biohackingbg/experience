@@ -8,7 +8,7 @@ import { listDocuments, listPartnersForDocuments } from "@/lib/documents";
 import { formatPrice } from "@/lib/tickets";
 
 import { cancelDoc, payDoc } from "./actions";
-import { DocumentForm, SendButton } from "./Forms";
+import { DeleteButton, DocumentForm, SendButton } from "./Forms";
 
 export const metadata: Metadata = {
   title: "Проформи и фактури | Администрация",
@@ -109,6 +109,11 @@ export default async function DocumentsPage() {
                     )}
                     {d.status !== "cancelled" && <SendButton reference={d.reference} kind="proforma" label="Изпрати проформа" />}
                     {d.invoiceNumber && <SendButton reference={d.reference} kind="invoice" label="Изпрати фактура" />}
+                    {/* Only while no number has been drawn: a proforma is not
+                        a tax document, so a mistyped one is better gone than
+                        left crossed out. An invoice is undone with a credit
+                        note, never a delete. */}
+                    {!d.invoiceNumber && <DeleteButton reference={d.reference} />}
                     {d.status === "open" && (
                       <>
                         <form action={payDoc}>

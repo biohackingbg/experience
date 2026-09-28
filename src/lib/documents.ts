@@ -359,6 +359,48 @@ export async function cancelDocument(reference: string): Promise<boolean> {
   return !!row;
 }
 
+/**
+ * Throws a document away for good - for the one typed wrong.
+ *
+ * Only ever a proforma. A proforma is not a tax document and nothing in the
+ * books points at it, so a mistyped one is better gone than left crossed
+ * out. An invoice is the opposite: its number comes from a run that has to
+ * stay whole, and the way to undo one is a credit note, never a delete. The
+ * guard is in the query, not only in the page, because a server action is
+ * its own entry point.
+ *
+ * The lines go with it - the foreign key deletes them - and the partner's
+ * deal falls back to "договорено" if this was the only document that made
+ * it "фактурирано".
+ */
+export async function deleteDocument(reference: string): Promise<"deleted" | "has_invoice" | "not_found"> {
+  const db = getDb();
+  const [doc] = await db
+    .select({ id: documents.id, deckLinkId: documents.deckLinkId, invoiceNumber: documents.invoiceNumber })
+    .from(documents)
+    .where(eq(documents.reference, reference))
+    .limit(1);
+  if (!doc) return "not_found";
+  if (doc.invoiceNumber !== null) return "has_invoice";
+
+  await db.delete(documents).where(sql`${documents.id} = ${doc.id} and ${documents.invoiceNumber} is null`);
+
+  if (doc.deckLinkId) {
+    const [left] = await db
+      .select({ n: sql<number>`count(*)::int` })
+      .from(documents)
+      .where(sql`${documents.deckLinkId} = ${doc.deckLinkId} and ${documents.status} <> 'cancelled'`);
+    if ((left?.n ?? 0) === 0) {
+      await db.execute(
+        sql`update ${deckLinks}
+            set money = 'agreed', updated_at = now()
+            where ${deckLinks.id} = ${doc.deckLinkId} and money = 'invoiced'`,
+      );
+    }
+  }
+  return "deleted";
+}
+
 /** A date window, as the accountant asks for it: two days, inclusive. */
 export type DateRange = { from?: string; to?: string };
 

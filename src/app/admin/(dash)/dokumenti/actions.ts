@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { canAccess } from "@/lib/access";
-import { cancelDocument, createDocument, isDocumentReference, markDocumentPaid, resendDocument } from "@/lib/documents";
+import { cancelDocument, createDocument, deleteDocument, isDocumentReference, markDocumentPaid, resendDocument } from "@/lib/documents";
 
 export type DocState = { status: "idle" | "ok" | "error"; message?: string; reference?: string };
 
@@ -105,4 +105,24 @@ export async function cancelDoc(formData: FormData): Promise<void> {
   if (!isDocumentReference(reference)) return;
   await cancelDocument(reference);
   done();
+}
+
+export type DeleteState = { status: "idle" | "error"; message?: string };
+
+/**
+ * Deletes a proforma that should never have existed. Never an invoice: that
+ * number belongs to a run, and the way back from one is a credit note.
+ */
+export async function deleteDoc(_prev: DeleteState, formData: FormData): Promise<DeleteState> {
+  if (!(await canAccess("dokumenti"))) return { status: "error", message: "Няма достъп." };
+  const reference = String(formData.get("reference") ?? "").trim().toUpperCase();
+  if (!isDocumentReference(reference)) return { status: "error", message: "Невалиден номер." };
+
+  const r = await deleteDocument(reference);
+  done();
+  if (r === "deleted") return { status: "idle" };
+  return {
+    status: "error",
+    message: r === "has_invoice" ? "Има издадена фактура - прави се кредитно известие, не се трие." : "Документът не е намерен.",
+  };
 }
