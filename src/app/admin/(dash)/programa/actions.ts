@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { canAccess } from "@/lib/access";
-import { type SessionInput, addSession, deleteSession, fillProgramEnglish, importProgram, moveSession, updateSession } from "@/lib/program-data";
+import { addSession, deleteSession, fillProgramEnglish, importProgram, moveSession, reimportProgram, type SessionInput, updateSession } from "@/lib/program-data";
 
 export type FormState = { status: "idle" | "ok" | "error"; message?: string };
 const UUID = /^[0-9a-f-]{36}$/;
@@ -86,5 +86,16 @@ export async function seedProgram(): Promise<void> {
 export async function fillEnglish(): Promise<void> {
   if (!(await canAccess("programa"))) return;
   await fillProgramEnglish();
+  done();
+}
+
+/**
+ * Replaces the table with the code programme - the way corrections that were
+ * made in the repository reach the site. Destructive by design; the page
+ * says so beside the button.
+ */
+export async function reseedProgram(): Promise<void> {
+  if (!(await canAccess("programa"))) return;
+  await reimportProgram();
   done();
 }

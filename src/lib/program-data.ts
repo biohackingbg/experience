@@ -101,12 +101,31 @@ export async function getProgram(lang: Lang = "bg"): Promise<Day[]> {
   }));
 }
 
-/** Copies the code programme into the table, once; a second call does nothing. */
-export async function importProgram(): Promise<number> {
-  const db = getDb();
-  const [c] = await db.select({ n: sql<number>`count(*)::int` }).from(sessions);
-  if ((c?.n ?? 0) > 0) return 0;
-  const rows = PROGRAM.flatMap((d, di) =>
+/**
+ * Throws the table away and writes the code programme in its place.
+ *
+ * The code copy is where corrections are made - they arrive as edits to the
+ * repository - but the site reads the table, so the two drift the moment
+ * anything is changed in either. This is the way back: one press and the
+ * table is the code again.
+ *
+ * It is destructive and says so where it is offered: anything typed into
+ * Програма by hand since the last import is gone. Done in one transaction,
+ * so a failure leaves the old programme standing rather than no programme
+ * at all.
+ */
+export async function reimportProgram(): Promise<number> {
+  const rows = codeProgramRows();
+  await getDb().transaction(async (tx) => {
+    await tx.delete(sessions);
+    if (rows.length) await tx.insert(sessions).values(rows);
+  });
+  return rows.length;
+}
+
+/** The code programme in the shape the table stores. */
+function codeProgramRows() {
+  return PROGRAM.flatMap((d, di) =>
     d.slots.map((s, si) => ({
       day: di + 1,
       sort: (si + 1) * 10,
@@ -121,6 +140,14 @@ export async function importProgram(): Promise<number> {
       roleEn: PROGRAM_EN[di]?.[si]?.role ?? null,
     })),
   );
+}
+
+/** Copies the code programme into the table, once; a second call does nothing. */
+export async function importProgram(): Promise<number> {
+  const db = getDb();
+  const [c] = await db.select({ n: sql<number>`count(*)::int` }).from(sessions);
+  if ((c?.n ?? 0) > 0) return 0;
+  const rows = codeProgramRows();
   if (rows.length) await db.insert(sessions).values(rows);
   return rows.length;
 }

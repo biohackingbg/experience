@@ -162,7 +162,6 @@ export const PROGRAM: Day[] = [
       {
         time: "18:00",
         title: "Край на ден 1",
-        note: "Благотворителната гала вечеря е същата вечер, с отделна покана и отделен билет.",
         pause: true,
       },
     ],
@@ -319,7 +318,6 @@ export const PROGRAM_EN: SlotEn[][] = [
     },
     {
       title: "End of day 1",
-      note: "The charity gala dinner is the same evening, by separate invitation and a separate ticket.",
     },
   ],
   [

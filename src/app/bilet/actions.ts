@@ -21,14 +21,11 @@ import { PURCHASE_TERMS_TEXT, PURCHASE_TERMS_TEXT_EN, PURCHASE_TERMS_VERSION } f
 import { checkRateLimit } from "@/lib/rate-limit";
 import { lastCampaignOf, visitorHash } from "@/lib/site-views";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
-import { GALA, SALES_OPEN, TIERS, getTier, picksDay } from "@/lib/tickets";
+import { SALES_OPEN, TIERS, getTier, picksDay } from "@/lib/tickets";
 
 const schema = z.object({
-  // The gala is sold through this same action - one payment path, one order
   // shape, one webhook - but it is not one of the summit tiers.
-  // The gala leads the list only because the tuple's first element has to be
-  // a fixed one for the type to hold; order means nothing to the check.
-  tierId: z.enum([GALA.id, ...TIERS.map((t) => t.id)] as [string, ...string[]]),
+  tierId: z.enum(TIERS.map((t) => t.id) as [string, ...string[]]),
   quantity: z.coerce.number().int().min(1).max(10),
   /** Only the one-day tiers send it; checked against the tier below. */
   coreDay: z.coerce.number().int().min(1).max(2).optional(),
@@ -243,13 +240,9 @@ export async function startCheckout(
     return { status: "redirect", redirectUrl: `${origin}/bilet/uspeh?ref=${order.reference}&lang=${lang}` };
   }
 
-  // What the buyer sees on the Stripe page and on the card statement. Only
-  // the dates differ: the gala is one evening, not the two-day summit.
+  // What the buyer sees on the Stripe page and on the card statement.
   const productName = `Sofia Life Summit - ${tier.name}`;
-  const productNote =
-    tier.id === GALA.id
-      ? "07 ноември 2026 · Гала вечеря · Гранд Хотел Милениум, София"
-      : "07-08 ноември 2026, Гранд Хотел Милениум, София";
+  const productNote = "07-08 ноември 2026, Гранд Хотел Милениум, София";
 
   const session = await getStripe().checkout.sessions.create({
     mode: "payment",

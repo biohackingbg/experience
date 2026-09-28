@@ -6,7 +6,7 @@ import { requireAccess } from "@/lib/access";
 import { PROGRAM } from "@/lib/program";
 import { listSessions, peopleList } from "@/lib/program-data";
 
-import { fillEnglish, seedProgram, shiftSession } from "./actions";
+import { fillEnglish, reseedProgram, seedProgram, shiftSession } from "./actions";
 import { NewSessionForm, SessionEditor } from "./Forms";
 
 export const metadata: Metadata = {
@@ -119,6 +119,28 @@ export default async function ProgramAdminPage() {
             })}
           </div>
         )}
+        {rows.length > 0 && (
+          <section className="mt-10 rounded-3xl bg-bh-cloud p-6 ring-1 ring-bh-ink/6">
+            <h2 className="text-lg font-bold tracking-tight text-bh-ink">Презареди програмата от кода</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-bh-ink/60">
+              Корекциите по програмата се правят в кода, а сайтът чете таблицата отдолу - затова двете
+              се разминават, щом някоя от тях се промени. Това е пътят назад: таблицата става точно
+              каквато е програмата в кода ({PROGRAM.reduce((a, d) => a + d.slots.length, 0)} сесии).{" "}
+              <strong className="font-semibold text-bh-ink">
+                Всичко, което е писано тук на ръка, изчезва.
+              </strong>
+            </p>
+            <form action={reseedProgram} className="mt-4">
+              <button
+                type="submit"
+                className="rounded-full border border-[#9c3d5c]/40 px-4 py-2 text-sm font-semibold text-[#9c3d5c] transition-colors hover:border-[#9c3d5c]"
+              >
+                Изтрий таблицата и вземи кода
+              </button>
+            </form>
+          </section>
+        )}
+
       </div>
     </div>
   );

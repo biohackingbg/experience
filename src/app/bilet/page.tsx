@@ -5,8 +5,7 @@ import { isTestMode } from "@/lib/stripe";
 import { CHECKOUT, langOf } from "@/lib/i18n";
 import { getRemainingAll } from "@/lib/orders";
 import { getPricing } from "@/lib/pricing";
-import { GALA, SALES_OPEN } from "@/lib/tickets";
-import { GALA_SECTION } from "@/lib/site-copy";
+import { SALES_OPEN } from "@/lib/tickets";
 import { CheckoutForm } from "./CheckoutForm";
 
 export const metadata: Metadata = {
@@ -28,11 +27,7 @@ export default async function CheckoutPage({
   const t = CHECKOUT[lang];
   const testMode = isTestMode();
   const [pricing, remaining] = await Promise.all([getPricing(), getRemainingAll()]);
-  // The gala is one evening at a flat couvert - no tier picker, and none of
-  // the early-bird staging that belongs to the summit tickets.
-  const isGala = nivo === GALA.id;
-  const gala = GALA_SECTION[lang];
-  const early = pricing.discounted && !isGala;
+  const early = pricing.discounted;
   const soldOut = Object.entries(remaining).filter(([, n]) => n === 0).map(([id]) => id);
 
   // While sales are closed the page still answers - a shared link should
@@ -115,10 +110,10 @@ export default async function CheckoutPage({
         )}
 
         <h1 className="mt-8 text-[clamp(2rem,4.5vw,3.2rem)] font-display font-[900] uppercase leading-[0.95] tracking-tight text-bh-ink">
-          {isGala ? gala.eyebrow : t.title}
+          {t.title}
         </h1>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-bh-ink/60">
-          {isGala ? `${gala.when} · ${gala.limited}` : t.intro}
+          {t.intro}
         </p>
 
         {SALES_OPEN && early && (
@@ -140,7 +135,6 @@ export default async function CheckoutPage({
           soldOut={soldOut}
           lang={lang}
           utm={{ source: utm_source, campaign: utm_campaign }}
-          only={isGala ? { id: GALA.id, name: GALA.name, priceCents: GALA.listPriceCents } : undefined}
         />
       </div>
     </div>
