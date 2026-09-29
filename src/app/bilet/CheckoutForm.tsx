@@ -4,7 +4,7 @@ import { useActionState, useEffect, useRef, useState, useSyncExternalStore } fro
 
 import { initialCheckoutState } from "@/lib/checkout-state";
 import { CHECKOUT, type Lang } from "@/lib/i18n";
-import { consentPending, consentSnapshot, subscribeToConsent } from "@/lib/consent-browser";
+import { allowsAnalytics, consentPending, consentSnapshot, subscribeToConsent } from "@/lib/consent-browser";
 import { trackGaEvent } from "@/lib/ga-browser";
 import { trackMetaEvent } from "@/lib/meta-browser";
 import { PURCHASE_TERMS_TEXT, PURCHASE_TERMS_TEXT_EN } from "@/lib/purchase-terms";
@@ -78,7 +78,7 @@ export function CheckoutForm({
   // that is simply dropped.
   const consent = useSyncExternalStore(subscribeToConsent, consentSnapshot, consentPending);
   useEffect(() => {
-    if (consent !== "granted" || listSent.current) return;
+    if (!allowsAnalytics(consent) || listSent.current) return;
     listSent.current = true;
     trackGaEvent("view_item_list", {
       item_list_id: "tickets",

@@ -1,7 +1,7 @@
 "use client";
 
 import { cookieValue } from "@/lib/consent-browser";
-import { MARKETING_CONSENT_COOKIE, hasMarketingConsent } from "@/lib/marketing-consent";
+import { MARKETING_CONSENT_COOKIE, hasAnalyticsConsent } from "@/lib/marketing-consent";
 
 type GaWindow = Window & {
   gtag?: (...args: unknown[]) => void;
@@ -49,7 +49,7 @@ function ensureGa(): GaWindow["gtag"] | null {
 /** Browser events stay inert unless the visitor explicitly accepted measurement. */
 export function trackGaEvent(name: string, parameters?: Record<string, unknown>): void {
   if (typeof window === "undefined") return;
-  if (!hasMarketingConsent(cookieValue(MARKETING_CONSENT_COOKIE))) return;
+  if (!hasAnalyticsConsent(cookieValue(MARKETING_CONSENT_COOKIE))) return;
   ensureGa()?.("event", name, parameters ?? {});
 }
 

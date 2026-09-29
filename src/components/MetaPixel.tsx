@@ -5,6 +5,7 @@ import { useEffect, useRef, useSyncExternalStore } from "react";
 
 import {
   consentPending,
+  allowsMarketing,
   consentSnapshot,
   shouldTrack,
   subscribeToConsent,
@@ -64,7 +65,7 @@ export function MetaPixel({ id }: { id: string | null }) {
   const viewedTicketPath = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!id || choice !== "granted" || !shouldTrack(pathname)) return;
+    if (!id || !allowsMarketing(choice) || !shouldTrack(pathname)) return;
     const fbq = initializePixel(id);
     if (trackedPath.current !== pathname) {
       fbq("track", "PageView");

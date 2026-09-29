@@ -253,6 +253,13 @@
       "when": 1789000000034,
       "tag": "0035_documents",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1789000000035,
+      "tag": "0036_consent_log",
+      "breakpoints": true
     }
   ]
 }

@@ -839,3 +839,35 @@ export const listMailings = pgTable("list_mailings", {
   sentAt: timestamp("sent_at", { withTimezone: true }).notNull().defaultNow(),
   sentBy: text("sent_by"),
 });
+
+/**
+ * Every cookie choice made on the site, as evidence.
+ *
+ * What a consent platform sells is this table: who chose what, when, and
+ * under which wording - the record the regulator asks for and the one a
+ * visitor can point at. "Who" is the consent id from the visitor's own
+ * cookie plus the daily pseudonym site_views uses; never an address or a
+ * name. A change of mind is a new row with the same consent id, so the
+ * history stays whole.
+ */
+export const consentLog = pgTable(
+  "consent_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    /** The random token in the visitor's cookie - their handle on this record. */
+    consentId: text("consent_id").notNull(),
+    /** The disclosure version the choice was made under. */
+    version: text("version").notNull(),
+    analytics: boolean("analytics").notNull(),
+    marketing: boolean("marketing").notNull(),
+    /** Daily-rotating pseudonym, the same one site_views uses. Never an address. */
+    visitor: text("visitor"),
+    /** Where the banner was answered. */
+    path: text("path"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("consent_log_created_idx").on(table.createdAt),
+    index("consent_log_consent_idx").on(table.consentId),
+  ],
+);

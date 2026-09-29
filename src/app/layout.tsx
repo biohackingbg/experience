@@ -9,7 +9,7 @@ import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { GoogleTagManager } from "@/components/GoogleTagManager";
 import { ConsentBanner } from "@/components/ConsentBanner";
 import { pixelId } from "@/lib/meta-pixel";
-import { MARKETING_CONSENT_COOKIE, marketingConsentValue } from "@/lib/marketing-consent";
+import { MARKETING_CONSENT_COOKIE, MARKETING_CONSENT_VERSION } from "@/lib/marketing-consent";
 import { GA_ID_GLOBAL, gaId } from "@/lib/ga-id";
 import { GTM_ID_GLOBAL, gtmId } from "@/lib/gtm-id";
 import { META } from "@/lib/site-copy";
@@ -97,8 +97,9 @@ export default function RootLayout({
             All seven signals, so no tool reads one as "unknown". Security
             storage is granted from the start; the other six, functionality
             storage included (the agency's call - it gates their tags, not the
-            site's own theme or consent cookie), follow the single choice the
-            banner asks for.
+            site's own theme or consent cookie), follow the two choices the
+            banner asks for: analytics_storage from "статистика", the rest
+            from "маркетинг".
 
             The default is denied on every visit, and a stored "yes" is
             replayed as an update straight after it. Without that replay the
@@ -108,7 +109,7 @@ export default function RootLayout({
         {gaId() || gtmId() ? (
           <script
             dangerouslySetInnerHTML={{
-              __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',personalization_storage:'denied',functionality_storage:'denied',security_storage:'granted'});try{var m=document.cookie.match(/(?:^|; )${MARKETING_CONSENT_COOKIE}=([^;]*)/);if(m&&decodeURIComponent(m[1])===${JSON.stringify(marketingConsentValue("granted"))}){gtag('consent','update',{ad_storage:'granted',ad_user_data:'granted',ad_personalization:'granted',analytics_storage:'granted',personalization_storage:'granted',functionality_storage:'granted'});}}catch(e){}`,
+              __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',personalization_storage:'denied',functionality_storage:'denied',security_storage:'granted'});try{var m=document.cookie.match(/(?:^|; )${MARKETING_CONSENT_COOKIE}=([^;]*)/);if(m){var v=decodeURIComponent(m[1]).split(':');if(v[0]===${JSON.stringify(MARKETING_CONSENT_VERSION)}&&v[1]){var a=v[1].charAt(1)==='1'?'granted':'denied',k=v[1].charAt(3)==='1'?'granted':'denied';gtag('consent','update',{ad_storage:k,ad_user_data:k,ad_personalization:k,analytics_storage:a,personalization_storage:k,functionality_storage:k});}}}catch(e){}`,
             }}
           />
         ) : null}

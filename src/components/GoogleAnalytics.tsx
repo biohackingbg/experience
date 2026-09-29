@@ -5,6 +5,7 @@ import { useEffect, useRef, useSyncExternalStore } from "react";
 
 import {
   consentPending,
+  allowsAnalytics,
   consentSnapshot,
   shouldTrack,
   subscribeToConsent,
@@ -24,7 +25,7 @@ export function GoogleAnalytics() {
   const sentPath = useRef<string | null>(null);
 
   useEffect(() => {
-    if (choice !== "granted" || !shouldTrack(pathname)) return;
+    if (!allowsAnalytics(choice) || !shouldTrack(pathname)) return;
     if (sentPath.current === pathname) return;
     sentPath.current = pathname;
     trackGaPageView();

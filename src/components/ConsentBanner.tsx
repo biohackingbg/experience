@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 import {
   consentPending,
@@ -12,24 +12,96 @@ import {
   rememberConsent,
   subscribeToConsent,
 } from "@/lib/consent-browser";
+import { ACCEPT_ALL, type ConsentChoice, REJECT_ALL } from "@/lib/marketing-consent";
 
 type TaggedWindow = Window & { fbq?: (...args: unknown[]) => void };
 
 /**
- * Stripe's cookie banner, one to one: their sentence, their card, their two
- * equal buttons - measured off stripe.com rather than remembered, and in
- * English on every page, the way theirs is. Only the accent is ours.
- * "Improve your experience" is true here too: the analytics half of what the
- * visitor accepts is what tells us which pages work.
+ * The cookie dialog: a centred window over a dimmed page, three tabs, three
+ * ways out.
+ *
+ * It sits in the middle and dims the page on purpose - a card in a corner
+ * is ignored, and an ignored banner measures nobody. What keeps this on the
+ * right side of the line is that every way out is one click and the same
+ * size: "Отказ" is a real button beside "Съгласявам се", not a link hidden
+ * behind "Персонализация". A dialog that made refusing harder than agreeing
+ * would collect consents that do not count, and the Meta and Google data
+ * built on them would be worth nothing.
+ *
+ * Two categories, because they are two different things going to two
+ * different companies. Necessary cookies are not offered: there is nothing
+ * to choose.
  */
+
 const COPY = {
-  title: "Cookie consent",
-  body: "We use cookies to improve your experience and for marketing. Read our ",
-  policy: "cookie policy",
-  tail: ".",
-  accept: "Accept all",
-  decline: "Reject all",
-  reopen: "Cookies",
+  bg: {
+    tabs: { consent: "Съгласие", details: "Детайли", about: "За нас" },
+    title: "Този сайт използва бисквитки.",
+    body:
+      "Освен необходимите за работата му, ползваме бисквитки за две неща: да разберем кои страници работят (статистика) и да покажем събитието на хората, които вече са го гледали (маркетинг). Нищо от това не тръгва, преди да избереш.",
+    policy: "Пълното описание е в политиката за поверителност.",
+    policyLink: "политиката за поверителност",
+    reject: "Отказ",
+    customise: "Персонализация",
+    accept: "Съгласявам се",
+    save: "Запази избора",
+    reopen: "Бисквитки",
+    close: "Затвори",
+    categories: {
+      necessary: {
+        name: "Необходими",
+        body: "Една бисквитка, която пази избора ти от този прозорец за 180 дни, и сесията при плащане. Без тях сайтът не работи; не се използват за реклама.",
+        always: "винаги включени",
+      },
+      analytics: {
+        name: "Статистика",
+        body: "Google Analytics: кои страници се отварят, докъде стига човек по пътя към билета. Помага ни да оправим това, което не работи. Получател е Google Ireland Ltd.",
+      },
+      marketing: {
+        name: "Маркетинг",
+        body: "Meta (Facebook, Instagram) и рекламната част на Google: да покажем събитието на хора, които вече са били тук, и да разберем коя реклама е довела до билет. Получатели са Meta Platforms Ireland Ltd. и Google Ireland Ltd.",
+      },
+    },
+    about: [
+      "Сайтът е на Biohacking.bg, организатор на Sofia Life Summit заедно с Bulgarian Longevity Association. Въпроси за данните: hi@biohacking.bg.",
+      "Изборът ти важи 180 дни и може да се смени по всяко време от бутона „Бисквитки“ в долния ляв ъгъл. При оттегляне спираме бъдещите събития и изтриваме достъпните бисквитки на Meta и Google от този домейн.",
+      "Всеки избор се записва с номер, дата и версия на този текст, така че да е ясно какво точно си приел/а. Номерът ти е:",
+    ],
+  },
+  en: {
+    tabs: { consent: "Consent", details: "Details", about: "About" },
+    title: "This site uses cookies.",
+    body:
+      "Beyond the ones it needs to work, we use cookies for two things: to see which pages work (statistics) and to show the event to people who have already looked at it (marketing). None of it runs until you choose.",
+    policy: "The full description is in the privacy policy.",
+    policyLink: "privacy policy",
+    reject: "Reject",
+    customise: "Customise",
+    accept: "Accept",
+    save: "Save choice",
+    reopen: "Cookies",
+    close: "Close",
+    categories: {
+      necessary: {
+        name: "Necessary",
+        body: "One cookie that keeps your choice from this window for 180 days, and the session during payment. The site does not work without them; they are not used for advertising.",
+        always: "always on",
+      },
+      analytics: {
+        name: "Statistics",
+        body: "Google Analytics: which pages are opened, how far someone gets on the way to a ticket. It helps us fix what does not work. Recipient: Google Ireland Ltd.",
+      },
+      marketing: {
+        name: "Marketing",
+        body: "Meta (Facebook, Instagram) and the advertising side of Google: to show the event to people who have already been here, and to learn which advert led to a ticket. Recipients: Meta Platforms Ireland Ltd. and Google Ireland Ltd.",
+      },
+    },
+    about: [
+      "The site belongs to Biohacking.bg, organiser of Sofia Life Summit together with the Bulgarian Longevity Association. Questions about data: hi@biohacking.bg.",
+      "Your choice lasts 180 days and can be changed at any time from the “Cookies” button in the bottom-left corner. On withdrawal we stop future events and delete the Meta and Google cookies reachable from this domain.",
+      "Every choice is recorded with a number, a date and the version of this text, so it is clear what exactly you agreed to. Your number is:",
+    ],
+  },
 } as const;
 
 /** Google names the per-property cookie after the measurement id, so it can
@@ -42,89 +114,208 @@ function forgetGoogleCookies(): void {
   }
 }
 
-/**
- * One choice for every advertising tag on the site.
- *
- * It lives apart from the tags themselves because it is the thing that turns
- * them on: asked once, it decides for Meta and Google alike, and it is shown
- * as soon as any of them is connected.
- */
+type Tab = "consent" | "details" | "about";
+
 export function ConsentBanner({ enabled }: { enabled: boolean }) {
   const pathname = usePathname();
-  const choice = useSyncExternalStore(subscribeToConsent, consentSnapshot, consentPending);
+  const stored = useSyncExternalStore(subscribeToConsent, consentSnapshot, consentPending);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [tab, setTab] = useState<Tab>("consent");
+  const [draft, setDraft] = useState<ConsentChoice>(REJECT_ALL);
 
-  if (!enabled || !isConsentSurface(pathname) || choice === "pending") return null;
+  const open = enabled && isConsentSurface(pathname) && stored !== "pending" && (stored === null || settingsOpen);
 
-  const t = COPY;
-  const showDialog = choice === null || settingsOpen;
-  const accept = () => {
-    rememberConsent("granted");
+  // The page behind must not scroll while the question is on screen.
+  useEffect(() => {
+    if (!open) return;
+    const before = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = before;
+    };
+  }, [open]);
+
+  if (!enabled || !isConsentSurface(pathname) || stored === "pending") return null;
+
+  const t = pathname.startsWith("/en") ? COPY.en : COPY.bg;
+  const previous = stored;
+
+  const apply = (choice: ConsentChoice) => {
+    const losingMarketing = previous?.marketing === true && !choice.marketing;
+    const losingAnalytics = previous?.analytics === true && !choice.analytics;
+    rememberConsent(choice);
+    if (losingMarketing) {
+      (window as TaggedWindow).fbq?.("consent", "revoke");
+      forgetCookie("_fbp");
+      forgetCookie("_fbc");
+    }
+    if (losingAnalytics) forgetGoogleCookies();
     setSettingsOpen(false);
+    setTab("consent");
+    // A tag already running cannot be unloaded; a reload is the honest way to be rid of it.
+    if (losingMarketing || losingAnalytics) window.location.reload();
   };
-  const decline = () => {
-    const wasGranted = choice === "granted";
-    rememberConsent("denied");
-    (window as TaggedWindow).fbq?.("consent", "revoke");
-    forgetCookie("_fbp");
-    forgetCookie("_fbc");
-    forgetGoogleCookies();
-    setSettingsOpen(false);
-    // A tag already running cannot be unloaded; a reload is the honest way to
-    // be rid of it.
-    if (wasGranted) window.location.reload();
-  };
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          // Reopened from the corner: start from what is stored, not from nothing.
+          if (previous) setDraft({ analytics: previous.analytics, marketing: previous.marketing });
+          setTab("consent");
+          setSettingsOpen(true);
+        }}
+        className="fixed bottom-3 left-3 z-40 rounded-full border border-bh-ink/15 bg-bh-paper/95 px-3 py-2 text-[11px] font-medium text-bh-ink/65 shadow-md backdrop-blur transition-colors hover:text-bh-ink"
+      >
+        {t.reopen}
+      </button>
+    );
+  }
+
+  const tabButton = (id: Tab, label: string) => (
+    <button
+      type="button"
+      role="tab"
+      aria-selected={tab === id}
+      onClick={() => setTab(id)}
+      className={`flex-1 border-b-2 px-3 py-4 text-sm font-semibold transition-colors ${
+        tab === id ? "border-bh-pine text-bh-pine" : "border-transparent text-bh-ink/60 hover:text-bh-ink"
+      }`}
+    >
+      {label}
+    </button>
+  );
+
+  const toggle = (key: "analytics" | "marketing") => (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={draft[key]}
+      onClick={() => setDraft((d) => ({ ...d, [key]: !d[key] }))}
+      className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${draft[key] ? "bg-bh-pine" : "bg-bh-ink/20"}`}
+    >
+      <span
+        className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-transform ${draft[key] ? "translate-x-6" : "translate-x-1"}`}
+      />
+    </button>
+  );
 
   return (
-    <>
-      {showDialog ? (
-        // Stripe's numbers: a 380px card in the bottom-left corner, 18px of
-        // padding, 6px corners, a soft shadow; 14px text; two identical
-        // 36px buttons with a hairline border, 8px apart.
-        <div className="fixed inset-x-0 bottom-0 z-[100] px-4 pb-4">
-          <section
-            role="dialog"
-            aria-labelledby="cookie-title"
-            aria-describedby="cookie-description"
-            className="flex max-w-[380px] flex-col gap-[14px] rounded-[6px] bg-white p-[18px] shadow-[0_4px_24px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.03)]"
-          >
-            <h2 id="cookie-title" className="sr-only">
-              {t.title}
-            </h2>
-            <p id="cookie-description" className="text-[14px] leading-[1.4] text-[#5a6677]">
-              {t.body}
-              <Link href="/poveritelnost" className="underline underline-offset-2">
-                {t.policy}
-              </Link>
-              {t.tail}
-            </p>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={accept}
-                className="rounded-[4px] border border-[rgba(20,100,85,0.3)] bg-transparent px-6 py-[10.5px] text-[12px] leading-[12px] text-[#146455]"
-              >
-                {t.accept}
-              </button>
-              <button
-                type="button"
-                onClick={decline}
-                className="rounded-[4px] border border-[rgba(20,100,85,0.3)] bg-transparent px-6 py-[10.5px] text-[12px] leading-[12px] text-[#146455]"
-              >
-                {t.decline}
-              </button>
-            </div>
-          </section>
+    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-[#02251f]/55 p-3 sm:items-center sm:p-6" role="presentation">
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cookie-title"
+        className="flex max-h-[calc(100vh-1.5rem)] w-full max-w-[760px] flex-col overflow-hidden rounded-2xl bg-white text-[#02251f] shadow-[0_24px_80px_rgba(0,0,0,0.35)]"
+      >
+        <div className="flex items-center justify-between px-6 pt-5 sm:px-8">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.svg" alt="Biohacking Experience" className="h-6 w-auto sm:h-7" />
+          {previous && (
+            <button type="button" onClick={() => setSettingsOpen(false)} className="text-xs font-medium text-bh-ink/50 hover:text-bh-ink">
+              {t.close}
+            </button>
+          )}
         </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => setSettingsOpen(true)}
-          className="fixed bottom-3 left-3 z-40 rounded-full border border-bh-ink/15 bg-bh-paper/95 px-3 py-2 text-[11px] font-medium text-bh-ink/65 shadow-md backdrop-blur transition-colors hover:text-bh-ink"
-        >
-          {t.reopen}
-        </button>
-      )}
-    </>
+
+        <div role="tablist" className="mt-3 flex border-b border-bh-ink/10 px-2 sm:px-4">
+          {tabButton("consent", t.tabs.consent)}
+          {tabButton("details", t.tabs.details)}
+          {tabButton("about", t.tabs.about)}
+        </div>
+
+        <div className="overflow-y-auto px-6 py-6 sm:px-8">
+          {tab === "consent" && (
+            <>
+              <h2 id="cookie-title" className="text-lg font-bold leading-snug">
+                {t.title}
+              </h2>
+              <p className="mt-3 text-[15px] leading-relaxed text-bh-ink/80">{t.body}</p>
+              <p className="mt-3 text-[13px] leading-relaxed text-bh-ink/60">
+                {t.policy.replace(t.policyLink + ".", "")}
+                <Link href="/poveritelnost" className="underline underline-offset-2 hover:text-bh-ink">
+                  {t.policyLink}
+                </Link>
+                .
+              </p>
+            </>
+          )}
+
+          {tab === "details" && (
+            <ul className="flex flex-col divide-y divide-bh-ink/10">
+              <li className="flex items-start justify-between gap-6 py-4">
+                <div>
+                  <div className="text-[15px] font-semibold">{t.categories.necessary.name}</div>
+                  <p className="mt-1 text-[13px] leading-relaxed text-bh-ink/65">{t.categories.necessary.body}</p>
+                </div>
+                <span className="shrink-0 pt-1 text-[11px] font-medium uppercase tracking-wide text-bh-ink/45">{t.categories.necessary.always}</span>
+              </li>
+              <li className="flex items-start justify-between gap-6 py-4">
+                <div>
+                  <div className="text-[15px] font-semibold">{t.categories.analytics.name}</div>
+                  <p className="mt-1 text-[13px] leading-relaxed text-bh-ink/65">{t.categories.analytics.body}</p>
+                </div>
+                {toggle("analytics")}
+              </li>
+              <li className="flex items-start justify-between gap-6 py-4">
+                <div>
+                  <div className="text-[15px] font-semibold">{t.categories.marketing.name}</div>
+                  <p className="mt-1 text-[13px] leading-relaxed text-bh-ink/65">{t.categories.marketing.body}</p>
+                </div>
+                {toggle("marketing")}
+              </li>
+            </ul>
+          )}
+
+          {tab === "about" && (
+            <div className="flex flex-col gap-3 text-[14px] leading-relaxed text-bh-ink/80">
+              <p>{t.about[0]}</p>
+              <p>{t.about[1]}</p>
+              <p>
+                {t.about[2]}{" "}
+                <code className="rounded bg-bh-ink/8 px-1.5 py-0.5 font-mono text-[12px] text-bh-ink">{previous?.id ?? "—"}</code>
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Three ways out, one row, one click each. Reject and accept are the
+            same size; only the fill differs. */}
+        <div className="grid gap-2 border-t border-bh-ink/10 px-6 py-5 sm:grid-cols-3 sm:px-8">
+          <button
+            type="button"
+            onClick={() => apply(REJECT_ALL)}
+            className="rounded-full border border-bh-ink/25 px-5 py-3 text-sm font-semibold text-bh-ink transition-colors hover:border-bh-ink"
+          >
+            {t.reject}
+          </button>
+          {tab === "details" ? (
+            <button
+              type="button"
+              onClick={() => apply(draft)}
+              className="rounded-full border border-bh-pine px-5 py-3 text-sm font-semibold text-bh-pine transition-colors hover:bg-bh-pine/5"
+            >
+              {t.save}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setTab("details")}
+              className="rounded-full px-5 py-3 text-sm font-semibold text-bh-ink/70 transition-colors hover:text-bh-ink"
+            >
+              {t.customise} ›
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => apply(ACCEPT_ALL)}
+            className="rounded-full bg-bh-pine px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0f5245]"
+          >
+            {t.accept}
+          </button>
+        </div>
+      </section>
+    </div>
   );
 }

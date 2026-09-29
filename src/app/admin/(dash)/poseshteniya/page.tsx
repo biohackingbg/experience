@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { requireAccess } from "@/lib/access";
+import { getConsentStats } from "@/lib/consent-log";
 import { getTrafficData } from "@/lib/site-views";
 
 import { Funnel } from "./Funnel";
@@ -116,7 +117,7 @@ export default async function TrafficPage({
 
   const { dni } = await searchParams;
   const days = RANGES.includes(Number(dni) as (typeof RANGES)[number]) ? Number(dni) : 30;
-  const d = await getTrafficData(days);
+  const [d, consent] = await Promise.all([getTrafficData(days), getConsentStats(days)]);
 
   return (
     <div className="min-h-screen rounded-[1.75rem] bg-bh-paper px-5 py-10 sm:px-8 lg:px-10">
@@ -224,6 +225,29 @@ export default async function TrafficPage({
             empty="Още няма данни."
           />
         </div>
+
+        {/* How the cookie window is doing - each person's latest answer, so a
+            change of mind counts once, the honest way. This is the number
+            the whole Meta and Google measurement stands on: nothing is
+            measured for the people in "отказ". */}
+        <section className="mt-8 rounded-3xl bg-bh-cloud p-6 ring-1 ring-bh-ink/8">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="text-sm font-bold tracking-tight text-bh-ink">Съгласия за бисквитки</h2>
+            <span className="text-xs text-bh-ink/55">
+              {consent.people} души · {consent.answers} отговора · последните {days} дни
+            </span>
+          </div>
+          {consent.people === 0 ? (
+            <p className="mt-3 text-sm text-bh-ink/55">Още няма отговори под сегашния текст на прозорчето.</p>
+          ) : (
+            <div className="mt-4 grid gap-3 sm:grid-cols-4">
+              <Tile label="Маркетинг · да" value={`${Math.round(consent.marketingRate * 100)}%`} sub="Meta и Google Ads работят за тях" />
+              <Tile label="Статистика · да" value={`${Math.round(consent.analyticsRate * 100)}%`} sub="Google Analytics ги брои" />
+              <Tile label="Приели всичко" value={consent.all} sub={`само статистика ${consent.analyticsOnly} · само маркетинг ${consent.marketingOnly}`} />
+              <Tile label="Отказ" value={consent.none} sub="нищо не се измерва за тях" />
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );
