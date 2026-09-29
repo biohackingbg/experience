@@ -1,14 +1,5 @@
 import { Reveal } from "@/components/ui/Reveal";
-import {
-  Capsule,
-  Chip,
-  Heart,
-  Neural,
-  Pulse,
-  TestTube,
-  Watch,
-  Waves,
-} from "@/components/ui/Pictograms";
+import { Body, Neural, Pulse, SunSkin, Walk, Watch, Waves } from "@/components/ui/Pictograms";
 import type { Lang } from "@/lib/i18n";
 import { CONCEPT } from "@/lib/site-copy";
 
@@ -18,7 +9,9 @@ import { CONCEPT } from "@/lib/site-copy";
  * try things in this area", which holds before any name is public.
  */
 /** Icons only; the titles are in site-copy.ts. */
-const icons = [Pulse, Watch, Waves, Neural, Capsule, Chip, Heart, TestTube];
+// One per station, in the order the copy lists them: InBody, Lagree, reformer,
+// Power Plate, Rev bikes, mobility, mental health, Endosphere.
+const icons = [Body, Walk, Waves, Pulse, Watch, Walk, Neural, SunSkin];
 
 export function SummitConcept({ lang = "bg" }: { lang?: Lang }) {
   const c = CONCEPT[lang];
