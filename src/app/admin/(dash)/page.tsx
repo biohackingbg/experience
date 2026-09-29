@@ -645,6 +645,18 @@ export default async function AdminDashboard({
                     <td className="px-4 py-3">
                       <StatusChip status={o.status} />
                       {o.isTest && <span className="ml-1.5 rounded-full bg-[#d0a11a]/15 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide text-[#7a5c05]">тест</span>}
+                      {/* Whether Analytics can tie this sale to a session, and so
+                          to the advert. Without it the sale is revenue with no
+                          source - which is what every sale was for a month
+                          before anyone noticed. */}
+                      <span
+                        title={o.gaSessionId ? `GA сесия ${o.gaSessionId}` : "без GA сесия - купувачът е отказал статистика или е купил преди поправката"}
+                        className={`ml-1.5 rounded-full px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide ${
+                          o.gaSessionId ? "bg-[#0E8C7D]/15 text-[#0b6d61]" : "bg-[#0b2a22]/8 text-[#0b2a22]/45"
+                        }`}
+                      >
+                        GA {o.gaSessionId ? "✓" : "–"}
+                      </span>
                     </td>
                     <td className="px-4 py-3 text-right font-semibold"><Money cents={o.totalCents} /></td>
                     <td className="px-4 py-3 text-right"><TestToggle reference={o.reference} isTest={o.isTest} /></td>

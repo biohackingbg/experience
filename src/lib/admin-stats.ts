@@ -177,6 +177,10 @@ export async function getDashboardData(): Promise<DashboardData> {
           company: orders.invoiceCompany,
           phone: orders.phone,
           isTest: orders.isTest,
+          // Whether Analytics can tie this sale to a session - and so to the
+          // advert that brought it. Shown per order, because when it broke
+          // it broke silently, for a month, for every sale.
+          gaSessionId: orders.gaSessionId,
         })
         .from(orders)
         // Sales only. An unfinished checkout is not an order the team can act
