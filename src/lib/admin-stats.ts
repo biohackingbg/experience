@@ -422,6 +422,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       name: o.name,
       email: o.email,
       status: o.status,
+      gaSessionId: o.gaSessionId,
       totalCents: o.totalCents,
       createdAt: o.createdAt,
       paidAt: o.paidAt,
@@ -463,6 +464,7 @@ export async function searchOrders(q: string): Promise<FoundOrder[]> {
       company: orders.invoiceCompany,
       phone: orders.phone,
       isTest: orders.isTest,
+      gaSessionId: orders.gaSessionId,
     })
     .from(orders)
     .where(
@@ -494,6 +496,7 @@ export async function searchOrders(q: string): Promise<FoundOrder[]> {
     name: o.name,
     email: o.email,
     status: o.status,
+    gaSessionId: o.gaSessionId,
     totalCents: o.totalCents,
     createdAt: o.createdAt,
     paidAt: o.paidAt,
