@@ -168,7 +168,7 @@ export const TRACKS: Copy<{
     ourFor: "За всички, без медицинско образование",
     ourDates: "07-08 ноември 2026",
     ourPoints: [
-      "Четири зони: сцена, движение, възстановяване, Village",
+      "Лекции на сцената и работилници със записан час",
       "Същите лектори, на разбираем език, по 25 минути",
       "Билетите на тази страница",
     ],
@@ -196,7 +196,7 @@ export const TRACKS: Copy<{
     ourFor: "For everyone, no medical background needed",
     ourDates: "7-8 November 2026",
     ourPoints: [
-      "Four zones: stage, movement, recovery, Village",
+      "Talks on the stage and workshops you book a time for",
       "The same speakers, in plain language, 25 minutes each",
       "Tickets on this page",
     ],
@@ -204,37 +204,6 @@ export const TRACKS: Copy<{
     ourAria: "To the tickets",
     footnote:
       "A ticket from this page admits you to Biohacking Experience. The medical conference has its own registration through the Bulgarian Longevity Association.",
-  },
-};
-
-export const ZONES: Copy<{
-  eyebrow: string;
-  title: string;
-  intro: string;
-  items: { tag: string; title: string; text: string }[];
-}> = {
-  bg: {
-    eyebrow: "Концепцията",
-    title: "Четири зони, два дни в тялото ти",
-    intro:
-      "Денят ти минава през четирите - знание, движение, възстановяване и брандовете, които стоят зад тях.",
-    items: [
-      { tag: "Знанието", title: "Сцена", text: "18 лекции и панела - лекари и изследователи на разбираем език." },
-      { tag: "Тялото", title: "Движение", text: "Power Plate зона и пилатес - на постелка и на реформър, със записан час." },
-      { tag: "Балансът", title: "Възстановяване", text: "Breathwork сесии и Recovery зона, по 30 минути." },
-      { tag: "Брандовете", title: "Village", text: "30 подбрани компании: добавки, устройства, клиники, храна." },
-    ],
-  },
-  en: {
-    eyebrow: "The concept",
-    title: "Four zones, two days inside your body",
-    intro: "Your day moves through all four - knowledge, movement, recovery, and the brands behind them.",
-    items: [
-      { tag: "Knowledge", title: "Stage", text: "18 talks and panels - doctors and researchers in plain language." },
-      { tag: "The body", title: "Movement", text: "A Power Plate zone and pilates - on the mat and on the reformer, by appointment." },
-      { tag: "Balance", title: "Recovery", text: "Breathwork sessions and a recovery zone, 30 minutes each." },
-      { tag: "The brands", title: "Village", text: "30 selected companies: supplements, devices, clinics, food." },
-    ],
   },
 };
 
@@ -306,7 +275,7 @@ export const PROGRAM_SECTION: Copy<{
     eyebrow: "Програма",
     title: "Два дни, един голям въпрос",
     intro:
-      "Как да превърнем повече години в повече живот? Сцената, движението и възстановяването вървят паралелно през целия ден, със записване на час.",
+      "Как да превърнем повече години в повече живот? Лекциите на сцената и работилниците вървят паралелно през целия ден, със записване на час.",
     footnote: "Предварителна програма · подлежи на финално потвърждение на лектори и часови диапазони.",
     days: [
       { day: "Събота", theme: "Тяло, мозък, сърце и бъдеще", intro: "От науката за стареенето до решенията, които можем да вземем още днес." },
@@ -317,7 +286,7 @@ export const PROGRAM_SECTION: Copy<{
     eyebrow: "Programme",
     title: "Two days, one big question",
     intro:
-      "How do we turn more years into more life? The stage, the movement and the recovery zones run in parallel all day, with sessions you book a time for.",
+      "How do we turn more years into more life? The talks on the stage and the workshops run in parallel all day, with sessions you book a time for.",
     footnote: "Preliminary programme · speakers and time slots are still being confirmed.",
     days: [
       { day: "Saturday", theme: "Body, brain, heart and the future", intro: "From the science of ageing to the decisions we can make today." },
@@ -636,8 +605,8 @@ export const SPONSORS_SECTION: Copy<{
     eyebrow: "Партньори",
     title: "Марките, които стоят зад деня",
     intro:
-      "Всяка зона има свой партньор, а във Village се събират подбрани компании - добавки, устройства, лаборатории, клиники и храна.",
-    zoneSponsor: "Спонсор на зоната",
+      "Всяка част от деня има свой партньор, а във Village се събират подбрани компании - добавки, устройства, лаборатории, клиники и храна.",
+    zoneSponsor: "Партньор",
     village: (n) => `Village · ${n} експонента`,
     blurbs: {
       Сцена: "18 лекции и панела, международни лектори.",
@@ -649,8 +618,8 @@ export const SPONSORS_SECTION: Copy<{
     eyebrow: "Partners",
     title: "The brands behind the day",
     intro:
-      "Each zone has its own partner, and the Village gathers selected companies - supplements, devices, laboratories, clinics and food.",
-    zoneSponsor: "Zone sponsor",
+      "Each part of the day has its own partner, and the Village gathers selected companies - supplements, devices, laboratories, clinics and food.",
+    zoneSponsor: "Partner",
     village: (n) => `Village · ${n} exhibitors`,
     blurbs: {
       Сцена: "18 talks and panels, international speakers.",
@@ -719,14 +688,14 @@ export const META: Copy<{ title: string; describe: (from: string) => string }> =
     title: "Sofia Life Summit 2026 - дълголетие и биохакинг, София | Biohacking Experience",
     describe: (from) =>
       "Фест за дълголетие и биохакинг - 07-08 ноември 2026, Гранд Хотел " +
-      "Милениум, София. Четири зони, longevity паспорт, станции за " +
+      "Милениум, София. Лекции, работилници, longevity паспорт, станции за " +
       `измерване, международни лектори. Билети от ${from} €.`,
   },
   en: {
     title: "Sofia Life Summit 2026 - longevity and biohacking in Sofia | Biohacking Experience",
     describe: (from) =>
       "A festival of longevity and biohacking - 7-8 November 2026, Grand Hotel " +
-      "Millennium, Sofia. Four zones, a longevity passport, measuring " +
+      "Millennium, Sofia. Talks, workshops, a longevity passport, measuring " +
       `stations, international speakers. Tickets from €${from}.`,
   },
 };

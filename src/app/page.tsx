@@ -2,7 +2,6 @@ import { SiteNotice } from "@/components/summit/SiteNotice";
 import { SummitNav } from "@/components/summit/SummitNav";
 import { SummitHero } from "@/components/summit/SummitHero";
 import { SummitConcept } from "@/components/summit/SummitConcept";
-import { SummitZones } from "@/components/summit/SummitZones";
 import { SummitPartners } from "@/components/summit/SummitPartners";
 import { SummitSpeakers } from "@/components/summit/SummitSpeakers";
 import { SummitTracks } from "@/components/summit/SummitTracks";
@@ -47,7 +46,6 @@ export default async function Home() {
         <SummitHero speakerCount={speakers.length} from={from} />
         <SummitSpeakers />
         <SummitTracks />
-        <SummitZones />
         <SummitConcept />
         <SummitPartners />
         <SummitProgram />

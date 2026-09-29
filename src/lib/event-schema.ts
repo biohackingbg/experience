@@ -43,7 +43,7 @@ export async function buildEventSchema() {
   name: "Sofia Life Summit 2026",
   alternateName: "Biohacking Experience",
   description:
-    "Потребителската част на Sofia Life Summit: четири зони, longevity паспорт с 12 станции за измерване, две сцени и Village с 30 компании.",
+    "Потребителската част на Sofia Life Summit: лекции, работилници, longevity паспорт с 12 станции за измерване, две сцени и Village с 30 компании.",
   startDate: "2026-11-07T10:00:00+02:00",
   endDate: "2026-11-08T18:00:00+02:00",
   eventStatus: "https://schema.org/EventScheduled",
