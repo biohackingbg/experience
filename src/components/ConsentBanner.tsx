@@ -36,7 +36,7 @@ type TaggedWindow = Window & { fbq?: (...args: unknown[]) => void };
 const COPY = {
   bg: {
     tabs: { consent: "Съгласие", details: "Детайли", about: "За нас" },
-    title: "Този сайт използва бисквитки.",
+    title: "Нашият сайт използва бисквитки, за да функционира правилно.",
     body:
       "Освен необходимите за работата му, ползваме бисквитки за две неща: да разберем кои страници работят (статистика) и да покажем събитието на хората, които вече са го гледали (маркетинг). Нищо от това не тръгва, преди да избереш.",
     policy: "Пълното описание е в политиката за поверителност.",
@@ -70,7 +70,7 @@ const COPY = {
   },
   en: {
     tabs: { consent: "Consent", details: "Details", about: "About" },
-    title: "This site uses cookies.",
+    title: "Our site uses cookies so that it works properly.",
     body:
       "Beyond the ones it needs to work, we use cookies for two things: to see which pages work (statistics) and to show the event to people who have already looked at it (marketing). None of it runs until you choose.",
     policy: "The full description is in the privacy policy.",
@@ -228,10 +228,10 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
         <div className="overflow-y-auto px-6 py-6 sm:px-8">
           {tab === "consent" && (
             <>
-              <h2 id="cookie-title" className="text-lg font-bold leading-snug">
+              <h2 id="cookie-title" className="text-[15px] font-bold leading-snug">
                 {t.title}
               </h2>
-              <p className="mt-3 text-[15px] leading-relaxed text-bh-ink/80">{t.body}</p>
+              <p className="mt-3 text-[14px] leading-relaxed text-[#02251f]/85">{t.body}</p>
               <p className="mt-3 text-[13px] leading-relaxed text-bh-ink/60">
                 {t.policy.replace(t.policyLink + ".", "")}
                 <Link href="/poveritelnost" className="underline underline-offset-2 hover:text-bh-ink">
@@ -280,13 +280,16 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
           )}
         </div>
 
-        {/* Three ways out, one row, one click each. Reject and accept are the
-            same size; only the fill differs. */}
-        <div className="grid gap-2 border-t border-bh-ink/10 px-6 py-5 sm:grid-cols-3 sm:px-8">
+        {/* The row from the reference, one to one: "Отказ" and
+            "Персонализация" as plain text, "Съгласявам се" the only thing
+            shaped like a button. All three are one click and on the same
+            row; the difference is in how loudly each one is drawn. That
+            imbalance is the organisers' call, made knowing what it is. */}
+        <div className="grid grid-cols-3 items-center border-t border-bh-ink/10 px-6 py-4 sm:px-8">
           <button
             type="button"
             onClick={() => apply(REJECT_ALL)}
-            className="rounded-full border border-bh-ink/25 px-5 py-3 text-sm font-semibold text-bh-ink transition-colors hover:border-bh-ink"
+            className="py-3 text-center text-[15px] font-semibold text-[#02251f] transition-colors hover:text-bh-pine"
           >
             {t.reject}
           </button>
@@ -294,7 +297,7 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
             <button
               type="button"
               onClick={() => apply(draft)}
-              className="rounded-full border border-bh-pine px-5 py-3 text-sm font-semibold text-bh-pine transition-colors hover:bg-bh-pine/5"
+              className="py-3 text-center text-[15px] font-semibold text-[#02251f] transition-colors hover:text-bh-pine"
             >
               {t.save}
             </button>
@@ -302,15 +305,18 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
             <button
               type="button"
               onClick={() => setTab("details")}
-              className="rounded-full px-5 py-3 text-sm font-semibold text-bh-ink/70 transition-colors hover:text-bh-ink"
+              className="inline-flex items-center justify-center gap-1.5 py-3 text-[15px] font-semibold text-[#02251f] transition-colors hover:text-bh-pine"
             >
-              {t.customise} ›
+              {t.customise}
+              <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4" aria-hidden>
+                <path d="M7.5 5l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </button>
           )}
           <button
             type="button"
             onClick={() => apply(ACCEPT_ALL)}
-            className="rounded-full bg-bh-pine px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0f5245]"
+            className="rounded-md border-2 border-bh-pine bg-white px-5 py-3 text-[15px] font-semibold text-[#02251f] transition-colors hover:bg-bh-pine/5"
           >
             {t.accept}
           </button>
