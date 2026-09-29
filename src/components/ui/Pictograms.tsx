@@ -342,3 +342,80 @@ export function ArrowDownLeft({ className }: Props) {
     </svg>
   );
 }
+
+/* ── The stations, one pictogram each - drawn for the thing, not borrowed. ── */
+
+/** Body composition - a figure on the analyser platform. */
+export function Composition({ className }: Props) {
+  return (
+    <svg {...base} className={className}>
+      <circle cx="12" cy="4.6" r="2.1" /><path d="M9.2 9.2h5.6l1 6.2H8.2z" /><path d="M10.4 15.4v3.4M13.6 15.4v3.4" /><path d="M4.5 20.5h15" /><path d="M6.5 18.8v1.7M17.5 18.8v1.7" />
+    </svg>
+  );
+}
+
+/** Lagree - a plank on the carriage. */
+export function Plank({ className }: Props) {
+  return (
+    <svg {...base} className={className}>
+      <circle cx="4.6" cy="8.4" r="1.9" /><path d="M6.6 10.2 15.6 11.2 20.2 9.6" /><path d="m7.4 10.3-.6 4.6M16.2 11.1l1.2 4" /><path d="M2.8 18.2h18.4" /><path d="M5 18.2v2M19 18.2v2" />
+    </svg>
+  );
+}
+
+/** Reformer pilates - the bench, the springs and the foot bar. */
+export function Reformer({ className }: Props) {
+  return (
+    <svg {...base} className={className}>
+      <rect x="3" y="11.5" width="14" height="4.5" rx="1" /><path d="M3 13.8H1.6M17 13.8h3.2" /><path d="M20.2 13.8V8.6h1.6" /><path d="M5.4 16v3M14.6 16v3M3.8 19h3.2M13 19h3.2" /><path d="M7.4 11.5c.4-1.4 1.1-2.1 2.2-2.1s1.8.7 2.2 2.1" />
+    </svg>
+  );
+}
+
+/** Power Plate - the vibrating platform and its column. */
+export function Plate({ className }: Props) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M4 17.5h16l-1.2 3H5.2z" /><path d="M12 17.5V6.8" /><path d="M8.6 6.8h6.8" /><path d="M6 13.4c.8-.8 1.6-.8 2.4 0s1.6.8 2.4 0M13.2 13.4c.8-.8 1.6-.8 2.4 0s1.6.8 2.4 0" /><path d="M6 10.6c.8-.8 1.6-.8 2.4 0s1.6.8 2.4 0M13.2 10.6c.8-.8 1.6-.8 2.4 0s1.6.8 2.4 0" />
+    </svg>
+  );
+}
+
+/** Rev bikes - an indoor bike. */
+export function Bike({ className }: Props) {
+  return (
+    <svg {...base} className={className}>
+      <circle cx="6" cy="16" r="3.6" /><circle cx="18" cy="16" r="3.6" /><path d="M6 16 9.6 9h4.8l3.6 7" /><path d="M9.6 9 8.2 6.6h-2M14.4 9l.8-2.4h2.4" /><path d="M12 16V9" /><circle cx="12" cy="16" r="1.2" />
+    </svg>
+  );
+}
+
+/** Mobility - a figure reaching and stretching. */
+export function Stretch({ className }: Props) {
+  return (
+    <svg {...base} className={className}>
+      <circle cx="10.4" cy="4.4" r="2.1" /><path d="M10.6 7.2 9 12.6l3.6 2.4 1.2 5.6" /><path d="m9 12.6-4.4 6.6" /><path d="M11.4 8.6 16.2 6l3.2 2.6" /><path d="M2.8 20.8h18.4" />
+    </svg>
+  );
+}
+
+/** Endosphere - the roller with its micro-vibration spheres. */
+export function Sphere({ className }: Props) {
+  return (
+    <svg {...base} className={className}>
+      <rect x="4" y="8" width="16" height="8" rx="4" /><circle cx="8" cy="12" r="1.1" /><circle cx="12" cy="12" r="1.1" /><circle cx="16" cy="12" r="1.1" /><path d="M20 12h1.6M2.4 12H4" /><path d="M8 5.6c.6-.9 1.3-.9 2 0M14 5.6c.6-.9 1.3-.9 2 0M8 18.4c.6.9 1.3.9 2 0M14 18.4c.6.9 1.3.9 2 0" />
+    </svg>
+  );
+}
+
+/** Mental health - a brain, the two halves and the folds. */
+export function Brain({ className }: Props) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M12 4.2c-1.2-1.4-3.6-1.2-4.4.6-2 .2-3 2.2-2.2 3.8-1.6 1.2-1.4 3.6.4 4.4-.4 2 1.2 3.6 3 3.2.4 1.8 2.6 2.4 3.2.8" />
+      <path d="M12 4.2c1.2-1.4 3.6-1.2 4.4.6 2 .2 3 2.2 2.2 3.8 1.6 1.2 1.4 3.6-.4 4.4.4 2-1.2 3.6-3 3.2-.4 1.8-2.6 2.4-3.2.8" />
+      <path d="M12 4.2v12.8M12 17v3.6" />
+      <path d="M8.2 9.4c1 .2 1.8 1 2 2M15.8 9.4c-1 .2-1.8 1-2 2" />
+    </svg>
+  );
+}
