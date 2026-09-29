@@ -46,6 +46,8 @@ export type RecentOrder = {
   createdAt: Date;
   /** Marked by the team as a test purchase - skipped by every statistic. */
   isTest: boolean;
+  /** Analytics session the sale is tied to; null when the buyer refused statistics. */
+  gaSessionId: string | null;
   /** When the money landed; null until it does. The date shown for a sale. */
   paidAt: Date | null;
   /** Set when the buyer asked for a company invoice - the accountant's flag. */
