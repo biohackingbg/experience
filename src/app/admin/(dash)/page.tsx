@@ -334,6 +334,17 @@ export default async function AdminDashboard({
                     <div className="flex flex-wrap items-center gap-3">
                       <span className="text-xs text-[#0b2a22]/60">{o.items} · <Money cents={o.totalCents} /></span>
                       <StatusChip status={o.status} />
+                      {/* Same GA chip as in the sales table: a pending order
+                          found by its number is how a checkout is checked
+                          without anyone paying for it. */}
+                      <span
+                        title={o.gaSessionId ? `GA сесия ${o.gaSessionId}` : "без GA сесия"}
+                        className={`rounded-full px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide ${
+                          o.gaSessionId ? "bg-[#0E8C7D]/15 text-[#0b6d61]" : "bg-[#0b2a22]/8 text-[#0b2a22]/45"
+                        }`}
+                      >
+                        GA {o.gaSessionId ? "✓" : "–"}
+                      </span>
                       {o.status === "paid" && <ResendForm reference={o.reference} />}
                       <TestToggle reference={o.reference} isTest={o.isTest} />
                     </div>
