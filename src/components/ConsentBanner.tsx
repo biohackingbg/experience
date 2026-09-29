@@ -38,7 +38,7 @@ const COPY = {
     tabs: { consent: "Съгласие", details: "Детайли", about: "За нас" },
     title: "Нашият сайт използва бисквитки, за да функционира правилно.",
     body:
-      "Освен необходимите за работата му, ползваме бисквитки за две неща: да разберем кои страници работят (статистика) и да покажем събитието на хората, които вече са го гледали (маркетинг). Нищо от това не тръгва, преди да избереш.",
+      "Освен необходимите за работата му, ползваме бисквитки за две неща: да разберем кои страници работят (статистика) и да покажем събитието на хората, които вече са го гледали (маркетинг).",
     policy: "Пълното описание е в политиката за поверителност.",
     policyLink: "политиката за поверителност",
     reject: "Отказ",
@@ -72,7 +72,7 @@ const COPY = {
     tabs: { consent: "Consent", details: "Details", about: "About" },
     title: "Our site uses cookies so that it works properly.",
     body:
-      "Beyond the ones it needs to work, we use cookies for two things: to see which pages work (statistics) and to show the event to people who have already looked at it (marketing). None of it runs until you choose.",
+      "Beyond the ones it needs to work, we use cookies for two things: to see which pages work (statistics) and to show the event to people who have already looked at it (marketing).",
     policy: "The full description is in the privacy policy.",
     policyLink: "privacy policy",
     reject: "Reject",
@@ -180,7 +180,7 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
       aria-selected={tab === id}
       onClick={() => setTab(id)}
       className={`flex-1 border-b-2 px-3 py-4 text-sm font-semibold transition-colors ${
-        tab === id ? "border-bh-pine text-bh-pine" : "border-transparent text-bh-ink/60 hover:text-bh-ink"
+        tab === id ? "border-[#146455] text-[#146455]" : "border-transparent text-[#02251f]/55 hover:text-[#02251f]"
       }`}
     >
       {label}
@@ -193,7 +193,7 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
       role="switch"
       aria-checked={draft[key]}
       onClick={() => setDraft((d) => ({ ...d, [key]: !d[key] }))}
-      className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${draft[key] ? "bg-bh-pine" : "bg-bh-ink/20"}`}
+      className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${draft[key] ? "bg-[#146455]" : "bg-[#02251f]/20"}`}
     >
       <span
         className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-transform ${draft[key] ? "translate-x-6" : "translate-x-1"}`}
@@ -213,13 +213,13 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.svg" alt="Biohacking Experience" className="h-6 w-auto sm:h-7" />
           {previous && (
-            <button type="button" onClick={() => setSettingsOpen(false)} className="text-xs font-medium text-bh-ink/50 hover:text-bh-ink">
+            <button type="button" onClick={() => setSettingsOpen(false)} className="text-xs font-medium text-[#02251f]/50 hover:text-[#02251f]">
               {t.close}
             </button>
           )}
         </div>
 
-        <div role="tablist" className="mt-3 flex border-b border-bh-ink/10 px-2 sm:px-4">
+        <div role="tablist" className="mt-3 flex border-b border-[#02251f]/10 px-2 sm:px-4">
           {tabButton("consent", t.tabs.consent)}
           {tabButton("details", t.tabs.details)}
           {tabButton("about", t.tabs.about)}
@@ -232,9 +232,9 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
                 {t.title}
               </h2>
               <p className="mt-3 text-[14px] leading-relaxed text-[#02251f]/85">{t.body}</p>
-              <p className="mt-3 text-[13px] leading-relaxed text-bh-ink/60">
+              <p className="mt-3 text-[13px] leading-relaxed text-[#02251f]/60">
                 {t.policy.replace(t.policyLink + ".", "")}
-                <Link href="/poveritelnost" className="underline underline-offset-2 hover:text-bh-ink">
+                <Link href="/poveritelnost" className="underline underline-offset-2 hover:text-[#02251f]">
                   {t.policyLink}
                 </Link>
                 .
@@ -243,25 +243,25 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
           )}
 
           {tab === "details" && (
-            <ul className="flex flex-col divide-y divide-bh-ink/10">
+            <ul className="flex flex-col divide-y divide-[#02251f]/10">
               <li className="flex items-start justify-between gap-6 py-4">
                 <div>
                   <div className="text-[15px] font-semibold">{t.categories.necessary.name}</div>
-                  <p className="mt-1 text-[13px] leading-relaxed text-bh-ink/65">{t.categories.necessary.body}</p>
+                  <p className="mt-1 text-[13px] leading-relaxed text-[#02251f]/65">{t.categories.necessary.body}</p>
                 </div>
-                <span className="shrink-0 pt-1 text-[11px] font-medium uppercase tracking-wide text-bh-ink/45">{t.categories.necessary.always}</span>
+                <span className="shrink-0 pt-1 text-[11px] font-medium uppercase tracking-wide text-[#02251f]/45">{t.categories.necessary.always}</span>
               </li>
               <li className="flex items-start justify-between gap-6 py-4">
                 <div>
                   <div className="text-[15px] font-semibold">{t.categories.analytics.name}</div>
-                  <p className="mt-1 text-[13px] leading-relaxed text-bh-ink/65">{t.categories.analytics.body}</p>
+                  <p className="mt-1 text-[13px] leading-relaxed text-[#02251f]/65">{t.categories.analytics.body}</p>
                 </div>
                 {toggle("analytics")}
               </li>
               <li className="flex items-start justify-between gap-6 py-4">
                 <div>
                   <div className="text-[15px] font-semibold">{t.categories.marketing.name}</div>
-                  <p className="mt-1 text-[13px] leading-relaxed text-bh-ink/65">{t.categories.marketing.body}</p>
+                  <p className="mt-1 text-[13px] leading-relaxed text-[#02251f]/65">{t.categories.marketing.body}</p>
                 </div>
                 {toggle("marketing")}
               </li>
@@ -269,12 +269,12 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
           )}
 
           {tab === "about" && (
-            <div className="flex flex-col gap-3 text-[14px] leading-relaxed text-bh-ink/80">
+            <div className="flex flex-col gap-3 text-[14px] leading-relaxed text-[#02251f]/80">
               <p>{t.about[0]}</p>
               <p>{t.about[1]}</p>
               <p>
                 {t.about[2]}{" "}
-                <code className="rounded bg-bh-ink/8 px-1.5 py-0.5 font-mono text-[12px] text-bh-ink">{previous?.id ?? "—"}</code>
+                <code className="rounded bg-[#02251f]/8 px-1.5 py-0.5 font-mono text-[12px] text-[#02251f]">{previous?.id ?? "—"}</code>
               </p>
             </div>
           )}
@@ -285,11 +285,11 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
             shaped like a button. All three are one click and on the same
             row; the difference is in how loudly each one is drawn. That
             imbalance is the organisers' call, made knowing what it is. */}
-        <div className="grid grid-cols-3 items-center border-t border-bh-ink/10 px-6 py-4 sm:px-8">
+        <div className="grid grid-cols-3 items-center border-t border-[#02251f]/10 px-6 py-4 sm:px-8">
           <button
             type="button"
             onClick={() => apply(REJECT_ALL)}
-            className="py-3 text-center text-[15px] font-semibold text-[#02251f] transition-colors hover:text-bh-pine"
+            className="py-3 text-center text-[15px] font-semibold text-[#02251f] transition-colors hover:text-[#146455]"
           >
             {t.reject}
           </button>
@@ -297,7 +297,7 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
             <button
               type="button"
               onClick={() => apply(draft)}
-              className="py-3 text-center text-[15px] font-semibold text-[#02251f] transition-colors hover:text-bh-pine"
+              className="py-3 text-center text-[15px] font-semibold text-[#02251f] transition-colors hover:text-[#146455]"
             >
               {t.save}
             </button>
@@ -305,7 +305,7 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
             <button
               type="button"
               onClick={() => setTab("details")}
-              className="inline-flex items-center justify-center gap-1.5 py-3 text-[15px] font-semibold text-[#02251f] transition-colors hover:text-bh-pine"
+              className="inline-flex items-center justify-center gap-1.5 py-3 text-[15px] font-semibold text-[#02251f] transition-colors hover:text-[#146455]"
             >
               {t.customise}
               <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4" aria-hidden>
@@ -316,7 +316,7 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
           <button
             type="button"
             onClick={() => apply(ACCEPT_ALL)}
-            className="rounded-md border-2 border-bh-pine bg-white px-5 py-3 text-[15px] font-semibold text-[#02251f] transition-colors hover:bg-bh-pine/5"
+            className="bh-gradient inline-flex items-center justify-center rounded-full px-6 py-3 text-[15px] font-semibold text-[#02251f] transition-transform hover:-translate-y-0.5"
           >
             {t.accept}
           </button>
