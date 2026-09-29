@@ -611,7 +611,7 @@ export const SPONSORS_SECTION: Copy<{
     blurbs: {
       Сцена: "18 лекции и панела, международни лектори.",
       Движение: "Power Plate и пилатес, със записан час.",
-      Възстановяване: "Breathwork сесии и Recovery зона, по 30 минути.",
+      Възстановяване: "Breathwork и Recovery работилници, по 30 минути.",
     },
   },
   en: {
