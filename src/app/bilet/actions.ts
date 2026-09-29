@@ -11,6 +11,7 @@ import {
   hasMarketingConsent,
 } from "@/lib/marketing-consent";
 import { sendGaPurchase } from "@/lib/ga";
+import { gaId } from "@/lib/ga-id";
 import { sendPurchase } from "@/lib/meta-pixel";
 import { sendTicketEmail } from "@/lib/email";
 import { createPendingOrder, markOrderPaid } from "@/lib/orders";
@@ -86,18 +87,29 @@ function fail(
 }
 
 /**
- * "GA1.1.1234567890.1234567890" carries the client id in its last two parts;
- * the session id lives in a per-property cookie shaped "GS1.1.<id>.<n>...".
+ * "GA1.1.1234567890.1234567890" carries the client id in its last two parts.
  */
 function gaClientIdFrom(value?: string): string | undefined {
   const parts = value?.split(".");
   return parts && parts.length >= 4 ? parts.slice(-2).join(".") : undefined;
 }
 
+/**
+ * The session id from the per-property cookie, in either shape Google has
+ * used: "GS1.1.<id>.<n>.<n>.<ts>..." until 2025, and "GS2.1.s<id>$o<n>$g<n>$t<ts>..."
+ * since. The old split-on-dots read the GS2 value as "s1758…$o3$g1…", which
+ * Google could not match to any session - so every sale for a month landed
+ * as source "(not set)", and nobody could tell an advert from a walk-in.
+ */
 function gaSessionIdFrom(all: { name: string; value: string }[]): string | undefined {
-  const cookie = all.find((c) => c.name.startsWith("_ga_"));
-  const parts = cookie?.value.split(".");
-  return parts && parts.length >= 3 ? parts[2] : undefined;
+  // Our own property's cookie first - a tag manager can set a second stream's
+  // "_ga_…" beside it, and that one's session means nothing to our reports.
+  const own = gaId()?.replace(/^G-/i, "");
+  const cookie =
+    (own && all.find((c) => c.name.toUpperCase() === `_GA_${own.toUpperCase()}`)) ||
+    all.find((c) => c.name.startsWith("_ga_"));
+  const m = cookie ? /^GS\d+\.\d+\.s?(\d{9,11})(?:[.$]|$)/.exec(cookie.value) : null;
+  return m?.[1];
 }
 
 export async function startCheckout(
