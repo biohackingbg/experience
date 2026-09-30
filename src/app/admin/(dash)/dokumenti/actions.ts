@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { canAccess } from "@/lib/access";
-import { cancelDocument, createDocument, deleteDocument, isDocumentReference, markDocumentPaid, resendDocument } from "@/lib/documents";
+import { cancelDocument, createDocument, deleteDocument, documentLetterText, isDocumentReference, markDocumentPaid, resendDocument } from "@/lib/documents";
 
 export type DocState = { status: "idle" | "ok" | "error"; message?: string; reference?: string };
 
@@ -64,9 +64,17 @@ export async function createDoc(_prev: DocState, formData: FormData): Promise<Do
     dueDays,
     note: s("note", 300),
     lang,
+    send: formData.get("sendNow") === "1",
   });
   done();
-  return { status: "ok", reference, message: `Проформата е готова (${reference}) и вече е изпратена на ${buyerEmail}.` };
+  return {
+    status: "ok",
+    reference,
+    message:
+      formData.get("sendNow") === "1"
+        ? `Проформата е готова (${reference}) и е изпратена на ${buyerEmail}.`
+        : `Проформата е готова (${reference}). Не е изпращана - вземи текста от „Текст за писмо“ и я прати от своята поща.`,
+  };
 }
 
 export type SendState = { status: "idle" | "ok" | "error"; message?: string };
@@ -125,4 +133,17 @@ export async function deleteDoc(_prev: DeleteState, formData: FormData): Promise
     status: "error",
     message: r === "has_invoice" ? "Има издадена фактура - прави се кредитно известие, не се трие." : "Документът не е намерен.",
   };
+}
+
+export type LetterState = { status: "idle" | "ok" | "error"; subject?: string; text?: string; message?: string };
+
+/** The letter's subject and text, to paste into a mail from the team's own mailbox. */
+export async function letterText(_prev: LetterState, formData: FormData): Promise<LetterState> {
+  if (!(await canAccess("dokumenti"))) return { status: "error", message: "Няма достъп." };
+  const reference = String(formData.get("reference") ?? "").trim().toUpperCase();
+  const kind = formData.get("kind") === "invoice" ? "invoice" : "proforma";
+  if (!isDocumentReference(reference)) return { status: "error", message: "Невалиден номер." };
+  const r = await documentLetterText(reference, kind);
+  if (!r) return { status: "error", message: kind === "invoice" ? "Още няма фактура." : "Документът не е намерен." };
+  return { status: "ok", ...r };
 }

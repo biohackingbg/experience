@@ -5,7 +5,7 @@ import { useActionState, useState } from "react";
 import { TIERS as PACKAGES } from "@/lib/finance-options";
 import { formatPrice } from "@/lib/tickets";
 
-import { type DeleteState, type DocState, type SendState, createDoc, deleteDoc, sendDoc } from "./actions";
+import { type DeleteState, type DocState, type LetterState, type SendState, createDoc, deleteDoc, letterText, sendDoc } from "./actions";
 
 const idle: DocState = { status: "idle" };
 const field = "w-full min-w-0 rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35";
@@ -166,6 +166,17 @@ export function DocumentForm({ partners }: { partners: PartnerOption[] }) {
         </label>
       </div>
 
+      {/* Off by default while the automatic letters land in spam: the team
+          sends the proforma from its own mailbox, which has a reputation and
+          a person behind it. The switch stays so it can go back to automatic
+          the day the domain earns its own. */}
+      <label className="mt-4 flex items-start gap-2 text-xs text-bh-ink/70">
+        <input type="checkbox" name="sendNow" value="1" className="mt-0.5 h-3.5 w-3.5 accent-[#146455]" />
+        <span>
+          Изпрати проформата по имейл веднага.{" "}
+          <span className="text-bh-ink/50">Изключено засега - писмата от сайта падат в спам. Прати я от своята поща с „Текст за писмо“.</span>
+        </span>
+      </label>
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <button type="submit" disabled={pending} className="rounded-full bg-bh-ink px-5 py-2.5 text-sm font-semibold text-bh-paper disabled:opacity-50">
           {pending ? "Издава…" : "Направи проформа"}
@@ -244,6 +255,53 @@ export function DeleteButton({ reference }: { reference: string }) {
         {pending ? "Трие…" : armed ? "Наистина изтрий" : "Изтрий"}
       </button>
       {state.status === "error" && <span className="text-xs text-red-600">{state.message}</span>}
+    </form>
+  );
+}
+
+const letterIdle: LetterState = { status: "idle" };
+
+/**
+ * The letter, ready to paste.
+ *
+ * Fetches the subject and text the automatic letter would have carried and
+ * puts them on the clipboard, with the text shown beneath in case the
+ * clipboard is refused. The team then sends it from its own mailbox and
+ * attaches the proforma page saved as PDF.
+ */
+export function LetterButton({ reference, kind }: { reference: string; kind: "proforma" | "invoice" }) {
+  const [state, action, pending] = useActionState(letterText, letterIdle);
+  const [copied, setCopied] = useState(false);
+  const full = state.status === "ok" ? `Тема: ${state.subject}\n\n${state.text}` : "";
+
+  return (
+    <form action={action} className="flex flex-col items-start gap-2">
+      <input type="hidden" name="reference" value={reference} />
+      <input type="hidden" name="kind" value={kind} />
+      <div className="flex items-center gap-2">
+        <button
+          type="submit"
+          disabled={pending}
+          className="rounded-full border border-bh-ink/20 px-3 py-1.5 text-xs font-semibold text-bh-ink transition-colors hover:border-bh-ink disabled:opacity-50"
+        >
+          {pending ? "Взима…" : "Текст за писмо"}
+        </button>
+        {state.status === "ok" && (
+          <button
+            type="button"
+            onClick={() => {
+              navigator.clipboard?.writeText(full).then(() => setCopied(true)).catch(() => setCopied(false));
+            }}
+            className="rounded-full bg-bh-ink px-3 py-1.5 text-xs font-semibold text-bh-paper"
+          >
+            {copied ? "Копирано ✓" : "Копирай"}
+          </button>
+        )}
+        {state.status === "error" && <span className="text-xs text-red-600">{state.message}</span>}
+      </div>
+      {state.status === "ok" && (
+        <textarea readOnly value={full} rows={6} className="w-full min-w-[20rem] max-w-xl rounded-xl border border-bh-ink/15 bg-bh-paper p-3 font-mono text-[0.7rem] leading-relaxed text-bh-ink" />
+      )}
     </form>
   );
 }

@@ -8,7 +8,7 @@ import { listDocuments, listPartnersForDocuments } from "@/lib/documents";
 import { formatPrice } from "@/lib/tickets";
 
 import { cancelDoc, payDoc } from "./actions";
-import { DeleteButton, DocumentForm, SendButton } from "./Forms";
+import { DeleteButton, DocumentForm, LetterButton, SendButton } from "./Forms";
 
 export const metadata: Metadata = {
   title: "Проформи и фактури | Администрация",
@@ -42,7 +42,9 @@ export default async function DocumentsPage() {
           Когато преводът дойде, натискаш „Платена“ и се издава{" "}
           <strong className="font-semibold text-bh-ink">фактурата</strong>, с номер от същата поредица като фактурите за
           билети. Сумите се пишат <strong className="font-semibold text-bh-ink">без ДДС</strong>, както са договорени в
-          „Презентация“; ДДС-то се добавя отгоре.
+          „Презентация“; ДДС-то се добавя отгоре.{" "}
+          <strong className="font-semibold text-bh-ink">Засега документите се пращат на ръка:</strong> „Текст за писмо“ дава
+          темата и текста, отвори документа и го запази като PDF (⌘P), и го прати от своята поща.
         </p>
 
         <section className="mt-8 rounded-3xl bg-bh-cloud p-6 ring-1 ring-bh-ink/6">
@@ -107,6 +109,8 @@ export default async function DocumentsPage() {
                         Фактура
                       </Link>
                     )}
+                    {d.status !== "cancelled" && <LetterButton reference={d.reference} kind="proforma" />}
+                    {d.invoiceNumber && <LetterButton reference={d.reference} kind="invoice" />}
                     {d.status !== "cancelled" && <SendButton reference={d.reference} kind="proforma" label="Изпрати проформа" />}
                     {d.invoiceNumber && <SendButton reference={d.reference} kind="invoice" label="Изпрати фактура" />}
                     {/* Only while no number has been drawn: a proforma is not

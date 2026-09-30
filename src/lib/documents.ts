@@ -6,7 +6,7 @@ import { asc, desc, eq, sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { deckLinks, documentLines, documents } from "@/lib/db/schema";
-import { type DocumentEmailInput, sendDocumentEmail } from "@/lib/email";
+import { type DocumentEmailInput, documentEmailParts, sendDocumentEmail } from "@/lib/email";
 import { type BankDetails, getBankDetails } from "@/lib/manual-orders";
 import { CURRENCY, VAT_RATE } from "@/lib/tickets";
 
@@ -43,6 +43,13 @@ export type DocumentInput = {
   dueDays: number;
   note: string | null;
   lang: "bg" | "en";
+  /**
+   * Whether the proforma leaves by email the moment it exists. Off while
+   * the letters land in spam: a company that finds the proforma in its junk
+   * folder and then gets it again by hand has been written to twice, and
+   * neither copy reads well.
+   */
+  send?: boolean;
 };
 
 export type DocumentRow = {
@@ -124,8 +131,9 @@ export async function createDocument(input: DocumentInput): Promise<{ reference:
   }
 
   // The proforma is of no use sitting in the admin: it goes to the buyer the
-  // moment it exists, the same way a bank-transfer ticket order's does.
-  await sendDocumentEmail("proforma", {
+  // moment it exists, the same way a bank-transfer ticket order's does -
+  // unless the team is sending it by hand for now.
+  if (input.send !== false) await sendDocumentEmail("proforma", {
     to: input.buyerEmail,
     buyerName: input.buyerName,
     company: input.company,
@@ -551,4 +559,29 @@ export async function latestDocumentMail(kind: "proforma" | "invoice"): Promise<
       ...(kind === "proforma" ? { dueAt: row.dueAt, bank: await getBankDetails() } : { invoiceNumber: row.invoiceNumber }),
     },
   };
+}
+
+/**
+ * The proforma or invoice letter as text, for sending by hand.
+ *
+ * While the automatic letters land in spam, the team sends the document
+ * from their own mailbox instead - one that has years of reputation and a
+ * person behind it. This is the same wording the automatic letter would
+ * carry, so the two never drift apart.
+ */
+export async function documentLetterText(reference: string, kind: "proforma" | "invoice"): Promise<{ subject: string; text: string } | null> {
+  const d = await loadDocument(reference);
+  if (!d || d.status === "cancelled") return null;
+  if (kind === "invoice" && !d.invoiceNumber) return null;
+  const items = d.lines.map((l) => `${l.quantity}× ${l.description}`).join(", ");
+  const parts = documentEmailParts(kind, {
+    to: d.buyerEmail,
+    buyerName: d.buyerName,
+    company: d.company,
+    reference: d.reference,
+    totalCents: d.totalCents,
+    items,
+    ...(kind === "proforma" ? { dueAt: d.dueAt, bank: await getBankDetails() } : { invoiceNumber: d.invoiceNumber }),
+  });
+  return { subject: parts.subject, text: parts.text };
 }
