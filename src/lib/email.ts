@@ -34,6 +34,14 @@ import { walletConfigured } from "@/lib/wallet-pass";
 
 const SITE = "https://thelongevitysummit.eu";
 
+/**
+ * Where a reply lands. The sending address is on a domain that receives no
+ * mail - it exists to sign and to send - and a From that cannot be answered
+ * is one of the things a spam filter counts. Every letter says where to
+ * write back instead.
+ */
+const REPLY_TO = process.env.EMAIL_REPLY_TO?.trim() || "hi@biohacking.bg";
+
 /** A small link under the ticket button; on an iPhone the file opens straight into Wallet. */
 const walletLink = (code: string, en: boolean, f: string) =>
   walletConfigured()
@@ -210,7 +218,7 @@ export async function sendTicketEmail(input: TicketEmailInput): Promise<boolean>
 
   try {
     const { error } = await resend.emails.send({
-      from,
+      from, replyTo: REPLY_TO,
       to: input.to,
       subject: input.lang === "en" ? `Your Sofia Life Summit ticket · ${input.reference}` : `Билетът ти за Sofia Life Summit · ${input.reference}`,
       html: ticketEmailHtml(input, t),
@@ -339,7 +347,7 @@ export async function sendReminderEmail(input: ReminderEmailInput): Promise<stri
   const t = await getMailTexts();
   try {
     const { data, error } = await resend.emails.send({
-      from,
+      from, replyTo: REPLY_TO,
       to: input.to,
       subject: input.lang === "en" ? `Your Sofia Life Summit ticket is waiting · ${input.reference}` : `Билетът ти за Sofia Life Summit чака · ${input.reference}`,
       html: reminderEmailHtml(input, t),
@@ -491,7 +499,7 @@ export async function sendEventInfoBatch(inputs: EventInfoInput[]): Promise<{ ok
   try {
     const { error } = await resend.batch.send(
       inputs.map((input) => ({
-        from,
+        from, replyTo: REPLY_TO,
         to: input.to,
         subject: eventInfoSubject(input.daysLeft, input.lang),
         html: eventInfoHtml(input, t),
@@ -571,7 +579,7 @@ export async function sendProformaEmail(input: ProformaEmailInput): Promise<bool
   const from = process.env.EMAIL_FROM;
   if (!resend || !from) return false;
   try {
-    const { error } = await resend.emails.send({ from, to: input.to, ...proformaParts(input, await getMailTexts()) });
+    const { error } = await resend.emails.send({ from, replyTo: REPLY_TO, to: input.to, ...proformaParts(input, await getMailTexts()) });
     if (error) {
       console.error("[email] proforma send failed:", error);
       return false;
@@ -675,7 +683,7 @@ export async function sendDocumentEmail(
   const from = process.env.EMAIL_FROM;
   if (!resend || !from) return false;
   try {
-    const { error } = await resend.emails.send({ from, to: input.to, ...documentParts(kind, input, await getMailTexts()) });
+    const { error } = await resend.emails.send({ from, replyTo: REPLY_TO, to: input.to, ...documentParts(kind, input, await getMailTexts()) });
     if (error) {
       console.error("[email] document send failed:", error);
       return false;
@@ -722,7 +730,7 @@ export async function sendWaitlistEmail(input: WaitlistEmailInput): Promise<bool
   const from = process.env.EMAIL_FROM;
   if (!resend || !from) return false;
   try {
-    const { error } = await resend.emails.send({ from, to: input.to, ...waitlistParts(input, await getMailTexts()) });
+    const { error } = await resend.emails.send({ from, replyTo: REPLY_TO, to: input.to, ...waitlistParts(input, await getMailTexts()) });
     return !error;
   } catch {
     return false;
@@ -761,7 +769,7 @@ export async function sendSaleAlert(input: SaleAlertInput): Promise<boolean> {
   const to = process.env.SALES_ALERT_EMAIL ?? process.env.DIGEST_EMAIL ?? "hi@biohacking.bg";
   if (!resend || !from) return false;
   try {
-    const { error } = await resend.emails.send({ from, to, ...saleAlertParts(input) });
+    const { error } = await resend.emails.send({ from, replyTo: REPLY_TO, to, ...saleAlertParts(input) });
     return !error;
   } catch {
     return false;
@@ -782,7 +790,7 @@ export async function sendDigestEmail(input: { subject: string; text: string; ht
     return false;
   }
   try {
-    const { error } = await resend.emails.send({ from, to, ...input });
+    const { error } = await resend.emails.send({ from, replyTo: REPLY_TO, to, ...input });
     if (error) {
       console.error("[email] digest send failed:", error);
       return false;
@@ -809,7 +817,7 @@ export async function sendAlertEmail(subject: string, body: string): Promise<boo
   }
 
   try {
-    const { error } = await resend.emails.send({ from, to, subject, text: body });
+    const { error } = await resend.emails.send({ from, replyTo: REPLY_TO, to, subject, text: body });
     if (error) {
       console.error("[email] alert send failed:", error);
       return false;
@@ -906,7 +914,7 @@ export async function sendListMailBatch(inputs: ListMailInput[]): Promise<{ ok: 
       inputs.map((input) => {
         const unsub = unsubscribeUrl(input.to);
         return {
-          from,
+          from, replyTo: REPLY_TO,
           to: input.to,
           subject: input.subject,
           html: listMailHtml(input, unsub),
@@ -981,7 +989,7 @@ export async function sendAccessLinkEmail(input: AccessLinkInput): Promise<boole
   const from = process.env.EMAIL_FROM;
   if (!resend || !from) return false;
   try {
-    const { error } = await resend.emails.send({ from, to: input.to, ...accessLinkParts(input, await getMailTexts()) });
+    const { error } = await resend.emails.send({ from, replyTo: REPLY_TO, to: input.to, ...accessLinkParts(input, await getMailTexts()) });
     if (error) {
       console.error("[email] access link failed:", error);
       return false;
