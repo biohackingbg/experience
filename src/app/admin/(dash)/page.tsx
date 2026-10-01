@@ -130,33 +130,33 @@ function Stat({
 }
 
 /** Seven pills, one per day; an empty day is a hatched ghost, the busiest is labelled. */
-function WeekStrip({ week }: { week: { day: string; label: string; orders: number; grossCents: number; today: boolean }[] }) {
-  const max = week.reduce((m, d) => Math.max(m, d.orders), 0);
+function WeekStrip({ week }: { week: { day: string; label: string; orders: number; tickets: number; grossCents: number; today: boolean }[] }) {
+  const max = week.reduce((m, d) => Math.max(m, d.tickets), 0);
   return (
     <div className="mt-4 flex h-full min-h-44 w-full items-end gap-3 sm:gap-5">
       {week.map((d) => {
-        const h = max ? Math.max((d.orders / max) * 100, 8) : 8;
-        const peak = max > 0 && d.orders === max;
+        const h = max ? Math.max((d.tickets / max) * 100, 8) : 8;
+        const peak = max > 0 && d.tickets === max;
         return (
           <div key={d.day} className="group relative flex flex-1 flex-col items-center justify-end" style={{ height: "100%" }}>
             <span
               className={`mb-3 rounded-md px-2 py-0.5 text-[0.65rem] font-semibold ${
                 peak
                   ? "bg-[#0b2a22] text-white"
-                  : d.orders > 0
+                  : d.tickets > 0
                     ? "text-[#0b2a22]"
                     : "text-[#0b2a22]/30"
               }`}
             >
-              {d.orders}
+              {d.tickets}
             </span>
             <div
               className="w-full max-w-[3.25rem] rounded-full"
               style={{
-                height: `${d.orders > 0 ? h : 100}%`,
-                background: d.orders > 0 ? (peak ? "#0b3f31" : d.today ? "#5fbf9a" : GREEN) : HATCH,
+                height: `${d.tickets > 0 ? h : 100}%`,
+                background: d.tickets > 0 ? (peak ? "#0b3f31" : d.today ? "#5fbf9a" : GREEN) : HATCH,
               }}
-              title={`${d.day} · ${d.orders} поръчки · ${formatPrice(d.grossCents)} €`}
+              title={`${d.day} · ${d.tickets} билета · ${d.orders} поръчки · ${formatPrice(d.grossCents)} €`}
             />
             <span className={`mt-3 font-mono text-xs ${d.today ? "font-bold text-[#0b2a22]" : "text-[#0b2a22]/45"}`}>{d.label}</span>
           </div>
@@ -370,7 +370,7 @@ export default async function AdminDashboard({
       <div className="mt-6 grid gap-4 xl:grid-cols-4">
         <section className="flex flex-col rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6 xl:col-span-2">
           <div className="flex items-baseline justify-between">
-            <h2 className="text-lg font-bold tracking-tight">Поръчки тази седмица</h2>
+            <h2 className="text-lg font-bold tracking-tight">Билети тази седмица</h2>
             <span className="text-xs text-[#0b2a22]/55">{d.soldLast7Days} билета за 7 дни</span>
           </div>
           <div className="flex flex-1 items-end pt-4">

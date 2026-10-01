@@ -34,6 +34,7 @@ export type TierSales = {
 export type DailySales = {
   day: string;
   orders: number;
+  tickets: number;
   grossCents: number;
 };
 
@@ -57,7 +58,7 @@ export type RecentOrder = {
 };
 
 /** One of the last seven Sofia days, zero-filled - the week strip on the dashboard. */
-export type WeekDay = { day: string; label: string; orders: number; grossCents: number; today: boolean };
+export type WeekDay = { day: string; label: string; orders: number; tickets: number; grossCents: number; today: boolean };
 
 /** A paid order that does not look like a sale: no tickets, no items, or no payment behind it. */
 export type OddOrder = {
@@ -159,6 +160,9 @@ export async function getDashboardData(): Promise<DashboardData> {
         .select({
           day: sql<string>`to_char(${orders.paidAt}, 'YYYY-MM-DD')`,
           count: sql<number>`count(*)::int`,
+          // Tickets, not orders: one order can carry three seats, and the
+          // week is read as "how many people did we sell to today".
+          tickets: sql<number>`coalesce(sum((select sum(oi.quantity) from order_items oi where oi.order_id = ${orders.id})), 0)::int`,
           gross: sql<number>`coalesce(sum(${orders.totalCents}), 0)::int`,
         })
         .from(orders)
@@ -404,6 +408,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     daily: dailyRows.map((r) => ({
       day: r.day,
       orders: r.count,
+      tickets: r.tickets,
       grossCents: r.gross,
     })),
     week: weekDays.map((day, i) => {
@@ -413,6 +418,7 @@ export async function getDashboardData(): Promise<DashboardData> {
         day,
         label: ["Н", "П", "В", "С", "Ч", "П", "С"][weekday],
         orders: row?.count ?? 0,
+        tickets: row?.tickets ?? 0,
         grossCents: row?.gross ?? 0,
         today: i === 6,
       };
