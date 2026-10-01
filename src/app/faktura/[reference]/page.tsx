@@ -3,10 +3,10 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
-import { InvoiceDocument } from "@/components/InvoiceDocument";
+import { InvoiceDocument, invoiceNo } from "@/components/InvoiceDocument";
 import { isAdmin } from "@/lib/admin-auth";
 import type { Lang } from "@/lib/i18n";
-import { PrintButton } from "./PrintButton";
+import { SavePdfButton } from "@/components/admin/SavePdfButton";
 import { getDocumentInvoice } from "@/lib/documents";
 import { getInvoice } from "@/lib/invoices";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -25,10 +25,10 @@ export default async function InvoicePage({
   searchParams,
 }: {
   params: Promise<{ reference: string }>;
-  searchParams: Promise<{ lang?: string }>;
+  searchParams: Promise<{ lang?: string; pdf?: string }>;
 }) {
   const { reference } = await params;
-  const { lang: langParam } = await searchParams;
+  const { lang: langParam, pdf } = await searchParams;
 
   // The reference is the only key to a page full of personal data. The
   // keyspace is ~1e9, which holds only while nobody can try candidates at
@@ -80,7 +80,7 @@ export default async function InvoicePage({
                 Кредитно известие →
               </Link>
             )}
-            <PrintButton />
+            <SavePdfButton fileName={`Фактура ${invoiceNo(inv.number)}`} auto={pdf === "1"} />
           </div>
         </div>
 

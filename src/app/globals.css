@@ -227,6 +227,11 @@ body {
   --color-bh-pine: #146455;
 }
 
+@page {
+  size: A4;
+  margin: 14mm;
+}
+
 @media print {
   .bh-doc {
     background-color: #ffffff;

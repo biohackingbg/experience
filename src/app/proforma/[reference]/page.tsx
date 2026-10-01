@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { ProformaDocument } from "@/components/ProformaDocument";
-import { PrintButton } from "@/components/admin/PrintButton";
+import { SavePdfButton } from "@/components/admin/SavePdfButton";
 import { getDocumentProforma } from "@/lib/documents";
 import { getProforma } from "@/lib/manual-orders";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -13,8 +13,15 @@ export const metadata: Metadata = { title: "Проформа | Sofia Life Summit
 export const dynamic = "force-dynamic";
 
 /** The proforma for a bank-transfer order, at the reference the mail links to. Same throttle as the invoice. */
-export default async function ProformaPage({ params }: { params: Promise<{ reference: string }> }) {
+export default async function ProformaPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ reference: string }>;
+  searchParams: Promise<{ pdf?: string }>;
+}) {
   const { reference } = await params;
+  const { pdf } = await searchParams;
   const head = await headers();
   const ip = head.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   if (!checkRateLimit(`proforma:${ip}`).allowed) notFound();
@@ -30,7 +37,7 @@ export default async function ProformaPage({ params }: { params: Promise<{ refer
           <Link href="/" className="font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/50 transition-colors hover:text-bh-ink">← Към сайта</Link>
           <div className="flex items-center gap-3">
             {p.paid && <Link href={`/faktura/${p.reference}`} className="font-mono text-xs uppercase tracking-[0.2em] text-bh-pine">Фактура →</Link>}
-            <PrintButton />
+            <SavePdfButton fileName={`Проформа ${ref}`} auto={pdf === "1"} />
           </div>
         </div>
         <ProformaDocument p={p} />

@@ -100,6 +100,15 @@ export default async function DocumentsPage() {
                     >
                       Проформа
                     </Link>
+                    {/* Opens the sheet with the save dialog already up, named
+                        after the document - one click from here to a file. */}
+                    <Link
+                      href={`/proforma/${d.reference}?pdf=1`}
+                      target="_blank"
+                      className="rounded-full border border-bh-ink/20 px-3 py-1.5 text-xs font-semibold text-bh-ink"
+                    >
+                      PDF
+                    </Link>
                     {d.invoiceNumber && (
                       <Link
                         href={`/faktura/${d.reference}`}
@@ -107,6 +116,15 @@ export default async function DocumentsPage() {
                         className="rounded-full bg-bh-pine px-3 py-1.5 text-xs font-semibold text-bh-paper"
                       >
                         Фактура
+                      </Link>
+                    )}
+                    {d.invoiceNumber && (
+                      <Link
+                        href={`/faktura/${d.reference}?pdf=1`}
+                        target="_blank"
+                        className="rounded-full border border-bh-pine px-3 py-1.5 text-xs font-semibold text-bh-pine"
+                      >
+                        PDF
                       </Link>
                     )}
                     {d.status !== "cancelled" && <LetterButton reference={d.reference} kind="proforma" />}
