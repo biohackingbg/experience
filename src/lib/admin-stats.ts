@@ -58,7 +58,16 @@ export type RecentOrder = {
 };
 
 /** One of the last seven Sofia days, zero-filled - the week strip on the dashboard. */
-export type WeekDay = { day: string; label: string; orders: number; tickets: number; grossCents: number; today: boolean };
+export type WeekDay = {
+  day: string;
+  label: string;
+  orders: number;
+  tickets: number;
+  /** Tickets of each tier that day, in tier order, only the ones sold. */
+  byTier: { name: string; n: number }[];
+  grossCents: number;
+  today: boolean;
+};
 
 /** A paid order that does not look like a sale: no tickets, no items, or no payment behind it. */
 export type OddOrder = {
@@ -124,9 +133,11 @@ export async function getDashboardData(): Promise<DashboardData> {
   const daysToEvent = Math.max(1, Math.ceil((EVENT_DAY.getTime() - Date.now()) / 86_400_000));
   // The last seven Sofia calendar days, oldest first, for the week strip.
   const sofiaDay = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia" });
-  const weekDays = Array.from({ length: 7 }, (_, i) => sofiaDay.format(new Date(Date.now() - (6 - i) * 86_400_000)));
+  // Fourteen days: seven made the bars thick and the picture short.
+  const WINDOW = 14;
+  const weekDays = Array.from({ length: WINDOW }, (_, i) => sofiaDay.format(new Date(Date.now() - (WINDOW - 1 - i) * 86_400_000)));
 
-  const [totals, perTierRows, dailyRows, recentRows, signupRow, last7Row, checkedInRow, daySplitRows, dayRow, oddRows, hourRows, weekdayRows, punchRows, buyerNames, compedRows] =
+  const [totals, perTierRows, dailyRows, dayTierRows, recentRows, signupRow, last7Row, checkedInRow, daySplitRows, dayRow, oddRows, hourRows, weekdayRows, punchRows, buyerNames, compedRows] =
     await Promise.all([
       db
         .select({
@@ -173,6 +184,18 @@ export async function getDashboardData(): Promise<DashboardData> {
         .where(sql`${SALE} and ${orders.paidAt} is not null`)
         .groupBy(sql`to_char(${orders.paidAt}, 'YYYY-MM-DD')`)
         .orderBy(sql`to_char(${orders.paidAt}, 'YYYY-MM-DD')`),
+
+      // The same days, split by tier - what the strip shows on hover.
+      db
+        .select({
+          day: sql<string>`to_char(${orders.paidAt}, 'YYYY-MM-DD')`,
+          tierId: orderItems.tierId,
+          n: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int`,
+        })
+        .from(orderItems)
+        .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
+        .where(sql`${SALE} and ${orders.paidAt} is not null and ${orders.paidAt} > now() - interval '15 days'`)
+        .groupBy(sql`to_char(${orders.paidAt}, 'YYYY-MM-DD')`, orderItems.tierId),
 
       db
         .select({
@@ -417,14 +440,16 @@ export async function getDashboardData(): Promise<DashboardData> {
     })),
     week: weekDays.map((day, i) => {
       const row = dailyRows.find((r) => r.day === day);
-      const weekday = new Date(`${day}T12:00:00+03:00`).getDay();
       return {
         day,
-        label: ["Н", "П", "В", "С", "Ч", "П", "С"][weekday],
+        // The day of the month: fourteen weekday letters repeat twice and say
+        // nothing; a number places the bar in the month at a glance.
+        label: String(Number(day.slice(-2))),
         orders: row?.count ?? 0,
         tickets: row?.tickets ?? 0,
+        byTier: TIERS.map((t) => ({ name: t.name, n: dayTierRows.find((r) => r.day === day && r.tierId === t.id)?.n ?? 0 })).filter((t) => t.n > 0),
         grossCents: row?.gross ?? 0,
-        today: i === 6,
+        today: i === weekDays.length - 1,
       };
     }),
     recent: recentRows.map((o) => ({
