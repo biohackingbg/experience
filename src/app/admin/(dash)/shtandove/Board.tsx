@@ -79,7 +79,7 @@ export function Board({ booths, partners }: { booths: BoardBooth[]; partners: Bo
       <aside className="flex flex-col gap-4">
         <div className="rounded-3xl bg-bh-cloud p-5 ring-1 ring-bh-ink/6">
           {selected ? (
-            <BoothPanel key={selected.id} booth={selected} partners={partners} onClose={() => setSelectedId(null)} />
+            <BoothPanel key={`${selected.id}:${selected.partner?.id ?? ""}:${selected.holdLabel ?? ""}`} booth={selected} partners={partners} onClose={() => setSelectedId(null)} />
           ) : (
             <>
               <h2 className="text-lg font-bold tracking-tight text-bh-ink">Избери щанд</h2>
