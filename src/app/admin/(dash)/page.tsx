@@ -370,7 +370,7 @@ export default async function AdminDashboard({
       <div className="mt-6 grid gap-4 xl:grid-cols-4">
         <section className="flex flex-col rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6 xl:col-span-2">
           <div className="flex items-baseline justify-between">
-            <h2 className="text-lg font-bold tracking-tight">Билети тази седмица</h2>
+            <h2 className="text-lg font-bold tracking-tight">Билети по дни</h2>
             <span className="text-xs text-[#0b2a22]/55">{d.week.reduce((a, x) => a + x.tickets, 0)} билета за 14 дни</span>
           </div>
           <div className="flex flex-1 items-end pt-4">
