@@ -213,7 +213,6 @@ export const CONCEPT: Copy<{
   title: (n: number) => string;
   intro: string;
   stations: string[];
-  partnersSoon: string;
 }> = {
   bg: {
     eyebrow: "Станциите",
@@ -229,7 +228,6 @@ export const CONCEPT: Copy<{
       "Ментално здраве - работилница с Виолета Михайлова",
       "Ендосфера",
     ],
-    partnersSoon: "Партньорите ще бъдат обявени скоро.",
   },
   en: {
     eyebrow: "The stations",
@@ -245,7 +243,6 @@ export const CONCEPT: Copy<{
       "Mental health - workshop with Violeta Mihaylova",
       "Endosphere",
     ],
-    partnersSoon: "Partners announced soon.",
   },
 };
 

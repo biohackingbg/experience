@@ -52,9 +52,6 @@ export function SummitConcept({ lang = "bg" }: { lang?: Lang }) {
                   <h3 className="text-xl font-bold leading-tight tracking-tight">
                     {s.title}
                   </h3>
-                  <p className="mt-2 font-mono text-[0.65rem] uppercase tracking-[0.15em] text-bh-ink/45">
-                    {c.partnersSoon}
-                  </p>
                 </div>
               </article>
             </Reveal>
