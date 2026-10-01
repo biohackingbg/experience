@@ -162,7 +162,11 @@ export async function getDashboardData(): Promise<DashboardData> {
           count: sql<number>`count(*)::int`,
           // Tickets, not orders: one order can carry three seats, and the
           // week is read as "how many people did we sell to today".
-          tickets: sql<number>`coalesce(sum((select sum(oi.quantity) from order_items oi where oi.order_id = ${orders.id})), 0)::int`,
+          // `orders.id` spelled out: inside the correlated subquery Drizzle's
+          // rendering of the column did not resolve to the outer row, and every
+          // day came back as zero tickets. The raw name does, and the query
+          // selects from "orders" under its own name.
+          tickets: sql<number>`coalesce(sum((select sum(oi.quantity) from order_items oi where oi.order_id = orders.id)), 0)::int`,
           gross: sql<number>`coalesce(sum(${orders.totalCents}), 0)::int`,
         })
         .from(orders)
