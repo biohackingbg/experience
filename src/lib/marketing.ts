@@ -257,10 +257,18 @@ export async function getMarketing(): Promise<Marketing> {
   const averageRate = pooledVisitors > 0 ? Math.round((pooledTickets / pooledVisitors) * 10000) / 100 : null;
   for (const row of list) row.tips = tipsFor(row, averageRate);
 
+  // A sale belongs to the platform of the row whose code it carries; only a
+  // sale no row claims falls back to its utm_source. An agency's Meta links
+  // say utm_source=facebook, and without this they would land under
+  // "Facebook" while the row that paid for them sits under "Meta".
+  const codeOwner = new Map<string, string>();
+  for (const c of list) if (c.utmCampaign && !codeOwner.has(c.utmCampaign)) codeOwner.set(c.utmCampaign, c.platform);
+  const platformOf = (t: { campaign: string | null; source: string | null }) =>
+    (t.campaign && codeOwner.get(t.campaign)) || t.source;
+
   const platforms: PlatformSummary[] = PLATFORMS.map((p) => {
     const mine = list.filter((c) => c.platform === p.id);
-    // Sales tagged with this platform as source, whether or not the campaign code matched a row.
-    const sales = tagged.filter((t) => t.source === p.id);
+    const sales = tagged.filter((t) => platformOf(t) === p.id);
     const platformTaggedVisitors = mine.reduce((a, c) => a + c.taggedVisitors, 0);
     const platformTaggedTickets = sales.reduce((a, s) => a + s.tickets, 0);
     return {
