@@ -260,6 +260,13 @@
       "when": 1789000000035,
       "tag": "0036_consent_log",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1789000000036,
+      "tag": "0037_booths",
+      "breakpoints": true
     }
   ]
 }

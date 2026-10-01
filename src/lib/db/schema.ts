@@ -871,3 +871,19 @@ export const consentLog = pgTable(
     index("consent_log_consent_idx").on(table.consentId),
   ],
 );
+
+/**
+ * Who stands where in the exhibition hall. One row per module that has been
+ * touched; a module with no row is free. The partner is the pipeline row,
+ * so "paid" is never typed here - it is read off the deal's money state.
+ * `holdLabel` is for a module given to someone who is not a partner row
+ * (the organiser's own stand, a media corner) or blocked on purpose.
+ */
+export const boothAssignments = pgTable("booth_assignments", {
+  /** A module id from the plan: A1 … D8 (booths-plan.ts). */
+  booth: text("booth").primaryKey(),
+  deckLinkId: uuid("deck_link_id").references(() => deckLinks.id, { onDelete: "set null" }),
+  holdLabel: text("hold_label"),
+  note: text("note"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});

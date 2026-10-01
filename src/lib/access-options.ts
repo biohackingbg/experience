@@ -13,6 +13,7 @@ export const PAGES = [
   { id: "lektori", label: "Лектори", href: "/admin/lektori", sensitive: false },
   { id: "prezentaciya", label: "Презентация (партньори)", href: "/admin/prezentaciya", sensitive: false },
   { id: "podgotovka", label: "Подготовка", href: "/admin/podgotovka", sensitive: false },
+  { id: "shtandove", label: "Щандове (план на залата)", href: "/admin/shtandove", sensitive: false },
   { id: "vhod", label: "Вход на събитието", href: "/admin/vhod", sensitive: false },
   { id: "izdai", label: "Издаване на билети", href: "/admin/izdai", sensitive: true },
   { id: "rabotilnici", label: "Работилници", href: "/admin/rabotilnici", sensitive: false },
