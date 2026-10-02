@@ -24,6 +24,7 @@ const photos: Record<number, string> = {
   2: "/stations/reformer.webp",
   3: "/stations/powerplate.webp",
   5: "/stations/mobilnost.webp",
+  6: "/stations/mentalno.webp",
   7: "/stations/endosfera.webp",
 };
 
