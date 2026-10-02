@@ -13,9 +13,18 @@ import { CONCEPT } from "@/lib/site-copy";
 // Power Plate, Rev bikes, mobility, mental health, Endosphere.
 const icons = [Composition, Plank, Reformer, Plate, Bike, Stretch, Brain, Sphere];
 
+/**
+ * A photo for a station that has one, by its position in the list. A card
+ * with a photo keeps the same emblem and number, so the eight still read
+ * as one set while the photos arrive one by one.
+ */
+const photos: Record<number, string> = {
+  7: "/stations/endosfera.webp",
+};
+
 export function SummitConcept({ lang = "bg" }: { lang?: Lang }) {
   const c = CONCEPT[lang];
-  const stations = c.stations.map((title, i) => ({ title, no: String(i + 1).padStart(2, "0"), icon: icons[i] }));
+  const stations = c.stations.map((title, i) => ({ title, no: String(i + 1).padStart(2, "0"), icon: icons[i], photo: photos[i] ?? null }));
   return (
     <section id="concept" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
@@ -58,19 +67,44 @@ export function SummitConcept({ lang = "bg" }: { lang?: Lang }) {
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {stations.map((s, i) => (
             <Reveal key={s.no} delay={i * 70}>
-              <article className="bh-mint group flex h-full min-h-[15rem] flex-col justify-between rounded-3xl p-6 text-bh-ink transition-transform duration-300 hover:-translate-y-1.5">
-                <div className="flex items-start justify-between">
+              <article
+                className={`group relative flex h-full min-h-[15rem] flex-col justify-between overflow-hidden rounded-3xl p-6 transition-transform duration-300 hover:-translate-y-1.5 ${
+                  s.photo ? "text-white" : "bh-mint text-bh-ink"
+                }`}
+              >
+                {s.photo && (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={s.photo}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                    />
+                    {/* The title sits on the darkest part of the photo, and
+                        the gradient makes sure there is one. */}
+                    <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#02251f]/85 via-[#02251f]/25 to-[#02251f]/10" />
+                  </>
+                )}
+                <div className="relative flex items-start justify-between">
                   {/* A tinted disc gives each pictogram a stage of its own,
                       so the eight read as a set of emblems rather than a
                       row of thin lines. */}
-                  <span className="grid h-14 w-14 place-items-center rounded-2xl bg-bh-pine/10 text-bh-pine transition-colors group-hover:bg-bh-pine group-hover:text-bh-paper">
+                  <span
+                    className={`grid h-14 w-14 place-items-center rounded-2xl transition-colors ${
+                      s.photo
+                        ? "bg-white/15 text-white backdrop-blur-sm group-hover:bg-white group-hover:text-bh-pine"
+                        : "bg-bh-pine/10 text-bh-pine group-hover:bg-bh-pine group-hover:text-bh-paper"
+                    }`}
+                  >
                     <s.icon className="h-7 w-7" />
                   </span>
-                  <span className="font-mono text-sm text-bh-ink/40">
+                  <span className={`font-mono text-sm ${s.photo ? "text-white/60" : "text-bh-ink/40"}`}>
                     / {s.no}
                   </span>
                 </div>
-                <div>
+                <div className="relative">
                   <h3 className="text-xl font-bold leading-tight tracking-tight">
                     {s.title}
                   </h3>
