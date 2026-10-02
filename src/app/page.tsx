@@ -16,6 +16,7 @@ import { buildEventSchema } from "@/lib/event-schema";
 import { cheapestOf, getPricing, priceOf } from "@/lib/pricing";
 import { getAnnouncedSpeakers } from "@/lib/speakers-data";
 import { SALES_OPEN, formatPrice } from "@/lib/tickets";
+import { SPEAKERS_PLANNED } from "@/lib/site-copy";
 
 // Re-rendered periodically as a safety net. Closing the launch prices is a
 // switch in the admin, and that switch revalidates this page on the spot;
@@ -43,7 +44,7 @@ export default async function Home() {
       <SiteNotice />
       <SummitNav />
       <main>
-        <SummitHero speakerCount={speakers.length} from={from} />
+        <SummitHero speakerCount={SPEAKERS_PLANNED} from={from} />
         <SummitSpeakers />
         <SummitTracks />
         <SummitConcept />

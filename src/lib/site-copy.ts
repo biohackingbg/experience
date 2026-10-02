@@ -250,6 +250,13 @@ export const CONCEPT: Copy<{
   },
 };
 
+/**
+ * The line-up as announced to the market: what the hero and the deck both
+ * say, while the published list is still catching up with the contracts.
+ * Keep it in step with the deck's "scale" numbers.
+ */
+export const SPEAKERS_PLANNED = 50;
+
 export const SPEAKERS_SECTION: Copy<{ eyebrow: string; title: string; intro: string; showAll: (n: number) => string }> = {
   bg: {
     eyebrow: "Лектори",

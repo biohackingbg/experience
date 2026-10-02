@@ -17,7 +17,7 @@ import { SummitFooter } from "@/components/summit/SummitFooter";
 import { buildEventSchema } from "@/lib/event-schema";
 import { getAnnouncedSpeakers } from "@/lib/speakers-data";
 import { cheapestOf, getPricing, priceOf } from "@/lib/pricing";
-import { META } from "@/lib/site-copy";
+import { META, SPEAKERS_PLANNED } from "@/lib/site-copy";
 import { SALES_OPEN, formatPrice } from "@/lib/tickets";
 
 export const revalidate = 300;
@@ -29,12 +29,21 @@ export const revalidate = 300;
  */
 export async function generateMetadata(): Promise<Metadata> {
   const pricing = await getPricing();
-  const description = META.en.describe(formatPrice(priceOf(pricing, cheapestOf(pricing))));
+  const description = META.en.describe(
+    formatPrice(priceOf(pricing, cheapestOf(pricing))),
+  );
   return {
     title: META.en.title,
     description,
     alternates: { canonical: "/en", languages: { bg: "/", en: "/en" } },
-    openGraph: { type: "website", locale: "en_GB", url: "https://thelongevitysummit.eu/en", siteName: "Sofia Life Summit", title: META.en.title, description },
+    openGraph: {
+      type: "website",
+      locale: "en_GB",
+      url: "https://thelongevitysummit.eu/en",
+      siteName: "Sofia Life Summit",
+      title: META.en.title,
+      description,
+    },
     twitter: { card: "summary_large_image", title: META.en.title, description },
   };
 }
@@ -51,11 +60,14 @@ export default async function HomeEn() {
   const from = formatPrice(priceOf(pricing, cheapestOf(pricing)));
   return (
     <div className="overflow-clip rounded-[1.75rem] bg-bh-paper">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }}
+      />
       <SiteNotice lang="en" />
       <SummitNav lang="en" />
       <main>
-        <SummitHero lang="en" speakerCount={speakers.length} from={from} />
+        <SummitHero lang="en" speakerCount={SPEAKERS_PLANNED} from={from} />
         <SummitSpeakers lang="en" />
         <SummitTracks lang="en" />
         <SummitConcept lang="en" />
@@ -67,7 +79,9 @@ export default async function HomeEn() {
         <SummitOrganizers lang="en" />
       </main>
       <SummitFooter lang="en" />
-      {SALES_OPEN && <BuyBar lang="en" from={from} tierId={cheapestOf(pricing).id} />}
+      {SALES_OPEN && (
+        <BuyBar lang="en" from={from} tierId={cheapestOf(pricing).id} />
+      )}
     </div>
   );
 }

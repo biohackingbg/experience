@@ -45,10 +45,10 @@ function OrbitBadge() {
 }
 
 /**
- * `speakerCount` is passed in rather than counted here: the page below shows
- * the announced line-up, and the two numbers on one screen must be the same
- * number. `from` is the cheapest ticket, so the button quotes the price the
- * next screen charges.
+ * `speakerCount` is passed in rather than fixed here: it is the announced
+ * line-up (SPEAKERS_PLANNED), the same number the partner deck quotes, and
+ * the page owns that decision. `from` is the cheapest ticket, so the button
+ * quotes the price the next screen charges.
  */
 export function SummitHero({
   lang = "bg",
