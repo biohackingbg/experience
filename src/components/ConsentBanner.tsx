@@ -12,7 +12,11 @@ import {
   rememberConsent,
   subscribeToConsent,
 } from "@/lib/consent-browser";
-import { ACCEPT_ALL, type ConsentChoice, REJECT_ALL } from "@/lib/marketing-consent";
+import {
+  ACCEPT_ALL,
+  type ConsentChoice,
+  REJECT_ALL,
+} from "@/lib/marketing-consent";
 
 type TaggedWindow = Window & { fbq?: (...args: unknown[]) => void };
 
@@ -37,8 +41,7 @@ const COPY = {
   bg: {
     tabs: { consent: "Съгласие", details: "Детайли", about: "За нас" },
     title: "Нашият сайт използва бисквитки, за да функционира правилно.",
-    body:
-      "Освен необходимите за работата му, ползваме бисквитки за две неща: да разберем кои страници работят (статистика) и да покажем събитието на хората, които вече са го гледали (маркетинг).",
+    body: "Освен необходимите за работата му, ползваме бисквитки за две неща: да разберем кои страници работят (статистика) и да покажем събитието на хората, които вече са го гледали (маркетинг).",
     policy: "Пълното описание е в политиката за поверителност.",
     policyLink: "политиката за поверителност",
     reject: "Отказ",
@@ -71,8 +74,7 @@ const COPY = {
   en: {
     tabs: { consent: "Consent", details: "Details", about: "About" },
     title: "Our site uses cookies so that it works properly.",
-    body:
-      "Beyond the ones it needs to work, we use cookies for two things: to see which pages work (statistics) and to show the event to people who have already looked at it (marketing).",
+    body: "Beyond the ones it needs to work, we use cookies for two things: to see which pages work (statistics) and to show the event to people who have already looked at it (marketing).",
     policy: "The full description is in the privacy policy.",
     policyLink: "privacy policy",
     reject: "Reject",
@@ -118,12 +120,20 @@ type Tab = "consent" | "details" | "about";
 
 export function ConsentBanner({ enabled }: { enabled: boolean }) {
   const pathname = usePathname();
-  const stored = useSyncExternalStore(subscribeToConsent, consentSnapshot, consentPending);
+  const stored = useSyncExternalStore(
+    subscribeToConsent,
+    consentSnapshot,
+    consentPending,
+  );
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [tab, setTab] = useState<Tab>("consent");
   const [draft, setDraft] = useState<ConsentChoice>(REJECT_ALL);
 
-  const open = enabled && isConsentSurface(pathname) && stored !== "pending" && (stored === null || settingsOpen);
+  const open =
+    enabled &&
+    isConsentSurface(pathname) &&
+    stored !== "pending" &&
+    (stored === null || settingsOpen);
 
   // The page behind must not scroll while the question is on screen.
   useEffect(() => {
@@ -135,7 +145,8 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
     };
   }, [open]);
 
-  if (!enabled || !isConsentSurface(pathname) || stored === "pending") return null;
+  if (!enabled || !isConsentSurface(pathname) || stored === "pending")
+    return null;
 
   const t = pathname.startsWith("/en") ? COPY.en : COPY.bg;
   const previous = stored;
@@ -162,7 +173,11 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
         type="button"
         onClick={() => {
           // Reopened from the corner: start from what is stored, not from nothing.
-          if (previous) setDraft({ analytics: previous.analytics, marketing: previous.marketing });
+          if (previous)
+            setDraft({
+              analytics: previous.analytics,
+              marketing: previous.marketing,
+            });
           setTab("consent");
           setSettingsOpen(true);
         }}
@@ -180,7 +195,9 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
       aria-selected={tab === id}
       onClick={() => setTab(id)}
       className={`flex-1 border-b-2 px-3 py-4 text-sm font-semibold transition-colors ${
-        tab === id ? "border-[#146455] text-[#146455]" : "border-transparent text-[#02251f]/55 hover:text-[#02251f]"
+        tab === id
+          ? "border-[#146455] text-[#146455]"
+          : "border-transparent text-[#02251f]/55 hover:text-[#02251f]"
       }`}
     >
       {label}
@@ -202,7 +219,10 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
   );
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-[#02251f]/55 p-3 sm:items-center sm:p-6" role="presentation">
+    <div
+      className="fixed inset-0 z-[100] flex items-end justify-center bg-[#02251f]/55 p-3 sm:items-center sm:p-6"
+      role="presentation"
+    >
       <section
         role="dialog"
         aria-modal="true"
@@ -211,15 +231,26 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
       >
         <div className="flex items-center justify-between px-6 pt-5 sm:px-8">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt="Biohacking Experience" className="h-6 w-auto sm:h-7" />
+          <img
+            src="/logo.svg"
+            alt="Biohacking Experience"
+            className="h-6 w-auto sm:h-7"
+          />
           {previous && (
-            <button type="button" onClick={() => setSettingsOpen(false)} className="text-xs font-medium text-[#02251f]/50 hover:text-[#02251f]">
+            <button
+              type="button"
+              onClick={() => setSettingsOpen(false)}
+              className="text-xs font-medium text-[#02251f]/50 hover:text-[#02251f]"
+            >
               {t.close}
             </button>
           )}
         </div>
 
-        <div role="tablist" className="mt-3 flex border-b border-[#02251f]/10 px-2 sm:px-4">
+        <div
+          role="tablist"
+          className="mt-3 flex border-b border-[#02251f]/10 px-2 sm:px-4"
+        >
           {tabButton("consent", t.tabs.consent)}
           {tabButton("details", t.tabs.details)}
           {tabButton("about", t.tabs.about)}
@@ -228,13 +259,21 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
         <div className="overflow-y-auto px-6 py-6 sm:px-8">
           {tab === "consent" && (
             <>
-              <h2 id="cookie-title" className="text-[15px] font-bold leading-snug">
+              <h2
+                id="cookie-title"
+                className="text-[15px] font-bold leading-snug"
+              >
                 {t.title}
               </h2>
-              <p className="mt-3 text-[14px] leading-relaxed text-[#02251f]/85">{t.body}</p>
+              <p className="mt-3 text-[14px] leading-relaxed text-[#02251f]/85">
+                {t.body}
+              </p>
               <p className="mt-3 text-[13px] leading-relaxed text-[#02251f]/60">
                 {t.policy.replace(t.policyLink + ".", "")}
-                <Link href="/poveritelnost" className="underline underline-offset-2 hover:text-[#02251f]">
+                <Link
+                  href="/poveritelnost"
+                  className="underline underline-offset-2 hover:text-[#02251f]"
+                >
                   {t.policyLink}
                 </Link>
                 .
@@ -246,22 +285,36 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
             <ul className="flex flex-col divide-y divide-[#02251f]/10">
               <li className="flex items-start justify-between gap-6 py-4">
                 <div>
-                  <div className="text-[15px] font-semibold">{t.categories.necessary.name}</div>
-                  <p className="mt-1 text-[13px] leading-relaxed text-[#02251f]/65">{t.categories.necessary.body}</p>
+                  <div className="text-[15px] font-semibold">
+                    {t.categories.necessary.name}
+                  </div>
+                  <p className="mt-1 text-[13px] leading-relaxed text-[#02251f]/65">
+                    {t.categories.necessary.body}
+                  </p>
                 </div>
-                <span className="shrink-0 pt-1 text-[11px] font-medium uppercase tracking-wide text-[#02251f]/45">{t.categories.necessary.always}</span>
+                <span className="shrink-0 pt-1 text-[11px] font-medium uppercase tracking-wide text-[#02251f]/45">
+                  {t.categories.necessary.always}
+                </span>
               </li>
               <li className="flex items-start justify-between gap-6 py-4">
                 <div>
-                  <div className="text-[15px] font-semibold">{t.categories.analytics.name}</div>
-                  <p className="mt-1 text-[13px] leading-relaxed text-[#02251f]/65">{t.categories.analytics.body}</p>
+                  <div className="text-[15px] font-semibold">
+                    {t.categories.analytics.name}
+                  </div>
+                  <p className="mt-1 text-[13px] leading-relaxed text-[#02251f]/65">
+                    {t.categories.analytics.body}
+                  </p>
                 </div>
                 {toggle("analytics")}
               </li>
               <li className="flex items-start justify-between gap-6 py-4">
                 <div>
-                  <div className="text-[15px] font-semibold">{t.categories.marketing.name}</div>
-                  <p className="mt-1 text-[13px] leading-relaxed text-[#02251f]/65">{t.categories.marketing.body}</p>
+                  <div className="text-[15px] font-semibold">
+                    {t.categories.marketing.name}
+                  </div>
+                  <p className="mt-1 text-[13px] leading-relaxed text-[#02251f]/65">
+                    {t.categories.marketing.body}
+                  </p>
                 </div>
                 {toggle("marketing")}
               </li>
@@ -274,7 +327,9 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
               <p>{t.about[1]}</p>
               <p>
                 {t.about[2]}{" "}
-                <code className="rounded bg-[#02251f]/8 px-1.5 py-0.5 font-mono text-[12px] text-[#02251f]">{previous?.id ?? "—"}</code>
+                <code className="rounded bg-[#02251f]/8 px-1.5 py-0.5 font-mono text-[12px] text-[#02251f]">
+                  {previous?.id ?? "—"}
+                </code>
               </p>
             </div>
           )}
@@ -285,41 +340,61 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
             shaped like a button. All three are one click and on the same
             row; the difference is in how loudly each one is drawn. That
             imbalance is the organisers' call, made knowing what it is. */}
-        <div className="grid grid-cols-3 items-center border-t border-[#02251f]/10 px-6 py-4 sm:px-8">
-          <button
-            type="button"
-            onClick={() => apply(REJECT_ALL)}
-            className="py-3 text-center text-[15px] font-semibold text-[#02251f] transition-colors hover:text-[#146455]"
-          >
-            {t.reject}
-          </button>
-          {tab === "details" ? (
+        <div className="border-t border-[#02251f]/10 px-6 py-4 sm:px-8">
+          {/* Three equal columns from tablet up. On a phone the three labels
+            do not fit one row, so the pill goes on top at full width and
+            the two plain choices share the row beneath - still one tap each,
+            still the same words. `sm:contents` dissolves the pair's wrapper
+            so the desktop grid sees three children in the reference order. */}
+          <div className="grid gap-2 sm:grid-cols-3 sm:items-center">
             <button
               type="button"
-              onClick={() => apply(draft)}
-              className="py-3 text-center text-[15px] font-semibold text-[#02251f] transition-colors hover:text-[#146455]"
+              onClick={() => apply(ACCEPT_ALL)}
+              className="bh-gradient order-first inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 py-3 text-[15px] font-semibold text-[#02251f] transition-transform hover:-translate-y-0.5 sm:order-last"
             >
-              {t.save}
+              {t.accept}
             </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setTab("details")}
-              className="inline-flex items-center justify-center gap-1.5 py-3 text-[15px] font-semibold text-[#02251f] transition-colors hover:text-[#146455]"
-            >
-              {t.customise}
-              <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4" aria-hidden>
-                <path d="M7.5 5l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={() => apply(ACCEPT_ALL)}
-            className="bh-gradient inline-flex items-center justify-center rounded-full px-6 py-3 text-[15px] font-semibold text-[#02251f] transition-transform hover:-translate-y-0.5"
-          >
-            {t.accept}
-          </button>
+            <div className="grid grid-cols-2 sm:contents">
+              <button
+                type="button"
+                onClick={() => apply(REJECT_ALL)}
+                className="py-3 text-center text-[15px] font-semibold text-[#02251f] transition-colors hover:text-[#146455]"
+              >
+                {t.reject}
+              </button>
+              {tab === "details" ? (
+                <button
+                  type="button"
+                  onClick={() => apply(draft)}
+                  className="py-3 text-center text-[15px] font-semibold text-[#02251f] transition-colors hover:text-[#146455]"
+                >
+                  {t.save}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setTab("details")}
+                  className="inline-flex items-center justify-center gap-1.5 py-3 text-[15px] font-semibold text-[#02251f] transition-colors hover:text-[#146455]"
+                >
+                  {t.customise}
+                  <svg
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    className="h-4 w-4"
+                    aria-hidden
+                  >
+                    <path
+                      d="M7.5 5l5 5-5 5"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </section>
     </div>
