@@ -55,14 +55,14 @@ export function SummitConcept({ lang = "bg" }: { lang?: Lang }) {
           <figure>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/zala.webp"
-              srcSet="/zala-1000.webp 1000w, /zala.webp 1550w"
+              src="/zala-wide.webp"
+              srcSet="/zala-wide-1000.webp 1000w, /zala-wide.webp 1550w"
               sizes="(min-width: 80rem) 80rem, 100vw"
               alt={c.hall}
               loading="lazy"
               decoding="async"
               width={1550}
-              height={1015}
+              height={540}
               className="w-full rounded-[1.6rem] object-cover"
             />
             <figcaption className="mt-3 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bh-ink/55">
