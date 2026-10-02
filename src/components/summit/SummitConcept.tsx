@@ -23,6 +23,7 @@ const photos: Record<number, string> = {
   1: "/stations/lagree.webp",
   2: "/stations/reformer.webp",
   3: "/stations/powerplate.webp",
+  4: "/stations/rev.webp",
   5: "/stations/mobilnost.webp",
   6: "/stations/mentalno.webp",
   7: "/stations/endosfera.webp",
