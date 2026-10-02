@@ -33,7 +33,29 @@ export function SummitConcept({ lang = "bg" }: { lang?: Lang }) {
           </p>
         </Reveal>
 
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* The hall itself, before the list of what happens in it: the one
+            image that answers "where is this" at the scale of the event. */}
+        <Reveal className="mt-12">
+          <figure>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/zala.webp"
+              srcSet="/zala-1000.webp 1000w, /zala.webp 1550w"
+              sizes="(min-width: 80rem) 80rem, 100vw"
+              alt={c.hall}
+              loading="lazy"
+              decoding="async"
+              width={1550}
+              height={1015}
+              className="w-full rounded-[1.6rem] object-cover"
+            />
+            <figcaption className="mt-3 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bh-ink/55">
+              {c.hall}
+            </figcaption>
+          </figure>
+        </Reveal>
+
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {stations.map((s, i) => (
             <Reveal key={s.no} delay={i * 70}>
               <article className="bh-mint group flex h-full min-h-[15rem] flex-col justify-between rounded-3xl p-6 text-bh-ink transition-transform duration-300 hover:-translate-y-1.5">

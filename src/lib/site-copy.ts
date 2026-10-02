@@ -213,6 +213,8 @@ export const CONCEPT: Copy<{
   title: (n: number) => string;
   intro: string;
   stations: string[];
+  /** Under the hall render: where this happens. */
+  hall: string;
 }> = {
   bg: {
     eyebrow: "Станциите",
@@ -228,6 +230,7 @@ export const CONCEPT: Copy<{
       "Ментално здраве - работилница с Виолета Михайлова",
       "Ендосфера",
     ],
+    hall: "Залата на Sofia Life Summit · Grand Hotel Millennium, София · 7–8 ноември 2026",
   },
   en: {
     eyebrow: "The stations",
@@ -243,6 +246,7 @@ export const CONCEPT: Copy<{
       "Mental health - workshop with Violeta Mihaylova",
       "Endosphere",
     ],
+    hall: "The Sofia Life Summit hall · Grand Hotel Millennium, Sofia · 7–8 November 2026",
   },
 };
 

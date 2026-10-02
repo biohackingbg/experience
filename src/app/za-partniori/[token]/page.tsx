@@ -534,19 +534,35 @@ export default async function PartnersPage({ params }: { params: Promise<{ token
             </Reveal>
           ))}
         </div>
+        {/* Two halls, side by side: last year's, full, is the proof; this
+            year's stage is the promise. The same scale, read twice. */}
         <Reveal className="mt-12">
-          <figure>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/deck/zala.jpg"
-              alt="Залата на Biohacking Experience, пълна с публика"
-              loading="lazy"
-              className="w-full rounded-[1.6rem] object-cover"
-            />
-            <figcaption className="mt-3 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bh-ink/65">
-              Залата на Biohacking Experience
-            </figcaption>
-          </figure>
+          <div className="grid gap-5 md:grid-cols-2">
+            <figure>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/deck/zala.jpg"
+                alt="Залата на Biohacking Experience, пълна с публика"
+                loading="lazy"
+                className="aspect-[3/2] w-full rounded-[1.6rem] object-cover"
+              />
+              <figcaption className="mt-3 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bh-ink/65">
+                Biohacking Experience 2025 · пълна зала
+              </figcaption>
+            </figure>
+            <figure>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/zala.webp"
+                alt="Сцената на Sofia Life Summit 2026 в Grand Hotel Millennium"
+                loading="lazy"
+                className="aspect-[3/2] w-full rounded-[1.6rem] object-cover"
+              />
+              <figcaption className="mt-3 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-bh-ink/65">
+                Sofia Life Summit 2026 · сцената в Grand Hotel Millennium
+              </figcaption>
+            </figure>
+          </div>
         </Reveal>
         <Reveal className="mt-10">
           <div className="rounded-[1.4rem] bg-bh-cloud p-7 ring-1 ring-bh-ink/8">
