@@ -19,6 +19,9 @@ const icons = [Composition, Plank, Reformer, Plate, Bike, Stretch, Brain, Sphere
  * as one set while the photos arrive one by one.
  */
 const photos: Record<number, string> = {
+  1: "/stations/lagree.webp",
+  2: "/stations/reformer.webp",
+  5: "/stations/mobilnost.webp",
   7: "/stations/endosfera.webp",
 };
 
