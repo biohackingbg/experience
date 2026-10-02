@@ -262,13 +262,13 @@ export const SPEAKERS_SECTION: Copy<{ eyebrow: string; title: string; intro: str
     eyebrow: "Лектори",
     title: "Международни имена, на разбираем език",
     intro: "Лекари и изследователи от България и чужбина, на една сцена през двата дни.",
-    showAll: (n) => `Виж всички ${n} лектори`,
+    showAll: () => "Виж всички лектори",
   },
   en: {
     eyebrow: "Speakers",
     title: "International names, in plain language",
     intro: "Doctors and researchers from Bulgaria and abroad, on one stage across the two days.",
-    showAll: (n) => `See all ${n} speakers`,
+    showAll: () => "See all speakers",
   },
 };
 
