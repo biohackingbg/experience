@@ -80,7 +80,7 @@ export default async function HomeEn() {
       </main>
       <SummitFooter lang="en" />
       {SALES_OPEN && (
-        <BuyBar lang="en" from={from} tierId={cheapestOf(pricing).id} />
+        <BuyBar lang="en" from={from} tierId="plus" />
       )}
     </div>
   );

@@ -58,7 +58,7 @@ export async function SummitNav({ lang = "bg" }: { lang?: Lang }) {
               same number. */}
           {SALES_OPEN ? (
             <Link
-              href={`/bilet?nivo=${cheapestTier.id}${en ? "&lang=en" : ""}`}
+              href={`/bilet?nivo=plus${en ? "&lang=en" : ""}`}
               className="bh-gradient inline-flex items-center whitespace-nowrap rounded-full px-3.5 py-2.5 text-[0.8rem] font-semibold text-bh-ink transition-transform hover:-translate-y-0.5 sm:px-5 sm:text-sm"
             >
               <span className="sm:hidden">{c.buyShort(formatPrice(cheapest))}</span>

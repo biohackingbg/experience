@@ -34,9 +34,11 @@ export const NAV: Copy<{
       { href: "#tickets", label: "Билети" },
     ],
     home: "Biohacking Experience - начало",
-    buy: (price) => `Купи билет от ${price} €`,
-    /** What fits on a phone: the price stays, the verb goes. */
-    buyShort: (price) => `Билети от ${price} €`,
+    /** No price on the button: it opens on PLUS, and "от 35 €" beside a
+        button that lands on 89 € reads as a trick. The hero still says
+        where the prices start. */
+    buy: () => "Купи билет",
+    buyShort: () => "Билети",
     soon: "Билети - скоро",
     soonShort: "Билети",
     otherLang: "English",
@@ -50,8 +52,8 @@ export const NAV: Copy<{
       { href: "#tickets", label: "Tickets" },
     ],
     home: "Biohacking Experience - home",
-    buy: (price) => `Tickets from €${price}`,
-    buyShort: (price) => `€${price}+`,
+    buy: () => "Buy a ticket",
+    buyShort: () => "Tickets",
     soon: "Tickets - soon",
     soonShort: "Tickets",
     otherLang: "Български",

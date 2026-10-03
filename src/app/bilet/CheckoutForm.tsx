@@ -10,6 +10,7 @@ import { trackMetaEvent } from "@/lib/meta-browser";
 import { PURCHASE_TERMS_TEXT, PURCHASE_TERMS_TEXT_EN } from "@/lib/purchase-terms";
 import { TIERS, formatPrice, picksDay, splitVat } from "@/lib/tickets";
 import { type PromoPreview, checkPromo, startCheckout } from "./actions";
+import { TierPicker } from "./TierPicker";
 
 const fieldBase =
   "mt-2 w-full rounded-2xl border border-bh-ink/15 bg-bh-cloud px-4 py-3 text-bh-ink outline-none focus:border-bh-pine";
@@ -45,8 +46,17 @@ export function CheckoutForm({
   soldOut = [],
   lang = "bg",
   utm,
+  discounted = false,
+  regularAfter = "",
+  offerNote,
 }: {
   initialTier?: string;
+  /** A discounted stage is on: list prices are struck on the cards. */
+  discounted?: boolean;
+  /** The condition under which the struck price applies, e.g. "след първите 200 билета". */
+  regularAfter?: string;
+  /** One line under the cards saying how long these prices hold. */
+  offerNote?: string;
   /** Per tier, VAT included, decided on the server for the stage the site is on. */
   prices: Record<string, number>;
   /** Tier ids with no seats left; shown, but not selectable. */
@@ -97,7 +107,11 @@ export function CheckoutForm({
 
   const [tierId, setTierId] = useState(() => {
     const wanted = TIERS.some((t) => t.id === initialTier) && !soldOut.includes(initialTier!) ? initialTier! : null;
-    return wanted ?? TIERS.find((t) => !soldOut.includes(t.id))?.id ?? "plus";
+    // No valid tier asked for: open on PLUS, the one most people end up
+    // with, rather than on whichever happens to be first in the list.
+    if (wanted) return wanted;
+    if (!soldOut.includes("plus")) return "plus";
+    return TIERS.find((t) => !soldOut.includes(t.id))?.id ?? "plus";
   });
   const [quantity, setQuantity] = useState(1);
   const [day, setDay] = useState(1);
@@ -107,6 +121,19 @@ export function CheckoutForm({
   const [checking, setChecking] = useState(false);
 
   const tier = TIERS.find((t) => t.id === tierId)!;
+
+  // On a phone the pay button is several screens down. A bar at the bottom
+  // keeps the chosen tier and its total in view and jumps to the fields; it
+  // steps aside once the real summary has scrolled in.
+  const summaryRef = useRef<HTMLElement>(null);
+  const [summaryVisible, setSummaryVisible] = useState(false);
+  useEffect(() => {
+    const el = summaryRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([e]) => setSummaryVisible(e.isIntersecting), { threshold: 0.15 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
   const gross = (prices[tier.id] ?? tier.listPriceCents) * quantity;
   // Preview only - the server resolves the code again when the order is made.
   const discount =
@@ -166,39 +193,25 @@ export function CheckoutForm({
           <legend className="font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/50">
             {t.tier}
           </legend>
-          <div className="mt-3 flex flex-col gap-2">
-            {TIERS.map((tier0) => {
-              const gone = soldOut.includes(tier0.id);
-              return (
-              <label
-                key={tier0.id}
-                className={`flex items-center justify-between gap-4 rounded-2xl px-5 py-4 ring-1 transition-colors ${
-                  gone
-                    ? "cursor-not-allowed bg-bh-cloud opacity-60 ring-bh-ink/10"
-                    : tier0.id === tierId
-                      ? "bh-mint cursor-pointer ring-bh-pine"
-                      : "cursor-pointer bg-bh-cloud ring-bh-ink/10 hover:ring-bh-ink/25"
-                }`}
-              >
-                <span className="flex items-center gap-3">
-                  <input
-                    type="radio"
-                    name="tierId"
-                    value={tier0.id}
-                    checked={tier0.id === tierId}
-                    disabled={gone}
-                    onChange={() => setTierId(tier0.id)}
-                    className="h-4 w-4 accent-bh-pine"
-                  />
-                  <span className="font-semibold text-bh-ink">{tier0.name}</span>
-                </span>
-                <span className="font-semibold text-bh-ink">
-                  {gone ? <span className="text-xs font-bold uppercase tracking-wide text-bh-ink/60">{t.soldOut}</span> : `${formatPrice(prices[tier0.id] ?? tier0.listPriceCents)} €`}
-                </span>
-              </label>
-              );
-            })}
-          </div>
+          <TierPicker
+            value={tierId}
+            onChange={(id) => {
+              setTierId(id);
+              const chosen = TIERS.find((x) => x.id === id);
+              if (chosen)
+                trackGaEvent("select_item", {
+                  item_list_id: "tickets",
+                  item_list_name: "Билети",
+                  items: [{ item_id: chosen.id, item_name: chosen.name, item_category: "Ticket", price: (prices[chosen.id] ?? chosen.listPriceCents) / 100, quantity: 1 }],
+                });
+            }}
+            prices={prices}
+            discounted={discounted}
+            regularAfter={regularAfter}
+            soldOut={soldOut}
+            lang={lang}
+          />
+          {offerNote && <p className="mt-3 text-xs leading-relaxed text-bh-ink/55">{offerNote}</p>}
         </fieldset>
 
         {picksDay(tierId) && (
@@ -235,7 +248,7 @@ export function CheckoutForm({
           </fieldset>
         )}
 
-        <div className="mt-6">
+        <div id="checkout-details" className="mt-8 scroll-mt-6">
           <Label htmlFor="quantity">{t.quantity}</Label>
           <select
             id="quantity"
@@ -341,7 +354,7 @@ export function CheckoutForm({
       </div>
 
       {/* Summary */}
-      <aside className="h-fit rounded-3xl bg-bh-cloud p-7 ring-1 ring-bh-ink/8 lg:sticky lg:top-24">
+      <aside ref={summaryRef} className="h-fit rounded-3xl bg-bh-cloud p-7 ring-1 ring-bh-ink/8 lg:sticky lg:top-24">
         <h2 className="text-lg font-bold tracking-tight text-bh-ink">
           {t.summary}
         </h2>
@@ -417,6 +430,31 @@ export function CheckoutForm({
           {t.stripe}
         </p>
       </aside>
+
+      <div
+        className={`fixed inset-x-0 bottom-0 z-40 border-t border-bh-ink/10 bg-bh-paper/95 px-4 py-3 backdrop-blur-lg transition-transform duration-300 motion-reduce:transition-none sm:hidden ${
+          summaryVisible || state.status === "redirect" ? "translate-y-full" : "translate-y-0"
+        }`}
+        style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
+        aria-hidden={summaryVisible}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0 leading-tight">
+            <div className="truncate text-sm font-bold text-bh-ink">
+              {tier.name} × {quantity}
+            </div>
+            <div className="text-xs text-bh-ink/60">{formatPrice(total)} €</div>
+          </div>
+          <button
+            type="button"
+            tabIndex={summaryVisible ? -1 : undefined}
+            onClick={() => document.getElementById("checkout-details")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+            className="bh-gradient shrink-0 rounded-full px-6 py-3 text-sm font-semibold text-bh-ink"
+          >
+            {t.continueBtn}
+          </button>
+        </div>
+      </div>
     </form>
   );
 }

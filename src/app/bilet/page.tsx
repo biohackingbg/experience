@@ -116,25 +116,26 @@ export default async function CheckoutPage({
           {t.intro}
         </p>
 
-        {SALES_OPEN && early && (
-          /* Said before the money, not after: the price on this page depends
-             on a number that is moving while the buyer reads it. */
-          <p className="mt-4 max-w-xl rounded-2xl bg-bh-cloud px-5 py-4 text-sm leading-relaxed text-bh-ink/70 ring-1 ring-bh-ink/10">
-            <strong className="font-semibold text-bh-ink">
-              {pricing.stage === "launch" ? t.launchPrice : t.specialPrice}
-            </strong>{" "}
-            {lang === "en"
-              ? CHECKOUT.en.priceNote(pricing.stage === "launch" ? "to the first 200 tickets" : pricing.label)
-              : CHECKOUT.bg.priceNote(pricing.label, pricing.stage === "launch")}
-          </p>
-        )}
-
+        {/* The offer line sits under the cards now, and the page opens on
+            PLUS unless the link asked for a tier: an ad that lands here
+            should meet the ticket most people buy, not the cheapest row. */}
         <CheckoutForm
-          initialTier={nivo}
+          initialTier={nivo ?? "plus"}
           prices={pricing.prices}
           soldOut={soldOut}
           lang={lang}
           utm={{ source: utm_source, campaign: utm_campaign }}
+          discounted={early}
+          regularAfter={lang === "en" ? (pricing.stage === "launch" ? "after the first 200 tickets" : pricing.regularAfter) : pricing.regularAfter}
+          offerNote={
+            early
+              ? `${pricing.stage === "launch" ? t.launchPrice : t.specialPrice} ${
+                  lang === "en"
+                    ? CHECKOUT.en.priceNote(pricing.stage === "launch" ? "to the first 200 tickets" : pricing.label)
+                    : CHECKOUT.bg.priceNote(pricing.label, pricing.stage === "launch")
+                }`
+              : undefined
+          }
         />
       </div>
     </div>

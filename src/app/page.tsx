@@ -56,7 +56,7 @@ export default async function Home() {
         <SummitOrganizers />
       </main>
       <SummitFooter />
-      {SALES_OPEN && <BuyBar from={from} tierId={cheapestOf(pricing).id} />}
+      {SALES_OPEN && <BuyBar from={from} tierId="plus" />}
     </div>
   );
 }
