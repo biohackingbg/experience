@@ -5,6 +5,7 @@ import type { Access } from "@/lib/access";
 
 import { MobileMenu } from "./MobileMenu";
 import { NavLink } from "./NavLink";
+import { RefreshStamp } from "./RefreshStamp";
 
 /**
  * The frame every admin page sits in: a sidebar with the whole menu, a top
@@ -188,6 +189,9 @@ export function AdminShell({ access, children }: { access: Access; children: Rea
               keyIcon={I.key}
               globeIcon={I.globe}
               outIcon={I.out}
+            />
+            <RefreshStamp
+              renderedAt={new Intl.DateTimeFormat("bg-BG", { timeZone: "Europe/Sofia", hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date())}
             />
             <div className="hidden items-center gap-3 sm:flex">
               {admin ? (
