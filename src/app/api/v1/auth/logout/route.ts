@@ -2,6 +2,7 @@ import { revokeSession } from "@/lib/app-auth";
 import { json, requireUser } from "@/lib/api-v1";
 
 export const dynamic = "force-dynamic";
+export { OPTIONS } from "@/lib/api-v1";
 
 export async function POST(request: Request) {
   const auth = await requireUser(request);

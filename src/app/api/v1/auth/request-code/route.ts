@@ -2,6 +2,7 @@ import { requestLoginCode } from "@/lib/app-auth";
 import { fail, json, langOf, limited, readBody } from "@/lib/api-v1";
 
 export const dynamic = "force-dynamic";
+export { OPTIONS } from "@/lib/api-v1";
 
 /** Mails a sign-in code. Always answers the same way to a valid address, so nobody can probe who has one. */
 export async function POST(request: Request) {

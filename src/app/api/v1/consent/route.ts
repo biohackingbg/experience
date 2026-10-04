@@ -3,6 +3,7 @@ import { recordConsent } from "@/lib/consent-log";
 import { MARKETING_CONSENT_VERSION } from "@/lib/marketing-consent";
 
 export const dynamic = "force-dynamic";
+export { OPTIONS } from "@/lib/api-v1";
 
 /** The app's own consent screen writes to the same log as the site's banner, marked as the app's. */
 export async function POST(request: Request) {

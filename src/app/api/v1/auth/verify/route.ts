@@ -2,6 +2,7 @@ import { verifyLoginCode } from "@/lib/app-auth";
 import { fail, json, langOf, limited, readBody } from "@/lib/api-v1";
 
 export const dynamic = "force-dynamic";
+export { OPTIONS } from "@/lib/api-v1";
 
 export async function POST(request: Request) {
   if (limited(request, "verify", 20)) return fail(429, "too_many");

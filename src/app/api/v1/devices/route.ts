@@ -2,6 +2,7 @@ import { fail, json, readBody, requireUser } from "@/lib/api-v1";
 import { registerDevice, unregisterDevice } from "@/lib/push";
 
 export const dynamic = "force-dynamic";
+export { OPTIONS } from "@/lib/api-v1";
 
 export async function POST(request: Request) {
   const auth = await requireUser(request);

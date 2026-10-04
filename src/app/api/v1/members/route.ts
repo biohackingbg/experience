@@ -2,6 +2,7 @@ import { json, readBody, requireUser } from "@/lib/api-v1";
 import { COMMUNITY_CONSENT_VERSION, isMember, joinCommunity, leaveCommunity } from "@/lib/members";
 
 export const dynamic = "force-dynamic";
+export { OPTIONS } from "@/lib/api-v1";
 
 export async function GET(request: Request) {
   const auth = await requireUser(request);

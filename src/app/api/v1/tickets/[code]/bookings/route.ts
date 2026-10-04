@@ -3,6 +3,7 @@ import { fail, json, limited, readBody, requireUser } from "@/lib/api-v1";
 import { bookPlace, cancelPlace, getTicketPlaces } from "@/lib/workshops";
 
 export const dynamic = "force-dynamic";
+export { OPTIONS } from "@/lib/api-v1";
 
 type Ctx = { params: Promise<{ code: string }> };
 

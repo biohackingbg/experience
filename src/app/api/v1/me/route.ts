@@ -4,6 +4,7 @@ import { isMember } from "@/lib/members";
 import { getPricing } from "@/lib/pricing";
 
 export const dynamic = "force-dynamic";
+export { OPTIONS } from "@/lib/api-v1";
 
 /** The signed-in person: their tickets with bookings, and whether they joined the community. */
 export async function GET(request: Request) {

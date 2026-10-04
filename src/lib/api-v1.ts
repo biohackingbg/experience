@@ -11,7 +11,23 @@ import { checkRateLimit } from "@/lib/rate-limit";
  * show without guessing.
  */
 
-export const json = (data: unknown, status = 200, headers?: HeadersInit) => NextResponse.json(data, { status, headers });
+/**
+ * The API is reachable from other origins: the app's web preview during
+ * development, and any later web client. Nothing here rides on cookies -
+ * the bearer token is the only credential - so an open origin costs nothing.
+ */
+export const CORS: Record<string, string> = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "authorization, content-type",
+  "Access-Control-Max-Age": "86400",
+};
+
+export const json = (data: unknown, status = 200, headers?: HeadersInit) =>
+  NextResponse.json(data, { status, headers: { ...CORS, ...(headers ? Object.fromEntries(new Headers(headers).entries()) : {}) } });
+
+/** The preflight answer every v1 route re-exports. */
+export const OPTIONS = () => new NextResponse(null, { status: 204, headers: CORS });
 export const fail = (status: number, error: string, extra?: Record<string, unknown>) => json({ error, ...(extra ?? {}) }, status);
 
 export async function readBody<T = Record<string, unknown>>(request: Request): Promise<T | null> {

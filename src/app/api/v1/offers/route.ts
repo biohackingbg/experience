@@ -3,6 +3,7 @@ import { json, requireUser } from "@/lib/api-v1";
 import { listOffersFor } from "@/lib/offers";
 
 export const dynamic = "force-dynamic";
+export { OPTIONS } from "@/lib/api-v1";
 
 /** The deal wall for this person: what their tickets entitle them to. A guest sees the offers open to all. */
 export async function GET(request: Request) {
