@@ -943,10 +943,48 @@ export const deviceTokens = pgTable(
   (table) => [index("device_tokens_email_idx").on(table.email)],
 );
 
+/**
+ * A partner as the public sees it: the name on the stand, a logo, a few
+ * lines about what they do. Kept apart from the pipeline row on purpose -
+ * `deck_links` holds money, contacts and notes that must never reach the
+ * app, and the label there is whatever the team typed ("Alma - Иван").
+ * A profile is shown only once `listed` is ticked.
+ */
+export const partners = pgTable(
+  "partners",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    /** The pipeline row this is, when there is one - for the stand on the map. */
+    deckLinkId: uuid("deck_link_id").references(() => deckLinks.id, { onDelete: "set null" }),
+    name: text("name").notNull(),
+    /** What kind of partner, in a word or two: "Уреди за тренировка". */
+    category: text("category"),
+    categoryEn: text("category_en"),
+    /** One line under the name. */
+    tagline: text("tagline"),
+    taglineEn: text("tagline_en"),
+    description: text("description"),
+    descriptionEn: text("description_en"),
+    website: text("website"),
+    instagram: text("instagram"),
+    logo: bytea("logo"),
+    logoMime: text("logo_mime"),
+    /** Bumped on every upload; part of the logo URL, so caches move on. */
+    logoUpdatedAt: timestamp("logo_updated_at", { withTimezone: true }),
+    listed: boolean("listed").notNull().default(false),
+    sort: integer("sort").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }),
+  },
+  (table) => [uniqueIndex("partners_deck_link_idx").on(table.deckLinkId)],
+);
+
 /** A partner's offer on the app's deal wall. */
 export const offers = pgTable("offers", {
   id: uuid("id").primaryKey().defaultRandom(),
   partner: text("partner").notNull(),
+  /** The profile behind the name, when there is one; `partner` keeps the name as typed. */
+  partnerId: uuid("partner_id").references(() => partners.id, { onDelete: "set null" }),
   /** The pipeline row this partner is, when there is one - for the booth on the map. */
   deckLinkId: uuid("deck_link_id").references(() => deckLinks.id, { onDelete: "set null" }),
   title: text("title").notNull(),

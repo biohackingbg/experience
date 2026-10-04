@@ -37,6 +37,8 @@ const I = {
   hands: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M7 11V5.5a1.5 1.5 0 0 1 3 0V10m0-1.5a1.5 1.5 0 0 1 3 0V11m0-1a1.5 1.5 0 0 1 3 0v3a4 4 0 0 1-4 4h-2a4 4 0 0 1-4-4v-1l-1.5-1.5a1.5 1.5 0 0 1 2-2L7 11"/></svg>,
   mail: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"><rect x="3" y="5" width="14" height="11" rx="2"/><path d="m3 7 7 5 7-5"/></svg>,
   map: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M3 9h7v8M10 9V3M10 13h7"/></svg>,
+  gift: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" strokeLinecap="round"><rect x="3" y="8" width="14" height="4" rx="1"/><path d="M4.5 12v5h11v-5M10 8v9M10 8c-1.5-3-5-3-5-1s3 1 5 1zM10 8c1.5-3 5-3 5-1s-3 1-5 1z"/></svg>,
+  shop: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" strokeLinecap="round"><path d="M3 8l1.5-4h11L17 8M3 8h14M3 8c0 1.4 1 2 2.3 2S7.7 9.4 7.7 8c0 1.4 1 2 2.3 2s2.3-.6 2.3-2c0 1.4 1 2 2.4 2S17 9.4 17 8M4.5 10v7h11v-7M8.5 17v-4h3v4"/></svg>,
   out: <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M8 4H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3M12 7l3 3-3 3M15 10H8"/></svg>,
 };
 
@@ -79,6 +81,13 @@ const GROUPS = [
       { page: "reklama" as const, href: "/admin/reklama", label: "Реклама", icon: I.mega },
       { page: "promo" as const, href: "/admin/promo", label: "Промо кодове", icon: I.tag },
       { page: "prezentaciya" as const, href: "/admin/prezentaciya", label: "Презентация (партньори)", icon: I.deck },
+    ],
+  },
+  {
+    title: "Партньори",
+    items: [
+      { page: "partniori" as const, href: "/admin/partniori", label: "Профили на партньори", icon: I.shop },
+      { page: "oferti" as const, href: "/admin/oferti", label: "Оферти", icon: I.gift },
     ],
   },
   {
