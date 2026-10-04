@@ -1000,3 +1000,50 @@ export async function sendAccessLinkEmail(input: AccessLinkInput): Promise<boole
     return false;
   }
 }
+
+/* ── The app's sign-in code ── */
+
+export type LoginCodeInput = { to: string; code: string; lang: "bg" | "en" };
+
+export function loginCodeParts(input: LoginCodeInput): MailParts {
+  const en = input.lang === "en";
+  const title = en ? "Your sign-in code" : "Твоят код за вход";
+  const lead = en
+    ? "Enter this code in the Biohacking Experience app. It works for 10 minutes."
+    : "Въведи този код в приложението Biohacking Experience. Важи 10 минути.";
+  const foot = en
+    ? "If you did not ask for a code, ignore this email - nobody can sign in without it."
+    : "Ако не си искал/а код, просто не обръщай внимание - без него никой не може да влезе.";
+  return {
+    subject: `${input.code} · ${en ? "Biohacking Experience sign-in" : "вход в Biohacking Experience"}`,
+    html: `<!doctype html><html lang="${input.lang}"><body style="margin:0;background:#f1f5f3;padding:28px 16px">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:20px;padding:32px">
+    <tr><td>
+      <div style="font:700 13px/1 -apple-system,Segoe UI,Roboto,sans-serif;letter-spacing:2px;text-transform:uppercase;color:#14645599">Biohacking Experience</div>
+      <h1 style="margin:12px 0 16px;font:800 20px/1.3 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f">${title}</h1>
+      <p style="margin:0 0 20px;font:400 15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f">${lead}</p>
+      <p style="margin:0 0 24px;font:800 40px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:8px;color:#02251f">${esc(input.code)}</p>
+      <p style="margin:0;padding-top:16px;border-top:1px solid #dfe4e0;font:400 12px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f80">${foot}</p>
+    </td></tr>
+  </table>
+</body></html>`,
+    text: [title, "", lead, "", input.code, "", foot].join("\n"),
+  };
+}
+
+export async function sendLoginCodeEmail(input: LoginCodeInput): Promise<boolean> {
+  const resend = getResend();
+  const from = process.env.EMAIL_FROM;
+  if (!resend || !from) return false;
+  try {
+    const { error } = await resend.emails.send({ from, replyTo: REPLY_TO, to: input.to, ...loginCodeParts(input) });
+    if (error) {
+      console.error("[email] login code failed:", error);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("[email] login code threw:", error);
+    return false;
+  }
+}

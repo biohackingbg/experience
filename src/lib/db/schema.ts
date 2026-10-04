@@ -887,3 +887,96 @@ export const boothAssignments = pgTable("booth_assignments", {
   note: text("note"),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/*
+ * The mobile app's own tables. A person in the app is an email address: the
+ * one on their order, or any address that asked for a code. Nothing here
+ * duplicates a ticket - the app reads tickets through `orders.email`.
+ */
+
+/** A six-digit code mailed to an address; hashed, short-lived, few tries. */
+export const loginCodes = pgTable(
+  "login_codes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: text("email").notNull(),
+    codeHash: text("code_hash").notNull(),
+    attempts: integer("attempts").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+  },
+  (table) => [index("login_codes_email_idx").on(table.email, table.createdAt)],
+);
+
+/** A signed-in device. The token itself is only ever on the phone; this is its hash. */
+export const appSessions = pgTable(
+  "app_sessions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: text("email").notNull(),
+    tokenHash: text("token_hash").notNull().unique(),
+    device: text("device"),
+    lang: text("lang").notNull().default("bg"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).notNull().defaultNow(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  },
+  (table) => [index("app_sessions_email_idx").on(table.email)],
+);
+
+/** Where to send a push: one row per device token, tied to the address that registered it. */
+export const deviceTokens = pgTable(
+  "device_tokens",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: text("email").notNull(),
+    token: text("token").notNull().unique(),
+    /** ios | android */
+    platform: text("platform").notNull().default("ios"),
+    lang: text("lang").notNull().default("bg"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).notNull().defaultNow(),
+    disabledAt: timestamp("disabled_at", { withTimezone: true }),
+  },
+  (table) => [index("device_tokens_email_idx").on(table.email)],
+);
+
+/** A partner's offer on the app's deal wall. */
+export const offers = pgTable("offers", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  partner: text("partner").notNull(),
+  /** The pipeline row this partner is, when there is one - for the booth on the map. */
+  deckLinkId: uuid("deck_link_id").references(() => deckLinks.id, { onDelete: "set null" }),
+  title: text("title").notNull(),
+  titleEn: text("title_en"),
+  body: text("body"),
+  bodyEn: text("body_en"),
+  /** How to claim it: "код в приложението", "покажи билета на щанд A4". */
+  how: text("how"),
+  howEn: text("how_en"),
+  code: text("code"),
+  url: text("url"),
+  /** Comma-separated tier ids the offer is for; empty = every ticket holder. */
+  tiers: text("tiers"),
+  /** Where it is claimed: onsite | online. */
+  place: text("place").notNull().default("onsite"),
+  validFrom: timestamp("valid_from", { withTimezone: true }),
+  validTo: timestamp("valid_to", { withTimezone: true }),
+  active: boolean("active").notNull().default(true),
+  sort: integer("sort").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }),
+});
+
+/** Who said yes to the community - a separate, explicit opt-in, never implied by a ticket. */
+export const members = pgTable("members", {
+  email: text("email").primaryKey(),
+  name: text("name"),
+  joinedAt: timestamp("joined_at", { withTimezone: true }).notNull().defaultNow(),
+  /** app | site | event */
+  source: text("source").notNull().default("app"),
+  consentVersion: text("consent_version").notNull(),
+  leftAt: timestamp("left_at", { withTimezone: true }),
+});
