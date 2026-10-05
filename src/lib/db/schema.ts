@@ -365,7 +365,7 @@ export const documents = pgTable("documents", {
   reference: text("reference").notNull().unique(),
   /** proforma until the money lands, invoice after - one row, two stages. */
   kind: text("kind").notNull().default("proforma"),
-  /** open | paid | cancelled */
+  /** open | paid | cancelled | credited (an invoice undone by a credit note) */
   status: text("status").notNull().default("open"),
   /** The partner pipeline row this was raised against, when there is one. */
   deckLinkId: uuid("deck_link_id").references(() => deckLinks.id, { onDelete: "set null" }),
@@ -385,6 +385,9 @@ export const documents = pgTable("documents", {
   /** Drawn from invoice_number_seq, and only when the document is paid. */
   invoiceNumber: bigint("invoice_number", { mode: "number" }),
   invoicedAt: timestamp("invoiced_at", { withTimezone: true }),
+  /** The credit note that undoes the invoice - same number run, never a delete. */
+  creditNoteNumber: bigint("credit_note_number", { mode: "number" }).unique(),
+  creditNotedAt: timestamp("credit_noted_at", { withTimezone: true }),
   /** What the proforma asks to be paid by. */
   dueAt: timestamp("due_at", { withTimezone: true }),
 

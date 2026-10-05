@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 
 import { CreditNoteDocument } from "@/components/InvoiceDocument";
 import type { Lang } from "@/lib/i18n";
+import { getDocumentInvoice } from "@/lib/documents";
 import { getInvoice } from "@/lib/invoices";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { PrintButton } from "../PrintButton";
@@ -35,7 +36,10 @@ export default async function CreditNotePage({
   const ip = head.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   if (!checkRateLimit(`faktura:${ip}`).allowed) notFound();
 
-  const inv = await getInvoice(decodeURIComponent(reference).toUpperCase());
+  // A ticket order's, or one raised for a sponsor or a service - one run, one sheet.
+  const ref = decodeURIComponent(reference).toUpperCase();
+  const order = await getInvoice(ref);
+  const inv = order ?? (await getDocumentInvoice(ref));
   if (!inv?.creditNoteNumber) notFound();
   const lang: Lang = langParam === "en" || (!langParam && inv.lang === "en") ? "en" : "bg";
 
@@ -51,7 +55,7 @@ export default async function CreditNotePage({
           </Link>
           <PrintButton />
         </div>
-        <CreditNoteDocument inv={inv} lang={lang} />
+        <CreditNoteDocument inv={inv} lang={lang} reason={order ? "reason" : "reasonDocument"} />
       </div>
     </div>
   );

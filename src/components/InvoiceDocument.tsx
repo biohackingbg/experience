@@ -62,6 +62,10 @@ const T = {
     "Основание: връщане на платената сума - отказ от поръчката. Сумата е възстановена по картата на купувача.",
     "Reason: refund of the amount paid - order cancelled. The amount was returned to the buyer's card.",
   ],
+  reasonDocument: [
+    "Основание: анулиране на фактурата - издадена е по грешка или сделката не се е осъществила.",
+    "Reason: the invoice is cancelled - it was issued in error or the deal did not take place.",
+  ],
 } as const;
 
 type Key = keyof typeof T;
@@ -266,7 +270,16 @@ export function InvoiceDocument({ inv, lang = "bg" }: { inv: InvoiceData; lang?:
  * The credit note that answers a refunded invoice: same parties, the same
  * lines with reversed signs, numbered from the same run as the invoices.
  */
-export function CreditNoteDocument({ inv, lang = "bg" }: { inv: InvoiceData; lang?: Lang }) {
+export function CreditNoteDocument({
+  inv,
+  lang = "bg",
+  reason = "reason",
+}: {
+  inv: InvoiceData;
+  lang?: Lang;
+  /** A ticket refund went back to a card; a sponsor or service invoice is simply annulled. */
+  reason?: "reason" | "reasonDocument";
+}) {
   const dim = "text-bh-ink/65";
   const noteDate = inv.creditNotedAt ?? inv.issuedAt;
 
@@ -301,7 +314,7 @@ export function CreditNoteDocument({ inv, lang = "bg" }: { inv: InvoiceData; lan
 
       <footer className="mt-8 border-t border-bh-ink/15 pt-6 text-xs leading-relaxed text-bh-ink/70">
         <p>
-          <Sentence lang={lang} k="reason" />
+          <Sentence lang={lang} k={reason} />
         </p>
         <p className="mt-2">
           {label(lang, "issuedBy")}: {COMPANY.manager}

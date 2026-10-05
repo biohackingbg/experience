@@ -64,6 +64,7 @@ export type DocumentRow = {
   totalCents: number;
   invoiceNumber: number | null;
   invoicedAt: Date | null;
+  creditNoteNumber: number | null;
   dueAt: Date | null;
   note: string | null;
   createdAt: Date;
@@ -162,6 +163,7 @@ export async function listDocuments(limit = 200): Promise<DocumentRow[]> {
       totalCents: documents.totalCents,
       invoiceNumber: documents.invoiceNumber,
       invoicedAt: documents.invoicedAt,
+      creditNoteNumber: documents.creditNoteNumber,
       dueAt: documents.dueAt,
       note: documents.note,
       createdAt: documents.createdAt,
@@ -197,6 +199,8 @@ type DocumentWithLines = {
   currency: string;
   invoiceNumber: number | null;
   invoicedAt: Date | null;
+  creditNoteNumber: number | null;
+  creditNotedAt: Date | null;
   dueAt: Date | null;
   lang: string;
   createdAt: Date;
@@ -238,7 +242,7 @@ export async function getDocumentProforma(reference: string) {
     vatRateBp: d.vatRateBp,
     currency: d.currency,
     items: d.lines.map((l) => ({ tierName: l.description, description: l.description, unitPriceCents: l.unitPriceCents, quantity: l.quantity })),
-    paid: d.status === "paid",
+    paid: d.status === "paid" || d.status === "credited",
     bank,
   };
 }
@@ -264,8 +268,8 @@ export async function getDocumentInvoice(reference: string) {
     items: d.lines.map((l) => ({ tierName: l.description, description: l.description, unitPriceCents: l.unitPriceCents, quantity: l.quantity })),
     discountCents: 0,
     promoCode: null,
-    creditNoteNumber: null,
-    creditNotedAt: null,
+    creditNoteNumber: d.creditNoteNumber,
+    creditNotedAt: d.creditNotedAt,
     lang: d.lang,
     paymentMethod: "bank",
   };
@@ -355,6 +359,43 @@ export async function resendDocument(reference: string, kind: "proforma" | "invo
     bank: kind === "proforma" ? await getBankDetails() : undefined,
   });
   return ok ? "sent" : "failed";
+}
+
+/**
+ * Undoes an issued invoice with a credit note - the only lawful way back
+ * from a number: the invoice stays in the run, and the note takes the next
+ * number from the same sequence, the way the ticket refunds do. Guarded in
+ * the query, so a double click cannot draw a second number.
+ *
+ * The document stops counting as income, and the partner's deal falls back
+ * to what its other documents say: paid if another one is, invoiced if one
+ * is still open, agreed otherwise.
+ */
+export async function issueDocumentCreditNote(reference: string): Promise<number | null> {
+  const db = getDb();
+  const [row] = await db.execute<{ credit_note_number: string; deck_link_id: string | null }>(
+    sql`update ${documents}
+        set credit_note_number = nextval('invoice_number_seq'),
+            credit_noted_at = now(),
+            status = 'credited',
+            updated_at = now()
+        where ${documents.reference} = ${reference}
+          and ${documents.status} = 'paid'
+          and ${documents.invoiceNumber} is not null
+          and ${documents.creditNoteNumber} is null
+        returning credit_note_number, deck_link_id`,
+  );
+  if (!row) return null;
+
+  if (row.deck_link_id) {
+    const others = await db
+      .select({ status: documents.status })
+      .from(documents)
+      .where(sql`${documents.deckLinkId} = ${row.deck_link_id} and ${documents.status} in ('paid', 'open')`);
+    const money = others.some((o) => o.status === "paid") ? "paid" : others.some((o) => o.status === "open") ? "invoiced" : "agreed";
+    await db.update(deckLinks).set({ money, updatedAt: new Date() }).where(eq(deckLinks.id, row.deck_link_id));
+  }
+  return Number(row.credit_note_number);
 }
 
 /** Nothing came of it. The document keeps its history; it just stops counting. */
@@ -461,13 +502,15 @@ export async function listDocumentInvoices(range?: DateRange) {
       .map((l) => ({ tierName: l.description, description: l.description, unitPriceCents: l.unitPriceCents, quantity: l.quantity })),
     discountCents: 0,
     promoCode: null as string | null,
-    creditNoteNumber: null as number | null,
-    creditNotedAt: null as Date | null,
+    creditNoteNumber: d.creditNoteNumber as number | null,
+    creditNotedAt: d.creditNotedAt as Date | null,
     lang: d.lang,
     paymentMethod: "bank" as string | null,
-    status: "paid",
-    refundedCents: null as number | null,
-    refundedAt: null as Date | null,
+    // A credited invoice reads like a fully refunded order everywhere the
+    // lists already handle one: the sheet, the print run, the CSV.
+    status: d.creditNoteNumber ? "refunded" : "paid",
+    refundedCents: d.creditNoteNumber ? d.totalCents : (null as number | null),
+    refundedAt: d.creditNoteNumber ? d.creditNotedAt : (null as Date | null),
     /** Tells the list a row is not a ticket order - no ticket mail to resend. */
     isDocument: true as const,
   }));

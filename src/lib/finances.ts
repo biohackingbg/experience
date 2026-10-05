@@ -277,7 +277,7 @@ export function financesCsv(f: Finances): string {
   }
   for (const d of f.documents.rows) {
     lines.push(
-      ["приход", d.createdAt.toISOString().slice(0, 10), "фактура", d.who, d.reference, "", d.status === "paid" ? "платено" : "фактурирано", eur(d.netCents)]
+      ["приход", d.createdAt.toISOString().slice(0, 10), "фактура", d.who, d.reference, "", d.status === "paid" ? "платено" : d.status === "credited" ? "сторнирано (кредитно известие)" : "фактурирано", eur(d.netCents)]
         .map(q)
         .join(";"),
     );

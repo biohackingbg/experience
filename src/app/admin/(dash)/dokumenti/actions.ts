@@ -3,7 +3,16 @@
 import { revalidatePath } from "next/cache";
 
 import { canAccess } from "@/lib/access";
-import { cancelDocument, createDocument, deleteDocument, documentLetterText, isDocumentReference, markDocumentPaid, resendDocument } from "@/lib/documents";
+import {
+  cancelDocument,
+  createDocument,
+  deleteDocument,
+  documentLetterText,
+  isDocumentReference,
+  issueDocumentCreditNote,
+  markDocumentPaid,
+  resendDocument,
+} from "@/lib/documents";
 
 export type DocState = { status: "idle" | "ok" | "error"; message?: string; reference?: string };
 
@@ -104,6 +113,15 @@ export async function payDoc(formData: FormData): Promise<void> {
   const reference = String(formData.get("reference") ?? "").trim().toUpperCase();
   if (!isDocumentReference(reference)) return;
   await markDocumentPaid(reference);
+  done();
+}
+
+/** Undoes an issued invoice with a credit note; see issueDocumentCreditNote. */
+export async function creditDoc(formData: FormData): Promise<void> {
+  if (!(await canAccess("dokumenti"))) return;
+  const reference = String(formData.get("reference") ?? "").trim().toUpperCase();
+  if (!isDocumentReference(reference)) return;
+  await issueDocumentCreditNote(reference);
   done();
 }
 

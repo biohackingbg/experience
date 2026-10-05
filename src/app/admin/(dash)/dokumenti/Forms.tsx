@@ -5,7 +5,7 @@ import { useActionState, useState } from "react";
 import { TIERS as PACKAGES } from "@/lib/finance-options";
 import { formatPrice } from "@/lib/tickets";
 
-import { type DeleteState, type DocState, type LetterState, type SendState, createDoc, deleteDoc, letterText, sendDoc } from "./actions";
+import { type DeleteState, type DocState, type LetterState, type SendState, createDoc, creditDoc, deleteDoc, letterText, payDoc, sendDoc } from "./actions";
 
 const idle: DocState = { status: "idle" };
 const field = "w-full min-w-0 rounded-xl border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35";
@@ -302,6 +302,50 @@ export function LetterButton({ reference, kind }: { reference: string; kind: "pr
       {state.status === "ok" && (
         <textarea readOnly value={full} rows={6} className="w-full min-w-[20rem] max-w-xl rounded-xl border border-bh-ink/15 bg-bh-paper p-3 font-mono text-[0.7rem] leading-relaxed text-bh-ink" />
       )}
+    </form>
+  );
+}
+
+/**
+ * "Платена" asks first. It draws an invoice number that can never be given
+ * back and mails the invoice to the buyer at once, so a stray click on a
+ * test proforma used to leave a real invoice in the run.
+ */
+export function PayButton({ reference, who, total }: { reference: string; who: string; total: string }) {
+  return (
+    <form
+      action={payDoc}
+      onSubmit={(e) => {
+        const ok = window.confirm(
+          `Отбелязваш проформа ${reference} (${who}, ${total}) като платена?\n\nТова издава фактура с номер от поредицата и я праща на купувача веднага. Фактура не се трие - отменя се само с кредитно известие.`,
+        );
+        if (!ok) e.preventDefault();
+      }}
+    >
+      <input type="hidden" name="reference" value={reference} />
+      <button type="submit" className="rounded-full bg-[#146455] px-3.5 py-1.5 text-xs font-semibold text-white">
+        Платена
+      </button>
+    </form>
+  );
+}
+
+/** Undoes an issued invoice. Asks first: the note takes the next number for good. */
+export function CreditButton({ reference, invoice }: { reference: string; invoice: string }) {
+  return (
+    <form
+      action={creditDoc}
+      onSubmit={(e) => {
+        const ok = window.confirm(
+          `Издаваш кредитно известие към фактура № ${invoice}?\n\nИзвестието взима следващия номер от поредицата, фактурата спира да се брои като приход, а сделката на партньора се връща назад. Не се изпраща имейл - отвори известието и го препрати, ако трябва.`,
+        );
+        if (!ok) e.preventDefault();
+      }}
+    >
+      <input type="hidden" name="reference" value={reference} />
+      <button type="submit" className="rounded-full border border-[#9c3d5c]/40 px-3 py-1.5 text-xs font-semibold text-[#9c3d5c] hover:border-[#9c3d5c]">
+        Кредитно известие
+      </button>
     </form>
   );
 }

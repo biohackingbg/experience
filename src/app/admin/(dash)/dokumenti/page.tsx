@@ -7,8 +7,8 @@ import { requireAccess } from "@/lib/access";
 import { listDocuments, listPartnersForDocuments } from "@/lib/documents";
 import { formatPrice } from "@/lib/tickets";
 
-import { cancelDoc, payDoc } from "./actions";
-import { DeleteButton, DocumentForm, LetterButton, SendButton } from "./Forms";
+import { cancelDoc } from "./actions";
+import { CreditButton, DeleteButton, DocumentForm, LetterButton, PayButton, SendButton } from "./Forms";
 
 export const metadata: Metadata = {
   title: "Проформи и фактури | Администрация",
@@ -73,12 +73,20 @@ export default async function DocumentsPage() {
                       className={`ml-2 rounded-full px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide ${
                         d.status === "cancelled"
                           ? "bg-bh-ink/10 text-bh-ink/50 line-through"
+                          : d.status === "credited"
+                            ? "bg-[#9c3d5c]/12 text-[#9c3d5c]"
                           : d.status === "paid"
                             ? "bg-[#0E8C7D]/15 text-[#0b6d61]"
                             : "bg-[#d0a11a]/20 text-[#7a5b00]"
                       }`}
                     >
-                      {d.status === "cancelled" ? "отказана" : d.status === "paid" ? `фактура № ${invoiceNo(d.invoiceNumber ?? 0)}` : "проформа"}
+                      {d.status === "cancelled"
+                        ? "отказана"
+                        : d.status === "credited"
+                          ? `фактура № ${invoiceNo(d.invoiceNumber ?? 0)} · сторнирана с КИ № ${invoiceNo(d.creditNoteNumber ?? 0)}`
+                          : d.status === "paid"
+                            ? `фактура № ${invoiceNo(d.invoiceNumber ?? 0)}`
+                            : "проформа"}
                     </span>
                     <div className="text-xs text-bh-ink/60">
                       {d.items} · {formatPrice(d.totalCents)} € с ДДС · {d.buyerEmail} · създадена {bgDate(d.createdAt)}
@@ -127,6 +135,15 @@ export default async function DocumentsPage() {
                         PDF
                       </Link>
                     )}
+                    {d.creditNoteNumber && (
+                      <Link
+                        href={`/faktura/${d.reference}/kredit`}
+                        target="_blank"
+                        className="rounded-full bg-[#9c3d5c] px-3 py-1.5 text-xs font-semibold text-white"
+                      >
+                        Кредитно известие
+                      </Link>
+                    )}
                     {d.status !== "cancelled" && <LetterButton reference={d.reference} kind="proforma" />}
                     {d.invoiceNumber && <LetterButton reference={d.reference} kind="invoice" />}
                     {d.status !== "cancelled" && <SendButton reference={d.reference} kind="proforma" label="Изпрати проформа" />}
@@ -136,14 +153,12 @@ export default async function DocumentsPage() {
                         left crossed out. An invoice is undone with a credit
                         note, never a delete. */}
                     {!d.invoiceNumber && <DeleteButton reference={d.reference} />}
+                    {d.status === "paid" && d.invoiceNumber && !d.creditNoteNumber && (
+                      <CreditButton reference={d.reference} invoice={invoiceNo(d.invoiceNumber)} />
+                    )}
                     {d.status === "open" && (
                       <>
-                        <form action={payDoc}>
-                          <input type="hidden" name="reference" value={d.reference} />
-                          <button type="submit" className="rounded-full bg-[#146455] px-3.5 py-1.5 text-xs font-semibold text-white">
-                            Платена
-                          </button>
-                        </form>
+                        <PayButton reference={d.reference} who={d.company ?? d.buyerName} total={`${formatPrice(d.totalCents)} €`} />
                         <form action={cancelDoc}>
                           <input type="hidden" name="reference" value={d.reference} />
                           <button type="submit" className="rounded-full px-3 py-1.5 text-xs font-semibold text-bh-ink/50 hover:text-red-600">
