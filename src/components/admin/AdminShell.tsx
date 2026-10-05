@@ -84,10 +84,11 @@ const GROUPS = [
     ],
   },
   {
-    title: "Партньори",
+    title: "Приложение",
     items: [
       { page: "partniori" as const, href: "/admin/partniori", label: "Профили на партньори", icon: I.shop },
       { page: "oferti" as const, href: "/admin/oferti", label: "Оферти", icon: I.gift },
+      { page: "ritam" as const, href: "/admin/ritam", label: "30 дни ритъм", icon: I.clock },
     ],
   },
   {

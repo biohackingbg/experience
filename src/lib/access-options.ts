@@ -14,6 +14,7 @@ export const PAGES = [
   { id: "prezentaciya", label: "Презентация (партньори)", href: "/admin/prezentaciya", sensitive: false },
   { id: "partniori", label: "Партньори (профили)", href: "/admin/partniori", sensitive: false },
   { id: "oferti", label: "Оферти (приложение)", href: "/admin/oferti", sensitive: false },
+  { id: "ritam", label: "30 дни ритъм (приложение)", href: "/admin/ritam", sensitive: false },
   { id: "podgotovka", label: "Подготовка", href: "/admin/podgotovka", sensitive: false },
   { id: "shtandove", label: "Щандове (план на залата)", href: "/admin/shtandove", sensitive: false },
   { id: "vhod", label: "Вход на събитието", href: "/admin/vhod", sensitive: false },

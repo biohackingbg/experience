@@ -1012,6 +1012,71 @@ export const offers = pgTable("offers", {
 });
 
 /** Who said yes to the community - a separate, explicit opt-in, never implied by a ticket. */
+/*
+ * The 30-day challenge ("30 дни ритъм"). One row per edition; the app and
+ * the admin read the current one. Dates are calendar days in Sofia, kept
+ * as text so "day 12" means the same thing on every phone.
+ */
+export const challenges = pgTable("challenges", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  /** First day, YYYY-MM-DD in Sofia. */
+  startsOn: text("starts_on").notNull(),
+  days: integer("days").notNull().default(30),
+  /** How many people share one cohort figure. */
+  cohortSize: integer("cohort_size").notNull().default(20),
+  active: boolean("active").notNull().default(false),
+  consentVersion: text("consent_version").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }),
+});
+
+/**
+ * Who is in. The wake and bed targets are the only numbers the server
+ * holds: they are clock times the person chose, not measurements. Every
+ * measurement (steps, sleep, heart rate, InBody) stays on the phone.
+ */
+export const challengeParticipants = pgTable(
+  "challenge_participants",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    challengeId: uuid("challenge_id")
+      .notNull()
+      .references(() => challenges.id, { onDelete: "cascade" }),
+    email: text("email").notNull(),
+    /** "07:00" - the chosen wake time; the window is ±30 min around it. */
+    wakeTarget: text("wake_target").notNull(),
+    bedTarget: text("bed_target"),
+    cohort: integer("cohort").notNull().default(1),
+    consentVersion: text("consent_version").notNull(),
+    joinedAt: timestamp("joined_at", { withTimezone: true }).notNull().defaultNow(),
+    leftAt: timestamp("left_at", { withTimezone: true }),
+  },
+  (table) => [uniqueIndex("challenge_participants_idx").on(table.challengeId, table.email)],
+);
+
+/** One row per person per day: four yes/no flags, nothing else. */
+export const challengeCheckins = pgTable(
+  "challenge_checkins",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    challengeId: uuid("challenge_id")
+      .notNull()
+      .references(() => challenges.id, { onDelete: "cascade" }),
+    email: text("email").notNull(),
+    /** 1-based day of the challenge. */
+    day: integer("day").notNull(),
+    wake: boolean("wake").notNull().default(false),
+    light: boolean("light").notNull().default(false),
+    walk: boolean("walk").notNull().default(false),
+    bed: boolean("bed").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }),
+  },
+  (table) => [uniqueIndex("challenge_checkins_idx").on(table.challengeId, table.email, table.day)],
+);
+
 export const members = pgTable("members", {
   email: text("email").primaryKey(),
   name: text("name"),

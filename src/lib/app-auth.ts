@@ -6,6 +6,7 @@ import { and, desc, eq, gt, isNull, sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { appSessions, deviceTokens, loginCodes, members } from "@/lib/db/schema";
+import { forgetChallengeData } from "@/lib/challenge";
 
 /**
  * Who is holding the phone.
@@ -151,4 +152,5 @@ export async function deleteAppAccount(email: string): Promise<void> {
   await db.delete(loginCodes).where(eq(loginCodes.email, email));
   await db.delete(deviceTokens).where(eq(deviceTokens.email, email));
   await db.delete(members).where(eq(members.email, email));
+  await forgetChallengeData(email);
 }
