@@ -5,7 +5,7 @@ import { createHash, randomBytes, randomInt, timingSafeEqual } from "node:crypto
 import { and, desc, eq, gt, isNull, sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
-import { appSessions, loginCodes } from "@/lib/db/schema";
+import { appSessions, deviceTokens, loginCodes, members } from "@/lib/db/schema";
 
 /**
  * Who is holding the phone.
@@ -136,4 +136,19 @@ export async function authFromRequest(request: Request): Promise<AppUser | null>
 
 export async function revokeSession(sessionId: string): Promise<void> {
   await getDb().update(appSessions).set({ revokedAt: new Date() }).where(eq(appSessions.id, sessionId));
+}
+
+/**
+ * "Delete my account" from the app. Everything the app itself created for
+ * this address goes: every session on every phone, pending sign-in codes,
+ * push tokens and the community opt-in. Orders, tickets and invoices stay -
+ * they were bought on the website and the law requires keeping them - so
+ * signing in again later shows the same tickets on a fresh, empty profile.
+ */
+export async function deleteAppAccount(email: string): Promise<void> {
+  const db = getDb();
+  await db.delete(appSessions).where(eq(appSessions.email, email));
+  await db.delete(loginCodes).where(eq(loginCodes.email, email));
+  await db.delete(deviceTokens).where(eq(deviceTokens.email, email));
+  await db.delete(members).where(eq(members.email, email));
 }

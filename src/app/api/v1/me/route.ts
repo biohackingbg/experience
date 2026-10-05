@@ -1,3 +1,4 @@
+import { deleteAppAccount } from "@/lib/app-auth";
 import { listTicketsForEmail } from "@/lib/app-tickets";
 import { json, requireUser } from "@/lib/api-v1";
 import { isMember } from "@/lib/members";
@@ -20,4 +21,12 @@ export async function GET(request: Request) {
     prices: pricing.prices,
     priceStage: pricing.stage,
   });
+}
+
+/** Deletes the account the app keeps for this address; see deleteAppAccount for what stays. */
+export async function DELETE(request: Request) {
+  const auth = await requireUser(request);
+  if ("response" in auth) return auth.response;
+  await deleteAppAccount(auth.user.email);
+  return json({ ok: true }, 200, { "Cache-Control": "no-store" });
 }
