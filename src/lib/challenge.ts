@@ -19,7 +19,7 @@ export type Checkin = typeof challengeCheckins.$inferSelect;
 
 /** The four weekly phases. Week 1 asks for one thing; each week adds one. */
 export const PHASES = [
-  { week: 1, title: "Закотви ставането", asks: ["wake", "light"] as const },
+  { week: 1, title: "Оптимизирай ставането", asks: ["wake", "light"] as const },
   { week: 2, title: "Светлина и движение", asks: ["wake", "light", "walk"] as const },
   { week: 3, title: "Прозорец за лягане", asks: ["wake", "light", "walk", "bed"] as const },
   { week: 4, title: "Дръж ритъма и в уикенда", asks: ["wake", "light", "walk", "bed"] as const },
