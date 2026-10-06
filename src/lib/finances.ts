@@ -141,7 +141,8 @@ export async function getFinances(): Promise<Finances> {
         createdAt: documents.createdAt,
       })
       .from(documents)
-      .where(sql`${documents.deckLinkId} is null and ${documents.status} <> 'cancelled'`)
+      // A credited invoice is undone; like a cancelled proforma it is no longer income.
+      .where(sql`${documents.deckLinkId} is null and ${documents.status} not in ('cancelled', 'credited')`)
       .orderBy(desc(documents.createdAt)),
     db.select().from(expenses).orderBy(desc(expenses.date)),
     db.select().from(budgets),
