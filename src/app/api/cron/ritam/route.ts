@@ -45,7 +45,7 @@ export async function GET(request: Request) {
     to = await participantEmails(c, { missingDay: day });
     const phase = phaseOf(day);
     if (day === 1) msg = { title: "Ден 1 · 30 дни ритъм", body: "Днес е простото: стани в прозореца си и излез на светло за 10 минути. Отбележи го с един тап.", collapseId: `ritam-d${day}` };
-    else if (day === 8) msg = { title: "Седмица 2 · Светлина и движение", body: "От днес добавяме 10-минутна сутрешна разходка. Крачките се броят сами, ако си пуснал Здраве.", collapseId: `ritam-d${day}` };
+    else if (day === 8) msg = { title: "Седмица 2 · Светлина и движение", body: "От днес добавяме 10-минутна сутрешна разходка. Крачките се броят сами, ако си свързал Apple Health.", collapseId: `ritam-d${day}` };
     else if (day === 14) msg = { title: "Половината път", body: "14 дни ритъм. Виж как върви групата ти и офертата за средата на пътя.", collapseId: `ritam-d${day}` };
     else if (day === 15) msg = { title: "Седмица 3 · Прозорец за лягане", body: "Сутринта е закотвена. От днес отбелязвай и лягането в прозореца си.", collapseId: `ritam-d${day}` };
     else if (day === 22) msg = { title: "Седмица 4 · И в уикенда", body: "Последната седмица: същият ритъм и в събота и неделя. Това е, което остава.", collapseId: `ritam-d${day}` };
