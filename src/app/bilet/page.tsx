@@ -1,3 +1,4 @@
+import { BackLink } from "@/components/BackLink";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -36,12 +37,7 @@ export default async function CheckoutPage({
     return (
       <div className="min-h-screen rounded-[1.75rem] bg-bh-paper px-5 py-10 sm:px-8 lg:px-10">
         <div className="mx-auto w-full max-w-3xl">
-          <Link
-            href="/"
-            className="font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/60 transition-colors hover:text-bh-ink"
-          >
-            ← Обратно към сайта
-          </Link>
+          <BackLink>Обратно към сайта</BackLink>
           <h1 className="mt-10 text-[clamp(2.2rem,5vw,3.4rem)] font-display font-[900] uppercase leading-[0.95] tracking-tight text-bh-ink">
             Билетите отварят скоро
           </h1>
@@ -81,12 +77,7 @@ export default async function CheckoutPage({
     <div className="min-h-screen rounded-[1.75rem] bg-bh-paper px-5 py-10 sm:px-8 lg:px-10">
       <div className="mx-auto w-full max-w-6xl">
         <div className="flex items-center justify-between gap-4">
-          <Link
-            href="/"
-            className="font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/50 transition-colors hover:text-bh-ink"
-          >
-            {t.back}
-          </Link>
+          <BackLink>{t.back}</BackLink>
           {/* The one place the site speaks English: a guest of a foreign speaker buys here. */}
           <Link
             href={`/bilet?${keep.toString()}`}

@@ -9,7 +9,7 @@ export const langOf = (v: unknown): Lang => (v === "en" ? "en" : "bg");
 
 export const CHECKOUT = {
   bg: {
-    back: "← Обратно към сайта",
+    back: "Обратно към сайта",
     switchTo: "English",
     switchHref: "?lang=en",
     title: "Купи билет",
@@ -58,7 +58,7 @@ export const CHECKOUT = {
     stripe: "Плащането се обработва от Stripe. Не съхраняваме данни за карти.",
   },
   en: {
-    back: "← Back to the site",
+    back: "Back to the site",
     switchTo: "Български",
     switchHref: "?lang=bg",
     title: "Buy a ticket",
@@ -125,7 +125,7 @@ export const RESEND_PAGE = {
     done: "Ако има поръчка с този адрес, билетите вече пътуват към него. Провери и папката със спам.",
     tooMany: "Твърде много опити. Опитай след няколко минути.",
     invalid: "Провери имейл адреса.",
-    back: "← Към сайта",
+    back: "Към сайта",
     help: "Ако не пристигне нищо, пиши на hi@biohacking.bg и ще намерим поръчката по име.",
   },
   en: {
@@ -137,7 +137,7 @@ export const RESEND_PAGE = {
     done: "If there is an order with that address, the tickets are already on their way. Check your spam folder too.",
     tooMany: "Too many attempts. Try again in a few minutes.",
     invalid: "Check the email address.",
-    back: "← Back to the site",
+    back: "Back to the site",
     help: "If nothing arrives, write to hi@biohacking.bg and we will find the order by name.",
   },
 } as const;

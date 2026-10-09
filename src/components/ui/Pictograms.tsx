@@ -343,6 +343,39 @@ export function ArrowDownLeft({ className }: Props) {
   );
 }
 
+/** Arrow pointing left, drawn like ArrowDownLeft: for "back" in a round button. */
+export function ArrowLeft({ className }: Props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+      <path
+        d="M19 12H5M5 12l6-6M5 12l6 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/** A cookie with a bite out of the corner and three crumbs: the cookie-settings button. */
+export function Cookie({ className }: Props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+      <path
+        d="M12 3a9 9 0 1 0 9 9 4 4 0 0 1-4-4 4 4 0 0 1-4-4 1 1 0 0 0-1-1z"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="8.5" cy="11" r="1" fill="currentColor" />
+      <circle cx="12" cy="16" r="1" fill="currentColor" />
+      <circle cx="15.5" cy="14" r="1" fill="currentColor" />
+    </svg>
+  );
+}
+
 /* ── The stations, one pictogram each - drawn for the thing, not borrowed. ── */
 
 /** Body composition - a figure on the analyser platform. */

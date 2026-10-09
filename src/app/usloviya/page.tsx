@@ -1,3 +1,4 @@
+import { BackLink } from "@/components/BackLink";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -77,12 +78,7 @@ export default function TermsPage() {
   return (
     <div className="min-h-screen rounded-[1.75rem] bg-bh-paper px-5 py-12 sm:px-8 lg:px-10">
       <div className="mx-auto w-full max-w-3xl">
-        <Link
-          href="/"
-          className="font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/50 transition-colors hover:text-bh-ink"
-        >
-          ← Обратно към сайта
-        </Link>
+        <BackLink>Обратно към сайта</BackLink>
 
         <h1 className="mt-8 text-[clamp(2rem,4.5vw,3rem)] font-display font-[900] uppercase leading-[0.95] tracking-tight text-bh-ink">
           Общи условия за продажба на билети

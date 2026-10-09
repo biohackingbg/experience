@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
+import { Cookie } from "@/components/ui/Pictograms";
 import {
   consentPending,
   consentSnapshot,
@@ -197,9 +198,15 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
   };
 
   if (!open) {
+    // A round cookie icon is all that stays once a choice exists. On the
+    // pages with a sticky buy bar along the bottom of a phone it sits above
+    // that bar, so it never covers the price and the button.
+    const aboveBuyBar = pathname === "/" || pathname === "/en" || pathname === "/bilet";
     return (
       <button
         type="button"
+        aria-label={t.reopen}
+        title={t.reopen}
         onClick={() => {
           // Reopened from the corner: start from what is stored, not from nothing.
           if (previous)
@@ -210,9 +217,11 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
           setTab("consent");
           setSettingsOpen(true);
         }}
-        className="fixed bottom-3 left-3 z-40 rounded-full border border-bh-ink/15 bg-bh-paper/95 px-3 py-2 text-[11px] font-medium text-bh-ink/65 shadow-md backdrop-blur transition-colors hover:text-bh-ink"
+        className={`fixed left-3 z-40 grid h-11 w-11 place-items-center rounded-full border border-bh-ink/15 bg-bh-paper/95 text-bh-ink/70 shadow-md backdrop-blur transition-colors hover:text-bh-ink sm:bottom-3 ${
+          aboveBuyBar ? "bottom-[calc(5.5rem+env(safe-area-inset-bottom))]" : "bottom-3"
+        }`}
       >
-        {t.reopen}
+        <Cookie className="h-5 w-5" aria-hidden />
       </button>
     );
   }

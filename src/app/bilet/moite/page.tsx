@@ -1,3 +1,4 @@
+import { BackLink } from "@/components/BackLink";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -20,7 +21,7 @@ export default async function MyTicketsPage({ searchParams }: { searchParams: Pr
     <div className="flex min-h-screen items-center justify-center rounded-[1.75rem] bg-bh-paper px-5 py-16">
       <div className="w-full max-w-md">
         <div className="flex items-center justify-between gap-4">
-          <Link href="/" className="font-mono text-xs uppercase tracking-[0.2em] text-bh-ink/50 transition-colors hover:text-bh-ink">{t.back}</Link>
+          <BackLink>{t.back}</BackLink>
           <Link href={`/bilet/moite?lang=${lang === "en" ? "bg" : "en"}`} className="rounded-full border border-bh-ink/20 px-3 py-1.5 text-xs font-semibold text-bh-ink">
             {lang === "en" ? "Български" : "English"}
           </Link>
