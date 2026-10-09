@@ -249,16 +249,16 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-end justify-center overscroll-contain bg-[#02251f]/55 p-3 sm:items-center sm:p-6"
+      className="fixed inset-0 z-[100] flex items-stretch justify-center overscroll-contain bg-[#02251f]/55 sm:items-center sm:p-6"
       role="presentation"
     >
       <section
         role="dialog"
         aria-modal="true"
         aria-labelledby="cookie-title"
-        className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[760px] flex-col overflow-hidden rounded-2xl bg-white text-[#02251f] shadow-[0_24px_80px_rgba(0,0,0,0.35)]"
+        className="flex h-[100dvh] w-full flex-col overflow-hidden bg-white text-[#02251f] sm:h-auto sm:max-h-[calc(100dvh-3rem)] sm:max-w-[760px] sm:rounded-2xl sm:shadow-[0_24px_80px_rgba(0,0,0,0.35)]"
       >
-        <div className="flex items-center justify-between px-6 pt-5 sm:px-8">
+        <div className="flex items-center justify-between px-6 pt-[max(1.25rem,env(safe-area-inset-top))] sm:px-8 sm:pt-5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/logo.svg"
@@ -285,7 +285,7 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
           {tabButton("about", t.tabs.about)}
         </div>
 
-        <div className="overflow-y-auto px-6 py-6 sm:px-8">
+        <div className="flex-1 overflow-y-auto px-6 py-6 sm:flex-none sm:px-8">
           {tab === "consent" && (
             <>
               <h2
@@ -369,7 +369,7 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
             shaped like a button. All three are one click and on the same
             row; the difference is in how loudly each one is drawn. That
             imbalance is the organisers' call, made knowing what it is. */}
-        <div className="border-t border-[#02251f]/10 px-6 py-4 sm:px-8">
+        <div className="border-t border-[#02251f]/10 px-6 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:px-8 sm:pb-4">
           {/* Three equal columns from tablet up. On a phone the three labels
             do not fit one row, so the pill goes on top at full width and
             the two plain choices share the row beneath - still one tap each,
