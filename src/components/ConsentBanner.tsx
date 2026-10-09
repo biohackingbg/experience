@@ -136,12 +136,41 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
     (stored === null || settingsOpen);
 
   // The page behind must not scroll while the question is on screen.
+  // `overflow: hidden` alone is honoured on desktop but not by iOS Safari or
+  // in-app browsers, where the page kept scrolling under the dialog and a
+  // visitor could read the whole site without answering. Pinning the body
+  // with `position: fixed` holds there too; the scroll position is put back
+  // when the dialog closes.
   useEffect(() => {
     if (!open) return;
-    const before = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const body = document.body;
+    const root = document.documentElement;
+    const y = window.scrollY;
+    const before = {
+      position: body.style.position,
+      top: body.style.top,
+      left: body.style.left,
+      right: body.style.right,
+      width: body.style.width,
+      overflow: body.style.overflow,
+      rootOverflow: root.style.overflow,
+    };
+    body.style.position = "fixed";
+    body.style.top = `-${y}px`;
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.width = "100%";
+    body.style.overflow = "hidden";
+    root.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = before;
+      body.style.position = before.position;
+      body.style.top = before.top;
+      body.style.left = before.left;
+      body.style.right = before.right;
+      body.style.width = before.width;
+      body.style.overflow = before.overflow;
+      root.style.overflow = before.rootOverflow;
+      window.scrollTo({ top: y, behavior: "instant" });
     };
   }, [open]);
 
@@ -220,14 +249,14 @@ export function ConsentBanner({ enabled }: { enabled: boolean }) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-end justify-center bg-[#02251f]/55 p-3 sm:items-center sm:p-6"
+      className="fixed inset-0 z-[100] flex items-end justify-center overscroll-contain bg-[#02251f]/55 p-3 sm:items-center sm:p-6"
       role="presentation"
     >
       <section
         role="dialog"
         aria-modal="true"
         aria-labelledby="cookie-title"
-        className="flex max-h-[calc(100vh-1.5rem)] w-full max-w-[760px] flex-col overflow-hidden rounded-2xl bg-white text-[#02251f] shadow-[0_24px_80px_rgba(0,0,0,0.35)]"
+        className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[760px] flex-col overflow-hidden rounded-2xl bg-white text-[#02251f] shadow-[0_24px_80px_rgba(0,0,0,0.35)]"
       >
         <div className="flex items-center justify-between px-6 pt-5 sm:px-8">
           {/* eslint-disable-next-line @next/next/no-img-element */}
