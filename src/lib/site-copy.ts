@@ -96,7 +96,7 @@ export const HERO: Copy<{
     firstTitle: "Първото по рода си биохакинг изживяване в България.",
     firstBody: "Два дни, в които науката за дълголетието се пипа, пробва и измерва - не се слуша от стол.",
     visitors: "посетители",
-    stations: "интерактивни станции",
+    stations: "станции и преживявания",
     stageTag: "Сцената",
     speakersLabel: "международни лектори",
     speakersBody:
@@ -120,7 +120,7 @@ export const HERO: Copy<{
     firstTitle: "The first biohacking experience of its kind in Bulgaria.",
     firstBody: "Two days in which the science of longevity is handled, tried and measured - not heard from a chair.",
     visitors: "visitors",
-    stations: "interactive stations",
+    stations: "stations and experiences",
     stageTag: "The stage",
     speakersLabel: "international speakers",
     speakersBody:
@@ -209,48 +209,99 @@ export const TRACKS: Copy<{
   },
 };
 
-export const CONCEPT: Copy<{
+/** What a card is, so the component can pick its icon and photo by id rather than by position. */
+export type StationId =
+  | "pilates-reformer" | "lagree" | "mobility" | "mat-pilates" | "psychosomatics" | "power-of-breath"
+  | "mitolight" | "power-plate-rev" | "power-plate-platform" | "yoga" | "endosphera"
+  | "restart" | "obsidian" | "n8" | "inbody" | "hydration";
+export type Station = { id: StationId; title: string };
+
+type StationGroup = {
   eyebrow: string;
   /** Counted from the cards, so the headline cannot promise more than it shows. */
   title: (n: number) => string;
   intro: string;
-  stations: string[];
+  items: Station[];
+};
+
+export const CONCEPT: Copy<{
+  /** Things you do with your own body: movement, breath, workshops. */
+  experience: StationGroup;
+  /** Measuring and recovery points. */
+  stations: StationGroup;
   /** Under the hall render: where this happens. */
   hall: string;
 }> = {
   bg: {
-    eyebrow: "Станциите",
-    title: (n) => `${n} интерактивни станции`,
-    intro: "Не гледаш отстрани - измерваш се, пробваш, питаш. Всяка станция е водена от партньор в своята област.",
-    stations: [
-      "InBody - телесни мазнини",
-      "Пилатес Lagree",
-      "Реформър пилатес",
-      "Power Plate",
-      "Rev колела",
-      "Мобилност",
-      "Ментално здраве - работилница с Виолета Михайлова",
-      "Ендосфера",
-    ],
+    experience: {
+      eyebrow: "Experience",
+      title: (n) => `${n} преживявания`,
+      intro: "Движение, дишане и работилници: не гледаш отстрани, а правиш. Всяко преживяване е водено от партньор в своята област.",
+      items: [
+        { id: "pilates-reformer", title: "Pilates reformer" },
+        { id: "lagree", title: "Lagree pilates" },
+        { id: "mobility", title: "Mobility" },
+        { id: "mat-pilates", title: "Mat pilates" },
+        { id: "psychosomatics", title: "Психосоматика - workshop с Виолета Михайлова" },
+        { id: "power-of-breath", title: "Яни Драгов - „Power of breath“" },
+        { id: "mitolight", title: "Mitolight breathwork" },
+        { id: "power-plate-rev", title: "Power Plate REV" },
+        { id: "power-plate-platform", title: "Power Plate Platform" },
+        { id: "yoga", title: "Yoga" },
+        { id: "endosphera", title: "Dupissima - Endosphera" },
+      ],
+    },
+    stations: {
+      eyebrow: "Станциите",
+      title: (n) => `${n} интерактивни станции`,
+      intro: "Не гледаш отстрани - измерваш се, пробваш, питаш. Всяка станция е водена от партньор в своята област.",
+      items: [
+        { id: "restart", title: "Restart by Therabody" },
+        { id: "obsidian", title: "Obsidian Club - PEMF Bed" },
+        { id: "n8", title: "N8 molecule - анализ на кожата на лицето" },
+        { id: "inbody", title: "Dupissima - InBody" },
+        { id: "hydration", title: "Health Upgrade - Hydration Station" },
+      ],
+    },
     hall: "Залата на Sofia Life Summit · Grand Hotel Millennium, София · 7–8 ноември 2026",
   },
   en: {
-    eyebrow: "The stations",
-    title: (n) => `${n} interactive stations`,
-    intro: "You do not watch from the side - you measure, try and ask. Each station is run by a partner in its field.",
-    stations: [
-      "InBody - body fat",
-      "Lagree pilates",
-      "Reformer pilates",
-      "Power Plate",
-      "Rev bikes",
-      "Mobility",
-      "Mental health - workshop with Violeta Mihaylova",
-      "Endosphere",
-    ],
+    experience: {
+      eyebrow: "Experience",
+      title: (n) => `${n} experiences`,
+      intro: "Movement, breath and workshops: you do not watch from the side, you do it. Each experience is run by a partner in its field.",
+      items: [
+        { id: "pilates-reformer", title: "Pilates reformer" },
+        { id: "lagree", title: "Lagree pilates" },
+        { id: "mobility", title: "Mobility" },
+        { id: "mat-pilates", title: "Mat pilates" },
+        { id: "psychosomatics", title: "Psychosomatics - workshop with Violeta Mihaylova" },
+        { id: "power-of-breath", title: "Yani Dragov - “Power of breath”" },
+        { id: "mitolight", title: "Mitolight breathwork" },
+        { id: "power-plate-rev", title: "Power Plate REV" },
+        { id: "power-plate-platform", title: "Power Plate Platform" },
+        { id: "yoga", title: "Yoga" },
+        { id: "endosphera", title: "Dupissima - Endosphera" },
+      ],
+    },
+    stations: {
+      eyebrow: "The stations",
+      title: (n) => `${n} interactive stations`,
+      intro: "You do not watch from the side - you measure, try and ask. Each station is run by a partner in its field.",
+      items: [
+        { id: "restart", title: "Restart by Therabody" },
+        { id: "obsidian", title: "Obsidian Club - PEMF Bed" },
+        { id: "n8", title: "N8 molecule - facial skin analysis" },
+        { id: "inbody", title: "Dupissima - InBody" },
+        { id: "hydration", title: "Health Upgrade - Hydration Station" },
+      ],
+    },
     hall: "The Sofia Life Summit hall · Grand Hotel Millennium, Sofia · 7–8 November 2026",
   },
 };
+
+/** Everything you can try on the floor, for the hero number. */
+export const CONCEPT_TOTAL = CONCEPT.bg.experience.items.length + CONCEPT.bg.stations.items.length;
 
 /**
  * The line-up as announced to the market: what the hero and the deck both

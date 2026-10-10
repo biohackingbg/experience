@@ -1,53 +1,141 @@
 import { Reveal } from "@/components/ui/Reveal";
-import { Bike, Brain, Composition, Plank, Plate, Reformer, Sphere, Stretch } from "@/components/ui/Pictograms";
+import {
+  Bike,
+  Body,
+  Brain,
+  Composition,
+  Droplet,
+  Plank,
+  Plate,
+  Pulse,
+  Reformer,
+  Sphere,
+  Stretch,
+  SunSkin,
+  Walk,
+  Waves,
+} from "@/components/ui/Pictograms";
 import type { Lang } from "@/lib/i18n";
-import { CONCEPT } from "@/lib/site-copy";
+import { CONCEPT, type Station, type StationId } from "@/lib/site-copy";
 
 /**
- * The station categories. Partners are announced per category as they sign,
- * so a card carries the field rather than a logo - the promise is "you will
- * try things in this area", which holds before any name is public.
+ * The floor, in two groups: the Experience (things you do with your own body:
+ * movement, breath, workshops) and the stations (measuring and recovery
+ * points). Partners are named on the cards as they sign; a card carries its
+ * own emblem and number, so the set reads as one even while the photos
+ * arrive one by one.
  */
-/** Icons only; the titles are in site-copy.ts. */
-// One per station, in the order the copy lists them: InBody, Lagree, reformer,
-// Power Plate, Rev bikes, mobility, mental health, Endosphere.
-const icons = [Composition, Plank, Reformer, Plate, Bike, Stretch, Brain, Sphere];
 
-/**
- * A photo for a station that has one, by its position in the list. A card
- * with a photo keeps the same emblem and number, so the eight still read
- * as one set while the photos arrive one by one.
- */
-const photos: Record<number, string> = {
-  0: "/stations/inbody.webp",
-  1: "/stations/lagree.webp",
-  2: "/stations/reformer.webp",
-  3: "/stations/powerplate.webp",
-  4: "/stations/rev.webp",
-  5: "/stations/mobilnost.webp",
-  6: "/stations/mentalno.webp",
-  7: "/stations/endosfera.webp",
+/** Icons by station id; the titles are in site-copy.ts. */
+const icons: Record<StationId, typeof Composition> = {
+  "pilates-reformer": Reformer,
+  lagree: Plank,
+  mobility: Stretch,
+  "mat-pilates": Body,
+  psychosomatics: Brain,
+  "power-of-breath": Waves,
+  mitolight: Pulse,
+  "power-plate-rev": Bike,
+  "power-plate-platform": Plate,
+  yoga: Walk,
+  endosphera: Sphere,
+  restart: Waves,
+  obsidian: Pulse,
+  n8: SunSkin,
+  inbody: Composition,
+  hydration: Droplet,
 };
+
+/** A photo for a station that has one. Cards without one stay mint. */
+const photos: Partial<Record<StationId, string>> = {
+  "pilates-reformer": "/stations/reformer.webp",
+  lagree: "/stations/lagree.webp",
+  mobility: "/stations/mobilnost.webp",
+  psychosomatics: "/stations/mentalno.webp",
+  "power-plate-rev": "/stations/rev.webp",
+  "power-plate-platform": "/stations/powerplate.webp",
+  endosphera: "/stations/endosfera.webp",
+  inbody: "/stations/inbody.webp",
+};
+
+function Cards({ items }: { items: Station[] }) {
+  const cards = items.map((it, i) => ({
+    ...it,
+    no: String(i + 1).padStart(2, "0"),
+    icon: icons[it.id],
+    photo: photos[it.id] ?? null,
+  }));
+  return (
+    <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {cards.map((s, i) => (
+        <Reveal key={s.id} delay={(i % 4) * 70}>
+          <article
+            className={`group relative flex h-full min-h-[15rem] flex-col justify-between overflow-hidden rounded-3xl p-6 transition-transform duration-300 hover:-translate-y-1.5 ${
+              s.photo ? "text-white" : "bh-mint text-bh-ink"
+            }`}
+          >
+            {s.photo && (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={s.photo}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                />
+                {/* The title sits on the darkest part of the photo, and
+                    the gradient makes sure there is one. */}
+                <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#02251f]/85 via-[#02251f]/25 to-[#02251f]/10" />
+              </>
+            )}
+            <div className="relative flex items-start justify-between">
+              {/* A tinted disc gives each pictogram a stage of its own, so
+                  the cards read as a set of emblems rather than a row of
+                  thin lines. */}
+              <span
+                className={`grid h-14 w-14 place-items-center rounded-2xl transition-colors ${
+                  s.photo
+                    ? "bg-white/15 text-white backdrop-blur-sm group-hover:bg-white group-hover:text-bh-pine"
+                    : "bg-bh-pine/10 text-bh-pine group-hover:bg-bh-pine group-hover:text-bh-paper"
+                }`}
+              >
+                <s.icon className="h-7 w-7" />
+              </span>
+              <span className={`font-mono text-sm ${s.photo ? "text-white/60" : "text-bh-ink/40"}`}>
+                / {s.no}
+              </span>
+            </div>
+            <div className="relative">
+              <h3 className="text-xl font-bold leading-tight tracking-tight">{s.title}</h3>
+            </div>
+          </article>
+        </Reveal>
+      ))}
+    </div>
+  );
+}
+
+function GroupHeader({ eyebrow, title, intro, first }: { eyebrow: string; title: string; intro: string; first?: boolean }) {
+  return (
+    <Reveal className={`flex flex-col gap-6 border-t border-bh-ink/15 pt-8 lg:flex-row lg:items-end lg:justify-between ${first ? "" : "mt-20"}`}>
+      <div>
+        <p className="bh-eyebrow font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">{eyebrow}</p>
+        <h2 className="mt-4 max-w-2xl text-[clamp(2rem,4.5vw,3.5rem)] font-display font-[900] uppercase leading-[0.95] tracking-tight text-bh-ink">
+          {title}
+        </h2>
+      </div>
+      <p className="max-w-sm text-sm leading-relaxed text-bh-ink/60">{intro}</p>
+    </Reveal>
+  );
+}
 
 export function SummitConcept({ lang = "bg" }: { lang?: Lang }) {
   const c = CONCEPT[lang];
-  const stations = c.stations.map((title, i) => ({ title, no: String(i + 1).padStart(2, "0"), icon: icons[i], photo: photos[i] ?? null }));
   return (
     <section id="concept" className="px-5 pt-24 sm:px-8 sm:pt-32 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
-        <Reveal className="flex flex-col gap-6 border-t border-bh-ink/15 pt-8 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="bh-eyebrow font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50">
-              {c.eyebrow}
-            </p>
-            <h2 className="mt-4 max-w-2xl text-[clamp(2rem,4.5vw,3.5rem)] font-display font-[900] uppercase leading-[0.95] tracking-tight text-bh-ink">
-              {c.title(stations.length)}
-            </h2>
-          </div>
-          <p className="max-w-sm text-sm leading-relaxed text-bh-ink/60">
-            {c.intro}
-          </p>
-        </Reveal>
+        <GroupHeader first eyebrow={c.experience.eyebrow} title={c.experience.title(c.experience.items.length)} intro={c.experience.intro} />
 
         {/* The hall itself, before the list of what happens in it: the one
             image that answers "where is this" at the scale of the event. */}
@@ -71,55 +159,10 @@ export function SummitConcept({ lang = "bg" }: { lang?: Lang }) {
           </figure>
         </Reveal>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {stations.map((s, i) => (
-            <Reveal key={s.no} delay={i * 70}>
-              <article
-                className={`group relative flex h-full min-h-[15rem] flex-col justify-between overflow-hidden rounded-3xl p-6 transition-transform duration-300 hover:-translate-y-1.5 ${
-                  s.photo ? "text-white" : "bh-mint text-bh-ink"
-                }`}
-              >
-                {s.photo && (
-                  <>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={s.photo}
-                      alt=""
-                      loading="lazy"
-                      decoding="async"
-                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-                    />
-                    {/* The title sits on the darkest part of the photo, and
-                        the gradient makes sure there is one. */}
-                    <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#02251f]/85 via-[#02251f]/25 to-[#02251f]/10" />
-                  </>
-                )}
-                <div className="relative flex items-start justify-between">
-                  {/* A tinted disc gives each pictogram a stage of its own,
-                      so the eight read as a set of emblems rather than a
-                      row of thin lines. */}
-                  <span
-                    className={`grid h-14 w-14 place-items-center rounded-2xl transition-colors ${
-                      s.photo
-                        ? "bg-white/15 text-white backdrop-blur-sm group-hover:bg-white group-hover:text-bh-pine"
-                        : "bg-bh-pine/10 text-bh-pine group-hover:bg-bh-pine group-hover:text-bh-paper"
-                    }`}
-                  >
-                    <s.icon className="h-7 w-7" />
-                  </span>
-                  <span className={`font-mono text-sm ${s.photo ? "text-white/60" : "text-bh-ink/40"}`}>
-                    / {s.no}
-                  </span>
-                </div>
-                <div className="relative">
-                  <h3 className="text-xl font-bold leading-tight tracking-tight">
-                    {s.title}
-                  </h3>
-                </div>
-              </article>
-            </Reveal>
-          ))}
-        </div>
+        <Cards items={c.experience.items} />
+
+        <GroupHeader eyebrow={c.stations.eyebrow} title={c.stations.title(c.stations.items.length)} intro={c.stations.intro} />
+        <Cards items={c.stations.items} />
       </div>
     </section>
   );

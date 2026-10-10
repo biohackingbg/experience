@@ -7,7 +7,7 @@ import {
   Stage,
 } from "@/components/ui/Pictograms";
 import type { Lang } from "@/lib/i18n";
-import { HERO } from "@/lib/site-copy";
+import { CONCEPT_TOTAL, HERO } from "@/lib/site-copy";
 import { SALES_OPEN } from "@/lib/tickets";
 
 /**
@@ -180,7 +180,7 @@ export function SummitHero({
               <article className="bh-mint rounded-3xl p-5">
                 <Gauge className="h-6 w-6 text-bh-pine/70" />
                 <div className="mt-3 text-3xl font-black tracking-tight text-bh-ink">
-                  10
+                  {CONCEPT_TOTAL}
                 </div>
                 <div className="mt-1.5 font-mono text-[0.65rem] uppercase tracking-[0.15em] text-bh-ink/50">
                   {c.stations}
