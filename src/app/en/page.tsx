@@ -20,7 +20,7 @@ import { cheapestOf, getPricing, priceOf } from "@/lib/pricing";
 import { META, SPEAKERS_PLANNED } from "@/lib/site-copy";
 import { SALES_OPEN, formatPrice } from "@/lib/tickets";
 
-export const revalidate = 300;
+export const revalidate = 3600;
 
 /**
  * The same page in English. Same sections, same data, same prices - only

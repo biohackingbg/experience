@@ -18,10 +18,12 @@ import { getAnnouncedSpeakers } from "@/lib/speakers-data";
 import { SALES_OPEN, formatPrice } from "@/lib/tickets";
 import { SPEAKERS_PLANNED } from "@/lib/site-copy";
 
-// Re-rendered periodically as a safety net. Closing the launch prices is a
-// switch in the admin, and that switch revalidates this page on the spot;
-// this interval only covers a flip that somehow did not.
-export const revalidate = 300;
+// Re-rendered hourly as a safety net. Prices, speakers, the programme and
+// every ticket sale revalidate this page on the spot (see the admin actions
+// and the Stripe webhook); this interval only covers a change that somehow
+// did not. Every re-render is an ISR write plus a function run on the bill,
+// and at five minutes that was most of the ISR cost.
+export const revalidate = 3600;
 
 /** The Bulgarian site. Its English twin is /en, built from the same sections. */
 export default async function Home() {

@@ -88,6 +88,7 @@ export async function POST(request: Request) {
         // The home page is static between sales; a sale may have just sold
         // out a tier, and "изчерпано" must not wait for the next revalidation.
         revalidatePath("/");
+        revalidatePath("/en");
 
         // Only the delivery that actually flipped the order returns `order`,
         // so a Stripe retry cannot send the buyer a second copy. A failed send
@@ -157,6 +158,7 @@ export async function POST(request: Request) {
           );
           // The seat is free again; the waiting list for that tier hears first.
           revalidatePath("/");
+          revalidatePath("/en");
           const [item] = await getDb().select({ tierId: orderItems.tierId }).from(orderItems).where(sql`${orderItems.orderId} = ${outcome.orderId}`).limit(1);
           if (item) await notifyWaitlist(item.tierId);
         } else {

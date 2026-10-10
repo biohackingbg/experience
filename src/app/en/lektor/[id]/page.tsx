@@ -5,7 +5,7 @@ import { SpeakerPage } from "@/components/summit/SpeakerPage";
 import { SPEAKER_PAGE } from "@/lib/site-copy";
 import { getSpeakerPage } from "@/lib/speakers-data";
 
-export const revalidate = 300;
+export const revalidate = 3600;
 
 const SITE = "https://thelongevitysummit.eu";
 

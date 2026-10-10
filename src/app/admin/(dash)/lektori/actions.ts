@@ -11,7 +11,11 @@ const ID = /^[a-z0-9-]{1,80}$/;
 function done() {
   revalidatePath("/admin/lektori");
   revalidatePath("/");
+  revalidatePath("/en");
   revalidatePath("/programa");
+  revalidatePath("/en/programa");
+  revalidatePath("/lektor/[id]", "page");
+  revalidatePath("/en/lektor/[id]", "page");
 }
 
 function parse(formData: FormData): { ok: true; input: SpeakerInput } | { ok: false; message: string } {

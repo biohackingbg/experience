@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 // The programme is edited in the admin; the page follows within minutes.
-export const revalidate = 300;
+export const revalidate = 3600;
 
 /** The programme on its own page, for the links in mail and posts. */
 export default function ProgramPage() {

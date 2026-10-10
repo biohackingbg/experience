@@ -13,6 +13,7 @@ function done() {
   revalidatePath("/admin/izdai");
   revalidatePath("/admin");
   revalidatePath("/");
+  revalidatePath("/en");
 }
 
 export async function issueOrder(_prev: IssueState, formData: FormData): Promise<IssueState> {

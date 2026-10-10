@@ -2,6 +2,15 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
+    // Image optimisation is billed per transformation and per cache write.
+    // Every width the browser may ask for is a separate transformation, so the
+    // ladder is cut to what the layouts actually need (a phone, a laptop, a
+    // wide screen), and anything the origin does not date stays cached for a
+    // month instead of the default four hours. The speaker portraits already
+    // carry a one-year immutable header and a version in their URL.
+    deviceSizes: [640, 1080, 1920],
+    imageSizes: [128, 256, 384],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     // The speaker portraits come out of the database through a route of our
     // own; the optimizer needs to be told it may resize them. Nothing else
     // local is dynamic, so the pattern is as narrow as the route.

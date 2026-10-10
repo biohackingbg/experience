@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/en/programa", languages: { bg: "/programa", en: "/en/programa" } },
 };
 
-export const revalidate = 300;
+export const revalidate = 3600;
 
 export default function ProgramPageEn() {
   return (

@@ -11,7 +11,11 @@ const UUID = /^[0-9a-f-]{36}$/;
 function done() {
   revalidatePath("/admin/programa");
   revalidatePath("/");
+  revalidatePath("/en");
   revalidatePath("/programa");
+  revalidatePath("/en/programa");
+  revalidatePath("/lektor/[id]", "page");
+  revalidatePath("/en/lektor/[id]", "page");
 }
 
 function parse(formData: FormData): { ok: true; input: SessionInput } | { ok: false; message: string } {
