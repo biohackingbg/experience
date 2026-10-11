@@ -1,5 +1,5 @@
 /**
- * The exhibition plan: 25 modules of 3 × 2 m in the Grand Millennium
+ * The exhibition plan: 25 modules of 3 × 2 m plus the bar, in the Grand Millennium
  * foyer, as drawn in "Sofia_Life_Summit_2026_Exhibition_booths 2" (October
  * 2026). The second drawing moved the B row and C1, turned B1/B2/C5/D1/D7
  * upright, and gave B6's place to the bar and the hydration station, so B6
@@ -56,6 +56,11 @@ export const BOOTHS: { id: string; zone: ZoneId; box: Box }[] = [
   { id: "D6", zone: "D", box: [37.7, 91.43, 6.6, 4.78] },
   { id: "D7", zone: "D", box: [50.47, 80.89, 4.4, 7.17] },
   { id: "D8", zone: "D", box: [44.33, 91.43, 6.6, 4.78] },
+  // The bar by the main flow is let out like a module, so a partner can be
+  // put on it from the board. It sits in the B row on the drawing, so it is
+  // counted with zone B; the hydration-station bar below it is Health
+  // Upgrade's and stays off the list.
+  { id: "BAR", zone: "B", box: [41.7, 60.89, 5.21, 4.78] },
 ];
 export const isBooth = (v: unknown): v is string => BOOTHS.some((b) => b.id === v);
 
