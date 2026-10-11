@@ -21,6 +21,48 @@ function shortName(b: BoardBooth): string | null {
 }
 
 /**
+ * How a name fits its module: broken into at most two lines at a space,
+ * as evenly as the words allow, and set at the largest size at which the
+ * longer line still fits the module's length and both lines fit its
+ * depth. Sizes are in `cqw` - hundredths of the plan's width - so a label
+ * scales with the plan instead of staying one pixel size on every screen,
+ * which is what let long names spill past their boxes.
+ */
+function fitLabel(name: string, box: [number, number, number, number], tall: boolean): { lines: string[]; size: number } {
+  const [, , w, h] = box;
+  // Both sides in cqw: the box height is a share of the image height, which
+  // is the width over the aspect.
+  const width = w;
+  const height = h / PLAN_ASPECT;
+  const length = (tall ? height : width) - 0.9; // minus the padding
+  const depth = (tall ? width : height) - 0.6;
+
+  const words = name.trim().split(/\s+/);
+  let lines = [name.trim()];
+  if (words.length > 1) {
+    let best: string[] = lines;
+    let bestLongest = name.length;
+    for (let i = 1; i < words.length; i++) {
+      const a = words.slice(0, i).join(" ");
+      const b = words.slice(i).join(" ");
+      const longest = Math.max(a.length, b.length);
+      if (longest < bestLongest) {
+        best = [a, b];
+        bestLongest = longest;
+      }
+    }
+    lines = best;
+  }
+  const longest = Math.max(...lines.map((l) => l.length));
+  // 0.6em per character is the average for this font in bold; 1.05 is the
+  // line height, so two lines need 2.1em of depth.
+  const byLength = length / (0.6 * longest);
+  const byDepth = depth / (lines.length * 1.05);
+  const size = Math.max(0.85, Math.min(2.1, byLength, byDepth));
+  return { lines, size };
+}
+
+/**
  * The plan with the current state laid over it, and a panel for the module
  * that was clicked. The image already carries the zone colours and the
  * module ids; the overlay only says who is on each one, so an empty
@@ -34,7 +76,7 @@ export function Board({ booths, partners }: { booths: BoardBooth[]; partners: Bo
   return (
     <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_22rem]">
       <div className="rounded-3xl bg-bh-cloud p-3 ring-1 ring-bh-ink/6 sm:p-4">
-        <div className="relative w-full overflow-hidden rounded-2xl bg-white" style={{ aspectRatio: String(PLAN_ASPECT) }}>
+        <div className="relative w-full overflow-hidden rounded-2xl bg-white" style={{ aspectRatio: String(PLAN_ASPECT), containerType: "inline-size" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={PLAN_IMAGE} alt="План на изложбената зона" className="absolute inset-0 h-full w-full select-none" draggable={false} />
           {booths.map((b) => {
@@ -42,6 +84,7 @@ export function Board({ booths, partners }: { booths: BoardBooth[]; partners: Bo
             const name = shortName(b);
             const active = b.id === selectedId;
             const tall = h > w;
+            const label = name ? fitLabel(name, b.box, tall) : null;
             return (
               <button
                 key={b.id}
@@ -61,12 +104,20 @@ export function Board({ booths, partners }: { booths: BoardBooth[]; partners: Bo
                   opacity: b.status === "free" ? 1 : 0.94,
                 }}
               >
-                {name && (
+                {label && (
                   <span
-                    className="px-0.5 text-[0.55rem] font-semibold text-white sm:text-[0.62rem]"
-                    style={tall ? { writingMode: "vertical-rl", transform: "rotate(180deg)" } : undefined}
+                    className="px-[0.3cqw] font-semibold text-white"
+                    style={{
+                      fontSize: `${label.size}cqw`,
+                      lineHeight: 1.05,
+                      ...(tall ? { writingMode: "vertical-rl", transform: "rotate(180deg)" } : {}),
+                    }}
                   >
-                    {name.length > 14 ? `${name.slice(0, 13)}…` : name}
+                    {label.lines.map((line, i) => (
+                      <span key={i} className="block whitespace-nowrap">
+                        {line}
+                      </span>
+                    ))}
                   </span>
                 )}
               </button>
