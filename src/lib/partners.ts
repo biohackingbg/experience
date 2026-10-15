@@ -36,7 +36,7 @@ export const PARTNERS: Partner[] = [
   { name: "AgeHack", logo: "/partners/agehack-white.png" },
   { name: "Therabody", logo: "/partners/therabody-white.png" },
   // Therabody's own studio brand, confirmed separately from Therabody.
-  { name: "RE START by Therabody", logo: "/partners/restart-therabody-white.png" },
+  { name: "Re Start by Therabody", logo: "/partners/restart-therabody-white.png" },
   { name: "Dupissima Aesthetics", logo: "/partners/dupissima-white.png" },
   { name: "FITBOX", logo: "/partners/fitbox-white.png" },
   { name: "Manchini Coffee", logo: "/partners/manchini-coffee-white.png" },
