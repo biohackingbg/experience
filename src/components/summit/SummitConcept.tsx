@@ -62,6 +62,7 @@ const photos: Partial<Record<StationId, string>> = {
   inbody: "/stations/inbody.webp",
   restart: "/stations/restart.webp",
   obsidian: "/stations/obsidian.webp",
+  n8: "/stations/n8.webp",
   hydration: "/stations/hydration.webp",
 };
 
