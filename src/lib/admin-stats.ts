@@ -63,8 +63,8 @@ export type WeekDay = {
   label: string;
   orders: number;
   tickets: number;
-  /** Tickets of each tier that day, in tier order, only the ones sold. */
-  byTier: { name: string; n: number }[];
+  /** Tickets and money of each tier that day, in tier order, only the ones sold. */
+  byTier: { id: TierId; name: string; n: number; grossCents: number }[];
   grossCents: number;
   today: boolean;
 };
@@ -191,6 +191,7 @@ export async function getDashboardData(): Promise<DashboardData> {
           day: sql<string>`to_char(${orders.paidAt}, 'YYYY-MM-DD')`,
           tierId: orderItems.tierId,
           n: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int`,
+          gross: sql<number>`coalesce(sum(${orderItems.quantity} * ${orderItems.unitPriceCents}), 0)::int`,
         })
         .from(orderItems)
         .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
@@ -447,7 +448,10 @@ export async function getDashboardData(): Promise<DashboardData> {
         label: String(Number(day.slice(-2))),
         orders: row?.count ?? 0,
         tickets: row?.tickets ?? 0,
-        byTier: TIERS.map((t) => ({ name: t.name, n: dayTierRows.find((r) => r.day === day && r.tierId === t.id)?.n ?? 0 })).filter((t) => t.n > 0),
+        byTier: TIERS.map((t) => {
+          const r = dayTierRows.find((x) => x.day === day && x.tierId === t.id);
+          return { id: t.id, name: t.name, n: r?.n ?? 0, grossCents: r?.gross ?? 0 };
+        }).filter((t) => t.n > 0),
         grossCents: row?.gross ?? 0,
         today: i === weekDays.length - 1,
       };

@@ -11,7 +11,7 @@ import { formatPrice } from "@/lib/tickets";
  */
 
 /** Validated with the dataviz checker in both light and dark. */
-const TIER_COLORS: Record<string, string> = {
+export const TIER_COLORS: Record<string, string> = {
   core: "#0E8C7D",
   plus: "#3F6FD8",
   peak: "#C4607F",

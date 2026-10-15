@@ -16,7 +16,7 @@ import { ResendForm } from "./fakturi/ResendForm";
 import { PriceStages } from "./PriceStages";
 import { SiteNoticeCard } from "./SiteNoticeCard";
 import { ReminderForm } from "./ReminderForm";
-import { TierBars } from "./TierBars";
+import { TIER_COLORS, TierBars } from "./TierBars";
 import { WhenChart } from "./WhenChart";
 
 export const metadata: Metadata = {
@@ -130,38 +130,58 @@ function Stat({
 }
 
 /** Seven pills, one per day; an empty day is a hatched ghost, the busiest is labelled. */
+/**
+ * Fourteen days of sales. Each bar is the day's tickets, stacked by tier in
+ * the colours of "По нива", with the day's money under the date - so the
+ * strip answers "how much did we make, from which tickets" without hovering.
+ * The hover keeps the full split per tier.
+ */
 function WeekStrip({ week }: { week: WeekDay[] }) {
   const max = week.reduce((m, d) => Math.max(m, d.tickets), 0);
+  const tiersSeen = week.flatMap((d) => d.byTier.map((t) => t.id));
   return (
-    <div className="mt-4 flex h-full min-h-44 w-full items-end gap-1.5 sm:gap-2.5">
-      {week.map((d) => {
-        const h = max ? Math.max((d.tickets / max) * 100, 8) : 8;
-        const peak = max > 0 && d.tickets === max;
-        return (
-          <div key={d.day} className="group relative flex flex-1 flex-col items-center justify-end" style={{ height: "100%" }}>
-            <span
-              className={`mb-2 rounded-md px-1 py-0.5 text-[0.6rem] font-semibold ${
-                peak
-                  ? "bg-[#0b2a22] text-white"
-                  : d.tickets > 0
-                    ? "text-[#0b2a22]"
-                    : "text-[#0b2a22]/30"
-              }`}
-            >
-              {d.tickets}
-            </span>
-            <div
-              className="w-full max-w-[1.6rem] rounded-full"
-              style={{
-                height: `${d.tickets > 0 ? h : 100}%`,
-                background: d.tickets > 0 ? (peak ? "#0b3f31" : d.today ? "#5fbf9a" : GREEN) : HATCH,
-              }}
-              title={`${d.day} · ${d.tickets} билета${d.byTier.length ? ` (${d.byTier.map((t) => `${t.name} ${t.n}`).join(", ")})` : ""} · ${d.orders} поръчки · ${formatPrice(d.grossCents)} €`}
-            />
-            <span className={`mt-2 font-mono text-[0.65rem] ${d.today ? "font-bold text-[#0b2a22]" : "text-[#0b2a22]/45"}`}>{d.label}</span>
-          </div>
-        );
-      })}
+    <div className="flex h-full w-full flex-col">
+      <div className="mt-2 flex h-full min-h-44 w-full items-end gap-1.5 sm:gap-2.5">
+        {week.map((d) => {
+          const h = max ? Math.max((d.tickets / max) * 100, 8) : 8;
+          const peak = max > 0 && d.tickets === max;
+          const title = `${d.day} · ${d.tickets} билета · ${d.orders} поръчки · ${formatPrice(d.grossCents)} €${
+            d.byTier.length ? `\n${d.byTier.map((t) => `${t.name} ${t.n} · ${formatPrice(t.grossCents)} €`).join("\n")}` : ""
+          }`;
+          return (
+            <div key={d.day} className="group relative flex flex-1 flex-col items-center justify-end" style={{ height: "100%" }} title={title}>
+              <span
+                className={`mb-2 rounded-md px-1 py-0.5 text-[0.6rem] font-semibold ${
+                  peak ? "bg-[#0b2a22] text-white" : d.tickets > 0 ? "text-[#0b2a22]" : "text-[#0b2a22]/30"
+                }`}
+              >
+                {d.tickets}
+              </span>
+              <div
+                className="flex w-full max-w-[1.6rem] flex-col-reverse overflow-hidden rounded-full"
+                style={{ height: `${d.tickets > 0 ? h : 100}%`, background: d.tickets > 0 ? undefined : HATCH }}
+              >
+                {d.byTier.map((t) => (
+                  <div key={t.id} style={{ height: `${(t.n / d.tickets) * 100}%`, background: TIER_COLORS[t.id] ?? GREEN, opacity: d.today ? 0.75 : 1 }} />
+                ))}
+              </div>
+              <span className={`mt-2 font-mono text-[0.65rem] ${d.today ? "font-bold text-[#0b2a22]" : "text-[#0b2a22]/45"}`}>{d.label}</span>
+              <span className={`hidden font-mono text-[0.58rem] tabular-nums sm:block ${d.grossCents > 0 ? "text-[#0b2a22]/60" : "text-[#0b2a22]/25"}`}>
+                {d.grossCents > 0 ? formatPrice(d.grossCents).replace(/,\d\d$/, "") : "–"}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[0.65rem] text-[#0b2a22]/55">
+        {(["core", "plus", "peak"] as const).filter((id) => tiersSeen.includes(id)).map((id) => (
+          <span key={id} className="inline-flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full" style={{ background: TIER_COLORS[id] }} />
+            {id.toUpperCase()}
+          </span>
+        ))}
+        <span className="ml-auto">под датата: оборот за деня в €</span>
+      </div>
     </div>
   );
 }
@@ -227,6 +247,11 @@ export default async function AdminDashboard({
     getNotice(),
   ]);
   const soldPct = d.capacityTotal ? Math.round((d.ticketsSold / d.capacityTotal) * 100) : 0;
+  // What a ticket brings on average, and what today and yesterday brought:
+  // the strip has the days, the tile only needs the two that are "now".
+  const avgTicketCents = d.ticketsSold ? Math.round(d.grossCents / d.ticketsSold) : 0;
+  const todayGross = d.week[d.week.length - 1]?.grossCents ?? 0;
+  const yesterdayGross = d.week[d.week.length - 2]?.grossCents ?? 0;
 
   // The one sentence the morning glance is for: are we on pace to fill the
   // room, at the pace we are actually selling at?
@@ -276,8 +301,8 @@ export default async function AdminDashboard({
           sub={
             <span className="inline-flex flex-wrap items-center gap-2">
               <span className="rounded-md bg-white/15 px-1.5 py-0.5 font-mono text-[0.62rem]">{soldPct}%</span>
-              днес {d.soldToday} · вчера {d.soldYesterday} · от {d.capacityTotal} места · само платени
-              {d.testOrders ? ` · ${d.testOrders} тестови скрити` : ""}
+              днес {d.soldToday}{todayGross ? ` (${formatPrice(todayGross)} €)` : ""} · вчера {d.soldYesterday}
+              {yesterdayGross ? ` (${formatPrice(yesterdayGross)} €)` : ""} · средно {formatPrice(avgTicketCents)} € на билет
             </span>
           }
         />
@@ -371,7 +396,9 @@ export default async function AdminDashboard({
         <section className="flex flex-col rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6 xl:col-span-2">
           <div className="flex items-baseline justify-between">
             <h2 className="text-lg font-bold tracking-tight">Билети по дни</h2>
-            <span className="text-xs text-[#0b2a22]/55">{d.week.reduce((a, x) => a + x.tickets, 0)} билета за 14 дни</span>
+            <span className="text-xs text-[#0b2a22]/55">
+              {d.week.reduce((a, x) => a + x.tickets, 0)} билета · {formatPrice(d.week.reduce((a, x) => a + x.grossCents, 0))} € за 14 дни
+            </span>
           </div>
           <div className="flex flex-1 items-end pt-4">
             <WeekStrip week={d.week} />
