@@ -83,7 +83,10 @@ export default async function FinancesPage() {
           <div className="rounded-2xl bg-bh-cloud p-6 ring-1 ring-bh-ink/8">
             <div className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-bh-ink/55">Прогноза · ако всичко се плати и похарчи</div>
             <div className="mt-3 text-4xl font-black tracking-tight text-bh-ink"><Eur cents={f.result.forecastCents} signed /></div>
-            <div className="mt-1 text-xs text-bh-ink/60">приходи <Eur cents={incomeForecast} /> минус разходи <Eur cents={f.expenses.plannedCents} /></div>
+            <div className="mt-1 text-xs text-bh-ink/60">
+              приходи <Eur cents={incomeForecast} /> минус разходи <Eur cents={f.expenses.expectedCents} />
+              {f.expenses.expectedCents > f.expenses.plannedCents && <> · по категория се брои по-голямото от записаното и бюджета</>}
+            </div>
           </div>
         </div>
 

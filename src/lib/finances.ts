@@ -90,6 +90,13 @@ export type Finances = {
     byCategory: { id: string; label: string; plannedCents: number; committedCents: number; budgetCents: number | null }[];
     /** planned + invoiced + paid, i.e. everything not cancelled. */
     plannedCents: number;
+    /**
+     * What the event will cost as far as anyone knows: per category the
+     * larger of the logged costs and the budget. A budget with nothing
+     * logged yet is still money that will go; logged costs above the budget
+     * are the truer number. This is what the forecast subtracts.
+     */
+    expectedCents: number;
     /** invoiced + paid, i.e. money we can no longer avoid. */
     committedCents: number;
     paidCents: number;
@@ -176,6 +183,7 @@ export async function getFinances(): Promise<Finances> {
     };
   });
   const ePlanned = live.reduce((a, e) => a + e.amountCents, 0);
+  const eExpected = byCategory.reduce((a, c) => a + Math.max(c.plannedCents, c.budgetCents ?? 0), 0);
   const eCommitted = live.filter((e) => e.status !== "planned").reduce((a, e) => a + e.amountCents, 0);
   const ePaid = live.filter((e) => e.status === "paid").reduce((a, e) => a + e.amountCents, 0);
 
@@ -201,13 +209,14 @@ export async function getFinances(): Promise<Finances> {
       rows: expenseRows,
       byCategory,
       plannedCents: ePlanned,
+      expectedCents: eExpected,
       committedCents: eCommitted,
       paidCents: ePaid,
       budgetCents: budgetRows.reduce((a, b) => a + b.amountCents, 0),
     },
     result: {
       actualCents: ticketsNet + sPaid + docPaid - ePaid,
-      forecastCents: ticketsNet + sAgreed + sInvoiced + sPaid + docPaid + docOpen - ePlanned,
+      forecastCents: ticketsNet + sAgreed + sInvoiced + sPaid + docPaid + docOpen - eExpected,
     },
   };
 }
