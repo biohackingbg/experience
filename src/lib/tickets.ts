@@ -101,7 +101,8 @@ export type Tier = {
   /**
    * Both prices are stated, not derived: the early figures were chosen as
    * round numbers (35/89/249), and no single percentage produces them from
-   * the equally round list prices (49/129/349).
+   * the equally round list prices (69/129/349). CORE's list price went from
+   * 49 to 69 on 15 October 2026, so the mid-stage 45 reads as a real saving.
    */
   earlyPriceCents: number;
   /** Regular price, VAT included, in cents. Applies from 1 September. */
@@ -119,7 +120,7 @@ export const TIERS: Tier[] = [
     id: "core",
     name: "CORE",
     earlyPriceCents: 3500,
-    listPriceCents: 4900,
+    listPriceCents: 6900,
     capacity: 700,
     features: [
       "Един ден по избор",
