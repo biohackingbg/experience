@@ -60,6 +60,7 @@ const photos: Partial<Record<StationId, string>> = {
   endosphera: "/stations/endosfera.webp",
   inbody: "/stations/inbody.webp",
   restart: "/stations/restart.webp",
+  obsidian: "/stations/obsidian.webp",
 };
 
 function Cards({ items }: { items: Station[] }) {
