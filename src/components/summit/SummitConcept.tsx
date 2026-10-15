@@ -55,6 +55,7 @@ const photos: Partial<Record<StationId, string>> = {
   "mat-pilates": "/stations/mat-pilates.webp",
   "power-of-breath": "/stations/dishane.webp",
   mitolight: "/stations/mitolight.webp",
+  yoga: "/stations/yoga.webp",
   "power-plate-rev": "/stations/rev.webp",
   "power-plate-platform": "/stations/powerplate.webp",
   endosphera: "/stations/endosfera.webp",
