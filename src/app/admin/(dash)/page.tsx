@@ -11,7 +11,7 @@ import { getTrafficData } from "@/lib/site-views";
 import { formatPrice } from "@/lib/tickets";
 
 import { setTestOrder } from "./actions";
-import { DailyChart } from "./DailyChart";
+import { SalesHistory } from "./SalesHistory";
 import { ResendForm } from "./fakturi/ResendForm";
 import { PriceStages } from "./PriceStages";
 import { SiteNoticeCard } from "./SiteNoticeCard";
@@ -616,7 +616,7 @@ export default async function AdminDashboard({
             </ul>
           )}
         </section>
-        <DailyChart data={d.daily} />
+        <SalesHistory history={d.history} launches={d.launches} />
       </div>
 
       {d.odd.length > 0 && (

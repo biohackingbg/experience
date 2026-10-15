@@ -4,7 +4,7 @@ import { desc, inArray, or, sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { genderSplit } from "@/lib/gender";
-import { orderItems, orders, signups, tickets } from "@/lib/db/schema";
+import { campaigns, orderItems, orders, signups, tickets } from "@/lib/db/schema";
 import { PENDING_HOLD_MINUTES } from "@/lib/orders";
 import { COMPED, KEPT_CENTS, SALE, SOLD } from "@/lib/sold";
 import { TIERS, VAT_RATE, type TierId, picksDay } from "@/lib/tickets";
@@ -67,7 +67,12 @@ export type WeekDay = {
   byTier: { id: TierId; name: string; n: number; grossCents: number }[];
   grossCents: number;
   today: boolean;
+  /** Tickets that day whose order arrived through a tagged link, per campaign code. */
+  tagged: { code: string; title: string | null; n: number }[];
 };
+
+/** A row of the marketing log, placed on the sales timeline. */
+export type Launch = { day: string; title: string; platform: string; kind: string; code: string | null; spendCents: number };
 
 /** A paid order that does not look like a sale: no tickets, no items, or no payment behind it. */
 export type OddOrder = {
@@ -82,6 +87,10 @@ export type OddOrder = {
 
 export type DashboardData = {
   week: WeekDay[];
+  /** Every Sofia day from the first sale to today, zero-filled, same shape as the week - the long chart. */
+  history: WeekDay[];
+  /** What marketing did, by day - drawn under the long chart. */
+  launches: Launch[];
   /** What the sold figures leave out or should not include - for the team to look at, not for the count. */
   odd: OddOrder[];
   grossCents: number;
@@ -137,7 +146,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   const WINDOW = 14;
   const weekDays = Array.from({ length: WINDOW }, (_, i) => sofiaDay.format(new Date(Date.now() - (WINDOW - 1 - i) * 86_400_000)));
 
-  const [totals, perTierRows, dailyRows, dayTierRows, recentRows, signupRow, last7Row, checkedInRow, daySplitRows, dayRow, oddRows, hourRows, weekdayRows, punchRows, buyerNames, compedRows] =
+  const [totals, perTierRows, dailyRows, dayTierRows, recentRows, signupRow, last7Row, checkedInRow, daySplitRows, dayRow, oddRows, hourRows, weekdayRows, punchRows, buyerNames, compedRows, taggedRows, launchRows] =
     await Promise.all([
       db
         .select({
@@ -195,7 +204,7 @@ export async function getDashboardData(): Promise<DashboardData> {
         })
         .from(orderItems)
         .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
-        .where(sql`${SALE} and ${orders.paidAt} is not null and ${orders.paidAt} > now() - interval '15 days'`)
+        .where(sql`${SALE} and ${orders.paidAt} is not null`)
         .groupBy(sql`to_char(${orders.paidAt}, 'YYYY-MM-DD')`, orderItems.tierId),
 
       db
@@ -333,6 +342,24 @@ export async function getDashboardData(): Promise<DashboardData> {
         .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
         .where(COMPED)
         .groupBy(tickets.tierId),
+
+      // Sales that arrived through a tagged link, per day and campaign code:
+      // the one certain tie between a day's bar and an advert.
+      db
+        .select({
+          day: sql<string>`to_char(${orders.paidAt}, 'YYYY-MM-DD')`,
+          code: orders.utmCampaign,
+          tickets: sql<number>`coalesce(sum((select sum(oi.quantity) from order_items oi where oi.order_id = orders.id)), 0)::int`,
+        })
+        .from(orders)
+        .where(sql`${SALE} and ${orders.paidAt} is not null and ${orders.utmCampaign} is not null`)
+        .groupBy(sql`to_char(${orders.paidAt}, 'YYYY-MM-DD')`, orders.utmCampaign),
+
+      // The marketing log: when each post or advert went out.
+      db
+        .select({ postedAt: campaigns.postedAt, title: campaigns.title, platform: campaigns.platform, kind: campaigns.kind, code: campaigns.utmCampaign, spendCents: campaigns.spendCents })
+        .from(campaigns)
+        .orderBy(campaigns.postedAt),
     ]);
 
   // Items for the listed orders, fetched separately and stitched in JS. A
@@ -380,6 +407,38 @@ export async function getDashboardData(): Promise<DashboardData> {
   }));
 
   const grossCents = totals[0]?.gross ?? 0;
+
+  // One day of the strip, from the per-day and per-day-per-tier rows.
+  const dayOf = (day: string, today: boolean): WeekDay => {
+    const row = dailyRows.find((r) => r.day === day);
+    return {
+      day,
+      // The day of the month: fourteen weekday letters repeat twice and say
+      // nothing; a number places the bar in the month at a glance.
+      label: String(Number(day.slice(-2))),
+      orders: row?.count ?? 0,
+      tickets: row?.tickets ?? 0,
+      byTier: TIERS.map((t) => {
+        const r = dayTierRows.find((x) => x.day === day && x.tierId === t.id);
+        return { id: t.id, name: t.name, n: r?.n ?? 0, grossCents: r?.gross ?? 0 };
+      }).filter((t) => t.n > 0),
+      grossCents: row?.gross ?? 0,
+      today,
+      tagged: taggedRows
+        .filter((r) => r.day === day && r.code)
+        .map((r) => ({ code: r.code as string, title: launchRows.find((l) => l.code === r.code)?.title ?? null, n: r.tickets })),
+    };
+  };
+  // Every day from the first sale to today. dailyRows is ordered by day and
+  // only holds days with a sale, so the gaps are filled here.
+  const firstDay = dailyRows[0]?.day ?? weekDays[0];
+  const todayStr = weekDays[weekDays.length - 1];
+  const historyDays: string[] = [];
+  for (let t = Date.parse(firstDay + "T12:00:00Z"); ; t += 86_400_000) {
+    const d = new Date(t).toISOString().slice(0, 10);
+    historyDays.push(d);
+    if (d >= todayStr || historyDays.length > 400) break;
+  }
   const vatCents = totals[0]?.vat ?? 0;
 
   const odd: OddOrder[] = oddRows.map((o) => ({
@@ -439,23 +498,9 @@ export async function getDashboardData(): Promise<DashboardData> {
       tickets: r.tickets,
       grossCents: r.gross,
     })),
-    week: weekDays.map((day, i) => {
-      const row = dailyRows.find((r) => r.day === day);
-      return {
-        day,
-        // The day of the month: fourteen weekday letters repeat twice and say
-        // nothing; a number places the bar in the month at a glance.
-        label: String(Number(day.slice(-2))),
-        orders: row?.count ?? 0,
-        tickets: row?.tickets ?? 0,
-        byTier: TIERS.map((t) => {
-          const r = dayTierRows.find((x) => x.day === day && x.tierId === t.id);
-          return { id: t.id, name: t.name, n: r?.n ?? 0, grossCents: r?.gross ?? 0 };
-        }).filter((t) => t.n > 0),
-        grossCents: row?.gross ?? 0,
-        today: i === weekDays.length - 1,
-      };
-    }),
+    week: weekDays.map((day, i) => dayOf(day, i === weekDays.length - 1)),
+    history: historyDays.map((day, i) => dayOf(day, i === historyDays.length - 1)),
+    launches: launchRows.map((l) => ({ day: sofiaDay.format(l.postedAt), title: l.title, platform: l.platform, kind: l.kind, code: l.code, spendCents: l.spendCents })),
     recent: recentRows.map((o) => ({
       reference: o.reference,
       name: o.name,
