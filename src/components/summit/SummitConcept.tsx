@@ -59,6 +59,7 @@ const photos: Partial<Record<StationId, string>> = {
   "power-plate-platform": "/stations/powerplate.webp",
   endosphera: "/stations/endosfera.webp",
   inbody: "/stations/inbody.webp",
+  restart: "/stations/restart.webp",
 };
 
 function Cards({ items }: { items: Station[] }) {
