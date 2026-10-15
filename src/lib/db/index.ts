@@ -47,17 +47,19 @@ function connect(): { client: Client; db: Database } {
 /**
  * Lazily opens the connection so importing this module never fails at build
  * time - only an actual query requires DATABASE_URL to be present.
+ *
+ * The client is kept for the life of the process in production too. It used
+ * to be kept only in development, so on Vercel every getDb() call - and a
+ * request makes several - opened a fresh connection: a TLS handshake and a
+ * login to Neon each time, which was most of the API's response time.
+ * postgres-js reconnects by itself if the pooler drops the socket.
  */
 export function getDb(): Database {
   if (globalForDb.__bhDb) return globalForDb.__bhDb;
 
   const { client, db } = connect();
-
-  if (process.env.NODE_ENV !== "production") {
-    globalForDb.__bhClient = client;
-    globalForDb.__bhDb = db;
-  }
-
+  globalForDb.__bhClient = client;
+  globalForDb.__bhDb = db;
   return db;
 }
 
