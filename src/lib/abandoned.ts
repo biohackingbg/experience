@@ -98,6 +98,29 @@ export async function getAbandonedOrders(limit = 30): Promise<AbandonedOrder[]> 
   }));
 }
 
+/**
+ * What the reminders have done so far, over every order ever reminded.
+ * "Bought after" is any paid order from the same address, placed after the
+ * reminder went: the reminded checkout itself, or a fresh one - the person
+ * came back either way. Opens come from the mail provider's webhook and are
+ * a sign, not a count (Apple Mail opens everything); clicks are certain.
+ */
+export type ReminderStats = { sent: number; opened: number; clicked: number; boughtAfter: number; boughtAfterCents: number };
+
+export async function getReminderStats(): Promise<ReminderStats> {
+  const [r] = await getDb()
+    .select({
+      sent: sql<number>`count(*)::int`,
+      opened: sql<number>`count(*) filter (where ${orders.reminderOpenedAt} is not null or ${orders.reminderClickedAt} is not null)::int`,
+      clicked: sql<number>`count(*) filter (where ${orders.reminderClickedAt} is not null)::int`,
+      boughtAfter: sql<number>`count(*) filter (where exists (select 1 from orders p where p.email = orders.email and p.status = 'paid' and not p.is_test and p.paid_at > orders.reminder_sent_at))::int`,
+      boughtAfterCents: sql<number>`coalesce(sum((select max(p.total_cents) from orders p where p.email = orders.email and p.status = 'paid' and not p.is_test and p.paid_at > orders.reminder_sent_at)), 0)::int`,
+    })
+    .from(orders)
+    .where(sql`${orders.reminderSentAt} is not null and not ${orders.isTest}`);
+  return r ?? { sent: 0, opened: 0, clicked: 0, boughtAfter: 0, boughtAfterCents: 0 };
+}
+
 export type PendingOrder = { reference: string; name: string; email: string; items: string; totalCents: number; minutesAgo: number };
 
 /**

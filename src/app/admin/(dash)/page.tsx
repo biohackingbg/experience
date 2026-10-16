@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { getAbandonedOrders, getPendingOrders } from "@/lib/abandoned";
+import { getAbandonedOrders, getPendingOrders, getReminderStats } from "@/lib/abandoned";
 import { requireAccess } from "@/lib/access";
 import { type WeekDay, getDashboardData, searchOrders } from "@/lib/admin-stats";
 import { getFinances } from "@/lib/finances";
@@ -236,7 +236,7 @@ export default async function AdminDashboard({
   await requireAccess("tablo");
 
   const { q = "" } = await searchParams;
-  const [d, traffic, found, fin, pricing, abandoned, pendingNow, notice] = await Promise.all([
+  const [d, traffic, found, fin, pricing, abandoned, pendingNow, notice, reminders] = await Promise.all([
     getDashboardData(),
     getTrafficData(30),
     searchOrders(q),
@@ -245,6 +245,7 @@ export default async function AdminDashboard({
     getAbandonedOrders(),
     getPendingOrders(),
     getNotice(),
+    getReminderStats(),
   ]);
   const soldPct = d.capacityTotal ? Math.round((d.ticketsSold / d.capacityTotal) * 100) : 0;
   // What a ticket brings on average, and what today and yesterday brought:
@@ -548,6 +549,24 @@ export default async function AdminDashboard({
               14 дни · без купилите после · едно напомняне, най-рано след денонощие · „кликнал“ е сигурно, „отворено“ е знак
             </p>
           </div>
+          {reminders.sent > 0 && (
+            // What the reminders have brought, over all of them: the ones that
+            // worked leave the list below, so without this line a success
+            // looked like nothing happened.
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 rounded-2xl bg-[#E7F6F1] px-4 py-3 text-sm">
+              <span className="font-mono text-[0.62rem] uppercase tracking-[0.15em] text-[#146455] self-center">Досега</span>
+              <span>напомнени <strong className="font-semibold tabular-nums">{reminders.sent}</strong></span>
+              <span>отворили <strong className="font-semibold tabular-nums">{reminders.opened}</strong></span>
+              <span>кликнали <strong className="font-semibold tabular-nums">{reminders.clicked}</strong></span>
+              <span>
+                купили след това <strong className="font-semibold tabular-nums">{reminders.boughtAfter}</strong>
+                {reminders.boughtAfter > 0 && <span className="text-[#0b2a22]/55"> · {formatPrice(reminders.boughtAfterCents)} €</span>}
+              </span>
+              <span className="text-[#0b2a22]/55">
+                {reminders.sent ? `${Math.round((reminders.boughtAfter / reminders.sent) * 100)}% от напомнените купуват` : ""}
+              </span>
+            </div>
+          )}
           {pendingNow.length > 0 && (
             <div className="mt-4 rounded-2xl bg-[#f6f7f5] px-4 py-3">
               <p className="font-mono text-[0.62rem] uppercase tracking-[0.15em] text-[#0b2a22]/50">
