@@ -249,6 +249,7 @@ export const CONCEPT: Copy<{
         { id: "power-plate-platform", title: "Power Plate Platform" },
         { id: "yoga", title: "Yoga" },
         { id: "endosphera", title: "Dupissima - Endosphera" },
+        { id: "slow-strength", title: "Slow Strength" },
       ],
     },
     stations: {
@@ -262,7 +263,6 @@ export const CONCEPT: Copy<{
         { id: "n8", title: "N8 molecule - анализ на кожата на лицето" },
         { id: "inbody", title: "Dupissima - InBody" },
         { id: "hydration", title: "Health Upgrade - Hydration Station" },
-        { id: "slow-strength", title: "Slow Strength" },
       ],
     },
     hall: "Залата на Sofia Life Summit · Grand Hotel Millennium, София · 7–8 ноември 2026",
@@ -284,6 +284,7 @@ export const CONCEPT: Copy<{
         { id: "power-plate-platform", title: "Power Plate Platform" },
         { id: "yoga", title: "Yoga" },
         { id: "endosphera", title: "Dupissima - Endosphera" },
+        { id: "slow-strength", title: "Slow Strength" },
       ],
     },
     stations: {
@@ -297,7 +298,6 @@ export const CONCEPT: Copy<{
         { id: "n8", title: "N8 molecule - facial skin analysis" },
         { id: "inbody", title: "Dupissima - InBody" },
         { id: "hydration", title: "Health Upgrade - Hydration Station" },
-        { id: "slow-strength", title: "Slow Strength" },
       ],
     },
     hall: "The Sofia Life Summit hall · Grand Hotel Millennium, Sofia · 7–8 November 2026",
