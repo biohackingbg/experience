@@ -18,7 +18,7 @@ export type JourneyStep = {
  * Under prefers-reduced-motion everything renders in its final, fully
  * readable state and nothing moves.
  */
-export function JourneyTimeline({ steps }: { steps: JourneyStep[] }) {
+export function JourneyTimeline({ steps, brandLabel = "Контакт с бранда" }: { steps: JourneyStep[]; brandLabel?: string }) {
   const listRef = useRef<HTMLOListElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   // Read once, lazily: the OS preference does not change mid-visit in any
@@ -104,7 +104,7 @@ export function JourneyTimeline({ steps }: { steps: JourneyStep[] }) {
                   className="ml-3 inline-block rounded-full bg-bh-pine/12 px-2.5 py-0.5 align-middle font-mono text-[0.58rem] uppercase tracking-[0.15em] text-bh-pine motion-safe:transition-opacity motion-safe:duration-500"
                   style={{ opacity: on ? 1 : 0 }}
                 >
-                  Контакт с бранда
+                  {brandLabel}
                 </span>
               )}
               <p className="mt-1 text-sm font-light leading-relaxed text-bh-ink/65">{j.p}</p>
