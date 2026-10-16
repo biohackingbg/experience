@@ -213,7 +213,7 @@ export const TRACKS: Copy<{
 export type StationId =
   | "pilates-reformer" | "lagree" | "mobility" | "mat-pilates" | "psychosomatics" | "power-of-breath"
   | "mitolight" | "power-plate-rev" | "power-plate-platform" | "yoga" | "endosphera"
-  | "restart" | "obsidian" | "n8" | "inbody" | "hydration";
+  | "restart" | "obsidian" | "n8" | "inbody" | "hydration" | "scaneca";
 export type Station = { id: StationId; title: string };
 
 type StationGroup = {
@@ -256,6 +256,7 @@ export const CONCEPT: Copy<{
       title: (n) => `${n} интерактивни станции`,
       intro: "Не гледаш отстрани - измерваш се, пробваш, питаш. Всяка станция е водена от партньор в своята област.",
       items: [
+        { id: "scaneca", title: "Scaneca Body Analysis" },
         { id: "restart", title: "Re Start by Therabody" },
         { id: "obsidian", title: "Obsidian Club - PEMF Bed" },
         { id: "n8", title: "N8 molecule - анализ на кожата на лицето" },
@@ -289,6 +290,7 @@ export const CONCEPT: Copy<{
       title: (n) => `${n} interactive stations`,
       intro: "You do not watch from the side - you measure, try and ask. Each station is run by a partner in its field.",
       items: [
+        { id: "scaneca", title: "Scaneca Body Analysis" },
         { id: "restart", title: "Re Start by Therabody" },
         { id: "obsidian", title: "Obsidian Club - PEMF Bed" },
         { id: "n8", title: "N8 molecule - facial skin analysis" },

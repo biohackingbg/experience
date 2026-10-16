@@ -6,6 +6,7 @@
  */
 
 import { type Pricing, priceOf } from "@/lib/pricing";
+import { CONCEPT_TOTAL } from "@/lib/site-copy";
 import { TIERS, type Tier, formatPrice, getTier } from "@/lib/tickets";
 
 const SITE = "https://thelongevitysummit.eu";
@@ -224,7 +225,7 @@ export function listLetter(id: ListLetterId, i: ListLetterInput): Letter {
       return build(
         "Програмата на Sofia Life Summit: двата дни по часове",
         [
-          `${greet} Програмата е на сайта: лекторите по часове, работилниците и 16-те станции и преживявания в Гранд Хотел Милениум на 7 и 8 ноември.`,
+          `${greet} Програмата е на сайта: лекторите по часове, работилниците и ${CONCEPT_TOTAL}-те станции и преживявания в Гранд Хотел Милениум на 7 и 8 ноември.`,
           `Събота и неделя са различни. С CORE избираш един ден; с PLUS си и в двата, с работилниците и с едно специално преживяване по избор; PEAK добавя Premium Lounge и Meet & Greet с лекторите.`,
           priceLine,
         ],
@@ -235,7 +236,7 @@ export function listLetter(id: ListLetterId, i: ListLetterInput): Letter {
         "48 часа до края на междинните цени",
         [
           `${greet} В неделя, 25 октомври, в полунощ междинните цени свършват. Дотогава: CORE **${now(core)}** (после ${list(core)}), PLUS **${now(plus)}** (после ${list(plus)}), PEAK **${now(peak)}** (после ${list(peak)}).`,
-          `Два дни, в които науката за дълголетието се докосва, пробва и измерва - не се слуша от стол. 16 станции и преживявания, работилници и лектори по часове на сайта.`,
+          `Два дни, в които науката за дълголетието се докосва, пробва и измерва - не се слуша от стол. ${CONCEPT_TOTAL} станции и преживявания, работилници и лектори по часове на сайта.`,
         ],
         { label: "Вземи билет на междинна цена", url: bilet("48-chasa") },
       );
@@ -261,7 +262,7 @@ export function listLetter(id: ListLetterId, i: ListLetterInput): Letter {
       return build(
         "Една седмица до Sofia Life Summit",
         [
-          `${greet} След седмица, в събота и неделя, Гранд Хотел Милениум е два дни дълголетие на живо: лектори по часове, работилници и 16 станции и преживявания - reformer, lagree, breathwork, PEMF, Power Plate, InBody и още.`,
+          `${greet} След седмица, в събота и неделя, Гранд Хотел Милениум е два дни дълголетие на живо: лектори по часове, работилници и ${CONCEPT_TOTAL} станции и преживявания - reformer, lagree, breathwork, PEMF, Power Plate, InBody и още.`,
           `PEAK има още **${i.peakLeft} места**: Premium Lounge, Meet & Greet с лекторите, приоритет за работилниците и преживяванията, goody bag на стойност 250 €+.`,
           priceLine,
         ],
@@ -299,7 +300,7 @@ export function alumniDraft(pricing: Pricing): { subject: string; body: string; 
       "",
       `Кодът е ${ALUMNI_CODE} и се пише на стъпката за плащане. С него PLUS (двата дни, работилниците и едно специално преживяване) излиза ${off(plus)}, CORE (един ден) - ${off(core)}. Кодът важи и след края на междинните цени, за един билет на човек.`,
       "",
-      "Два дни, в които науката за дълголетието се докосва, пробва и измерва - не се слуша от стол. 16 станции и преживявания, работилници и лектори по часове.",
+      "Два дни, в които науката за дълголетието се докосва, пробва и измерва - не се слуша от стол. ${CONCEPT_TOTAL} станции и преживявания, работилници и лектори по часове.",
     ].join("\n"),
     ctaLabel: "Вземи билет с ALUMNI",
     ctaUrl: `${SITE}/bilet?utm_source=email&utm_campaign=alumni`,

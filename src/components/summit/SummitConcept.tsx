@@ -44,6 +44,7 @@ const icons: Record<StationId, typeof Composition> = {
   n8: SunSkin,
   inbody: Composition,
   hydration: Droplet,
+  scaneca: Body,
 };
 
 /** A photo for a station that has one. Cards without one stay mint. */
@@ -64,6 +65,7 @@ const photos: Partial<Record<StationId, string>> = {
   obsidian: "/stations/obsidian.webp",
   n8: "/stations/n8.webp",
   hydration: "/stations/hydration.webp",
+  scaneca: "/stations/scaneca.webp",
 };
 
 function Cards({ items }: { items: Station[] }) {
