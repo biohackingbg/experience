@@ -213,7 +213,7 @@ export const TRACKS: Copy<{
 export type StationId =
   | "pilates-reformer" | "lagree" | "mobility" | "mat-pilates" | "psychosomatics" | "power-of-breath"
   | "mitolight" | "power-plate-rev" | "power-plate-platform" | "yoga" | "endosphera"
-  | "restart" | "obsidian" | "n8" | "inbody" | "hydration" | "scaneca";
+  | "restart" | "obsidian" | "n8" | "inbody" | "hydration" | "scaneca" | "slow-strength";
 export type Station = { id: StationId; title: string };
 
 type StationGroup = {
@@ -262,6 +262,7 @@ export const CONCEPT: Copy<{
         { id: "n8", title: "N8 molecule - анализ на кожата на лицето" },
         { id: "inbody", title: "Dupissima - InBody" },
         { id: "hydration", title: "Health Upgrade - Hydration Station" },
+        { id: "slow-strength", title: "Slow Strength" },
       ],
     },
     hall: "Залата на Sofia Life Summit · Grand Hotel Millennium, София · 7–8 ноември 2026",
@@ -296,6 +297,7 @@ export const CONCEPT: Copy<{
         { id: "n8", title: "N8 molecule - facial skin analysis" },
         { id: "inbody", title: "Dupissima - InBody" },
         { id: "hydration", title: "Health Upgrade - Hydration Station" },
+        { id: "slow-strength", title: "Slow Strength" },
       ],
     },
     hall: "The Sofia Life Summit hall · Grand Hotel Millennium, Sofia · 7–8 November 2026",

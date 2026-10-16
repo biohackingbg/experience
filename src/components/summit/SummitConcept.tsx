@@ -45,6 +45,7 @@ const icons: Record<StationId, typeof Composition> = {
   inbody: Composition,
   hydration: Droplet,
   scaneca: Body,
+  "slow-strength": Plank,
 };
 
 /** A photo for a station that has one. Cards without one stay mint. */
@@ -66,6 +67,7 @@ const photos: Partial<Record<StationId, string>> = {
   n8: "/stations/n8.webp",
   hydration: "/stations/hydration.webp",
   scaneca: "/stations/scaneca.webp",
+  "slow-strength": "/stations/slow-strength.webp",
 };
 
 function Cards({ items }: { items: Station[] }) {
