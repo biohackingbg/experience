@@ -14,8 +14,16 @@ import { ViewBeacon } from "./ViewBeacon";
 
 type Props = { params: Promise<{ token: string }>; searchParams: Promise<{ lang?: string }> };
 
-export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
-  const { ui } = DECK_COPY[deckLangOf((await searchParams).lang)];
+/** ?lang= wins; otherwise the language the link was made with. */
+async function langFor(params: Props["params"], searchParams: Props["searchParams"]) {
+  const [{ token }, { lang }] = await Promise.all([params, searchParams]);
+  if (lang) return deckLangOf(lang);
+  const link = await findActiveLink(token);
+  return deckLangOf(link?.lang);
+}
+
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
+  const { ui } = DECK_COPY[await langFor(params, searchParams)];
   return {
     title: ui.metaTitle,
     description: ui.metaDescription,
@@ -129,7 +137,8 @@ export default async function PartnersPage({ params, searchParams }: Props) {
   const { token } = await params;
   const link = await findActiveLink(token);
   if (!link) notFound();
-  const lang = deckLangOf((await searchParams).lang);
+  const query = (await searchParams).lang;
+  const lang = deckLangOf(query ?? link.lang);
   const c = DECK_COPY[lang];
   const { ui } = c;
   const CONTACT = DECK_CONTACT;

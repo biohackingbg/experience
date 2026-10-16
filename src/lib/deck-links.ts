@@ -125,12 +125,20 @@ export async function findActiveLink(raw: string): Promise<DeckLink | null> {
   return hits.length === 1 ? hits[0] : null;
 }
 
-export async function createLink(label: string): Promise<DeckLink> {
+export type DeckLinkLang = "bg" | "en";
+export const isDeckLang = (v: unknown): v is DeckLinkLang => v === "bg" || v === "en";
+
+export async function createLink(label: string, lang: DeckLinkLang = "bg"): Promise<DeckLink> {
   const [row] = await getDb()
     .insert(deckLinks)
-    .values({ label: label.trim().slice(0, 80), token: newToken() })
+    .values({ label: label.trim().slice(0, 80), token: newToken(), lang })
     .returning();
   return row;
+}
+
+/** Which language the deck opens in on this link. The address stays the same. */
+export async function setLinkLang(id: string, lang: DeckLinkLang): Promise<void> {
+  await getDb().update(deckLinks).set({ lang }).where(eq(deckLinks.id, id));
 }
 
 /**
@@ -357,6 +365,7 @@ export async function getDeckStats(): Promise<DeckStats> {
         note: deckLinks.note,
         nextStep: deckLinks.nextStep,
         owner: deckLinks.owner,
+      lang: deckLinks.lang,
         tier: deckLinks.tier,
         amountCents: deckLinks.amountCents,
         money: deckLinks.money,

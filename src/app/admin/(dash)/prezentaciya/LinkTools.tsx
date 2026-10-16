@@ -25,6 +25,17 @@ export function NewLinkForm() {
         placeholder="за кого е - напр. Alma Lasers"
         className="w-64 rounded-full border border-bh-ink/15 bg-bh-paper px-4 py-2 text-sm text-bh-ink placeholder:text-bh-ink/35"
       />
+      {/* The language the deck opens in for this partner. The reader can
+          still switch on the page; this only picks the first screen. */}
+      <select
+        name="lang"
+        defaultValue="bg"
+        aria-label="Език на презентацията"
+        className="rounded-full border border-bh-ink/15 bg-bh-paper px-3 py-2 text-sm text-bh-ink"
+      >
+        <option value="bg">на български</option>
+        <option value="en">in English</option>
+      </select>
       <button
         type="submit"
         disabled={pending}

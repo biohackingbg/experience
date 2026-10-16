@@ -4,7 +4,7 @@ import { requireAccess } from "@/lib/access";
 import { STAGES, deckUrl, getDeckStats, listViews } from "@/lib/deck-links";
 import { sectionIndex, sectionLabel } from "@/lib/deck-sections";
 
-import { reactivateDeckLink, regenerateDeckLink, revokeDeckLink, updateDeckLink } from "./actions";
+import { reactivateDeckLink, regenerateDeckLink, revokeDeckLink, setDeckLinkLang, updateDeckLink } from "./actions";
 import { BulkLinkForm, CopyLink, NewLinkForm, PipelineEditor, RegenerateButton } from "./LinkTools";
 import { HomeLink } from "@/components/admin/HomeLink";
 
@@ -179,6 +179,26 @@ export default async function DeckPage() {
                               …/{l.token}
                             </a>
                             <CopyLink url={url} />
+                            {/* Which language this partner's link opens in.
+                                One click flips it; the address stays. */}
+                            <form action={setDeckLinkLang} className="flex gap-1">
+                              <input type="hidden" name="id" value={l.id} />
+                              {(["bg", "en"] as const).map((v) => (
+                                <button
+                                  key={v}
+                                  type="submit"
+                                  name="lang"
+                                  value={v}
+                                  disabled={l.lang === v}
+                                  title={v === "bg" ? "Отваря се на български" : "Opens in English"}
+                                  className={`rounded-full px-2 py-0.5 font-mono text-[0.6rem] uppercase tracking-[0.15em] ${
+                                    l.lang === v ? "bg-bh-ink text-bh-paper" : "border border-bh-ink/20 text-bh-ink/60 hover:border-bh-ink"
+                                  }`}
+                                >
+                                  {v}
+                                </button>
+                              ))}
+                            </form>
                           </div>
                         </td>
                         <td className="px-5 py-3 align-top">

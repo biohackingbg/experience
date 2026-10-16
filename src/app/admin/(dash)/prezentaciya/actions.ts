@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { canAccess } from "@/lib/access";
-import { createLink, createLinks, isStage, reactivateLink, regenerateToken, revokeLink, updateLinkConversation } from "@/lib/deck-links";
+import { createLink, createLinks, isDeckLang, isStage, reactivateLink, regenerateToken, revokeLink, setLinkLang, updateLinkConversation } from "@/lib/deck-links";
 
 export type LinkFormState = { status: "idle" | "ok" | "error"; message?: string };
 
@@ -19,9 +19,20 @@ export async function createDeckLink(
   const label = String(formData.get("label") ?? "").trim();
   if (label.length < 2) return { status: "error", message: "Напиши за кого е линкът." };
 
-  await createLink(label);
+  const lang = formData.get("lang");
+  await createLink(label, isDeckLang(lang) ? lang : "bg");
   revalidatePath("/admin/prezentaciya");
-  return { status: "ok", message: `Линк за „${label}“ е готов.` };
+  return { status: "ok", message: `Линк за „${label}“ е готов${lang === "en" ? ", на английски" : ""}.` };
+}
+
+/** Flips the language a link opens in; the address does not change. */
+export async function setDeckLinkLang(formData: FormData): Promise<void> {
+  if (!(await canAccess("prezentaciya"))) return;
+  const id = String(formData.get("id") ?? "");
+  const lang = formData.get("lang");
+  if (!id || !isDeckLang(lang)) return;
+  await setLinkLang(id, lang);
+  revalidatePath("/admin/prezentaciya");
 }
 
 /** Closes a link. Its history stays; the URL stops opening. */

@@ -321,6 +321,11 @@ export const deckLinks = pgTable(
     /** Who on the team leads this conversation (a first name is enough). */
     owner: text("owner"),
     updatedAt: timestamp("updated_at", { withTimezone: true }),
+    /**
+     * The language the deck opens in for this partner: bg | en. The reader
+     * can still flip it on the page; this is only where it starts.
+     */
+    lang: text("lang").notNull().default("bg"),
 
     /**
      * The money side of the same row. The pipeline row *is* the deal, so the

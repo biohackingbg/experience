@@ -309,6 +309,13 @@
       "when": 1789000000042,
       "tag": "0043_email_sequences",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1789000000043,
+      "tag": "0044_deck_link_lang",
+      "breakpoints": true
     }
   ]
 }

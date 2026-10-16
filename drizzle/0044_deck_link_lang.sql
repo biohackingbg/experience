@@ -1,0 +1,1 @@
+ALTER TABLE "deck_links" ADD COLUMN IF NOT EXISTS "lang" text DEFAULT 'bg' NOT NULL;
