@@ -267,7 +267,7 @@ export function reminderEmailHtml(input: ReminderEmailInput, t: MailTexts = defa
       <p style="margin:14px 0 0;${p}">If you still want to be there on 7-8 November, finish the order here${input.offer ? ` - ${esc(input.offer)} still apply` : ""}:</p>
       <p style="margin:22px 0 0"><a href="${SITE}${input.resumePath}${input.resumePath.includes("?") ? "&" : "?"}lang=en" style="display:inline-block;background:#146455;color:#f1f5f3;text-decoration:none;font:600 14px/1 -apple-system,Segoe UI,Roboto,sans-serif;padding:14px 22px;border-radius:999px">Finish the order</a></p>
       <div style="margin-top:26px;height:3px;background:#cef870;border-radius:2px"></div>
-      <p style="margin:22px 0 0;font:400 12px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f80">If you no longer want a ticket, this is the only reminder you will get. Questions: reply to this email or write to hi@biohacking.bg. Order ${input.reference}.</p>
+      <p style="margin:22px 0 0;font:400 12px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f80">If you no longer want a ticket, just ignore this - we will write at most once more. Questions: reply to this email or write to hi@biohacking.bg. Order ${input.reference}.</p>
   </td></tr></table></body></html>`;
   }
   return `<!doctype html>
@@ -319,7 +319,7 @@ export function reminderEmailText(input: ReminderEmailInput, t: MailTexts = defa
       `If you still want to be there on 7-8 November, finish the order here${input.offer ? ` (${input.offer} still apply)` : ""}:`,
       `${SITE}${input.resumePath}${input.resumePath.includes("?") ? "&" : "?"}lang=en`,
       "",
-      "If you no longer want a ticket, this is the only reminder you will get.",
+      "If you no longer want a ticket, just ignore this - we will write at most once more.",
       `Questions: hi@biohacking.bg · Order ${input.reference}`,
     ].join("\n");
   }
@@ -360,6 +360,47 @@ export async function sendReminderEmail(input: ReminderEmailInput): Promise<stri
     return data?.id ?? "";
   } catch (error) {
     console.error("[email] reminder send threw:", error);
+    return null;
+  }
+}
+
+/**
+ * One letter of a sequence (lib/sequences.ts): the sequence builds the
+ * words, this only sends them and hands back the provider's id so opens
+ * and clicks can be written against the right row later.
+ */
+export async function sendSequenceMail(input: {
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+  /** Marketing letters carry the one-click unsubscribe headers; transactional ones do not. */
+  unsubscribe?: { url: string; postUrl: string };
+}): Promise<string | null> {
+  const resend = getResend();
+  const from = process.env.EMAIL_FROM;
+  if (!resend || !from) {
+    console.warn("[email] not configured - skipping sequence mail");
+    return null;
+  }
+  try {
+    const { data, error } = await resend.emails.send({
+      from, replyTo: REPLY_TO,
+      to: input.to,
+      subject: input.subject,
+      html: input.html,
+      text: input.text,
+      headers: input.unsubscribe
+        ? { "List-Unsubscribe": `<${input.unsubscribe.postUrl}>, <${input.unsubscribe.url}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" }
+        : undefined,
+    });
+    if (error) {
+      console.error("[email] sequence send failed:", error);
+      return null;
+    }
+    return data?.id ?? "";
+  } catch (error) {
+    console.error("[email] sequence send threw:", error);
     return null;
   }
 }
@@ -841,6 +882,9 @@ export type ListMailInput = {
   body: string;
   ctaLabel: string | null;
   ctaUrl: string | null;
+  /** A letter already rendered elsewhere (the sequences) - sent as is, inside no frame. */
+  html?: string;
+  text?: string;
 };
 
 /** Line breaks the way people type them, escaped, as paragraphs. */
@@ -903,22 +947,22 @@ export function listMailText(input: ListMailInput, unsubUrl: string): string {
  * unsubscribe link, and the List-Unsubscribe header lets Gmail show its own
  * button - which keeps complaints off the spam report.
  */
-export async function sendListMailBatch(inputs: ListMailInput[]): Promise<{ ok: boolean; error?: string }> {
+export async function sendListMailBatch(inputs: ListMailInput[]): Promise<{ ok: boolean; error?: string; ids?: string[] }> {
   const resend = getResend();
   const from = process.env.EMAIL_FROM;
   if (!resend || !from) return { ok: false, error: "Пощата не е настроена." };
-  if (inputs.length === 0) return { ok: true };
+  if (inputs.length === 0) return { ok: true, ids: [] };
   const { unsubscribeUrl, unsubscribePostUrl } = await import("@/lib/unsubscribe");
   try {
-    const { error } = await resend.batch.send(
+    const { data, error } = await resend.batch.send(
       inputs.map((input) => {
         const unsub = unsubscribeUrl(input.to);
         return {
           from, replyTo: REPLY_TO,
           to: input.to,
           subject: input.subject,
-          html: listMailHtml(input, unsub),
-          text: listMailText(input, unsub),
+          html: input.html ?? listMailHtml(input, unsub),
+          text: input.text ?? listMailText(input, unsub),
           headers: {
             "List-Unsubscribe": `<${unsubscribePostUrl(input.to)}>, <${unsub}>`,
             "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
@@ -930,7 +974,8 @@ export async function sendListMailBatch(inputs: ListMailInput[]): Promise<{ ok: 
       console.error("[email] list mail batch failed:", error);
       return { ok: false, error: error.message };
     }
-    return { ok: true };
+    // The ids come back in the order the letters went in.
+    return { ok: true, ids: data?.data.map((d) => d.id) ?? [] };
   } catch (error) {
     console.error("[email] list mail batch threw:", error);
     return { ok: false, error: error instanceof Error ? error.message : String(error) };

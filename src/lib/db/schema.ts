@@ -195,6 +195,13 @@ export const orders = pgTable(
     reminderClickedAt: timestamp("reminder_clicked_at", { withTimezone: true }),
 
     /**
+     * An upgrade order pays the difference to a higher tier for one existing
+     * ticket, named here by its code. Paying it changes that ticket's tier
+     * instead of issuing a new one (see markOrderPaid).
+     */
+    upgradesTicketCode: text("upgrades_ticket_code"),
+
+    /**
      * Set from Stripe's charge.refunded event. A full refund flips `status`
      * to "refunded", which is what stops the tickets at the door; a partial
      * one only records the amount and leaves the order paid. The invoice
@@ -882,6 +889,30 @@ export const consentLog = pgTable(
  * `holdLabel` is for a module given to someone who is not a partner row
  * (the organiser's own stand, a media corner) or blocked on purpose.
  */
+/**
+ * Every letter of a sequence that went out: which letter, to whom, about
+ * which order or ticket, and what the mail provider later said about it.
+ * One row per (kind, target), so a run that is interrupted and resumed can
+ * never send the same letter twice.
+ */
+export const emailSends = pgTable(
+  "email_sends",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    /** abandoned-2 | upgrade-plus-0 | upgrade-plus-5 | upgrade-plus-3d | upgrade-peak | list-<slug> */
+    kind: text("kind").notNull(),
+    /** The order reference, ticket code or list address the letter is about. */
+    target: text("target").notNull(),
+    email: text("email").notNull(),
+    /** The provider's id, so opens and clicks can be written back. */
+    emailId: text("email_id"),
+    sentAt: timestamp("sent_at", { withTimezone: true }).notNull().defaultNow(),
+    openedAt: timestamp("opened_at", { withTimezone: true }),
+    clickedAt: timestamp("clicked_at", { withTimezone: true }),
+  },
+  (table) => [uniqueIndex("email_sends_kind_target_idx").on(table.kind, table.target), index("email_sends_email_id_idx").on(table.emailId)],
+);
+
 export const boothAssignments = pgTable("booth_assignments", {
   /** A module id from the plan: A1 … D8 (booths-plan.ts). */
   booth: text("booth").primaryKey(),

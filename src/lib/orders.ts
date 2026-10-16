@@ -259,6 +259,7 @@ export async function markOrderPaid(
         email: orders.email,
         totalCents: orders.totalCents,
         lang: orders.lang,
+        upgradesTicketCode: orders.upgradesTicketCode,
         marketingConsentVersion: orders.marketingConsentVersion,
         metaFbp: orders.metaFbp,
         metaFbc: orders.metaFbc,
@@ -294,6 +295,40 @@ export async function markOrderPaid(
       .from(orders)
       .where(sql`${orders.id} = ${orderId}`);
 
+    const [order] = updated;
+
+    // An upgrade pays the difference for one existing ticket: that ticket
+    // moves to the higher tier (and admits both days, as every tier above
+    // CORE does) and no new ticket is minted. The order's single item names
+    // the tier it moves to.
+    if (order.upgradesTicketCode) {
+      const target = items[0]?.tierId;
+      const moved = target
+        ? await tx
+            .update(tickets)
+            .set({ tierId: target, day: null })
+            .where(sql`${tickets.code} = ${order.upgradesTicketCode}`)
+            .returning({ code: tickets.code, tierId: tickets.tierId })
+        : [];
+      return {
+        issued: 0,
+        order: {
+          reference: order.reference,
+          name: order.name,
+          email: order.email,
+          totalCents: order.totalCents,
+          invoiceNumber: invoiced ? Number(invoiced.invoice_number) : null,
+          lang: order.lang === "en" ? "en" : "bg",
+          marketingConsentVersion: order.marketingConsentVersion,
+          metaFbp: order.metaFbp,
+          metaFbc: order.metaFbc,
+          metaClientIp: order.metaClientIp,
+          metaUserAgent: order.metaUserAgent,
+          tickets: moved.map((row) => ({ code: row.code, tierName: getTier(row.tierId)?.name ?? row.tierId, day: null })),
+        },
+      };
+    }
+
     const rows = items.flatMap((item) =>
       Array.from({ length: item.quantity }, () => ({
         orderId,
@@ -306,7 +341,6 @@ export async function markOrderPaid(
 
     if (rows.length) await tx.insert(tickets).values(rows);
 
-    const [order] = updated;
     return {
       issued: rows.length,
       order: {

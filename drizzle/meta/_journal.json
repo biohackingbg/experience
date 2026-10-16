@@ -302,6 +302,13 @@
       "when": 1789000000041,
       "tag": "0042_booth_b6_to_b2",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1789000000042,
+      "tag": "0043_email_sequences",
+      "breakpoints": true
     }
   ]
 }

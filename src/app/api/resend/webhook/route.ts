@@ -4,7 +4,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
-import { orders } from "@/lib/db/schema";
+import { emailSends, orders } from "@/lib/db/schema";
 
 export const dynamic = "force-dynamic";
 
@@ -72,6 +72,16 @@ export async function POST(request: Request) {
         : { reminderClickedAt: sql`coalesce(${orders.reminderClickedAt}, now())` },
     )
     .where(sql`${orders.reminderEmailId} = ${emailId}`);
+
+  // The sequence letters keep their own rows (lib/sequences.ts).
+  await getDb()
+    .update(emailSends)
+    .set(
+      column === orders.reminderOpenedAt
+        ? { openedAt: sql`coalesce(${emailSends.openedAt}, now())` }
+        : { clickedAt: sql`coalesce(${emailSends.clickedAt}, now())` },
+    )
+    .where(sql`${emailSends.emailId} = ${emailId}`);
 
   return NextResponse.json({ ok: true });
 }

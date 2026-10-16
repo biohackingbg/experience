@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { canAccess } from "@/lib/access";
 import { sendInfoMail, sendInfoMailTest } from "@/lib/event-mail";
 import { MAIL_SLOTS, saveMailTexts } from "@/lib/mail-texts";
+import { type ListLetterId, LIST_LETTERS } from "@/lib/sequence-letters";
+import { sendSequenceTest, setSequencesOn, skipListLetter } from "@/lib/sequences";
 
 export type MailState = { status: "idle" | "ok" | "error"; message?: string };
 
@@ -63,4 +65,35 @@ export async function saveTexts(_prev: TextState, formData: FormData): Promise<T
   await saveMailTexts(patch);
   revalidatePath("/admin/pisma");
   return { status: "ok", message: reset ? "Върнати по подразбиране." : "Записано - превюто отгоре е новото." };
+}
+
+/* ------------------------------------------------------------------ *
+ * The automatic sequences
+ * ------------------------------------------------------------------ */
+
+export async function toggleSequences(_prev: MailState, formData: FormData): Promise<MailState> {
+  if (!(await canAccess("pisma"))) return { status: "error", message: "Няма достъп." };
+  const on = formData.get("on") === "1";
+  await setSequencesOn(on);
+  revalidatePath("/admin/pisma");
+  return { status: "ok", message: on ? "Поредиците са пуснати. Първият пуск е в началото на следващия час." : "Поредиците са спрени." };
+}
+
+export async function sendSequenceTestAction(_prev: MailState, formData: FormData): Promise<MailState> {
+  if (!(await canAccess("pisma"))) return { status: "error", message: "Няма достъп." };
+  const to = String(formData.get("to") ?? "").trim().toLowerCase();
+  const kind = String(formData.get("kind") ?? "");
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)) return { status: "error", message: "Невалиден имейл." };
+  const ok = await sendSequenceTest(kind, to);
+  return ok ? { status: "ok", message: `Пробата е изпратена до ${to}.` } : { status: "error", message: "Изпращането не мина." };
+}
+
+export async function skipLetter(_prev: MailState, formData: FormData): Promise<MailState> {
+  if (!(await canAccess("pisma"))) return { status: "error", message: "Няма достъп." };
+  const id = String(formData.get("id") ?? "") as ListLetterId;
+  if (!LIST_LETTERS.some((l) => l.id === id)) return { status: "error", message: "Няма такова писмо." };
+  const undo = formData.get("undo") === "1";
+  await skipListLetter(id, undo);
+  revalidatePath("/admin/pisma");
+  return { status: "ok", message: undo ? "Писмото пак е в плана." : "Писмото няма да се праща." };
 }

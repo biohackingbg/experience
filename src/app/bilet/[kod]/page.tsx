@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import QRCode from "qrcode";
 
@@ -184,6 +185,16 @@ export default async function TicketPage({
             booked={places.bookings.map((b) => b.workshopId)}
             remaining={places.remaining}
           />
+        )}
+
+        {!ticket.checkedInAt && (ticket.tierId === "core" || ticket.tierId === "plus") && (
+          <p className="mt-5 text-center text-xs leading-relaxed text-bh-ink/55 print:hidden">
+            <Link href={`/bilet/nadgradi/${encodeURIComponent(ticket.code)}`} className="font-semibold text-bh-pine underline underline-offset-2">
+              {ticket.lang === "en"
+                ? `Upgrade to ${ticket.tierId === "core" ? "PLUS" : "PEAK"} - pay only the difference`
+                : `Надгради до ${ticket.tierId === "core" ? "PLUS" : "PEAK"} - плащаш само разликата`}
+            </Link>
+          </p>
         )}
 
         <p className="mt-5 text-center text-xs leading-relaxed text-bh-ink/45 print:hidden">
