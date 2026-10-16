@@ -239,7 +239,7 @@ export const CONCEPT: Copy<{
       intro: "Движение, дишане и работилници: не гледаш отстрани, а правиш. Всяко преживяване е водено от партньор в своята област.",
       items: [
         { id: "pilates-reformer", title: "Pilates reformer" },
-        { id: "lagree", title: "Lagree pilates" },
+        { id: "lagree", title: "Lagree" },
         { id: "mobility", title: "Mobility" },
         { id: "mat-pilates", title: "Mat pilates" },
         { id: "psychosomatics", title: "Психосоматика - workshop с Виолета Михайлова" },
@@ -272,7 +272,7 @@ export const CONCEPT: Copy<{
       intro: "Movement, breath and workshops: you do not watch from the side, you do it. Each experience is run by a partner in its field.",
       items: [
         { id: "pilates-reformer", title: "Pilates reformer" },
-        { id: "lagree", title: "Lagree pilates" },
+        { id: "lagree", title: "Lagree" },
         { id: "mobility", title: "Mobility" },
         { id: "mat-pilates", title: "Mat pilates" },
         { id: "psychosomatics", title: "Psychosomatics - workshop with Violeta Mihaylova" },
