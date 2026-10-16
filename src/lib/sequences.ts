@@ -84,6 +84,57 @@ export async function setSequencesOn(on: boolean): Promise<void> {
   await setSetting("sequences_paused", on ? "0" : "1");
 }
 
+/**
+ * Per letter: whether it runs at all, the day it may start (so a sequence
+ * can wait for the price stage to pass), and for a dated list letter its
+ * own date and time instead of the one in code. Dates are Sofia days.
+ */
+export type KindConfig = { on: boolean; from: string | null; at: string | null };
+export type SequenceConfig = Record<string, KindConfig>;
+
+const DEFAULT_KIND: KindConfig = { on: true, from: null, at: null };
+
+export async function getSequenceConfig(): Promise<SequenceConfig> {
+  const raw = (await getSetting("sequences_config"))?.value;
+  if (!raw) return {};
+  try {
+    const v = JSON.parse(raw) as Record<string, Partial<KindConfig>>;
+    const out: SequenceConfig = {};
+    for (const [k, c] of Object.entries(v)) out[k] = { on: c.on !== false, from: c.from || null, at: c.at || null };
+    return out;
+  } catch {
+    return {};
+  }
+}
+
+export async function saveKindConfig(kind: string, patch: Partial<KindConfig>): Promise<void> {
+  const cfg = await getSequenceConfig();
+  cfg[kind] = { ...DEFAULT_KIND, ...(cfg[kind] ?? {}), ...patch };
+  await setSetting("sequences_config", JSON.stringify(cfg));
+}
+
+/** Midnight of a Sofia day (YYYY-MM-DD), whichever side of the clock change it falls. */
+export function sofiaMidnight(day: string): Date {
+  const guess = new Date(`${day}T00:00:00+02:00`);
+  const h = Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Sofia", hour: "2-digit", hour12: false }).format(guess));
+  return h === 1 ? new Date(guess.getTime() - HOUR) : guess;
+}
+
+/** A local date-time typed in the admin ("2026-10-26T09:00"), read as Sofia time. */
+export function sofiaTime(local: string): Date {
+  const [day, time = "09:00"] = local.split("T");
+  const [hh, mm] = time.split(":").map(Number);
+  return new Date(sofiaMidnight(day).getTime() + (hh * 60 + (mm || 0)) * 60_000);
+}
+
+/** Why the hourly run would leave this letter alone right now, or null to go ahead. */
+function gate(kind: string, cfg: SequenceConfig, now: Date): string | null {
+  const c = cfg[kind] ?? DEFAULT_KIND;
+  if (!c.on) return "изключено";
+  if (c.from && now < sofiaMidnight(c.from)) return `чака до ${c.from.split("-").reverse().join(".")}`;
+  return null;
+}
+
 /* ------------------------------------------------------------------ *
  * Bookkeeping
  * ------------------------------------------------------------------ */
@@ -189,9 +240,9 @@ async function runAbandoned2(dry: boolean, pricing: Pricing): Promise<Step> {
  * 2 + 3 · Upgrades
  * ------------------------------------------------------------------ */
 
-type UpgradeRule = { kind: string; step: UpgradeStep; from: Tier; to: Tier; where: () => ReturnType<typeof sql> | null };
+type UpgradeRule = { kind: string; step: UpgradeStep; from: Tier; to: Tier; at: Date | null; where: () => ReturnType<typeof sql> };
 
-function upgradeRules(now: Date): UpgradeRule[] {
+function upgradeRules(): UpgradeRule[] {
   const core = getTier("core")!;
   const plus = getTier("plus")!;
   const peak = getTier("peak")!;
@@ -201,28 +252,28 @@ function upgradeRules(now: Date): UpgradeRule[] {
   // Day 0 only when no upgrade letter at all has gone for the order.
   return [
     {
-      kind: "upgrade-plus-0", step: "plus-0", from: core, to: plus,
+      kind: "upgrade-plus-0", step: "plus-0", from: core, to: plus, at: null,
       where: () => sql`${orders.paidAt} <= now() - interval ${age(PLUS_0_FROM)} and ${orders.paidAt} > now() - interval ${age(PLUS_0_UNTIL)} and ${noOther("upgrade-plus")}`,
     },
     {
-      kind: "upgrade-plus-5", step: "plus-5", from: core, to: plus,
+      kind: "upgrade-plus-5", step: "plus-5", from: core, to: plus, at: null,
       where: () => sql`${orders.paidAt} <= now() - interval ${age(PLUS_5_FROM)} and not exists (select 1 from ${emailSends} s where s.kind in ('upgrade-plus-5', 'upgrade-plus-3d') and s.target = ${orders.reference})`,
     },
     {
-      kind: "upgrade-plus-3d", step: "plus-3d", from: core, to: plus,
-      where: () => (now >= PLUS_3D_AT ? sql`not exists (select 1 from ${emailSends} s where s.kind = 'upgrade-plus-3d' and s.target = ${orders.reference})` : null),
+      kind: "upgrade-plus-3d", step: "plus-3d", from: core, to: plus, at: PLUS_3D_AT,
+      where: () => sql`not exists (select 1 from ${emailSends} s where s.kind = 'upgrade-plus-3d' and s.target = ${orders.reference})`,
     },
     {
-      kind: "upgrade-peak", step: "peak", from: plus, to: peak,
-      where: () => (now >= PEAK_AT ? sql`not exists (select 1 from ${emailSends} s where s.kind = 'upgrade-peak' and s.target = ${orders.reference})` : null),
+      kind: "upgrade-peak", step: "peak", from: plus, to: peak, at: PEAK_AT,
+      where: () => sql`not exists (select 1 from ${emailSends} s where s.kind = 'upgrade-peak' and s.target = ${orders.reference})`,
     },
   ];
 }
 
-async function runUpgrade(rule: UpgradeRule, dry: boolean, now: Date, pricing: Pricing): Promise<Step> {
+async function runUpgrade(rule: UpgradeRule, dry: boolean, now: Date, pricing: Pricing, force: boolean): Promise<Step> {
   if (now >= EVENT_AT) return { kind: rule.kind, sent: 0, skipped: "събитието започна" };
+  if (!force && rule.at && now < rule.at) return { kind: rule.kind, sent: 0, skipped: `от ${sofia(rule.at)}` };
   const extra = rule.where();
-  if (!extra) return { kind: rule.kind, sent: 0, skipped: "още не е време" };
   const left = await getRemaining(rule.to.id);
   if (left < 1) return { kind: rule.kind, sent: 0, skipped: `${rule.to.name} е изчерпан` };
 
@@ -291,22 +342,37 @@ export async function skipListLetter(id: ListLetterId, undo = false): Promise<vo
   await db.insert(emailSends).values({ kind: `list-${id}`, target: `list:${id}`, email: "skipped" }).onConflictDoNothing();
 }
 
-async function runList(dry: boolean, now: Date, pricing: Pricing): Promise<Step[]> {
+/** When a list letter goes: the admin's date if one was typed, else the one in code. */
+export function listLetterAt(id: ListLetterId, cfg: SequenceConfig): Date {
+  const own = cfg[`list-${id}`]?.at;
+  return own ? sofiaTime(own) : LIST_LETTERS.find((l) => l.id === id)!.at;
+}
+
+async function runList(dry: boolean, now: Date, pricing: Pricing, cfg: SequenceConfig, force: boolean, only?: string): Promise<Step[]> {
   const out: Step[] = [];
   for (const def of LIST_LETTERS) {
     const kind = `list-${def.id}`;
-    if (now < def.at) {
-      out.push({ kind, sent: 0, skipped: "още не е време" });
-      continue;
-    }
+    if (only && only !== kind) continue;
+    const at = listLetterAt(def.id, cfg);
     const state = await listSent(def.id);
     if (state) {
       out.push({ kind, sent: 0, skipped: state === "sent" ? "изпратено" : "пропуснато" });
       continue;
     }
-    if (now.getTime() - def.at.getTime() > LIST_GRACE) {
-      out.push({ kind, sent: 0, skipped: "закъсняло с над 36 ч - не се праща" });
-      continue;
+    if (!force) {
+      const why = gate(kind, cfg, now);
+      if (why) {
+        out.push({ kind, sent: 0, skipped: why });
+        continue;
+      }
+      if (now < at) {
+        out.push({ kind, sent: 0, skipped: `на ${sofia(at)}` });
+        continue;
+      }
+      if (now.getTime() - at.getTime() > LIST_GRACE) {
+        out.push({ kind, sent: 0, skipped: "закъсняло с над 36 ч - не се праща" });
+        continue;
+      }
     }
     if (def.needsDiscount && !pricing.discounted) {
       out.push({ kind, sent: 0, skipped: "междинните цени вече не са на" });
@@ -361,17 +427,33 @@ async function runList(dry: boolean, now: Date, pricing: Pricing): Promise<Step[
 
 export type Step = { kind: string; sent: number; skipped?: string; to?: string[] };
 
-export async function runSequences(opts: { dry?: boolean; now?: Date } = {}): Promise<{ on: boolean; steps: Step[] }> {
+/**
+ * `force` is the admin's "send now": the master switch, the per-letter
+ * switch and start day, and the dates are all ignored; what still holds is
+ * everything that protects a person - one letter per target, the opt-out,
+ * sold-out tiers, a price letter after the prices changed. `only` limits
+ * the run to one letter.
+ */
+export async function runSequences(opts: { dry?: boolean; now?: Date; force?: boolean; only?: string } = {}): Promise<{ on: boolean; steps: Step[] }> {
   const dry = !!opts.dry;
+  const force = !!opts.force;
+  const only = opts.only;
   const now = opts.now ?? new Date();
   const on = await sequencesOn();
-  if (!on && !dry) return { on, steps: [] };
-  const pricing = await getPricing();
+  if (!on && !dry && !force) return { on, steps: [] };
+  const [pricing, cfg] = await Promise.all([getPricing(), getSequenceConfig()]);
   const steps: Step[] = [];
-  steps.push(await runAbandoned1(dry));
-  steps.push(await runAbandoned2(dry, pricing));
-  for (const rule of upgradeRules(now)) steps.push(await runUpgrade(rule, dry, now, pricing));
-  steps.push(...(await runList(dry, now, pricing)));
+  const wants = (kind: string) => !only || only === kind;
+  const gated = (kind: string) => (force ? null : gate(kind, cfg, now));
+  const push = async (kind: string, run: () => Promise<Step>) => {
+    if (!wants(kind)) return;
+    const why = gated(kind);
+    steps.push(why ? { kind, sent: 0, skipped: why } : await run());
+  };
+  await push("abandoned-1", () => runAbandoned1(dry));
+  await push("abandoned-2", () => runAbandoned2(dry, pricing));
+  for (const rule of upgradeRules()) await push(rule.kind, () => runUpgrade(rule, dry, now, pricing, force));
+  steps.push(...(await runList(dry, now, pricing, cfg, force, only)));
   return { on, steps };
 }
 

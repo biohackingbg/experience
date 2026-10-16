@@ -6,7 +6,7 @@ import { canAccess } from "@/lib/access";
 import { sendInfoMail, sendInfoMailTest } from "@/lib/event-mail";
 import { MAIL_SLOTS, saveMailTexts } from "@/lib/mail-texts";
 import { type ListLetterId, LIST_LETTERS } from "@/lib/sequence-letters";
-import { sendSequenceTest, setSequencesOn, skipListLetter } from "@/lib/sequences";
+import { SEQUENCE_KINDS, runSequences, saveKindConfig, sendSequenceTest, setSequencesOn, skipListLetter } from "@/lib/sequences";
 
 export type MailState = { status: "idle" | "ok" | "error"; message?: string };
 
@@ -96,4 +96,33 @@ export async function skipLetter(_prev: MailState, formData: FormData): Promise<
   await skipListLetter(id, undo);
   revalidatePath("/admin/pisma");
   return { status: "ok", message: undo ? "Писмото пак е в плана." : "Писмото няма да се праща." };
+}
+
+const isKind = (k: string) => SEQUENCE_KINDS.some((s) => s.kind === k);
+
+/** The switch, the start day and (for a list letter) the date of one letter. */
+export async function saveKind(_prev: MailState, formData: FormData): Promise<MailState> {
+  if (!(await canAccess("pisma"))) return { status: "error", message: "Няма достъп." };
+  const kind = String(formData.get("kind") ?? "");
+  if (!isKind(kind)) return { status: "error", message: "Няма такова писмо." };
+  const from = String(formData.get("from") ?? "").trim();
+  const at = String(formData.get("at") ?? "").trim();
+  if (from && !/^\d{4}-\d{2}-\d{2}$/.test(from)) return { status: "error", message: "Невалидна дата." };
+  if (at && !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(at)) return { status: "error", message: "Невалидна дата и час." };
+  await saveKindConfig(kind, { on: formData.get("on") === "1", from: from || null, at: at || null });
+  revalidatePath("/admin/pisma");
+  return { status: "ok", message: "Запазено." };
+}
+
+/** "Прати сега": one letter, to everyone who is due for it, regardless of switches and dates. */
+export async function sendKindNow(_prev: MailState, formData: FormData): Promise<MailState> {
+  if (!(await canAccess("pisma"))) return { status: "error", message: "Няма достъп." };
+  const kind = String(formData.get("kind") ?? "");
+  if (!isKind(kind)) return { status: "error", message: "Няма такова писмо." };
+  const { steps } = await runSequences({ force: true, only: kind });
+  revalidatePath("/admin/pisma");
+  const step = steps[0];
+  if (!step) return { status: "error", message: "Нищо не тръгна." };
+  if (step.skipped && !step.sent) return { status: "error", message: `Не е изпратено: ${step.skipped}.` };
+  return { status: "ok", message: `Изпратени ${step.sent}${step.skipped ? ` (${step.skipped})` : ""}.` };
 }
