@@ -7,9 +7,8 @@ export const maxDuration = 60;
 
 /**
  * The automatic letters (lib/sequences.ts), run every hour by Vercel Cron.
- * `?dry=1` lists what would go without sending anything - and runs even
- * while the sequences are switched off, so the dashboard can show the
- * queue before anyone turns them on.
+ * `?dry=1` lists what would go without sending anything. Which letters
+ * are on is decided per letter in the dashboard (lib/sequences.ts).
  */
 export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET;

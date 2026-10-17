@@ -6,7 +6,7 @@ import { canAccess } from "@/lib/access";
 import { sendInfoMail, sendInfoMailTest } from "@/lib/event-mail";
 import { MAIL_SLOTS, saveMailTexts } from "@/lib/mail-texts";
 import { type ListLetterId, LIST_LETTERS } from "@/lib/sequence-letters";
-import { SEQUENCE_KINDS, runSequences, saveKindConfig, sendSequenceTest, setSequencesOn, skipListLetter } from "@/lib/sequences";
+import { SEQUENCE_KINDS, runSequences, saveKindConfig, sendSequenceTest, skipListLetter } from "@/lib/sequences";
 
 export type MailState = { status: "idle" | "ok" | "error"; message?: string };
 
@@ -71,14 +71,6 @@ export async function saveTexts(_prev: TextState, formData: FormData): Promise<T
  * The automatic sequences
  * ------------------------------------------------------------------ */
 
-export async function toggleSequences(_prev: MailState, formData: FormData): Promise<MailState> {
-  if (!(await canAccess("pisma"))) return { status: "error", message: "Няма достъп." };
-  const on = formData.get("on") === "1";
-  await setSequencesOn(on);
-  revalidatePath("/admin/pisma");
-  return { status: "ok", message: on ? "Поредиците са пуснати. Първият пуск е в началото на следващия час." : "Поредиците са спрени." };
-}
-
 export async function sendSequenceTestAction(_prev: MailState, formData: FormData): Promise<MailState> {
   if (!(await canAccess("pisma"))) return { status: "error", message: "Няма достъп." };
   const to = String(formData.get("to") ?? "").trim().toLowerCase();
@@ -109,9 +101,20 @@ export async function saveKind(_prev: MailState, formData: FormData): Promise<Ma
   const at = String(formData.get("at") ?? "").trim();
   if (from && !/^\d{4}-\d{2}-\d{2}$/.test(from)) return { status: "error", message: "Невалидна дата." };
   if (at && !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(at)) return { status: "error", message: "Невалидна дата и час." };
-  await saveKindConfig(kind, { on: formData.get("on") === "1", from: from || null, at: at || null });
+  await saveKindConfig(kind, { from: from || null, at: at || null });
   revalidatePath("/admin/pisma");
   return { status: "ok", message: "Запазено." };
+}
+
+/** The on/off switch of one letter, saved the moment it is pressed. */
+export async function toggleKind(_prev: MailState, formData: FormData): Promise<MailState> {
+  if (!(await canAccess("pisma"))) return { status: "error", message: "Няма достъп." };
+  const kind = String(formData.get("kind") ?? "");
+  if (!isKind(kind)) return { status: "error", message: "Няма такова писмо." };
+  const on = formData.get("on") === "1";
+  await saveKindConfig(kind, { on });
+  revalidatePath("/admin/pisma");
+  return { status: "ok", message: on ? "Включено." : "Изключено." };
 }
 
 /** "Прати сега": one letter, to everyone who is due for it, regardless of switches and dates. */

@@ -33,8 +33,8 @@ import { upgradableTickets } from "@/lib/upgrades";
  * a run that is cut off cannot send the same letter twice - and the
  * dashboard reads the same rows for its numbers.
  *
- * The whole thing is off until someone turns it on from the dashboard:
- * these letters go to real people, and the first run after a deploy would
+ * Every letter is off until someone switches it on from the dashboard, one
+ * by one: these letters go to real people, and the first run would
  * otherwise write to every CORE buyer at once before anyone read the words.
  */
 
@@ -75,15 +75,6 @@ export function sofia(d: Date): string {
  * Switch
  * ------------------------------------------------------------------ */
 
-/** Off unless explicitly on: see the note at the top. */
-export async function sequencesOn(): Promise<boolean> {
-  return (await getSetting("sequences_paused"))?.value === "0";
-}
-
-export async function setSequencesOn(on: boolean): Promise<void> {
-  await setSetting("sequences_paused", on ? "0" : "1");
-}
-
 /**
  * Per letter: whether it runs at all, the day it may start (so a sequence
  * can wait for the price stage to pass), and for a dated list letter its
@@ -92,15 +83,18 @@ export async function setSequencesOn(on: boolean): Promise<void> {
 export type KindConfig = { on: boolean; from: string | null; at: string | null };
 export type SequenceConfig = Record<string, KindConfig>;
 
-const DEFAULT_KIND: KindConfig = { on: true, from: null, at: null };
+// Every letter is off until someone switches it on in the dashboard.
+const DEFAULT_KIND: KindConfig = { on: false, from: null, at: null };
 
 export async function getSequenceConfig(): Promise<SequenceConfig> {
-  const raw = (await getSetting("sequences_config"))?.value;
+  // v2: the key changed when the master switch went away, so every letter
+  // starts off and is switched on knowingly, one by one.
+  const raw = (await getSetting("sequences_config_v2"))?.value;
   if (!raw) return {};
   try {
     const v = JSON.parse(raw) as Record<string, Partial<KindConfig>>;
     const out: SequenceConfig = {};
-    for (const [k, c] of Object.entries(v)) out[k] = { on: c.on !== false, from: c.from || null, at: c.at || null };
+    for (const [k, c] of Object.entries(v)) out[k] = { on: c.on === true, from: c.from || null, at: c.at || null };
     return out;
   } catch {
     return {};
@@ -110,7 +104,7 @@ export async function getSequenceConfig(): Promise<SequenceConfig> {
 export async function saveKindConfig(kind: string, patch: Partial<KindConfig>): Promise<void> {
   const cfg = await getSequenceConfig();
   cfg[kind] = { ...DEFAULT_KIND, ...(cfg[kind] ?? {}), ...patch };
-  await setSetting("sequences_config", JSON.stringify(cfg));
+  await setSetting("sequences_config_v2", JSON.stringify(cfg));
 }
 
 /** Midnight of a Sofia day (YYYY-MM-DD), whichever side of the clock change it falls. */
@@ -434,13 +428,11 @@ export type Step = { kind: string; sent: number; skipped?: string; to?: string[]
  * sold-out tiers, a price letter after the prices changed. `only` limits
  * the run to one letter.
  */
-export async function runSequences(opts: { dry?: boolean; now?: Date; force?: boolean; only?: string } = {}): Promise<{ on: boolean; steps: Step[] }> {
+export async function runSequences(opts: { dry?: boolean; now?: Date; force?: boolean; only?: string } = {}): Promise<{ steps: Step[] }> {
   const dry = !!opts.dry;
   const force = !!opts.force;
   const only = opts.only;
   const now = opts.now ?? new Date();
-  const on = await sequencesOn();
-  if (!on && !dry && !force) return { on, steps: [] };
   const [pricing, cfg] = await Promise.all([getPricing(), getSequenceConfig()]);
   const steps: Step[] = [];
   const wants = (kind: string) => !only || only === kind;
@@ -454,7 +446,7 @@ export async function runSequences(opts: { dry?: boolean; now?: Date; force?: bo
   await push("abandoned-2", () => runAbandoned2(dry, pricing));
   for (const rule of upgradeRules()) await push(rule.kind, () => runUpgrade(rule, dry, now, pricing, force));
   steps.push(...(await runList(dry, now, pricing, cfg, force, only)));
-  return { on, steps };
+  return { steps };
 }
 
 /* ------------------------------------------------------------------ *

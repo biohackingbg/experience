@@ -1,9 +1,9 @@
 import { getPricing } from "@/lib/pricing";
 import { ALUMNI_CODE, LIST_LETTERS, alumniDraft } from "@/lib/sequence-letters";
-import { SEQUENCE_KINDS, getSequenceConfig, listLetterAt, listLetterStates, runSequences, sequencePreview, sequenceStats, sequencesOn, sofia } from "@/lib/sequences";
+import { SEQUENCE_KINDS, getSequenceConfig, listLetterAt, listLetterStates, runSequences, sequencePreview, sequenceStats, sofia } from "@/lib/sequences";
 import { formatPrice } from "@/lib/tickets";
 
-import { KindForm, SendNowForm, SequenceTestForm, SkipForm, ToggleForm } from "./SequenceForms";
+import { KindForm, KindToggle, SendNowForm, SequenceTestForm, SkipForm } from "./SequenceForms";
 
 const when = (d: Date | null) => (d ? d.toLocaleString("bg-BG", { timeZone: "Europe/Sofia", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "-");
 
@@ -12,8 +12,7 @@ const when = (d: Date | null) => (d ? d.toLocaleString("bg-BG", { timeZone: "Eur
  * preview, the dated list letters with their plan, and the alumni draft.
  */
 export async function SequencesSection() {
-  const [on, stats, states, pricing, cfg, due, plan] = await Promise.all([
-    sequencesOn(),
+  const [stats, states, pricing, cfg, due, plan] = await Promise.all([
     sequenceStats(),
     listLetterStates(),
     getPricing(),
@@ -38,15 +37,9 @@ export async function SequencesSection() {
             CORE → PLUS (ден 0, ден 5 и три дни преди), PLUS → PEAK (веднъж, от 28 октомври) и писмата до
             списъка на датите им. Всяко писмо отива веднъж на човек; който натисне „Не искам повече писма“, отпада от всички.
             „Платили след писмото“ брои поръчки от същия имейл след изпращането - надграждане или покупка.
-            Всяко писмо има свой ключ и ден „от“, за да изчака например края на междинните цени; „Прати сега“ го праща веднага
-            на всички, на които се полага, без да гледа ключовете и датите.
+            Всяко писмо е изключено, докато не го включиш от ключа на реда му; денят „от“ го кара да изчака,
+            например края на междинните цени. „Прати сега“ го праща веднага на всички, на които се полага, без да гледа ключа и датата.
           </p>
-        </div>
-        <div className="text-right">
-          <div className={`mb-2 inline-block rounded-full px-3 py-1 text-xs font-semibold ${on ? "bg-[#0E8C7D]/15 text-[#0b6d61]" : "bg-amber-100 text-amber-900"}`}>
-            {on ? "пуснати" : "спрени"}
-          </div>
-          <ToggleForm on={on} />
         </div>
       </div>
 
@@ -69,23 +62,25 @@ export async function SequencesSection() {
               const s = stats[k.kind];
               const listId = k.kind.startsWith("list-") ? k.kind.slice(5) : null;
               const st = listId ? states[listId as keyof typeof states] : null;
-              const c = cfg[k.kind] ?? { on: true, from: null, at: null };
+              const c = cfg[k.kind] ?? { on: false, from: null, at: null };
               const d = dueOf(k.kind);
               const p = planOf(k.kind);
               const whenText = listId ? sofia(listLetterAt(listId as keyof typeof states, cfg)) : k.when;
-              const next = !on ? "поредиците са спрени" : p?.skipped ? p.skipped : `${p?.sent ?? 0} писма`;
+              const next = p?.skipped ? p.skipped : `${p?.sent ?? 0} писма`;
               return (
                 <tr key={k.kind} className="align-top text-bh-ink">
                   <td className="py-2.5 pr-3">
                     <a href={`#seq-${k.kind}`} className="font-semibold hover:underline">{k.title}</a>
-                    {!c.on && <span className="ml-2 rounded-full bg-bh-ink/10 px-2 py-0.5 text-[0.6rem] font-semibold text-bh-ink/60">изключено</span>}
-                    {st === "skipped" && <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[0.6rem] font-semibold text-amber-900">няма да се праща</span>}
+                                        {st === "skipped" && <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[0.6rem] font-semibold text-amber-900">няма да се праща</span>}
                     {st === "sent" && <span className="ml-2 rounded-full bg-[#0E8C7D]/15 px-2 py-0.5 text-[0.6rem] font-semibold text-[#0b6d61]">изпратено</span>}
-                    <div className="mt-1.5 flex flex-wrap items-center gap-3">
+                    <div className="mt-2 flex flex-wrap items-center gap-3">
+                      <KindToggle kind={k.kind} on={c.on} />
                       {k.kind !== "abandoned-1" && st !== "sent" && (
                         <SendNowForm kind={k.kind} title={k.title} due={d?.skipped && !d.sent ? 0 : (d?.sent ?? 0)} />
                       )}
-                      <KindForm kind={k.kind} on={c.on} from={c.from} at={c.at} isList={!!listId} />
+                    </div>
+                    <div className="mt-2">
+                      <KindForm kind={k.kind} from={c.from} at={c.at} isList={!!listId} />
                     </div>
                   </td>
                   <td className="py-2.5 pr-3 text-xs text-bh-ink/60">{whenText}</td>
@@ -108,7 +103,7 @@ export async function SequencesSection() {
       <h3 className="mt-8 text-base font-bold tracking-tight text-bh-ink">План на писмата до списъка</h3>
       <p className="mt-1 text-xs text-bh-ink/55">
         До всички в списъка с новини, без тези, които вече са купили. Датата на всяко писмо се сменя от „кога“ в таблицата горе.
-        Писмата за цените се пращат само докато междинните цени са пуснати; писмо, закъсняло с над 36 часа (например ако поредиците са спрени), не се праща.
+        Писмата за цените се пращат само докато междинните цени са пуснати; писмо, закъсняло с над 36 часа (например ако писмото е било изключено), не се праща.
       </p>
       <ul className="mt-3 divide-y divide-bh-ink/8 rounded-2xl bg-bh-paper ring-1 ring-bh-ink/8">
         {LIST_LETTERS.map((l) => (
