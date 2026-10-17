@@ -277,6 +277,13 @@ export const tickets = pgTable(
      */
     day: integer("day"),
     checkedInAt: timestamp("checked_in_at", { withTimezone: true }),
+    /**
+     * The arrival window the holder picked for each day ("09:20"; see
+     * lib/arrivals.ts), so the door fills in waves rather than at once.
+     * Null until chosen; a one-day ticket uses only its day's column.
+     */
+    arrivalSlot1: text("arrival_slot_1"),
+    arrivalSlot2: text("arrival_slot_2"),
 
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()

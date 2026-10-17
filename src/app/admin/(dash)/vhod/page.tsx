@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { requireAccess } from "@/lib/access";
+import { arrivalStats, getArrivalPlan, slotLabel } from "@/lib/arrivals";
 import { getDoorStats, searchTickets } from "@/lib/tickets-lookup";
 
 import { admitTicket } from "./actions";
+import { ArrivalPlanForm, AssignRemainingForm } from "./ArrivalPlanForm";
 import { Scanner } from "./Scanner";
 import { dayLabel } from "@/lib/tickets";
 
@@ -34,7 +36,8 @@ export default async function DoorPage({
   await requireAccess("vhod");
 
   const { q = "" } = await searchParams;
-  const [stats, hits] = await Promise.all([getDoorStats(), searchTickets(q)]);
+  const [stats, hits, plan] = await Promise.all([getDoorStats(), searchTickets(q), getArrivalPlan()]);
+  const arrivals = await arrivalStats(plan);
 
   return (
     <div className="min-h-screen rounded-[1.75rem] bg-bh-paper px-5 py-8 sm:px-8">
@@ -74,6 +77,59 @@ export default async function DoorPage({
         </div>
 
         <Scanner />
+
+        {/* Arrival windows: the plan (set once the programme is final) and
+            how the two mornings are filling up. Off by default; nothing
+            shows anywhere until the box is ticked. */}
+        <section className="mt-10 rounded-3xl bg-bh-cloud p-5 ring-1 ring-bh-ink/6">
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="text-sm font-bold tracking-tight text-bh-ink">Вход на вълни</h2>
+            <span className={`rounded-full px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-wide ${plan.on ? "bg-[#0E8C7D]/15 text-[#0b6d61]" : "bg-amber-100 text-amber-900"}`}>
+              {plan.on ? "пуснато" : "спряно"}
+            </span>
+          </div>
+          <p className="mt-1 text-xs leading-relaxed text-bh-ink/55">
+            Всеки билет си избира прозорец за влизане по дни, за да идват хората на групи. Планът се сетва тук, когато
+            програмата е ясна (docs/vhod-na-vulni.md). Писмото „Избери час за влизане“ е в Писма.
+          </p>
+          <ArrivalPlanForm on={plan.on} slots={plan.slots} capacity={plan.capacity} />
+          {plan.on && (
+            <div className="mt-5">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left font-mono text-[0.6rem] uppercase tracking-[0.15em] text-bh-ink/45">
+                    <th className="py-1.5 font-normal">Прозорец</th>
+                    <th className="py-1.5 text-right font-normal">Събота</th>
+                    <th className="py-1.5 text-right font-normal">Неделя</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-bh-ink/8">
+                  {plan.slots.map((slot) => (
+                    <tr key={slot} className="text-bh-ink">
+                      <td className="py-1.5">{slotLabel(plan, slot)}</td>
+                      {arrivals.days.map((d) => {
+                        const n = d.slots.find((x) => x.slot === slot)?.n ?? 0;
+                        const full = !slot.endsWith("+") && n >= plan.capacity;
+                        return (
+                          <td key={d.day} className={`py-1.5 text-right tabular-nums ${full ? "font-semibold text-amber-800" : ""}`}>
+                            {n}{slot.endsWith("+") ? "" : ` / ${plan.capacity}`}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                  <tr className="text-bh-ink/70">
+                    <td className="py-1.5">избрали / с билет за деня</td>
+                    {arrivals.days.map((d) => (
+                      <td key={d.day} className="py-1.5 text-right tabular-nums">{d.chosen} / {d.eligible}</td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+              <div className="mt-4"><AssignRemainingForm unchosen={arrivals.unchosen} /></div>
+            </div>
+          )}
+        </section>
 
         {/* For the phone that died in the queue: find the person, let them in. */}
         <section className="mt-10">

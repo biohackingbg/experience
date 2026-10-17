@@ -111,6 +111,8 @@ export function eventSample(): EventInfoInput {
     buyerName: "Иван",
     reference: "SLS-ПРИМЕР",
     daysLeft: daysToEvent(),
+    // The preview always shows the app/arrival paragraph; the real letter adds it once the plan is on.
+    arrival: true,
     tickets: [
       { code: "ABCD-EFGH", tierName: "PLUS", attendeeName: null },
       { code: "JKLM-NPQR", tierName: "PLUS", attendeeName: "Мария Иванова" },

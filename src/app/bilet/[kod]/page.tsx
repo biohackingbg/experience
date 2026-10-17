@@ -4,12 +4,14 @@ import { notFound } from "next/navigation";
 import QRCode from "qrcode";
 
 import { Calendar, Pin, TicketIcon } from "@/components/ui/Pictograms";
-import { BOOKING, TICKET_PAGE } from "@/lib/i18n";
+import { arrivalDaysFor, getArrivalPlan, slotCounts, slotLabel } from "@/lib/arrivals";
+import { TICKET_PAGE } from "@/lib/i18n";
 import { getTicketPlaces, listWorkshops } from "@/lib/workshops";
 import { dayLabel } from "@/lib/tickets";
 import { findTicket } from "@/lib/tickets-lookup";
 import { walletConfigured } from "@/lib/wallet-pass";
 
+import { ArrivalPicker, type ArrivalDayView } from "./ArrivalPicker";
 import { AttendeeForm } from "./AttendeeForm";
 import { Workshops } from "./Workshops";
 
@@ -31,7 +33,29 @@ export default async function TicketPage({
 
   if (!ticket) notFound();
   const t = TICKET_PAGE[ticket.lang];
-  const [sessions, places] = await Promise.all([listWorkshops(), getTicketPlaces(ticket.code)]);
+  const [sessions, places, plan] = await Promise.all([listWorkshops(), getTicketPlaces(ticket.code), getArrivalPlan()]);
+
+  // The arrival windows, only once the plan is switched on in the dashboard
+  // and only for a ticket that has not been used yet.
+  let arrival: ArrivalDayView[] = [];
+  if (plan.on && !ticket.checkedInAt) {
+    const days = arrivalDaysFor(ticket.tierId, ticket.day);
+    arrival = await Promise.all(
+      days.map(async (day) => {
+        const counts = await slotCounts(day);
+        const chosen = day === 1 ? ticket.arrivalSlot1 : ticket.arrivalSlot2;
+        return {
+          day,
+          chosen,
+          slots: plan.slots.map((id) => ({
+            id,
+            label: slotLabel(plan, id, ticket.lang),
+            free: id.endsWith("+") ? null : Math.max(0, plan.capacity - (counts[id] ?? 0)),
+          })),
+        };
+      }),
+    );
+  }
 
   // Rendered as an SVG string rather than a canvas so it prints crisply and
   // needs no client JavaScript.
@@ -152,6 +176,8 @@ export default async function TicketPage({
           {!ticket.checkedInAt && (
             <AttendeeForm code={ticket.code} current={ticket.attendeeName} lang={ticket.lang} />
           )}
+
+          {arrival.length > 0 && <ArrivalPicker code={ticket.code} lang={ticket.lang} days={arrival} />}
 
           {ticket.checkedInAt && (
             <p className="border-t border-bh-ink/8 bg-amber-100 px-7 py-4 text-center text-sm text-amber-900">

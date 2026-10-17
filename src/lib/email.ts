@@ -412,7 +412,11 @@ export type EventInfoInput = {
   daysLeft: number;
   tickets: { code: string; tierName: string; attendeeName: string | null }[];
   lang?: "bg" | "en";
+  /** Say "download the app, pick your arrival time" - only once the arrival plan is on. */
+  arrival?: boolean;
 };
+
+export const APP_STORE_URL = "https://apps.apple.com/bg/app/id6819034879";
 
 const VENUE_MAPS = "https://maps.google.com/?q=Grand+Hotel+Millennium+Sofia";
 
@@ -475,6 +479,18 @@ export function eventInfoHtml(input: EventInfoInput, t: MailTexts = defaultMailT
       <p style="margin:18px 0 0;${p}">
         ${w.other}
       </p>
+      ${
+        input.arrival
+          ? `<h2 style="margin:26px 0 4px;font:700 17px/1.3 ${f};color:#02251f">${en ? "The app and your arrival time" : "Приложението и часът за влизане"}</h2>
+      <p style="margin:0;${p}">${
+        en
+          ? "Download the Biohacking Experience app for iPhone - your tickets, the programme and the workshops are in it. And pick an arrival time from your ticket (or in the app): no queue at the door, your badge ready. The ticket admits at any time; the slot only spreads the morning."
+          : mailText(t, "predi.prilozhenie", {}, "html")
+      }</p>
+      <p style="margin:16px 0 0"><a href="${APP_STORE_URL}" style="display:inline-block;background:#02251f;color:#f1f5f3;text-decoration:none;font:600 13px/1 ${f};padding:11px 18px;border-radius:999px">${en ? "Get the app on the App Store" : "Свали от App Store"}</a>
+      <span style="display:inline-block;margin-left:10px;font:400 12px/1.4 ${f};color:#02251f80">${en ? "Android: the ticket page works the same way." : "Android: страницата на билета работи по същия начин."}</span></p>`
+          : ""
+      }
 
       <div style="margin-top:26px;height:3px;background:#cef870;border-radius:2px"></div>
       <p style="margin:22px 0 0;font:400 12px/1.6 ${f};color:#02251f80">
@@ -498,6 +514,9 @@ export function eventInfoText(input: EventInfoInput, t: MailTexts = defaultMailT
       ...input.tickets.map((t) => `- ${t.tierName}${t.attendeeName ? ` · ${t.attendeeName}` : ""} · ${t.code}\n  ${SITE}/bilet/${t.code}`),
       "",
       "Is a ticket for someone else? Open it and write their name - that is how we find them at the entrance.",
+      ...(input.arrival
+        ? ["", `THE APP AND YOUR ARRIVAL TIME: download the Biohacking Experience app for iPhone (${APP_STORE_URL}) and pick an arrival time from your ticket - no queue at the door. The ticket admits at any time.`]
+        : []),
       "",
       `Questions: hi@biohacking.bg · Order ${input.reference}`,
     ].join("\n");
@@ -515,6 +534,7 @@ export function eventInfoText(input: EventInfoInput, t: MailTexts = defaultMailT
     ),
     "",
     mailText(t, "bilet.drug"),
+    ...(input.arrival ? ["", `ПРИЛОЖЕНИЕТО И ЧАСЪТ ЗА ВЛИЗАНЕ: ${mailText(t, "predi.prilozhenie")} App Store: ${APP_STORE_URL}`] : []),
     "",
     mailText(t, "predi.podpis", { "поръчка": input.reference }),
   ].join("\n");

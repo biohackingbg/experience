@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 
+import { chooseArrival } from "@/lib/arrivals";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { setAttendeeName } from "@/lib/tickets-lookup";
 import { bookPlace, cancelPlace } from "@/lib/workshops";
@@ -69,4 +70,30 @@ export async function saveAttendee(_prev: AttendeeState, formData: FormData): Pr
 
   revalidatePath(`/bilet/${code}`);
   return { status: "ok", message: name ? `Записано: ${name}.` : "Името е изчистено." };
+}
+
+export type ArrivalState = { status: "idle" | "ok" | "error"; message?: string };
+
+const ARRIVAL_ERROR: Record<string, { bg: string; en: string }> = {
+  off: { bg: "Изборът на час още не е отворен.", en: "Picking a time is not open yet." },
+  not_found: { bg: "Билетът не е намерен.", en: "Ticket not found." },
+  used: { bg: "Билетът вече е използван на входа.", en: "The ticket was already used at the door." },
+  wrong_day: { bg: "Този билет не важи за този ден.", en: "This ticket is not valid for that day." },
+  bad_slot: { bg: "Няма такъв час.", en: "No such time." },
+  full: { bg: "Този час се запълни, докато избираше. Вземи друг.", en: "That time filled up while you were choosing. Pick another." },
+};
+
+/** The holder picks an arrival window for one day; every rule is settled in arrivals.ts. */
+export async function chooseArrivalSlot(_prev: ArrivalState, formData: FormData): Promise<ArrivalState> {
+  const head = await headers();
+  const ip = head.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  if (!checkRateLimit(`arrival:${ip}`, 40).allowed) return { status: "error", message: "Твърде много опити. Опитай след малко." };
+  const code = String(formData.get("code") ?? "").trim().toUpperCase();
+  const day = Number(formData.get("day"));
+  const slot = String(formData.get("slot") ?? "");
+  const lang = formData.get("lang") === "en" ? "en" : "bg";
+  if (day !== 1 && day !== 2) return { status: "error", message: ARRIVAL_ERROR.wrong_day[lang] };
+  const r = await chooseArrival(code, day, slot);
+  revalidatePath(`/bilet/${code}`);
+  return r.ok ? { status: "ok" } : { status: "error", message: ARRIVAL_ERROR[r.reason][lang] };
 }

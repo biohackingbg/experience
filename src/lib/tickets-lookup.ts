@@ -18,6 +18,9 @@ export type TicketView = {
   reference: string;
   checkedInAt: Date | null;
   lang: "bg" | "en";
+  /** The arrival windows picked for each day (lib/arrivals.ts), or null. */
+  arrivalSlot1: string | null;
+  arrivalSlot2: string | null;
 };
 
 /**
@@ -39,6 +42,8 @@ export async function findTicket(code: string): Promise<TicketView | null> {
       day: tickets.day,
       attendeeName: tickets.attendeeName,
       checkedInAt: tickets.checkedInAt,
+      arrivalSlot1: tickets.arrivalSlot1,
+      arrivalSlot2: tickets.arrivalSlot2,
       buyerName: orders.name,
       reference: orders.reference,
       lang: orders.lang,
@@ -244,6 +249,8 @@ export async function searchTickets(q: string): Promise<(TicketView & { email: s
       day: tickets.day,
       attendeeName: tickets.attendeeName,
       checkedInAt: tickets.checkedInAt,
+      arrivalSlot1: tickets.arrivalSlot1,
+      arrivalSlot2: tickets.arrivalSlot2,
       buyerName: orders.name,
       reference: orders.reference,
       email: orders.email,

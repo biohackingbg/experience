@@ -183,6 +183,28 @@ export function upgradeLetter(i: UpgradeInput, step: UpgradeStep): Letter {
 }
 
 /* ------------------------------------------------------------------ *
+ * 3b · Pick your arrival time (once the arrival plan is on)
+ * ------------------------------------------------------------------ */
+
+export const APP_STORE_URL = "https://apps.apple.com/bg/app/id6819034879";
+
+export function checkinLetter(i: { name: string; codes: string[]; unsubUrl: string }): Letter {
+  const links = i.codes.map((c) => ({ label: i.codes.length > 1 ? `Избери час за билет ${c}` : "Избери час за влизане", url: `${SITE}/bilet/${encodeURIComponent(c)}?utm_source=email&utm_campaign=checkin` }));
+  const lines = [
+    `${hi(i.name)} Sofia Life Summit е след няколко дни. Едно нещо, което ще ти спести опашката на входа: избери **час за влизане** от билета си. Баджът ти ще е готов, а на вратата няма да има тълпа.`,
+    `Билетът важи по всяко време - часът е само уговорка за сутринта. Отнема 10 секунди.`,
+    `Ако си с iPhone, свали и приложението Biohacking Experience: билетите, програмата и работилниците са в него, а часът за влизане стои на билета ти.`,
+  ];
+  return frame({
+    subject: "Избери си час за влизане на Sofia Life Summit",
+    bodyHtml: para(lines[0]) + links.map((l) => button(l.label, l.url)).join("") + para(lines[1]) + para(lines[2]) + button("Свали приложението", APP_STORE_URL, "ink"),
+    bodyText: [plain(lines[0]), "", ...links.map((l) => `${l.label}: ${l.url}`), "", lines[1], "", lines[2], `App Store: ${APP_STORE_URL}`],
+    why: "Получаваш това писмо, защото имаш билет за Sofia Life Summit.",
+    unsubUrl: i.unsubUrl,
+  });
+}
+
+/* ------------------------------------------------------------------ *
  * 4 · Letters to the news list, on fixed dates
  * ------------------------------------------------------------------ */
 

@@ -4,6 +4,7 @@ import { inArray, sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { orders, tickets } from "@/lib/db/schema";
+import { getArrivalPlan } from "@/lib/arrivals";
 import { type EventInfoInput, sendEventInfoBatch } from "@/lib/email";
 import { getTier } from "@/lib/tickets";
 
@@ -35,11 +36,13 @@ async function buildInputs(orderRows: { id: string; email: string; name: string;
     .from(tickets)
     .where(inArray(tickets.orderId, orderRows.map((o) => o.id)));
   const daysLeft = daysToEvent();
+  const arrival = (await getArrivalPlan()).on;
   return orderRows.map((o) => ({
     to: o.email,
     buyerName: o.name,
     reference: o.reference,
     daysLeft,
+    arrival,
     lang: o.lang === "en" ? "en" : "bg",
     tickets: tix
       .filter((t) => t.orderId === o.id)
@@ -84,6 +87,7 @@ export async function sendInfoMailTest(to: string): Promise<boolean> {
       buyerName: "Иван",
       reference: "SLS-ПРИМЕР",
       daysLeft: daysToEvent(),
+      arrival: (await getArrivalPlan()).on,
       tickets: [
         { code: "ABCD-EFGH", tierName: "PLUS", attendeeName: null },
         { code: "JKLM-NPQR", tierName: "PLUS", attendeeName: "Мария Иванова" },

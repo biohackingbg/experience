@@ -5,6 +5,7 @@ import { sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { orders, tickets } from "@/lib/db/schema";
 import { SOLD } from "@/lib/sold";
+import { arrivalDaysFor } from "@/lib/arrivals";
 import { getTier } from "@/lib/tickets";
 import { type TicketPlaces, getTicketPlaces } from "@/lib/workshops";
 
@@ -19,6 +20,8 @@ export type AppTicket = {
   reference: string;
   walletUrl: string;
   places: TicketPlaces | null;
+  /** Arrival windows (lib/arrivals.ts): which days this ticket may pick for, and what it picked. */
+  arrival: { days: (1 | 2)[]; chosen: Record<1 | 2, string | null> };
 };
 
 /** Every sold ticket on an address, newest order first. */
@@ -30,6 +33,8 @@ export async function listTicketsForEmail(email: string): Promise<AppTicket[]> {
       day: tickets.day,
       attendeeName: tickets.attendeeName,
       checkedInAt: tickets.checkedInAt,
+      arrivalSlot1: tickets.arrivalSlot1,
+      arrivalSlot2: tickets.arrivalSlot2,
       reference: orders.reference,
       paidAt: orders.paidAt,
     })
@@ -49,6 +54,7 @@ export async function listTicketsForEmail(email: string): Promise<AppTicket[]> {
       reference: r.reference,
       walletUrl: `/api/wallet/${encodeURIComponent(r.code)}`,
       places: await getTicketPlaces(r.code),
+      arrival: { days: arrivalDaysFor(r.tierId, r.day), chosen: { 1: r.arrivalSlot1, 2: r.arrivalSlot2 } },
     })),
   );
 }

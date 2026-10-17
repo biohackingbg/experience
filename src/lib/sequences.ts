@@ -14,9 +14,11 @@ import {
   type ListLetterId,
   type UpgradeStep,
   abandoned2,
+  checkinLetter,
   listLetter,
   upgradeLetter,
 } from "@/lib/sequence-letters";
+import { getArrivalPlan, ordersWithoutArrival } from "@/lib/arrivals";
 import { getSetting, setSetting } from "@/lib/settings";
 import { SOLD } from "@/lib/sold";
 import { type Tier, getTier } from "@/lib/tickets";
@@ -48,6 +50,7 @@ const PLUS_0_UNTIL = 3 * DAY;
 const PLUS_5_FROM = 5 * DAY;
 const PLUS_3D_AT = new Date("2026-11-04T09:00:00+02:00");
 const PEAK_AT = new Date("2026-10-28T09:00:00+02:00");
+const CHECKIN_AT = new Date("2026-11-02T10:00:00+02:00");
 /** Upgrade letters stop the morning of the event. */
 const EVENT_AT = new Date("2026-11-07T07:00:00+02:00");
 /** A dated letter that was missed by more than this is dropped, not sent late. */
@@ -62,6 +65,7 @@ export const SEQUENCE_KINDS = [
   { kind: "upgrade-plus-5", title: "CORE → PLUS · ден 5", when: "5 дни след покупката. Купилите преди пускането го получават на първия пуск." },
   { kind: "upgrade-plus-3d", title: "CORE → PLUS · 3 дни преди", when: "4 ноември от 09:00, на всеки, който още е с CORE." },
   { kind: "upgrade-peak", title: "PLUS → PEAK", when: "28 октомври от 09:00, веднъж, докато има места в PEAK." },
+  { kind: "checkin", title: "Избери час за влизане", when: "2 ноември от 10:00, на всеки с билет без избран час. Само ако входът на вълни е пуснат от Вход." },
   ...LIST_LETTERS.map((l) => ({ kind: `list-${l.id}`, title: `Списък · ${l.title}`, when: sofia(l.at) })),
 ] as const;
 
@@ -301,6 +305,29 @@ async function runUpgrade(rule: UpgradeRule, dry: boolean, now: Date, pricing: P
 }
 
 /* ------------------------------------------------------------------ *
+ * 3b · Pick your arrival time
+ * ------------------------------------------------------------------ */
+
+async function runCheckin(dry: boolean, now: Date, force: boolean): Promise<Step> {
+  const kind = "checkin";
+  if (now >= EVENT_AT) return { kind, sent: 0, skipped: "събитието започна" };
+  if (!force && now < CHECKIN_AT) return { kind, sent: 0, skipped: `от ${sofia(CHECKIN_AT)}` };
+  if (!(await getArrivalPlan()).on) return { kind, sent: 0, skipped: "входът на вълни не е пуснат" };
+  const all = await ordersWithoutArrival();
+  const sent = await getDb().select({ target: emailSends.target }).from(emailSends).where(sql`${emailSends.kind} = ${kind}`);
+  const done = new Set(sent.map((r) => r.target));
+  const rows = all.filter((o) => !done.has(o.reference)).slice(0, PER_RUN);
+  const out = await optedOut(rows.map((r) => r.email));
+  const to: string[] = [];
+  for (const r of rows) {
+    if (out.has(r.email.toLowerCase())) continue;
+    const letter = checkinLetter({ name: r.name, codes: r.codes, unsubUrl: unsubscribeUrl(r.email) });
+    if (await deliver(kind, r.reference, r.email, letter, dry)) to.push(r.email);
+  }
+  return { kind, sent: to.length, to };
+}
+
+/* ------------------------------------------------------------------ *
  * 4 · The news list, on its dates
  * ------------------------------------------------------------------ */
 
@@ -445,6 +472,7 @@ export async function runSequences(opts: { dry?: boolean; now?: Date; force?: bo
   await push("abandoned-1", () => runAbandoned1(dry));
   await push("abandoned-2", () => runAbandoned2(dry, pricing));
   for (const rule of upgradeRules()) await push(rule.kind, () => runUpgrade(rule, dry, now, pricing, force));
+  await push("checkin", () => runCheckin(dry, now, force));
   steps.push(...(await runList(dry, now, pricing, cfg, force, only)));
   return { steps };
 }
@@ -533,6 +561,7 @@ export async function sequencePreview(kind: string, to = "ti@example.com"): Prom
     case "upgrade-plus-5": return upgrade(core, plus, "plus-5");
     case "upgrade-plus-3d": return upgrade(core, plus, "plus-3d");
     case "upgrade-peak": return upgrade(plus, peak, "peak");
+    case "checkin": return checkinLetter({ name: "Мария", codes: ["AB12-CD34"], unsubUrl: u });
   }
   if (kind.startsWith("list-")) {
     const id = kind.slice(5) as ListLetterId;
