@@ -6,7 +6,9 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 /**
- * The automatic letters (lib/sequences.ts), run every hour by Vercel Cron.
+ * The automatic letters (lib/sequences.ts), run every three hours by Vercel Cron
+ * (every hour woke the database 24 times a day for letters that go out on a
+ * day, not on a minute).
  * `?dry=1` lists what would go without sending anything. Which letters
  * are on is decided per letter in the dashboard (lib/sequences.ts).
  */

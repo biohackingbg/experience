@@ -31,8 +31,9 @@ const GREEN = "#146455";
 const HATCH =
   "repeating-linear-gradient(135deg, #c9cfca 0 2px, transparent 2px 7px)";
 
-function Money({ cents }: { cents: number }) {
-  return <>{formatPrice(cents)} €</>;
+/** `whole` drops the cents for a headline figure; the exact amount sits right under it. */
+function Money({ cents, whole }: { cents: number; whole?: boolean }) {
+  return <>{formatPrice(whole ? Math.round(cents / 100) * 100 : cents)} €</>;
 }
 
 /** "03.09 · 23:04", Sofia time. A sale is dated by its payment, not its start. */
@@ -123,7 +124,7 @@ function Stat({
         <div className="text-lg font-semibold leading-snug">{label}</div>
         <Arrow href={href} dark={dark} />
       </div>
-      <div className="mt-4 text-5xl font-black tracking-tight">{value}</div>
+      <div className="mt-4 whitespace-nowrap text-5xl font-black tracking-tight">{value}</div>
       <div className={`mt-4 text-xs ${dark ? "text-[#cef870]" : "text-[#0b2a22]/60"}`}>{sub}</div>
     </div>
   );
@@ -309,7 +310,7 @@ export default async function AdminDashboard({
         />
         <Stat
           label="Приходи"
-          value={<Money cents={d.grossCents} />}
+          value={<Money cents={d.grossCents} whole />}
           href="/admin/finansi"
           sub={`нето ${formatPrice(d.netCents)} € · ДДС ${formatPrice(d.vatCents)} € · резултат ${fin.result.actualCents >= 0 ? "+" : ""}${formatPrice(fin.result.actualCents)} €`}
         />
