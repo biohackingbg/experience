@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { FitNumber } from "@/components/admin/FitNumber";
 import { getAbandonedOrders, getPendingOrders, getReminderStats } from "@/lib/abandoned";
 import { requireAccess } from "@/lib/access";
 import { type WeekDay, getDashboardData, searchOrders } from "@/lib/admin-stats";
@@ -124,14 +125,8 @@ function Stat({
         <div className="text-lg font-semibold leading-snug">{label}</div>
         <Arrow href={href} dark={dark} />
       </div>
-      {/* The figure sizes itself to the tile (container query units), up to
-          the usual 3rem: a fixed size ran off a phone screen as soon as the
-          number grew a digit. */}
-      <div className="mt-4" style={{ containerType: "inline-size" }}>
-        <div className="whitespace-nowrap font-black leading-tight tracking-tight" style={{ fontSize: "clamp(1.5rem, 11cqw, 3rem)" }}>
-          {value}
-        </div>
-      </div>
+      {/* As large as the tile allows, on one line, never past its edge. */}
+      <div className="mt-4"><FitNumber>{value}</FitNumber></div>
       <div className={`mt-4 text-xs ${dark ? "text-[#cef870]" : "text-[#0b2a22]/60"}`}>{sub}</div>
     </div>
   );

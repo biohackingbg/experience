@@ -1,3 +1,4 @@
+import { FitNumber } from "@/components/admin/FitNumber";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -77,12 +78,12 @@ export default async function FinancesPage() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           <div className={`rounded-2xl p-6 ring-1 ${f.result.actualCents >= 0 ? "bg-[#0E8C7D]/10 ring-[#0E8C7D]/25" : "bg-[#C4607F]/10 ring-[#C4607F]/25"}`}>
             <div className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-bh-ink/55">Резултат сега · в сметката</div>
-            <div className="mt-3 text-4xl font-black tracking-tight text-bh-ink"><Eur cents={f.result.actualCents} signed /></div>
+            <div className="mt-3 text-bh-ink"><FitNumber><Eur cents={f.result.actualCents} signed /></FitNumber></div>
             <div className="mt-1 text-xs text-bh-ink/60">платени приходи <Eur cents={incomeCash} /> минус платени разходи <Eur cents={f.expenses.paidCents} /></div>
           </div>
           <div className="rounded-2xl bg-bh-cloud p-6 ring-1 ring-bh-ink/8">
             <div className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-bh-ink/55">Прогноза · ако всичко се плати и похарчи</div>
-            <div className="mt-3 text-4xl font-black tracking-tight text-bh-ink"><Eur cents={f.result.forecastCents} signed /></div>
+            <div className="mt-3 text-bh-ink"><FitNumber><Eur cents={f.result.forecastCents} signed /></FitNumber></div>
             <div className="mt-1 text-xs text-bh-ink/60">
               приходи <Eur cents={incomeForecast} /> минус разходи <Eur cents={f.expenses.expectedCents} />
               {f.expenses.expectedCents > f.expenses.plannedCents && <> · по категория се брои по-голямото от записаното и бюджета</>}
