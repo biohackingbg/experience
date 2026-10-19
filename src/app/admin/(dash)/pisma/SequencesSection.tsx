@@ -1,6 +1,6 @@
 import { getPricing } from "@/lib/pricing";
 import { ALUMNI_CODE, LIST_LETTERS, alumniDraft } from "@/lib/sequence-letters";
-import { SEQUENCE_KINDS, getSequenceConfig, listLetterAt, listLetterStates, runSequences, sequencePreview, sequenceStats, sofia } from "@/lib/sequences";
+import { SEQUENCE_KINDS, gateReasons, getSequenceConfig, listLetterAt, listLetterStates, runSequences, sequencePreview, sequenceStats, sofia } from "@/lib/sequences";
 import { formatPrice } from "@/lib/tickets";
 
 import { KindForm, KindToggle, SendNowForm, SequenceTestForm, SkipForm } from "./SequenceForms";
@@ -12,18 +12,18 @@ const when = (d: Date | null) => (d ? d.toLocaleString("bg-BG", { timeZone: "Eur
  * preview, the dated list letters with their plan, and the alumni draft.
  */
 export async function SequencesSection() {
-  const [stats, states, pricing, cfg, due, plan] = await Promise.all([
+  const [stats, states, pricing, cfg, due, gates] = await Promise.all([
     sequenceStats(),
     listLetterStates(),
     getPricing(),
     getSequenceConfig(),
     // Who would get each letter if it went this minute, switches and dates aside.
     runSequences({ dry: true, force: true }),
-    // What the next hourly run will actually do.
-    runSequences({ dry: true }),
+    // Why the next hourly run would skip each one - from the switches and
+    // dates alone, so the page does not run the whole thing a second time.
+    gateReasons(),
   ]);
   const dueOf = (kind: string) => due.steps.find((s) => s.kind === kind);
-  const planOf = (kind: string) => plan.steps.find((s) => s.kind === kind);
   const previews = await Promise.all(SEQUENCE_KINDS.map(async (k) => ({ ...k, letter: await sequencePreview(k.kind) })));
   const alumni = alumniDraft(pricing);
 
@@ -64,9 +64,9 @@ export async function SequencesSection() {
               const st = listId ? states[listId as keyof typeof states] : null;
               const c = cfg[k.kind] ?? { on: false, from: null, at: null };
               const d = dueOf(k.kind);
-              const p = planOf(k.kind);
               const whenText = listId ? sofia(listLetterAt(listId as keyof typeof states, cfg)) : k.when;
-              const next = p?.skipped ? p.skipped : `${p?.sent ?? 0} писма`;
+              const dueN = d?.skipped && !d.sent ? 0 : (d?.sent ?? 0);
+              const next = gates[k.kind] ?? (d?.skipped && !d.sent ? d.skipped : `${dueN} писма`);
               return (
                 <tr key={k.kind} className="align-top text-bh-ink">
                   <td className="py-2.5 pr-3">
@@ -76,7 +76,7 @@ export async function SequencesSection() {
                     <div className="mt-2 flex flex-wrap items-center gap-3">
                       <KindToggle kind={k.kind} on={c.on} />
                       {k.kind !== "abandoned-1" && st !== "sent" && (
-                        <SendNowForm kind={k.kind} title={k.title} due={d?.skipped && !d.sent ? 0 : (d?.sent ?? 0)} />
+                        <SendNowForm kind={k.kind} title={k.title} due={dueN} />
                       )}
                     </div>
                     <div className="mt-2">
@@ -127,7 +127,15 @@ export async function SequencesSection() {
                 {k.title} <span className="font-normal text-bh-ink/55">· {k.letter.subject}</span>
               </summary>
               <div className="mt-3"><SequenceTestForm kind={k.kind} /></div>
-              <iframe title={`Превю: ${k.title}`} srcDoc={k.letter.html} sandbox="" className="mt-3 h-[40rem] w-full rounded-2xl bg-[#f1f5f3] ring-1 ring-bh-ink/8" />
+              {/* Loaded only when the details open: a closed <details> does not
+                  lay out its content, and a lazy iframe waits for layout. */}
+              <iframe
+                title={`Превю: ${k.title}`}
+                src={`/admin/pisma/preglad/poredica/${k.kind}`}
+                loading="lazy"
+                sandbox=""
+                className="mt-3 h-[40rem] w-full rounded-2xl bg-[#f1f5f3] ring-1 ring-bh-ink/8"
+              />
             </details>
           ) : (
             <p key={k.kind} id={`seq-${k.kind}`} className="text-xs text-bh-ink/55">

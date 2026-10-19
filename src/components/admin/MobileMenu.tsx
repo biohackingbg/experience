@@ -70,7 +70,15 @@ export function MobileMenu({
             onClick={() => setOpen(false)}
             className="absolute inset-0 bg-[#0b2a22]/40"
           />
-          <nav className="absolute inset-y-0 left-0 flex w-[82vw] max-w-xs flex-col overflow-y-auto bg-[#f6f7f5] px-4 py-6 shadow-2xl">
+          <nav
+            // Closes on the tap itself, not only once the new page has
+            // arrived: a heavy page can take seconds, and a sheet that stays
+            // open over the old page reads as "the button does nothing".
+            onClickCapture={(e) => {
+              if ((e.target as HTMLElement).closest("a")) setOpen(false);
+            }}
+            className="absolute inset-y-0 left-0 flex w-[82vw] max-w-xs flex-col overflow-y-auto bg-[#f6f7f5] px-4 py-6 shadow-2xl"
+          >
             <div className="flex items-center justify-between px-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo.svg" alt="Biohacking Experience" className="h-8 w-auto max-w-full" />

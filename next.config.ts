@@ -27,7 +27,9 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: "/:path*",
+        // Everything except the mail previews, which the admin's own page
+        // frames (they set frame-ancestors 'self' themselves).
+        source: "/((?!admin/pisma/preglad/).*)",
         headers: [
           // The site embeds nowhere; the admin panel especially must not be
           // frameable. CSP frame-ancestors is the modern header, X-Frame-

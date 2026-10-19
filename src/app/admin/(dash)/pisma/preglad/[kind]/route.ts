@@ -12,14 +12,16 @@ export async function GET(_req: Request, ctx: { params: Promise<{ kind: string }
   // A plain-text letter has no page to show; it is served as what it is.
   if (mail.html === null) {
     return new Response(mail.text, {
-      headers: { "content-type": "text/plain; charset=utf-8", "x-robots-tag": "noindex" },
+      headers: { "content-type": "text/plain; charset=utf-8", "x-robots-tag": "noindex", "content-security-policy": "frame-ancestors 'self'", "x-frame-options": "SAMEORIGIN" },
     });
   }
   return new Response(mail.html, {
     headers: {
       "content-type": "text/html; charset=utf-8",
       // Nothing in here may run or reach out; it is a picture of an email.
-      "content-security-policy": "default-src 'none'; img-src https: data:; style-src 'unsafe-inline'",
+      // Framed only by our own mail page; nothing in here may run or reach out.
+      "content-security-policy": "default-src 'none'; img-src https: data:; style-src 'unsafe-inline'; frame-ancestors 'self'",
+      "x-frame-options": "SAMEORIGIN",
       "x-robots-tag": "noindex",
     },
   });

@@ -1,7 +1,19 @@
 "use client";
 
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
+
+/** A small spinner while the page behind a tapped link is still on its way. */
+function Pending() {
+  const { pending } = useLinkStatus();
+  if (!pending) return null;
+  return (
+    <span
+      aria-label="Зарежда"
+      className="h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-2 border-[#0b2a22]/20 border-t-[#146455]"
+    />
+  );
+}
 
 /** A sidebar entry that knows whether it is the page being looked at. */
 export function NavLink({
@@ -29,6 +41,7 @@ export function NavLink({
       )}
       <span className={`h-5 w-5 shrink-0 ${active ? "text-[#146455]" : ""}`}>{icon}</span>
       <span className="flex-1">{label}</span>
+      <Pending />
       {badge ? (
         <span className="rounded-md bg-[#0b2a22] px-1.5 py-0.5 text-[0.62rem] font-semibold text-white">{badge}</span>
       ) : null}

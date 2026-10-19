@@ -122,13 +122,15 @@ export default async function MailPage() {
                     ) : (
                       <>
                         {/* The real rendering, in its own document - email HTML must not
-                            inherit the dashboard's styles, or it would lie about itself.
-                            Inlined (srcDoc) rather than loaded by URL: the whole site
-                            refuses to be framed (frame-ancestors 'none'), and a frame
-                            with inline content makes no request for that rule to stop. */}
+                            inherit the dashboard's styles, or it would lie about itself. */}
                         <iframe
                           title={`Превю: ${m.title}`}
-                          srcDoc={m.html}
+                          // By URL and lazily, not inlined: twenty-odd
+                          // inlined letters made this page half a megabyte,
+                          // which on a phone read as the Писма button doing
+                          // nothing. The preview route allows our own frame.
+                          src={`/admin/pisma/preglad/${m.kind}`}
+                          loading="lazy"
                           sandbox=""
                           className="mt-4 h-[46rem] w-full rounded-2xl bg-[#f2f2ee] ring-1 ring-bh-ink/8"
                         />

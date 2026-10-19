@@ -291,6 +291,9 @@ async function runUpgrade(rule: UpgradeRule, dry: boolean, now: Date, pricing: P
   const out = await optedOut(rows.map((r) => r.email));
   const targetCents = priceOf(pricing, rule.to);
   const to: string[] = [];
+  // A dry run only counts: the per-ticket price lookups below are two
+  // queries a ticket, and the dashboard asks for this count on every load.
+  if (dry) return { kind: rule.kind, sent: rows.filter((r) => !out.has(r.email.toLowerCase())).length, to: rows.slice(0, 5).map((r) => r.email) };
   for (const r of rows) {
     if (out.has(r.email.toLowerCase())) continue;
     const list = await upgradableTickets(r.id, rule.from, targetCents);
@@ -477,6 +480,33 @@ export async function runSequences(opts: { dry?: boolean; now?: Date; force?: bo
   return { steps };
 }
 
+/**
+ * Why the next hourly run would skip each letter, worked out from the
+ * switches, the dates and the price stage alone - no queries - so the
+ * dashboard can show "next hour" without running the whole thing twice.
+ * Null means it would run (and send whatever is due).
+ */
+export async function gateReasons(now = new Date()): Promise<Record<string, string | null>> {
+  const [cfg, pricing, plan] = await Promise.all([getSequenceConfig(), getPricing(), getArrivalPlan()]);
+  const out: Record<string, string | null> = {};
+  const timed = (kind: string, at: Date | null) => {
+    const why = gate(kind, cfg, now);
+    out[kind] = why ?? (at && now < at ? `от ${sofia(at)}` : now >= EVENT_AT && kind !== "abandoned-1" && kind !== "abandoned-2" ? "събитието започна" : null);
+  };
+  timed("abandoned-1", null);
+  timed("abandoned-2", null);
+  for (const rule of upgradeRules()) timed(rule.kind, rule.at);
+  timed("checkin", CHECKIN_AT);
+  if (out.checkin === null && !plan.on) out.checkin = "входът на вълни не е пуснат";
+  for (const def of LIST_LETTERS) {
+    const kind = `list-${def.id}`;
+    const at = listLetterAt(def.id, cfg);
+    const why = gate(kind, cfg, now);
+    out[kind] = why ?? (now < at ? `на ${sofia(at)}` : now.getTime() - at.getTime() > LIST_GRACE ? "закъсняло с над 36 ч - не се праща" : def.needsDiscount && !pricing.discounted ? "междинните цени вече не са на" : null);
+  }
+  return out;
+}
+
 /* ------------------------------------------------------------------ *
  * What the dashboard shows
  * ------------------------------------------------------------------ */
@@ -529,8 +559,15 @@ export async function sequenceStats(): Promise<Record<string, KindStats>> {
 }
 
 export async function listLetterStates(): Promise<Record<ListLetterId, "sent" | "skipped" | null>> {
+  const rows = await getDb()
+    .select({ target: emailSends.target, email: emailSends.email })
+    .from(emailSends)
+    .where(sql`${emailSends.target} like 'list:%'`);
   const out = {} as Record<ListLetterId, "sent" | "skipped" | null>;
-  for (const l of LIST_LETTERS) out[l.id] = await listSent(l.id);
+  for (const l of LIST_LETTERS) {
+    const r = rows.find((x) => x.target === `list:${l.id}`);
+    out[l.id] = r ? (r.email === "skipped" ? "skipped" : "sent") : null;
+  }
   return out;
 }
 
