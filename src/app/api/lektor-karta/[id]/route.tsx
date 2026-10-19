@@ -4,6 +4,16 @@ import { getPhoto, listSpeakers } from "@/lib/speakers-data";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * The cards are link-preview images (og:image on every speaker page), so
+ * every share, crawler and chat app fetches one - and each fetch used to
+ * render the PNG afresh and read the portrait and the whole speaker list
+ * from the database. An hour at the CDN (a day of stale-while-revalidate)
+ * keeps that to one render per card an hour; the admin sees an edit within
+ * the hour, or at once with a hard refresh of the card link.
+ */
+const CARD_CACHE = { "Cache-Control": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400" };
+
 const INK = "#02251f";
 const LIME = "#cef870";
 const TEAL = "#5fd4c0";
@@ -127,7 +137,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
           </div>
         </div>
       ),
-      { width: w, height: h, fonts },
+      { width: w, height: h, fonts, headers: CARD_CACHE },
     );
   }
 
@@ -214,6 +224,6 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
         </div>
       </div>
     ),
-    { width: w, height: h, fonts },
+    { width: w, height: h, fonts, headers: CARD_CACHE },
   );
 }
