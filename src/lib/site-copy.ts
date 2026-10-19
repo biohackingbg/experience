@@ -257,7 +257,7 @@ export const CONCEPT: Copy<{
       title: (n) => `${n} интерактивни станции`,
       intro: "Не гледаш отстрани - измерваш се, пробваш, питаш. Всяка станция е водена от партньор в своята област.",
       items: [
-        { id: "scaneca", title: "Scaneca Body Analysis" },
+        { id: "scaneca", title: "Body Analysis Station by Tiana Presolska" },
         { id: "restart", title: "Re Start by Therabody" },
         { id: "obsidian", title: "Obsidian Club - PEMF Bed" },
         { id: "n8", title: "N8 molecule - анализ на кожата на лицето" },
@@ -292,7 +292,7 @@ export const CONCEPT: Copy<{
       title: (n) => `${n} interactive stations`,
       intro: "You do not watch from the side - you measure, try and ask. Each station is run by a partner in its field.",
       items: [
-        { id: "scaneca", title: "Scaneca Body Analysis" },
+        { id: "scaneca", title: "Body Analysis Station by Tiana Presolska" },
         { id: "restart", title: "Re Start by Therabody" },
         { id: "obsidian", title: "Obsidian Club - PEMF Bed" },
         { id: "n8", title: "N8 molecule - facial skin analysis" },
