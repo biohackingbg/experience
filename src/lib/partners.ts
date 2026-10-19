@@ -56,4 +56,5 @@ export const PARTNERS: Partner[] = [
   { name: "Ciela", logo: "/partners/ciela-white.png" },
   { name: "Obsidian Club", logo: "/partners/obsidian-white.png" },
   { name: "FitLine", logo: "/partners/fitline-white.png" },
+  { name: "Nourish Matcha", logo: "/partners/nourish-matcha-white.png" },
 ];
