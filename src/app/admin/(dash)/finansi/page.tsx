@@ -75,7 +75,7 @@ export default async function FinancesPage() {
         </p>
 
         {/* The result, first and largest: cash beside forecast. */}
-        <div className="mt-8 grid gap-4 sm:grid-cols-2">
+        <div data-fit-group className="mt-8 grid gap-4 sm:grid-cols-2">
           <div className={`rounded-2xl p-6 ring-1 ${f.result.actualCents >= 0 ? "bg-[#0E8C7D]/10 ring-[#0E8C7D]/25" : "bg-[#C4607F]/10 ring-[#C4607F]/25"}`}>
             <div className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-bh-ink/55">Резултат сега · в сметката</div>
             <div className="mt-3 text-bh-ink"><FitNumber><Eur cents={f.result.actualCents} signed /></FitNumber></div>

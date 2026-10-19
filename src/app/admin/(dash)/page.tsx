@@ -296,7 +296,7 @@ export default async function AdminDashboard({
       </div>
 
       {/* Stat tiles */}
-      <div className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div data-fit-group className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Stat
           dark
           label="Продадени билети"
