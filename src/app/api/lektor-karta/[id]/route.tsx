@@ -12,6 +12,9 @@ export const dynamic = "force-dynamic";
  * keeps that to one render per card an hour; the admin sees an edit within
  * the hour, or at once with a hard refresh of the card link.
  */
+/** Height in px of one band of the darkening under the words. */
+const BAND = 8;
+
 const CARD_CACHE = { "Cache-Control": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400" };
 
 const INK = "#02251f";
@@ -96,7 +99,13 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
   const affiliation = (en ? speaker.affiliationEn : null) || speaker.affiliation || "";
   const credit = [role, affiliation].filter(Boolean).join(", ");
   const dates = en ? "7-8 NOVEMBER 2026 · SOFIA" : "07-08.11.2026 · СОФИЯ";
+  // Only a fixed set of labels: the route is public, and a free-text label
+  // would let anyone put their own words on a card carrying our name.
+  const LABELS = { stage: ["На сцената", "On stage"], participant: ["Участник", "Participant"] } as const;
+  const labelKey = url.searchParams.get("label");
+  const kicker = LABELS[(labelKey && labelKey in LABELS ? labelKey : "stage") as keyof typeof LABELS][en ? 1 : 0];
   const pad = Math.round(w * 0.075);
+  const bands = Math.ceil((h * 0.62) / BAND);
   const src = photo ? `data:${photo.mime};base64,${photo.bytes.toString("base64")}` : null;
   const name = [title, speaker.name].filter(Boolean).join(" ");
   const fonts = [
@@ -120,7 +129,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
             </div>
             <div style={{ display: "flex", flexDirection: "column" }}>
               <div style={{ display: "flex", fontSize: 18, letterSpacing: 6, color: LIME, textTransform: "uppercase", marginBottom: 10 }}>
-                {en ? "On stage" : "На сцената"}
+                {kicker}
               </div>
               <div style={{ display: "flex", fontFamily: "Sofia Sans", fontWeight: 900, fontSize: name.length > 30 ? 42 : 54, lineHeight: 1.05, color: "#ffffff" }}>
                 {name}
@@ -161,9 +170,12 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
             flat bands land exactly where they are put. Enough of them, on a
             curve, and the steps stop being visible. */}
         {/* No band at the top any more: the tag carries its own ground. */}
-        <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: "62%", display: "flex", flexDirection: "column" }}>
-          {Array.from({ length: 96 }, (_, i) => (
-            <div key={i} style={{ display: "flex", flexGrow: 1, background: `rgba(2,37,31,${Math.min(1, ((i + 1) / 96) ** 1.5 * 1.06).toFixed(3)})` }} />
+        {/* Whole-pixel bands: with flexGrow the band heights came out
+            fractional and a hairline of the photograph showed between them,
+            which a 1920-high story made plain. */}
+        <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: Math.round(h * 0.62), display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          {Array.from({ length: bands }, (_, i) => (
+            <div key={i} style={{ display: "flex", flexShrink: 0, height: BAND, background: `rgba(2,37,31,${Math.min(1, ((i + 1) / bands) ** 1.5 * 1.06).toFixed(3)})` }} />
           ))}
         </div>
 
@@ -184,7 +196,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
                   marginBottom: Math.round(h * 0.012),
                 }}
               >
-                {en ? "On stage" : "На сцената"}
+                {kicker}
               </div>
             )}
             <div
