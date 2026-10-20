@@ -131,7 +131,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
               <div style={{ display: "flex", fontSize: 18, letterSpacing: 6, color: LIME, textTransform: "uppercase", marginBottom: 10 }}>
                 {kicker}
               </div>
-              <div style={{ display: "flex", fontFamily: "Sofia Sans", fontWeight: 900, fontSize: name.length > 30 ? 42 : 54, lineHeight: 1.05, color: "#ffffff" }}>
+              <div style={{ display: "flex", maxWidth: 660, fontFamily: "Sofia Sans", fontWeight: 900, fontSize: name.length > 24 ? 40 : 54, lineHeight: 1.05, color: "#ffffff" }}>
                 {name}
               </div>
               {specialty && (
