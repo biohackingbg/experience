@@ -178,7 +178,7 @@ export async function getDashboardData(): Promise<DashboardData> {
 
       db
         .select({
-          day: sql<string>`to_char(${orders.paidAt}, 'YYYY-MM-DD')`,
+          day: sql<string>`to_char(${orders.paidAt} at time zone 'Europe/Sofia', 'YYYY-MM-DD')`,
           count: sql<number>`count(*)::int`,
           // Tickets, not orders: one order can carry three seats, and the
           // week is read as "how many people did we sell to today".
@@ -191,13 +191,13 @@ export async function getDashboardData(): Promise<DashboardData> {
         })
         .from(orders)
         .where(sql`${SALE} and ${orders.paidAt} is not null`)
-        .groupBy(sql`to_char(${orders.paidAt}, 'YYYY-MM-DD')`)
-        .orderBy(sql`to_char(${orders.paidAt}, 'YYYY-MM-DD')`),
+        .groupBy(sql`to_char(${orders.paidAt} at time zone 'Europe/Sofia', 'YYYY-MM-DD')`)
+        .orderBy(sql`to_char(${orders.paidAt} at time zone 'Europe/Sofia', 'YYYY-MM-DD')`),
 
       // The same days, split by tier - what the strip shows on hover.
       db
         .select({
-          day: sql<string>`to_char(${orders.paidAt}, 'YYYY-MM-DD')`,
+          day: sql<string>`to_char(${orders.paidAt} at time zone 'Europe/Sofia', 'YYYY-MM-DD')`,
           tierId: orderItems.tierId,
           n: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int`,
           gross: sql<number>`coalesce(sum(${orderItems.quantity} * ${orderItems.unitPriceCents}), 0)::int`,
@@ -205,7 +205,7 @@ export async function getDashboardData(): Promise<DashboardData> {
         .from(orderItems)
         .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
         .where(sql`${SALE} and ${orders.paidAt} is not null`)
-        .groupBy(sql`to_char(${orders.paidAt}, 'YYYY-MM-DD')`, orderItems.tierId),
+        .groupBy(sql`to_char(${orders.paidAt} at time zone 'Europe/Sofia', 'YYYY-MM-DD')`, orderItems.tierId),
 
       db
         .select({
@@ -347,13 +347,13 @@ export async function getDashboardData(): Promise<DashboardData> {
       // the one certain tie between a day's bar and an advert.
       db
         .select({
-          day: sql<string>`to_char(${orders.paidAt}, 'YYYY-MM-DD')`,
+          day: sql<string>`to_char(${orders.paidAt} at time zone 'Europe/Sofia', 'YYYY-MM-DD')`,
           code: orders.utmCampaign,
           tickets: sql<number>`coalesce(sum((select sum(oi.quantity) from order_items oi where oi.order_id = orders.id)), 0)::int`,
         })
         .from(orders)
         .where(sql`${SALE} and ${orders.paidAt} is not null and ${orders.utmCampaign} is not null`)
-        .groupBy(sql`to_char(${orders.paidAt}, 'YYYY-MM-DD')`, orders.utmCampaign),
+        .groupBy(sql`to_char(${orders.paidAt} at time zone 'Europe/Sofia', 'YYYY-MM-DD')`, orders.utmCampaign),
 
       // The marketing log: when each post or advert went out.
       db

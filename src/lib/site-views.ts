@@ -139,7 +139,7 @@ export async function getTrafficData(days = 30): Promise<TrafficData> {
         .select({
           views: sql<number>`count(*)::int`,
           visitors: sql<number>`count(distinct ${siteViews.visitor})::int`,
-          today: sql<number>`count(distinct ${siteViews.visitor}) filter (where ${siteViews.createdAt} >= date_trunc('day', now()))::int`,
+          today: sql<number>`count(distinct ${siteViews.visitor}) filter (where ${siteViews.createdAt} >= (date_trunc('day', now() at time zone 'Europe/Sofia') at time zone 'Europe/Sofia'))::int`,
         })
         .from(siteViews)
         .where(sql`${siteViews.createdAt} >= ${since}`),
