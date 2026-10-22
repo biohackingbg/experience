@@ -1,14 +1,13 @@
+import { latin } from "@/lib/latin";
+
 /**
- * The public programme, transcribed from the organisers' document
- * "Sofia Life Summit - Дълголетие за всеки", version 01.08.2026.
+ * The public programme, transcribed from the organisers' final programme
+ * "Biohacking Experience - част от Sofia Life Summit 2026" (22.10.2026).
  *
- * That document is headed PRELIMINARY and closes each day with "Програмата
- * подлежи на финално потвърждение на лектори и часови диапазони" - the page
- * repeats that, because a visitor reads a published schedule as a promise.
- *
- * Two names carried the note "(не е говорено с нея)" in the source and are
- * deliberately absent here. Announcing someone who has not agreed to come is
- * the one mistake a ticket page cannot walk back.
+ * Each panel is one row: the title says what kind of session it is, the note
+ * lists the talks with their speakers, and `people` carries the names - the
+ * speaker pages find their sessions by those names. Module headings are rows
+ * too, written "Модул N: ..." with no time; the page draws them as headings.
  */
 export type Slot = {
   /** As printed: "10:25-11:20", or a single time for the closing item. */
@@ -57,308 +56,212 @@ export type Day = {
   slots: Slot[];
 };
 
+/** The English half of a row. Only the words change: times and names are the same event. */
+export type SlotEn = { title?: string; note?: string; role?: string };
+
+/** One talk inside a panel: its title, who gives it and what they are. */
+type Talk = { t?: string; te?: string; who: string | string[]; sp?: string; spe?: string };
+
+const names = (t: Talk) => (Array.isArray(t.who) ? t.who : [t.who]);
+
+/** "„Заглавие“ - проф. Име, специалност", one line per talk. */
+function talkNote(talks: Talk[], en: boolean): string {
+  return talks
+    .map((t) => {
+      const who = names(t).map((n) => (en ? latin(n) : n)).join(en ? " and " : " и ");
+      const sp = en ? t.spe : t.sp;
+      const title = en ? t.te : t.t;
+      const q = (x: string) => (en ? `“${x}”` : `„${x}“`);
+      return `${title ? `${q(title)} - ` : ""}${who}${sp ? `, ${sp}` : ""}`;
+    })
+    .join("\n");
+}
+
+type Row = { slot: Slot; en: SlotEn };
+
+const mod = (n: number, bg: string, en: string): Row => ({
+  slot: { time: "", title: `Модул ${n}: ${bg}`, pause: true },
+  en: { title: `Module ${n}: ${en}` },
+});
+
+const pause = (time: string, bg: string, en: string): Row => ({ slot: { time, title: bg, pause: true }, en: { title: en } });
+
+/** A panel: the talks go into the note, every name into `people`. */
+const panel = (time: string, title: string, titleEn: string, talks: Talk[], extra?: { role?: string; roleEn?: string }): Row => ({
+  slot: { time, title, note: talkNote(talks, false), people: talks.flatMap(names), ...(extra?.role ? { role: extra.role } : {}) },
+  en: { title: titleEn, note: talkNote(talks, true), ...(extra?.roleEn ? { role: extra.roleEn } : {}) },
+});
+
+/** A keynote: one title, one speaker, and what they are in the role line. */
+const keynote = (time: string, title: string, titleEn: string, who: string, sp: string, spe: string, note?: [string, string]): Row => ({
+  slot: { time, title, role: `Keynote · ${sp}`, people: [who], ...(note ? { note: note[0] } : {}) },
+  en: { title: titleEn, role: `Keynote · ${spe}`, ...(note ? { note: note[1] } : {}) },
+});
+
+const DAY1: Row[] = [
+  pause("08:30-09:30", "Регистрация и кафе", "Registration and coffee"),
+  {
+    slot: { time: "09:30-09:45", title: "Официално откриване", role: "По 5 минути на човек", people: ["Д-р Райна Стоянова", "Джулия Димитрова", "Мария Варсанова"] },
+    en: { title: "Official opening", role: "5 minutes each" },
+  },
+  mod(1, "Императивът на дълголетието - от демографията до медицината", "The longevity imperative - from demography to medicine"),
+  {
+    slot: {
+      time: "09:50-10:20",
+      title: "Светът остарява: какво означава това за всеки от нас",
+      role: "Fireside с 2 участници",
+      note: "Кънчо Стойчев, социолог\nпроф. д-р Георги Бърдаров, демограф",
+      people: ["Кънчо Стойчев", "проф. д-р Георги Бърдаров"],
+    },
+    en: {
+      title: "The world is ageing: what it means for each of us",
+      role: "Fireside with 2 guests",
+      note: `${latin("Кънчо Стойчев")}, sociologist\n${latin("проф. д-р Георги Бърдаров")}, demographer`,
+    },
+  },
+  keynote("10:20-11:00", "Можем ли да измерим скоростта на стареене?", "Can we measure the speed of ageing?", "Sara Hägg", "биолог, молекулярна епидемиология", "biologist, molecular epidemiology"),
+  mod(2, "Дълголетие на сърцето", "Longevity of the heart"),
+  panel("11:10-11:40", "Панел с 4 гости", "Panel with 4 guests", [
+    { t: "Сърцето - двигателят на дългия живот", te: "The heart - the engine of a long life", who: "проф. Цветомир Луканов", sp: "кардиохирург", spe: "cardiac surgeon" },
+    { t: "Как метаболизмът състарява сърцето", te: "How metabolism ages the heart", who: "доц. Красимира Христова", sp: "кардиолог", spe: "cardiologist" },
+    { t: "Толкова млади, колкото са съдовете ни", te: "As young as our vessels", who: "проф. Милена Станева", sp: "ангиолог", spe: "angiologist" },
+    { t: "На колко години е сърцето ти?", te: "How old is your heart?", who: "д-р Танер Шахин", sp: "кардиолог", spe: "cardiologist" },
+  ]),
+  keynote("11:45-12:15", "Белият дроб като ранен сигнал за здравето", "The lung as an early signal of health", "д-р Александър Симидчиев", "пулмолог, специалист по белодробни болести", "pulmonologist, specialist in lung diseases"),
+  keynote("12:20-12:50", "Колко рано можем да видим сърдечносъдовия риск?", "How early can we see cardiovascular risk?", "проф. д-р Иво Петров", "кардиолог", "cardiologist"),
+  pause("12:50-13:50", "Обедна почивка", "Lunch break"),
+  mod(3, "Мозък и когнитивно дълголетие", "Brain and cognitive longevity"),
+  panel("14:00-15:00", "Панел с 4 гости", "Panel with 4 guests", [
+    { t: "Роботи, изкуствен интелект и бъдещето на мозъчното здраве", te: "Robots, artificial intelligence and the future of brain health", who: "проф. Николай Габровски", sp: "неврохирург", spe: "neurosurgeon" },
+    { t: "Какво разказва ЯМР за това как остарява мозъкът", te: "What an MRI tells us about how the brain ages", who: "доц. Марин Пенков", sp: "образна диагностика", spe: "imaging diagnostics" },
+    { t: "Деменцията може да се забави: какво зависи от нас", te: "Dementia can be slowed: what is up to us", who: "доц. д-р Иван Койчев", sp: "невропсихиатър", spe: "neuropsychiatrist" },
+    { t: "Колко добре спим наистина?", te: "How well do we really sleep?", who: "доц. д-р Кирил Терзийски" },
+  ]),
+  keynote("15:05-15:35", "Живеем по-дълго. Оставаме ли същите?", "We live longer. Do we stay the same?", "Виолета Михайлова", "психолог", "psychologist"),
+  pause("15:35-15:50", "Кафе пауза", "Coffee break"),
+  mod(4, "Метаболитно здраве и дълголетие", "Metabolic health and longevity"),
+  keynote(
+    "15:55-16:25",
+    "GLP-1 медикаментите - ново средство за отлагане на стареенето",
+    "GLP-1 drugs - a new tool for delaying ageing",
+    "Rocio Salas-Whalen",
+    "ендокринолог, Ню Йорк, САЩ",
+    "endocrinologist, New York, USA",
+    ["Представяне на книгата „Безтегловност“.", "Presentation of the book “Weightless”."],
+  ),
+  keynote("16:30-17:00", "Микробиомът и дълголетието без митове", "The microbiome and longevity without myths", "проф. Godfrey Grech", "онколог", "oncologist"),
+  panel("17:05-17:45", "Панел", "Panel", [
+    { t: "Захарта, която ни състарява", te: "The sugar that ages us", who: ["Весела Михнева", "Ивайло Богомилов"], sp: "ендокринолози", spe: "endocrinologists" },
+    { t: "Затлъстелият черен дроб и топящите се мускули: тихите рискове", te: "The fatty liver and the melting muscles: the silent risks", who: "Милен Василев", sp: "хепатолог", spe: "hepatologist" },
+  ]),
+  {
+    slot: {
+      time: "17:10-18:10",
+      title: "Подписване на книги: „Безтегловност“",
+      note: "На щанда, с участието на авторката Rocio Salas-Whalen. Книгата е преведена на български език със съдействието на БЛА.",
+      people: ["Rocio Salas-Whalen"],
+    },
+    en: {
+      title: "Book signing: “Weightless”",
+      note: "At the stand, with the author Rocio Salas-Whalen. The book has been translated into Bulgarian with the support of the BLA.",
+    },
+  },
+];
+
+const DAY2: Row[] = [
+  mod(5, "Репродуктивно здраве и стареене", "Reproductive health and ageing"),
+  panel("09:00-09:45", "Панел с 4 експерти", "Panel with 4 experts", [
+    { t: "Уморената имунна система - толкова лошо ли е това?", te: "The tired immune system - is that so bad?", who: "Георги Стаменов", sp: "гинеколог", spe: "gynaecologist" },
+    { t: "Имат ли мъжете своята пауза?", te: "Do men have their pause?", who: "проф. Здравко Каменов", sp: "ендокринолог", spe: "endocrinologist" },
+    { who: "д-р Атанас Чернев" },
+    { t: "Мъжко хормонално здраве и тестостерон", te: "Male hormonal health and testosterone", who: "д-р Бранимир Радуилов", sp: "обща медицина", spe: "general medicine" },
+  ]),
+  panel("09:50-10:35", "Панел с експерти", "Panel of experts", [
+    { who: "проф. Мария Юнакова" },
+    { who: "д-р Наталия Петракиева" },
+    { who: "доц. Малина Петкова" },
+    { who: "Кристина Вавура" },
+  ]),
+  {
+    slot: {
+      time: "10:40-11:00",
+      title: "Жената DIVA: енергията и възрастта като сила",
+      role: "Панел с 4 гости · водещ Джулия Димитрова",
+      people: ["Яна Балникова", "Тяна Пресолска", "Мария Илиева"],
+    },
+    en: { title: "The DIVA woman: energy and age as strength", role: "Panel with 4 guests · host Julia Dimitrova" },
+  },
+  pause("11:05-11:35", "Кафе пауза", "Coffee break"),
+  mod(6, "Ендокринология, онкология и стареене", "Endocrinology, oncology and ageing"),
+  panel("11:35-12:15", "Панел с 4 гости", "Panel with 4 guests", [
+    { t: "Щитовидната жлеза - тихият диригент на стареенето", te: "The thyroid - the quiet conductor of ageing", who: "доц. д-р Александър Шинков", sp: "ендокринолог", spe: "endocrinologist" },
+    { t: "Ранното откриване променя историята", te: "Early detection changes the story", who: "д-р Ваня Митова", sp: "мамолог", spe: "breast specialist" },
+    { who: "д-р Цвета Алайков" },
+    { t: "Какво казват гените ни за риска от рак", te: "What our genes say about cancer risk", who: "Боряна Герасимова", sp: "шеф на Regena", spe: "head of Regena" },
+  ]),
+  keynote("12:20-12:40", "Силни кости и мускули за дълъг живот", "Strong bones and muscles for a long life", "Paul Lee", "ортопед", "orthopaedist"),
+  pause("12:45-13:45", "Обедна почивка", "Lunch break"),
+  {
+    slot: {
+      time: "13:45-14:15",
+      title: "Представяне на книгата „Протоколите на Хюберман“",
+      people: ["Нели Огнянова", "Джулия Димитрова", "Мария Варсанова"],
+    },
+    en: { title: "Presentation of the book “The Huberman Protocols”" },
+  },
+  mod(7, "Дерматология и дълголетие", "Dermatology and longevity"),
+  panel("14:20-14:50", "Панел с 2 гости", "Panel with 2 guests", [
+    { t: "Кожата - огледало на стареенето", te: "The skin - a mirror of ageing", who: "Melanie Angelova", sp: "дерматолог", spe: "dermatologist" },
+    { t: "Какво разказва косата ни за стреса и възрастта", te: "What our hair tells us about stress and age", who: "проф. дхн Милен Богданов", sp: "органична и физична органична химия", spe: "organic and physical organic chemistry" },
+  ]),
+  panel("14:55-15:25", "Панел с 2 гости", "Panel with 2 guests", [
+    { t: "Липедемът: не е просто наднормено тегло", te: "Lipedema: it is not just excess weight", who: "Sheila Veronese", sp: "професор, инженер", spe: "professor, engineer" },
+    { t: "Хормоните - липсващото звено за млада кожа", te: "Hormones - the missing link for young skin", who: "Andre-Robert Rotmann", sp: "гинеколог", spe: "gynaecologist" },
+  ]),
+  pause("15:25-15:40", "Кафе пауза", "Coffee break"),
+  mod(8, "Интервенции за дълголетие - от начина на живот до медицината", "Longevity interventions - from lifestyle to medicine"),
+  panel("15:45-16:30", "Панел с 3 гости", "Panel with 3 guests", [
+    { t: "Чуваш, виждаш, движиш се - значи мислиш ясно", te: "You hear, you see, you move - so you think clearly", who: "д-р Десислава Димова", sp: "офталмолог", spe: "ophthalmologist" },
+    { t: "Светлината като лекарство: патентован метод за дълголетие", te: "Light as medicine: a patented method for longevity", who: "Милена Драганова", sp: "инженер", spe: "engineer" },
+    { t: "Нека храната бъде твоето лекарство", te: "Let food be thy medicine", who: "Дерйа Хюсеин Кандиларов", sp: "клиничен диетолог", spe: "clinical dietitian" },
+  ]),
+  panel("16:35-17:15", "Панел с 4 гости", "Panel with 4 guests", [
+    { t: "Уелнес и дишане срещу стареенето", te: "Wellness and breathing against ageing", who: "Fahri Saatcioglu", sp: "физиолог", spe: "physiologist" },
+    { who: "Анна Грозданова" },
+    { t: "Персонализирана медицина без черна кутия", te: "Personalised medicine without a black box", who: "Guido Axmann", sp: "обща медицина", spe: "general medicine" },
+    { t: "Добавки: кои работят и кои - не", te: "Supplements: which work and which do not", who: "Morten Scheibye-Knudsen", sp: "генетик", spe: "geneticist" },
+  ]),
+  {
+    slot: {
+      time: "17:20-18:00",
+      title: "Sofia Life Conversation: как искаме да живеем след 60, 70 и 80",
+      people: ["Красимир Балъков", "Мария Варсанова", "Джулия Димитрова", "Милена Хаджииванова"],
+    },
+    en: { title: "Sofia Life Conversation: how we want to live at 60, 70 and 80" },
+  },
+  {
+    slot: { time: "18:00-18:15", title: "Закриване: The Longevity Promise", role: "Организаторите", note: "Една измерима промяна за следващите 30 дни." },
+    en: { title: "Closing: The Longevity Promise", role: "The organisers", note: "One measurable change for the next 30 days." },
+  },
+  pause("18:15-19:15", "Farewell drink", "Farewell drink"),
+];
+
 export const PROGRAM: Day[] = [
   {
     day: "Събота",
     date: "07.11",
     theme: "Тяло, мозък, сърце и бъдеще",
-    intro:
-      "От науката за стареенето до решенията, които можем да вземем още днес.",
-    slots: [
-      {
-        time: "09:00-10:00",
-        title: "Регистрация • кафе • срещи",
-        note: "Вратите отварят. Запознанства, партньори и първи разговори за това как искаме да остаряваме.",
-        pause: true,
-      },
-      {
-        time: "10:00-10:25",
-        title: "Откриване: да живеем по-дълго. Но и по-добре.",
-        note: "Българска Лонджевити Асоциация и Biohacking BG откриват събитието заедно и поставят големия въпрос: как превръщаме науката за дълголетието в по-добър живот за всеки?",
-        people: ["Д-р Райна Стоянова", "Dominik Thor", "Rocio Salas-Whalen"],
-      },
-      {
-        time: "10:25-11:20",
-        title: "Колко дълго можем да живеем - и как да живеем по-добре?",
-        note: "От науката за стареенето към практиката: как geroscience променя начина, по който мислим за профилактиката, риска и здравите години живот.",
-        role: "Водещ и модератор: Диана Радева",
-        people: ["Александър Симидчиев", "Sara Hägg"],
-      },
-      {
-        time: "11:20-12:25",
-        title: "Метаболизмът е новият биологичен часовник",
-        note: "GLP-1 и инкретинови терапии, мастен черен дроб, мускулна загуба, хронично възпаление, биомаркери за ранна диагностика и новите терапевтични възможности.",
-        role: "Модератор: Райна Стоянова",
-        people: [
-          "Rocio Salas-Whalen",
-          "Dean Berman",
-          "Милен Василев",
-          "Виктория Сарафян",
-          "Godfrey Grech",
-        ],
-      },
-      {
-        time: "12:25-13:25",
-        title: "Книжен лаунч: „Weightless“",
-        note: "Успоредно с обяда, за желаещите. Среща с автора и подписване на книги.",
-        people: ["Rocio Salas-Whalen"],
-      },
-      {
-        time: "12:25-13:25",
-        title: "Обяд • longevity networking",
-        pause: true,
-      },
-      {
-        time: "13:20-14:05",
-        title: "Сърце за дълъг живот",
-        note: "Как стареят сърцето и съдовете, защо менопаузата променя сърдечносъдовия риск и как възпалението се превръща в мишена за по-дълъг здрав живот.",
-        role: "Модератор: Цветомир Луканов",
-        people: ["Красимира Христова", "проф. Иво Петров"],
-      },
-      {
-        time: "14:05-15:15",
-        title:
-          "Мозъкът не трябва да остарява със същата скорост като календара",
-        note: "Памет, сън, кръвоносни съдове, възпаление, зрение, слух и движение - практична карта за когнитивно дълголетие.",
-        role: "Модератори",
-        people: [
-          "Николай Габровски",
-          "Лъчезар Трайков",
-          "Шима Мехрабиян",
-          "Иван Койчев",
-          "Кирил Терзийски",
-          "Десислава Димова",
-        ],
-      },
-      { time: "15:15-15:40", title: "Кафе • reset break", pause: true },
-      {
-        time: "15:40-16:10",
-        title: "Дълголетието започва преди раждането",
-        note: "Как здравето на майката, бременността и феталното развитие могат да поставят основите на здравето десетилетия напред.",
-        role: "Специална лекция",
-        people: ["Иван Сигридов"],
-      },
-      {
-        time: "16:10-16:40",
-        title: "Тялото помни дисциплината",
-        note: "Уроци от спорта на високо ниво: как движението, постоянството, възстановяването и психиката изграждат форма, която издържа във времето.",
-        role: "Специален гост",
-        people: ["Красимир Балъков"],
-      },
-      {
-        time: "16:40-17:10",
-        title:
-          "Психологическо дълголетие: как да не изгорим, докато се опитваме да живеем повече",
-        note: "Устойчивост, смисъл, навици и връзката между психиката, представянето и качеството на живота.",
-        people: ["Милена Хаджииванова", "проф. Даниела Илиева"],
-      },
-      {
-        time: "17:10-18:00",
-        title: "DIVA Live: жената, енергията и възрастта като сила",
-        note: "Разговор на живо за женската идентичност, сцена, тяло, самочувствие и грижата за себе си през различните десетилетия.",
-        role: "Водещ: Джулия Димитрова",
-        people: ["Мария Илиева"],
-      },
-      {
-        time: "18:00",
-        title: "Край на ден 1",
-        pause: true,
-      },
-    ],
+    intro: "От науката за стареенето до решенията, които можем да вземем още днес.",
+    slots: DAY1.map((r) => r.slot),
   },
   {
     day: "Неделя",
     date: "08.11",
     theme: "Хормони, сила, превенция и навици",
-    intro:
-      "Практичната страна на дълголетието: какво да запазим, какво да променим и на какво да не вярваме.",
-    slots: [
-      {
-        time: "09:30-10:40",
-        title: "Женското и мъжкото време: хормони през живота",
-        note: "Яйчниково стареене, менопауза, андропауза и тестостерон: какво е нормално, какво може да се повлияе и кога лечението има смисъл.",
-        role: "Модератор: Яна Балникова",
-        people: [
-          "Мария Маринова",
-          "Louise Newson",
-          "Мария Юнакова",
-          "Малина Петкова",
-          "Тяна Пресолска",
-          "Здравко Каменов",
-          "Бранимир Радуилов",
-        ],
-      },
-      {
-        time: "10:40-11:35",
-        title: "Хормони, мускули и кости: инфраструктурата на дълголетието",
-        note: "Щитовидна жлеза, остеопороза, стави, хрущял, саркопения и физическа функция - как да запазим силата и независимостта си.",
-        role: "Модератор: Александър Шинков",
-        people: ["Paul Lee", "Brad Currier"],
-      },
-      { time: "11:35-12:00", title: "Кафе • move break", pause: true },
-      {
-        time: "12:00-12:55",
-        title: "Кожата като огледало на стареенето",
-        note: "Кожата като биомаркер, слънце и exposome, микропластмаси, ендокринни нарушители и по-информиран избор на козметика.",
-        role: "Модератор: Радина Денкова",
-        people: ["Melanie Angelova", "Симеон Личев"],
-      },
-      { time: "12:55-13:50", title: "Обяд • meet the experts", pause: true },
-      {
-        time: "13:50-15:25",
-        title: "Какво наистина работи? Хранене, добавки, NAD⁺, инфузии и превенция",
-        note: "Без маркетингов шум: доказателства срещу hype, хранене и добавки за дълъг живот, NAD⁺, венозни инфузии - ползи, рискове и етика - плюс превенция и ранно откриване на онкологични заболявания.",
-        people: [
-          "Анелия Биволарска",
-          "Silvena Rowe",
-          "Иван Манчев",
-          "Morten Scheibye-Knudsen",
-          "Fahri Saatcioglu",
-          "Яни Драгов",
-          "Ваня Митова",
-        ],
-      },
-      { time: "15:25-15:50", title: "Кафе • longevity lab", pause: true },
-      {
-        time: "15:50-16:35",
-        title:
-          "От лабораторията до ежедневието: как изглежда личният longevity план",
-        note: "Как се съчетават биомаркери, образна диагностика, физическа функция, когнитивна оценка и генетични панели в клинично смислен план - без „магически“ протоколи.",
-        role: "Водещ и модератор: Райна Стоянова",
-        people: ["Guido Axmann", "Таня Кадийска"],
-      },
-      {
-        time: "16:35-17:20",
-        title: "Дълголетието е навик, не проект",
-        note: "Как медицината се превръща в устойчиво ежедневие: движение, хранене, сън, промяна на поведението, критично мислене и защита от дезинформация.",
-        role: "Водещи и модератори",
-        people: ["Dominik Thor", "Мария Варсанова"],
-      },
-      {
-        time: "17:20-17:50",
-        title: "Sofia Life Conversation: как искаме да живеем след 60, 70, 80…",
-        note: "Финален разговор без медицински жаргон - какво взимаме със себе си от два дни наука и как започваме още от понеделник.",
-        role: "Водещ: Мария Силвестър",
-        people: [
-          "Мария Варсанова",
-          "Джулия Димитрова",
-          "Красимир Балъков",
-          "Милена Хаджииванова",
-        ],
-      },
-      {
-        time: "17:50-18:10",
-        title: "Закриване • the longevity promise",
-        note: "Една конкретна промяна за следващите 30 дни.",
-      },
-      {
-        time: "18:10-19:00",
-        title: "Farewell drink • community & connections",
-        pause: true,
-      },
-    ],
+    intro: "Практичната страна на дълголетието: какво да запазим, какво да променим и на какво да не вярваме.",
+    slots: DAY2.map((r) => r.slot),
   },
 ];
 
-/**
- * The English half of the programme, written by hand and keyed by day and
- * slot, in the same order as above. Only the words change: times, names and
- * the shape of the day are the same event.
- */
-export type SlotEn = { title?: string; note?: string; role?: string };
-
-export const PROGRAM_EN: SlotEn[][] = [
-  [
-    { title: "Registration \u00b7 coffee \u00b7 meeting people", note: "Doors open. Introductions, partners and first conversations about how we want to age." },
-    {
-      title: "Opening: living longer. And living better.",
-      note: "The Bulgarian Longevity Association and Biohacking BG open the event together and put the big question: how do we turn the science of longevity into a better life for everyone?",
-    },
-    {
-      title: "How long can we live - and how do we live better?",
-      note: "From the science of ageing to practice: how geroscience is changing the way we think about prevention, risk and healthy years of life.",
-      role: "Host and moderator: Diana Radeva",
-    },
-    {
-      title: "Metabolism is the new biological clock",
-      note: "GLP-1 and incretin therapies, fatty liver, muscle loss, chronic inflammation, biomarkers for early diagnosis and the new therapeutic options.",
-      role: "Moderator: Rayna Stoyanova",
-    },
-    { title: "Book launch: \u201cWeightless\u201d", note: "Alongside lunch, for those who wish. Meet the author and have your book signed." },
-    { title: "Lunch \u00b7 longevity networking" },
-    {
-      title: "A heart for a long life",
-      note: "How the heart and the vessels age, why menopause changes cardiovascular risk, and how inflammation becomes a target for more healthy years.",
-      role: "Moderator: Tsvetomir Lukanov",
-    },
-    {
-      title: "The brain need not age at the speed of the calendar",
-      note: "Memory, sleep, blood vessels, inflammation, vision, hearing and movement - a practical map for cognitive longevity.",
-      role: "Moderators",
-    },
-    { title: "Coffee \u00b7 reset break" },
-    {
-      title: "Longevity begins before birth",
-      note: "How a mother\u2019s health, pregnancy and fetal development can lay the foundations of health decades ahead.",
-      role: "Special lecture",
-    },
-    {
-      title: "The body remembers discipline",
-      note: "Lessons from elite sport: how movement, consistency, recovery and the mind build a form that lasts.",
-      role: "Special guest",
-    },
-    {
-      title: "Psychological longevity: how not to burn out while trying to live longer",
-      note: "Resilience, meaning, habits, and the link between the mind, performance and the quality of life.",
-    },
-    {
-      title: "DIVA Live: women, energy and age as strength",
-      note: "A live conversation about female identity, the stage, the body, confidence and self-care through the decades.",
-      role: "Host: Julia Dimitrova",
-    },
-    {
-      title: "End of day 1",
-    },
-  ],
-  [
-    {
-      title: "A woman\u2019s and a man\u2019s clock: hormones across life",
-      note: "Ovarian ageing, menopause, andropause and testosterone: what is normal, what can be influenced and when treatment makes sense.",
-      role: "Moderator: Yana Balnikova",
-    },
-    {
-      title: "Hormones, muscle and bone: the infrastructure of longevity",
-      note: "Thyroid, osteoporosis, joints, cartilage, sarcopenia and physical function - how to keep our strength and our independence.",
-      role: "Moderator: Aleksandar Shinkov",
-    },
-    { title: "Coffee \u00b7 move break" },
-    {
-      title: "The skin as a mirror of ageing",
-      note: "The skin as a biomarker, sun and the exposome, microplastics, endocrine disruptors and a better-informed choice of cosmetics.",
-      role: "Moderator: Radina Denkova",
-    },
-    { title: "Lunch \u00b7 meet the experts" },
-    {
-      title: "What actually works? Nutrition, supplements, NAD\u207a, infusions and prevention",
-      note: "Without the marketing noise: evidence against hype, nutrition and supplements for a long life, NAD\u207a, intravenous infusions - benefits, risks and ethics - plus prevention and early detection of cancer.",
-    },
-    { title: "Coffee \u00b7 longevity lab" },
-    {
-      title: "From the laboratory to everyday life: what a personal longevity plan looks like",
-      note: "How biomarkers, imaging, physical function, cognitive assessment and genetic panels come together into a clinically meaningful plan - with no \u201cmagic\u201d protocols.",
-      role: "Host and moderator: Rayna Stoyanova",
-    },
-    {
-      title: "Longevity is a habit, not a project",
-      note: "How medicine becomes a sustainable everyday: movement, nutrition, sleep, behaviour change, critical thinking and protection from misinformation.",
-      role: "Hosts and moderators",
-    },
-    {
-      title: "Sofia Life Conversation: how we want to live at 60, 70, 80\u2026",
-      note: "A closing conversation without medical jargon - what we take from two days of science, and how we start on Monday.",
-      role: "Host: Maria Silvester",
-    },
-    { title: "Closing \u00b7 the longevity promise", note: "One concrete change for the next 30 days." },
-    { title: "Farewell drink \u00b7 community & connections" },
-  ],
-];
+/** The English half, in the same order as PROGRAM - built from the same rows so they cannot drift. */
+export const PROGRAM_EN: SlotEn[][] = [DAY1.map((r) => r.en), DAY2.map((r) => r.en)];

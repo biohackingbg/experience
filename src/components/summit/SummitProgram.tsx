@@ -58,7 +58,18 @@ export async function SummitProgram({ lang = "bg" }: { lang?: Lang }) {
                 </div>
 
                 <ul>
-                  {d.slots.map((slot, j) => (
+                  {d.slots.map((slot, j) =>
+                    // "Модул N: ..." rows carry no time: they head the sessions below them.
+                    slot.pause && /^(Модул|Module)\s+\d/.test(slot.title) ? (
+                      <li
+                        key={`module-${slot.title}`}
+                        className={`bg-bh-ink/[0.05] px-7 py-3 ${j !== 0 ? "border-t border-bh-ink/8" : ""}`}
+                      >
+                        <p className="font-mono text-[0.68rem] font-medium uppercase tracking-[0.12em] text-bh-pine">
+                          {slot.title}
+                        </p>
+                      </li>
+                    ) : (
                     <li
                       key={`${slot.time}-${slot.title}`}
                       className={`flex gap-4 px-7 py-4 transition-colors hover:bg-bh-pine/10 ${
@@ -81,7 +92,7 @@ export async function SummitProgram({ lang = "bg" }: { lang?: Lang }) {
                         </p>
 
                         {slot.note && !slot.pause && (
-                          <p className="mt-1.5 text-xs leading-relaxed text-bh-ink/55">
+                          <p className="mt-1.5 whitespace-pre-line text-xs leading-relaxed text-bh-ink/55">
                             {slot.note}
                           </p>
                         )}
@@ -114,7 +125,8 @@ export async function SummitProgram({ lang = "bg" }: { lang?: Lang }) {
                         )}
                       </div>
                     </li>
-                  ))}
+                    ),
+                  )}
                 </ul>
               </div>
             </Reveal>

@@ -23,7 +23,8 @@ function parse(formData: FormData): { ok: true; input: SessionInput } | { ok: fa
   const time = String(formData.get("time") ?? "").trim().slice(0, 30);
   const title = String(formData.get("title") ?? "").trim().slice(0, 200);
   if (day !== 1 && day !== 2) return { ok: false, message: "Избери ден." };
-  if (!time) return { ok: false, message: "Напиши час, напр. 10:25-11:20." };
+  // A module heading ("Модул 3: ...") has no time of its own.
+  if (!time && formData.get("pause") !== "on") return { ok: false, message: "Напиши час, напр. 10:25-11:20." };
   if (!title) return { ok: false, message: "Напиши заглавие." };
   const s = (k: string, max: number) => String(formData.get(k) ?? "").trim().slice(0, max) || null;
   return {
