@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Общи условия | Sofia Life Summit",
   description:
     "Общи условия за продажба на билети за Sofia Life Summit, 07-08 ноември 2026, София.",
+  alternates: { canonical: "/usloviya" },
 };
 
 /*

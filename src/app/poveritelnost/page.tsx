@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Политика за поверителност | Biohacking Experience",
   description:
     "Как Sofia Life Summit и Biohacking.bg обработват данни за посещения, билети, имейли и рекламно измерване.",
+  alternates: { canonical: "/poveritelnost" },
 };
 
 const sections = [

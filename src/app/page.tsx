@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+
 import { SiteNotice } from "@/components/summit/SiteNotice";
 import { SummitNav } from "@/components/summit/SummitNav";
 import { SummitHero } from "@/components/summit/SummitHero";
@@ -24,6 +26,12 @@ import { SPEAKERS_PLANNED } from "@/lib/site-copy";
 // did not. Every re-render is an ISR write plus a function run on the bill,
 // and at five minutes that was most of the ISR cost.
 export const revalidate = 3600;
+
+// Both languages are declared to search engines, so the English page is
+// found as the English version rather than as a near-duplicate.
+export const metadata: Metadata = {
+  alternates: { canonical: "/", languages: { bg: "/", en: "/en" } },
+};
 
 /** The Bulgarian site. Its English twin is /en, built from the same sections. */
 export default async function Home() {

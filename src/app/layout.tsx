@@ -49,9 +49,10 @@ export async function generateMetadata(): Promise<Metadata> {
   metadataBase: new URL(SITE),
   title: TITLE,
   description: DESCRIPTION,
-  // Both languages are declared to search engines, so the English page is
-  // found as the English version rather than as a near-duplicate.
-  alternates: { canonical: "/", languages: { bg: "/", en: "/en" } },
+  // No canonical here: a canonical in the root layout is inherited by every
+  // page that does not set its own, and Search Console then reads /bilet,
+  // /usloviya and the rest as copies of the home page. Each public page sets
+  // its own; the home page carries the language pair.
   // Proves ownership to Search Console without touching DNS. The domain sits
   // on SuperHosting's redirect nameservers, which serve a template zone with
   // no TXT records, so the DNS method is not available until the zone moves.
