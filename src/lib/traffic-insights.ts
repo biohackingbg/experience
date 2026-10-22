@@ -62,8 +62,15 @@ export function insightsOf(r: TrafficReport): Insight[] {
       out.push({ tone: "info", text: `Най-добре стигат до билетите хората от ${best.channel} (${b}%), най-слабо от ${worst.channel} (${w}%).` });
   }
 
-  // Money per campaign.
-  const priced = r.campaigns.filter((c) => c.spendCents > 0 && c.tickets > 0).map((c) => ({ c, per: c.spendCents / c.tickets }));
+  // Broken tags: an unfilled template macro in the link ("{{campaign.id}}")
+  // lands in the log as the literal word, and the clicks go nowhere useful.
+  const broken = r.campaigns.find((c) => /campaign\.id|\{\{|%7b/i.test(c.code));
+  if (broken)
+    out.push({ tone: "warn", text: `Има ${broken.visitors} посещения с неразвит код „${broken.code}“ - линк, в който Meta не е сложила номера на кампанията. Провери URL параметрите на рекламата.` });
+
+  // Money per campaign. Spend in the log is the lot, not the period, so the
+  // cost per ticket is only honest over all time.
+  const priced = r.period !== "vsichko" ? [] : r.campaigns.filter((c) => c.spendCents > 0 && c.tickets > 0).map((c) => ({ c, per: c.spendCents / c.tickets }));
   if (priced.length >= 2) {
     priced.sort((a, b) => a.per - b.per);
     const best = priced[0];

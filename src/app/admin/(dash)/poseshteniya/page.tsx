@@ -330,7 +330,7 @@ export default async function TrafficPage({
           <Card
             className="mt-6"
             title="Кампании по линк с код"
-            note="Кодът в линка (utm_campaign) е Meta campaign ID за рекламите и свой код за постовете. Името и платените пари идват от „Реклама“."
+            note={`Кодът в линка (utm_campaign) е Meta campaign ID за рекламите и свой код за постовете. Името идва от „Реклама“.${period === "vsichko" ? "" : " Платеното и цената на билет се показват само за „Всичко“, защото разходът в „Реклама“ е общ, не по дни."}`}
           >
             <div className="overflow-x-auto">
               <table className="w-full min-w-[40rem] border-collapse">
@@ -341,8 +341,8 @@ export default async function TrafficPage({
                     <th className={`${th} text-right`}>До билетите</th>
                     <th className={`${th} text-right`}>Билети</th>
                     <th className={`${th} text-right`}>Приход</th>
-                    <th className={`${th} text-right`}>Платено</th>
-                    <th className={`${th} text-right`}>€ на билет</th>
+                    {period === "vsichko" && <th className={`${th} text-right`}>Платено</th>}
+                    {period === "vsichko" && <th className={`${th} text-right`}>€ на билет</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -356,8 +356,8 @@ export default async function TrafficPage({
                       <td className={`${td} text-right`}>{pct(c.ticketVisitors, c.visitors) ?? 0}%</td>
                       <td className={`${td} text-right`}>{c.tickets || "-"}</td>
                       <td className={`${td} text-right`}>{c.grossCents ? eur(c.grossCents) : "-"}</td>
-                      <td className={`${td} text-right`}>{c.spendCents ? eur(c.spendCents) : "-"}</td>
-                      <td className={`${td} text-right`}>{c.spendCents && c.tickets ? eur(c.spendCents / c.tickets) : "-"}</td>
+                      {period === "vsichko" && <td className={`${td} text-right`}>{c.spendCents ? eur(c.spendCents) : "-"}</td>}
+                      {period === "vsichko" && <td className={`${td} text-right`}>{c.spendCents && c.tickets ? eur(c.spendCents / c.tickets) : "-"}</td>}
                     </tr>
                   ))}
                 </tbody>

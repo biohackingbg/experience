@@ -70,7 +70,7 @@ function windows(p: PeriodId): { cur: Window; prev: Window | null; days: number 
  * and ad-review crawlers, and the cloud regions behind scanners. They are
  * counted as visitors by any beacon that runs JavaScript, and they never buy.
  */
-const BOT_CITIES = ["Prineville", "Forest City", "Luleå", "Lulea", "Ashburn", "Council Bluffs", "The Dalles", "Boardman", "Denver", "Santa Clara", "Des Moines", "Boydton", "Quincy", "San Jose", "Hillsboro", "Altoona"];
+const BOT_CITIES = ["Prineville", "Forest City", "Luleå", "Lulea", "Ashburn", "Council Bluffs", "The Dalles", "Boardman", "Denver", "Santa Clara", "Des Moines", "Boydton", "Quincy", "San Jose", "Hillsboro", "Altoona", "Omaha", "Fort Worth", "Taiyuan", "Moses Lake", "Cheyenne", "Lenoir", "Papillion", "New Albany", "Eagle Mountain", "Los Lunas", "Mesa"];
 const BOT_SQL = `(city is null or city not in (${BOT_CITIES.map((c) => `'${c.replace(/'/g, "''")}'`).join(", ")}))`;
 const NOT_BOT = sql.raw(BOT_SQL);
 const IS_BOT = sql.raw(`(city in (${BOT_CITIES.map((c) => `'${c.replace(/'/g, "''")}'`).join(", ")}))`);
@@ -125,6 +125,8 @@ async function periodStats(w: Window, human: boolean): Promise<PeriodStats> {
 /** A source as the team reads it: Instagram, Meta advert, newsletter, direct. */
 export function channelOf(utmSource: string | null, referrerHost: string | null): string {
   const u = (utmSource ?? "").toLowerCase();
+  // A tag that is really a host name ("chatgpt.com") is read as that host.
+  if (u.includes(".")) return channelOf(null, u);
   if (u) {
     if (["meta", "fb", "facebook-ads", "ig-ads"].includes(u)) return "Meta реклама";
     if (["instagram", "ig"].includes(u)) return "Instagram";
@@ -144,6 +146,8 @@ export function channelOf(utmSource: string | null, referrerHost: string | null)
   if (h === "t.co" || h.includes("twitter") || h === "x.com") return "X";
   if (h === "checkout.stripe.com" || h.includes("stripe.com")) return "Връщане от плащане";
   if (h.includes("tiktok")) return "TikTok";
+  if (h.includes("chatgpt") || h.includes("openai")) return "ChatGPT";
+  if (h.includes("perplexity")) return "Perplexity";
   return h;
 }
 
