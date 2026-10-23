@@ -204,7 +204,8 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
                 display: "flex",
                 fontFamily: "Sofia Sans",
                 fontWeight: 900,
-                fontSize: Math.round(w * 0.082),
+                // A name and title of about this length leaves one word alone on a second line at the full size.
+                fontSize: Math.round(w * (name.length >= 24 && name.length <= 28 ? 0.066 : 0.082)),
                 lineHeight: 1.05,
                 letterSpacing: -Math.round(w * 0.002),
                 color: "#ffffff",
