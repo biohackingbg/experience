@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return {
     title: `${who} | Sofia Life Summit 2026`,
     description,
-    alternates: { canonical: `/lektor/${id}`, languages: { bg: `/lektor/${id}`, en: `/en/lektor/${id}` } },
+    alternates: { canonical: `/lektor/${id}`, languages: { bg: `/lektor/${id}`, en: `/en/lektor/${id}`, "x-default": `/lektor/${id}` } },
     openGraph: {
       type: "profile",
       url: `${SITE}/lektor/${id}`,

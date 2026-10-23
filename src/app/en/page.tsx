@@ -35,7 +35,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: META.en.title,
     description,
-    alternates: { canonical: "/en", languages: { bg: "/", en: "/en" } },
+    alternates: { canonical: "/en", languages: { bg: "/", en: "/en", "x-default": "/" } },
     openGraph: {
       type: "website",
       locale: "en_GB",

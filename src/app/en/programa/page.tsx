@@ -8,7 +8,7 @@ import { SummitProgram } from "@/components/summit/SummitProgram";
 export const metadata: Metadata = {
   title: "Programme by the hour | Sofia Life Summit 2026",
   description: "The Sofia Life Summit programme by day and hour - 7-8 November 2026, Grand Hotel Millennium, Sofia.",
-  alternates: { canonical: "/en/programa", languages: { bg: "/programa", en: "/en/programa" } },
+  alternates: { canonical: "/en/programa", languages: { bg: "/programa", en: "/en/programa", "x-default": "/programa" } },
 };
 
 export const revalidate = 3600;

@@ -30,7 +30,7 @@ export const revalidate = 3600;
 // Both languages are declared to search engines, so the English page is
 // found as the English version rather than as a near-duplicate.
 export const metadata: Metadata = {
-  alternates: { canonical: "/", languages: { bg: "/", en: "/en" } },
+  alternates: { canonical: "/", languages: { bg: "/", en: "/en", "x-default": "/" } },
 };
 
 /** The Bulgarian site. Its English twin is /en, built from the same sections. */
