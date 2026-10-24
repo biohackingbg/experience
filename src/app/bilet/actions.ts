@@ -20,7 +20,7 @@ import { createWaitlistSignup } from "@/lib/signups";
 import { discountFor, promoReasonText, resolvePromo } from "@/lib/promo";
 import { PURCHASE_TERMS_TEXT, PURCHASE_TERMS_TEXT_EN, PURCHASE_TERMS_VERSION } from "@/lib/purchase-terms";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { lastCampaignOf, visitorHash } from "@/lib/site-views";
+import { lastCampaignOf, lastReferrerPlatformOf, visitorHash } from "@/lib/site-views";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { SALES_OPEN, TIERS, getTier, picksDay } from "@/lib/tickets";
 
@@ -167,6 +167,12 @@ export async function startCheckout(
       utmCampaign = seen.campaign;
       utmSource = utmSource ?? seen.source ?? undefined;
     }
+  }
+  // Still nothing: an untagged link (bio, sticker, a share). The page the
+  // visitor first arrived from names the network, so the sale is filed there
+  // instead of under "no known source".
+  if (!utmSource && !utmCampaign && ip !== "unknown") {
+    utmSource = (await lastReferrerPlatformOf(visitorHash(ip, head.get("user-agent") ?? ""))) ?? undefined;
   }
 
   const lang = langOf(input.lang);

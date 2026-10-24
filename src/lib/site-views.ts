@@ -6,6 +6,7 @@ import { sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
 import { orders, signups, siteViews } from "@/lib/db/schema";
+import { PLATFORMS } from "@/lib/marketing-options";
 
 /**
  * Our own visit counting for the public site.
@@ -70,6 +71,36 @@ export async function lastCampaignOf(
     .orderBy(sql`${siteViews.createdAt} desc`)
     .limit(1);
   return row?.campaign ? { source: row.source, campaign: row.campaign } : null;
+}
+
+/**
+ * Where an untagged visitor came from, when they arrived today by a link on
+ * another site - the platform's id ("instagram", "facebook", "linkedin", ...),
+ * for the sale that follows to be filed under it.
+ *
+ * A bio link or a story sticker carries no tags, so the sale lands under "no
+ * known source" even though the visit recorded that the person came from
+ * Instagram. This reads that first referrer back, by the same one-way daily
+ * code as above. It is a guess about the first touch, not a measurement: paid
+ * Meta traffic with a missing tag would also show as Instagram or Facebook,
+ * which is still the right network. The combined "meta" and the catch-all
+ * entries are skipped - only a specific network is a useful answer.
+ */
+export async function lastReferrerPlatformOf(visitor: string): Promise<string | null> {
+  const [row] = await getDb()
+    .select({ host: siteViews.referrerHost })
+    .from(siteViews)
+    .where(
+      sql`${siteViews.visitor} = ${visitor}
+          and ${siteViews.referrerHost} is not null
+          and ${siteViews.createdAt} >= now() - interval '24 hours'`,
+    )
+    .orderBy(sql`${siteViews.createdAt} asc`)
+    .limit(1);
+  const host = row?.host?.toLowerCase();
+  if (!host) return null;
+  const hit = PLATFORMS.find((p) => p.id !== "meta" && p.id !== "other" && (p.hosts as readonly string[]).includes(host));
+  return hit?.id ?? null;
 }
 
 /** Query strings carry campaign tags and sometimes an email; the path is enough. */
