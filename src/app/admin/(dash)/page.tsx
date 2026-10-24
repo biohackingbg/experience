@@ -153,20 +153,32 @@ function WeekStrip({ week }: { week: WeekDay[] }) {
           }`;
           return (
             <div key={d.day} className="group relative flex flex-1 flex-col items-center justify-end" style={{ height: "100%" }} title={title}>
-              <span
-                className={`mb-2 rounded-md px-1 py-0.5 text-[0.6rem] font-semibold ${
-                  peak ? "bg-[#0b2a22] text-white" : d.tickets > 0 ? "text-[#0b2a22]" : "text-[#0b2a22]/30"
-                }`}
-              >
-                {d.tickets}
-              </span>
-              <div
-                className="flex w-full max-w-[1.6rem] flex-col-reverse overflow-hidden rounded-full"
-                style={{ height: `${d.tickets > 0 ? h : 100}%`, background: d.tickets > 0 ? undefined : HATCH }}
-              >
-                {d.byTier.map((t) => (
-                  <div key={t.id} style={{ height: `${(t.n / d.tickets) * 100}%`, background: TIER_COLORS[t.id] ?? GREEN, opacity: d.today ? 0.75 : 1 }} />
-                ))}
+              {/* The bars get their own zone: a percentage of the whole column
+                  also had to fit the number above and the dates below, so the
+                  tallest bars were squeezed to the same height. The zone keeps
+                  a strip free at the top for the number. */}
+              <div className="relative w-full min-h-0 flex-1">
+                <div className="absolute inset-x-0 bottom-0 top-8 flex justify-center">
+                  <div className="relative flex h-full w-full max-w-[1.6rem] items-end">
+                    <div className="relative w-full" style={{ height: `${d.tickets > 0 ? h : 100}%` }}>
+                      <span
+                        className={`absolute bottom-full left-1/2 mb-2 -translate-x-1/2 rounded-md px-1 py-0.5 text-[0.6rem] font-semibold ${
+                          peak ? "bg-[#0b2a22] text-white" : d.tickets > 0 ? "text-[#0b2a22]" : "text-[#0b2a22]/30"
+                        }`}
+                      >
+                        {d.tickets}
+                      </span>
+                      <div
+                        className="flex h-full w-full flex-col-reverse overflow-hidden rounded-full"
+                        style={{ background: d.tickets > 0 ? undefined : HATCH }}
+                      >
+                        {d.byTier.map((t) => (
+                          <div key={t.id} style={{ height: `${(t.n / d.tickets) * 100}%`, background: TIER_COLORS[t.id] ?? GREEN, opacity: d.today ? 0.75 : 1 }} />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
               <span className={`mt-2 font-mono text-[0.65rem] ${d.today ? "font-bold text-[#0b2a22]" : "text-[#0b2a22]/45"}`}>{d.label}</span>
               <span className={`hidden font-mono text-[0.58rem] tabular-nums sm:block ${d.grossCents > 0 ? "text-[#0b2a22]/60" : "text-[#0b2a22]/25"}`}>
