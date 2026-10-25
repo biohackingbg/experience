@@ -157,7 +157,7 @@ const DAY1: Row[] = [
   {
     // The final programme lists this slot with her name and nothing else; the
     // title stays her name until the team gives the session one.
-    slot: { time: "17:45-18:20", title: "Кристина Вавура", people: ["Кристина Вавура"] },
+    slot: { time: "17:45-18:20", title: "Кристина Вавура" },
     en: { title: latin("Кристина Вавура") },
   },
   {
