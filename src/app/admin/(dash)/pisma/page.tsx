@@ -51,7 +51,9 @@ export default async function MailPage() {
           <HomeLink />
         </div>
 
-        <section className="mt-8 rounded-3xl bg-bh-cloud p-6 ring-1 ring-bh-ink/6">
+        <MedOfferSection />
+
+        <section className="mt-10 rounded-3xl bg-bh-cloud p-6 ring-1 ring-bh-ink/6">
           <h2 className="text-lg font-bold tracking-tight text-bh-ink">Прати писмото преди събитието</h2>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-bh-ink/60">
             Адрес, час на отваряне, програмата и билетите още веднъж, плюс
@@ -74,8 +76,6 @@ export default async function MailPage() {
         </section>
 
         <SequencesSection />
-
-        <MedOfferSection />
 
         {MAIL_GROUPS.map((g) => (
           <section key={g.id} className="mt-10">
