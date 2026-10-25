@@ -134,15 +134,18 @@ export async function sendKindNow(_prev: MailState, formData: FormData): Promise
  * The letter to the medical-conference ticket holders (lib/med-offer.ts)
  * ------------------------------------------------------------------ */
 
-import { getMedOffer, parseRecipients, saveMedOffer, sendMedOffer, sendMedTest } from "@/lib/med-offer";
+import { ensureCodes, getMedOffer, moveCodesUntil, parseRecipients, retireCode, saveMedOffer, sendMedOffer, sendMedTest } from "@/lib/med-offer";
 
 export async function saveMedText(_prev: MailState, formData: FormData): Promise<MailState> {
   if (!(await canAccess("pisma"))) return { status: "error", message: "Няма достъп." };
   const subject = String(formData.get("subject") ?? "").trim().slice(0, 200);
   const body = String(formData.get("body") ?? "").trim().slice(0, 8000);
+  const until = String(formData.get("until") ?? "").trim();
   if (!subject || !body) return { status: "error", message: "Темата и текстът не могат да са празни." };
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(until)) return { status: "error", message: "Избери дата, до която важат кодовете." };
   const cur = await getMedOffer();
-  await saveMedOffer({ ...cur, subject, body });
+  await saveMedOffer({ ...cur, subject, body, until });
+  if (until !== cur.until) await moveCodesUntil(cur, until);
   revalidatePath("/admin/pisma");
   return { status: "ok", message: "Записано." };
 }
@@ -154,7 +157,7 @@ export async function addMedRecipients(_prev: MailState, formData: FormData): Pr
   const cur = await getMedOffer();
   const have = new Set(cur.recipients.map((r) => r.email));
   const fresh = ok.filter((r, i) => !have.has(r.email) && ok.findIndex((x) => x.email === r.email) === i);
-  await saveMedOffer({ ...cur, recipients: [...cur.recipients, ...fresh] });
+  await ensureCodes({ ...cur, recipients: [...cur.recipients, ...fresh] }).then(saveMedOffer);
   revalidatePath("/admin/pisma");
   const skipped = ok.length - fresh.length;
   return {
@@ -167,6 +170,7 @@ export async function removeMedRecipient(formData: FormData): Promise<void> {
   if (!(await canAccess("pisma"))) return;
   const email = String(formData.get("email") ?? "").toLowerCase();
   const cur = await getMedOffer();
+  await retireCode(cur.recipients.find((r) => r.email === email)?.code);
   await saveMedOffer({ ...cur, recipients: cur.recipients.filter((r) => r.email !== email) });
   revalidatePath("/admin/pisma");
 }

@@ -1,69 +1,80 @@
 import "server-only";
 
-import { sql } from "drizzle-orm";
+import { randomInt } from "node:crypto";
+
+import { eq, sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
-import { emailSends } from "@/lib/db/schema";
+import { emailSends, promoCodes } from "@/lib/db/schema";
 import { sendSequenceMail } from "@/lib/email";
-import { getBankDetails } from "@/lib/manual-orders";
+import { getPricing, priceOf } from "@/lib/pricing";
+import { createPromo } from "@/lib/promo";
 import { type Letter, plainLetter } from "@/lib/sequence-letters";
 import { getSetting, setSetting } from "@/lib/settings";
+import { TIERS, formatPrice, getTier } from "@/lib/tickets";
 import { unsubscribePostUrl, unsubscribeUrl } from "@/lib/unsubscribe";
 
 /**
  * The letter to people who bought a ticket for the medical conference and
- * cannot go - it is for doctors - and are passing the 50 € on to us.
+ * cannot go - it is for doctors. The Bulgarian Longevity Association got
+ * their 50 € and passes it on to us, so they owe us nothing: what they get
+ * is a personal code worth 50 € off, to spend on a PLUS or a PEAK ticket,
+ * or two CORE tickets that we issue by hand when they answer.
  *
- * Kept as a setting, not a table: a short list that the team edits by hand,
- * with the wording beside it. The send is claimed per address in email_sends
- * under kind "med-offer", so pressing the button again, or after adding one
- * more person, writes only to those who have not had it.
+ * Kept as a setting, not a table: a short list the team edits by hand, with
+ * the wording beside it. Each person has their own one-use code, made when
+ * they are added, so a code cannot travel and its use is visible in
+ * Промо кодове. The send is claimed per address in email_sends under kind
+ * "med-offer", so pressing the button again, or after adding one more
+ * person, writes only to those who have not had it.
  */
 export const MED_KIND = "med-offer";
+export const MED_CREDIT_CENTS = 5000;
 
-export type MedRecipient = { name: string; email: string };
-export type MedOffer = { recipients: MedRecipient[]; subject: string; body: string };
+export type MedRecipient = { name: string; email: string; code?: string };
+export type MedOffer = { recipients: MedRecipient[]; subject: string; body: string; /** YYYY-MM-DD, last day the codes work. */ until: string };
 
 export const DEFAULT_SUBJECT = "Билетът ви за медицинската конференция и какво можем да направим с него";
 
-/** {{name}} is the first name; {{holder}}, {{iban}}, {{bic}} and {{bank}} come from the bank details in the admin. */
+export const DEFAULT_UNTIL = "2026-10-31";
+
+/**
+ * {{name}} is the first name; {{code}} the person's own code; {{until}} the last day it works;
+ * {{plus}}, {{plus_extra}}, {{peak}}, {{peak_extra}} are today's prices and what is left to pay after the 50 €.
+ */
 export const DEFAULT_BODY = `Здравей, {{name}}!
 
-Купили сте билет за медицинската конференция на Bulgarian Longevity Association за 50 €. Тя е само за лекари и затова не можете да присъствате. Благодарим ви, че ще пренасочите тази сума към Sofia Life Summit - феста, който е в същите дни, 7-8 ноември, и е за всички, без нужда от медицинско образование.
+Купили сте билет за медицинската конференция на Bulgarian Longevity Association за 50 €. Тя е само за лекари и затова не можете да присъствате. Не е нужно да правите нищо със сумата: тя е у нас от Асоциацията и е ваша като кредит за Sofia Life Summit - феста в същите дни, 7-8 ноември, който е за всички, без нужда от медицинско образование.
 
-Ето какво можем да направим с нея:
+Ето какво можете да изберете:
 
-**Вариант 1 · два билета CORE за 50 €**
-Един ден по избор за всеки билет (събота или неделя), лекции при наличие на места и партньорски оферти. Преведете 50 € и ни кажете за кои дни.
+**Вариант 1 · два билета CORE, без доплащане**
+Един ден по избор за всеки билет (събота или неделя), лекции при наличие на места и партньорски оферти. Отговорете на това писмо с кои дни искате и ние ви ги издаваме.
 
-**Вариант 2 · билет PLUS за 110 € (доплащате 60 €)**
+**Вариант 2 · билет PLUS за {{plus}} € (с кредита доплащате {{plus_extra}} €)**
 - И двата дни
 - Приоритетен достъп до лекциите
 - Работилниците са включени
 - 1 специално преживяване по избор
 - Goody bag на стойност над 100 €
 
-**Вариант 3 · билет PEAK за 299 € (доплащате 249 €)**
+**Вариант 3 · билет PEAK за {{peak}} € (с кредита доплащате {{peak_extra}} €)**
 - Гарантиран достъп и премиум зона
 - Premium Lounge и Meet & Greet с лектори
 - Приоритетен вход, работилници и преживявания с приоритет
 - Goody bag на стойност над 250 €
 
-Цените са тези до 25 октомври и ги запазваме за вас до 31 октомври.
+За вариант 2 и 3 вземате билета от thelongevitysummit.eu/bilet и в полето за промокод пишете личния си код:
 
-Отговорете на това писмо с избора си и преведете сумата по сметка:
-{{holder}}
-IBAN: {{iban}}
-BIC: {{bic}}, {{bank}}
-Основание: Sofia Life Summit и вашето име
+**{{code}}**
 
-Щом получим превода, ви изпращаме билетите и фактура. Ако имате въпрос, просто отговорете.`;
+Той сваля 50 € от цената и важи до {{until}}, за един билет. Ако имате въпрос, просто отговорете на това писмо.`;
 
 const KEY = "med_offer" as const;
 
 export async function getMedOffer(): Promise<MedOffer> {
   const row = await getSetting(KEY);
-  const empty: MedOffer = { recipients: [], subject: DEFAULT_SUBJECT, body: DEFAULT_BODY };
+  const empty: MedOffer = { recipients: [], subject: DEFAULT_SUBJECT, body: DEFAULT_BODY, until: DEFAULT_UNTIL };
   if (!row) return empty;
   try {
     const v = JSON.parse(row.value) as Partial<MedOffer>;
@@ -71,6 +82,7 @@ export async function getMedOffer(): Promise<MedOffer> {
       recipients: Array.isArray(v.recipients) ? v.recipients.filter((r) => r && typeof r.email === "string") : [],
       subject: v.subject?.trim() || DEFAULT_SUBJECT,
       body: v.body?.trim() || DEFAULT_BODY,
+      until: v.until && /^\d{4}-\d{2}-\d{2}$/.test(v.until) ? v.until : DEFAULT_UNTIL,
     };
   } catch {
     return empty;
@@ -105,21 +117,85 @@ export function parseRecipients(text: string): { ok: MedRecipient[]; unread: str
   return { ok, unread };
 }
 
-async function fill(body: string, name: string): Promise<string> {
-  const b = await getBankDetails();
-  const first = name.trim().split(/\s+/)[0] || name;
+/** The last moment of the day, Sofia time (UTC+2 in the autumn, +3 in summer: the evening of that date either way). */
+const endOfDay = (ymd: string) => new Date(`${ymd}T20:59:59Z`);
+
+/** Letters without 0/O/1/I, so a code read aloud or from a phone survives. */
+const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const makeCode = () => `BLA-${Array.from({ length: 5 }, () => ALPHABET[randomInt(ALPHABET.length)]).join("")}`;
+
+/** Gives everyone on the list their own one-use code, creating it in Промо кодове; saves the list. */
+export async function ensureCodes(offer: MedOffer): Promise<MedOffer> {
+  let changed = false;
+  const recipients: MedRecipient[] = [];
+  for (const r of offer.recipients) {
+    if (r.code) {
+      recipients.push(r);
+      continue;
+    }
+    for (let i = 0; i < 6; i++) {
+      const code = makeCode();
+      const made = await createPromo({
+        code,
+        kind: "fixed",
+        value: MED_CREDIT_CENTS,
+        maxUses: 1,
+        validUntil: endOfDay(offer.until),
+        note: `Медицинска конференция: ${r.name}`,
+      });
+      if (made === "ok") {
+        recipients.push({ ...r, code });
+        changed = true;
+        break;
+      }
+    }
+    if (!recipients.some((x) => x.email === r.email)) recipients.push(r);
+  }
+  const next = { ...offer, recipients };
+  if (changed) await saveMedOffer(next);
+  return next;
+}
+
+/** Switches a person's code off when they come off the list. */
+export async function retireCode(code: string | undefined): Promise<void> {
+  if (!code) return;
+  await getDb().update(promoCodes).set({ active: false }).where(eq(promoCodes.code, code));
+}
+
+/** The last day moves: every code of the list follows it. */
+export async function moveCodesUntil(offer: MedOffer, until: string): Promise<void> {
+  const codes = offer.recipients.map((r) => r.code).filter((c): c is string => !!c);
+  if (!codes.length) return;
+  await getDb()
+    .update(promoCodes)
+    .set({ validUntil: endOfDay(until) })
+    .where(sql`${promoCodes.code} in (${sql.join(codes.map((c) => sql`${c}`), sql`, `)})`);
+}
+
+const bgDay = (ymd: string) =>
+  new Date(`${ymd}T12:00:00Z`).toLocaleDateString("bg-BG", { day: "numeric", month: "long", timeZone: "UTC" });
+
+async function fill(body: string, r: MedRecipient, until: string): Promise<string> {
+  const pricing = await getPricing();
+  const plus = getTier("plus") ?? TIERS[1];
+  const peak = getTier("peak") ?? TIERS[2];
+  const p = priceOf(pricing, plus);
+  const k = priceOf(pricing, peak);
+  const first = r.name.trim().split(/\s+/)[0] || r.name;
   return body
     .replaceAll("{{name}}", first)
-    .replaceAll("{{holder}}", b.holder || "[получател - попълни в банковите данни]")
-    .replaceAll("{{iban}}", b.iban || "[IBAN - попълни в банковите данни]")
-    .replaceAll("{{bic}}", b.bic || "-")
-    .replaceAll("{{bank}}", b.bank || "-");
+    .replaceAll("{{code}}", r.code ?? "BLA-XXXXX")
+    .replaceAll("{{until}}", bgDay(until))
+    .replaceAll("{{plus}}", formatPrice(p))
+    .replaceAll("{{plus_extra}}", formatPrice(Math.max(0, p - MED_CREDIT_CENTS)))
+    .replaceAll("{{peak}}", formatPrice(k))
+    .replaceAll("{{peak_extra}}", formatPrice(Math.max(0, k - MED_CREDIT_CENTS)));
 }
 
 export async function renderMedLetter(offer: MedOffer, r: MedRecipient): Promise<Letter> {
   return plainLetter({
     subject: offer.subject,
-    text: await fill(offer.body, r.name),
+    text: await fill(offer.body, r, offer.until),
     why: "Получавате това писмо, защото сте купили билет за медицинската конференция.",
     unsubUrl: unsubscribeUrl(r.email),
   });
@@ -130,21 +206,26 @@ export async function sentTo(): Promise<Set<string>> {
   return new Set(rows.map((r) => r.target));
 }
 
-/** Sends the real letter to one address as a test; nothing is recorded. */
+/** Sends the real wording to one address as a test, with a sample code that does nothing; nothing is recorded. */
 export async function sendMedTest(to: string): Promise<boolean> {
   const offer = await getMedOffer();
-  const letter = await renderMedLetter(offer, offer.recipients[0] ?? { name: "Мария Иванова", email: to });
+  const first = offer.recipients[0];
+  const letter = await renderMedLetter(offer, { name: first?.name ?? "Мария Иванова", email: to, code: "BLA-ПРИМЕР" });
   const id = await sendSequenceMail({ to, ...letter, subject: `[тест] ${letter.subject}` });
   return id !== null;
 }
 
 /** Sends to everyone who has not had it. Returns how many went and how many are left. */
 export async function sendMedOffer(): Promise<{ sent: number; failed: number; remaining: number }> {
-  const offer = await getMedOffer();
+  const offer = await ensureCodes(await getMedOffer());
   const db = getDb();
   let sent = 0;
   let failed = 0;
   for (const r of offer.recipients) {
+    if (!r.code) {
+      failed++;
+      continue;
+    }
     const [claim] = await db
       .insert(emailSends)
       .values({ kind: MED_KIND, target: r.email, email: r.email })

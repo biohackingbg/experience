@@ -22,7 +22,7 @@ export async function MedOfferSection() {
         <span className="rounded-full bg-[#d0a11a]/20 px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-wide text-[#7a5b00]">на ръка</span>
       </h2>
       <p className="mt-2 max-w-2xl text-sm leading-relaxed text-bh-ink/60">
-        За хората, които не са лекари и не могат да отидат, и пренасочват 50 €: два билета CORE срещу тях или доплащане към PLUS и PEAK.
+        За хората, които не са лекари и не могат да отидат. Асоциацията ни пренася техните 50 €, затова те не плащат нищо: всеки получава личен код за 50 € отстъпка (за PLUS или PEAK) или два билета CORE, които издаваме ние. Кодовете се правят сами, щом добавиш човек, и се виждат в Промо кодове.
         Не се праща само. Натискаш „Прати“, когато си готова, и писмото тръгва само до тези, които още не са го получили.
       </p>
 
@@ -38,6 +38,7 @@ export async function MedOfferSection() {
                   <span className="min-w-0">
                     <span className="font-medium text-bh-ink">{r.name}</span>
                     <span className="ml-2 break-all text-xs text-bh-ink/50">{r.email}</span>
+                    {r.code && <span className="ml-2 font-mono text-[0.65rem] text-bh-ink/45">{r.code}</span>}
                   </span>
                   <span className="flex shrink-0 items-center gap-3">
                     {done.has(r.email) ? (
@@ -75,7 +76,7 @@ export async function MedOfferSection() {
 
       <details className="mt-6">
         <summary className="cursor-pointer text-sm font-semibold text-bh-ink">Промени тема и текст</summary>
-        <div className="mt-3"><MedTextForm subject={offer.subject} body={offer.body} /></div>
+        <div className="mt-3"><MedTextForm subject={offer.subject} body={offer.body} until={offer.until} /></div>
       </details>
     </section>
   );

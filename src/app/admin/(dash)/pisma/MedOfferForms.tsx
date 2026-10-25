@@ -9,15 +9,19 @@ const field = "w-full rounded-xl border border-bh-ink/15 bg-bh-paper px-4 py-2.5
 const msg = (s: MailState) =>
   s.status !== "idle" && <p className={`mt-2 text-xs ${s.status === "ok" ? "text-bh-pine" : "text-red-600"}`}>{s.message}</p>;
 
-export function MedTextForm({ subject, body }: { subject: string; body: string }) {
+export function MedTextForm({ subject, body, until }: { subject: string; body: string; until: string }) {
   const [state, action, pending] = useActionState(saveMedText, initial);
   return (
     <form action={action} className="flex flex-col gap-3">
       <input name="subject" defaultValue={subject} className={field} aria-label="Тема" />
+      <label className="flex flex-wrap items-center gap-3 text-sm text-bh-ink">
+        Личните кодове важат до
+        <input type="date" name="until" defaultValue={until} required className="rounded-full border border-bh-ink/15 bg-bh-paper px-4 py-2 text-sm" />
+      </label>
       <textarea name="body" defaultValue={body} rows={22} className={`${field} font-mono text-[0.8rem] leading-relaxed`} aria-label="Текст" />
       <p className="text-xs text-bh-ink/50">
-        Празен ред = нов абзац. Редове, започващи с „- “, стават точки. **Така** е удебелено. {"{{name}}"} е малкото име,
-        {" {{holder}}, {{iban}}, {{bic}}, {{bank}}"} идват от банковите данни.
+        Празен ред = нов абзац. Редове, започващи с „- “, стават точки. **Така** е удебелено. {"{{name}}"} е малкото име, {"{{code}}"} е личният код, {"{{until}}"} е датата,
+        {" {{plus}}, {{plus_extra}}, {{peak}}, {{peak_extra}}"} са цените днес и какво остава след 50 €.
       </p>
       <div>
         <button type="submit" disabled={pending} className="rounded-full border border-bh-ink/25 px-4 py-2 text-sm font-semibold text-bh-ink disabled:opacity-50">
