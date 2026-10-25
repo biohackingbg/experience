@@ -248,8 +248,8 @@ export type ListLetterDef = {
 export const LIST_LETTERS: ListLetterDef[] = [
   { id: "programa", title: "Програмата по часове", at: new Date("2026-10-20T09:00:00+03:00"), needsDiscount: false },
   { id: "48-chasa", title: "48 часа до края на междинните цени", at: new Date("2026-10-23T09:00:00+03:00"), needsDiscount: true },
-  { id: "posleden-den", title: "Последен ден на междинните цени", at: new Date("2026-10-25T09:00:00+02:00"), needsDiscount: true },
-  { id: "posledni-chasove", title: "Последни часове", at: new Date("2026-10-25T19:00:00+02:00"), needsDiscount: true },
+  { id: "posleden-den", title: "Последен ден на междинните цени", at: new Date("2026-10-28T09:00:00+02:00"), needsDiscount: true },
+  { id: "posledni-chasove", title: "Последни часове", at: new Date("2026-10-28T19:00:00+02:00"), needsDiscount: true },
   { id: "sedmica", title: "Една седмица до събитието", at: new Date("2026-10-31T10:00:00+02:00"), needsDiscount: false },
   { id: "sabota", title: "В събота започваме", at: new Date("2026-11-04T10:00:00+02:00"), needsDiscount: false },
 ];
@@ -294,7 +294,7 @@ export function listLetter(id: ListLetterId, i: ListLetterInput): Letter {
       return build(
         "48 часа до края на междинните цени",
         [
-          `${greet} В неделя, 25 октомври, в полунощ междинните цени свършват. Дотогава: CORE **${now(core)}** (после ${list(core)}), PLUS **${now(plus)}** (после ${list(plus)}), PEAK **${now(peak)}** (после ${list(peak)}).`,
+          `${greet} В сряда, 28 октомври, в полунощ междинните цени свършват. Дотогава: CORE **${now(core)}** (после ${list(core)}), PLUS **${now(plus)}** (после ${list(plus)}), PEAK **${now(peak)}** (после ${list(peak)}).`,
           `Два дни, в които науката за дълголетието се докосва, пробва и измерва - не се слуша от стол. ${CONCEPT_TOTAL} станции и преживявания, работилници и лектори по часове на сайта.`,
         ],
         { label: "Вземи билет на междинна цена", url: bilet("48-chasa") },

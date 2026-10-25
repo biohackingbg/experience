@@ -344,6 +344,13 @@
       "when": 1789000000047,
       "tag": "0048_program_vavura_once",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1789000000048,
+      "tag": "0049_mid_prices_until_28_oct",
+      "breakpoints": true
     }
   ]
 }
