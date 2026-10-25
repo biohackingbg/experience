@@ -155,6 +155,12 @@ const DAY1: Row[] = [
     { t: "Затлъстелият черен дроб и топящите се мускули: тихите рискове", te: "The fatty liver and the melting muscles: the silent risks", who: "Милен Василев", sp: "хепатолог", spe: "hepatologist" },
   ]),
   {
+    // The final programme lists this slot with her name and nothing else; the
+    // title stays her name until the team gives the session one.
+    slot: { time: "17:45-18:20", title: "Кристина Вавура", people: ["Кристина Вавура"] },
+    en: { title: latin("Кристина Вавура") },
+  },
+  {
     slot: {
       time: "17:10-18:10",
       title: "Подписване на книги: „Безтегловност“",
