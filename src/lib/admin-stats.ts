@@ -7,6 +7,7 @@ import { genderSplit } from "@/lib/gender";
 import { campaigns, orderItems, orders, signups, tickets } from "@/lib/db/schema";
 import { PENDING_HOLD_MINUTES } from "@/lib/orders";
 import { COMPED, KEPT_CENTS, SALE, SOLD } from "@/lib/sold";
+import { sofiaDaysBack } from "@/lib/sofia-days";
 import { TIERS, VAT_RATE, type TierId, picksDay } from "@/lib/tickets";
 
 /**
@@ -144,7 +145,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   const sofiaDay = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia" });
   // Fourteen days: seven made the bars thick and the picture short.
   const WINDOW = 14;
-  const weekDays = Array.from({ length: WINDOW }, (_, i) => sofiaDay.format(new Date(Date.now() - (WINDOW - 1 - i) * 86_400_000)));
+  const weekDays = sofiaDaysBack(WINDOW);
 
   const [totals, perTierRows, dailyRows, dayTierRows, recentRows, signupRow, last7Row, checkedInRow, daySplitRows, dayRow, oddRows, hourRows, weekdayRows, punchRows, buyerNames, compedRows, taggedRows, launchRows] =
     await Promise.all([
@@ -456,6 +457,8 @@ export async function getDashboardData(): Promise<DashboardData> {
     ],
   }));
 
+  const punchDays = sofiaDaysBack(21);
+
   return {
     odd,
     grossCents,
@@ -484,8 +487,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     // information, and a grid with days missing cannot show it.
     buyers: genderSplit(buyerNames.map((r) => r.name)),
     punch: Array.from({ length: 21 }, (_, i) => {
-      const d = new Date(Date.now() - (20 - i) * 86_400_000);
-      const day = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+      const day = punchDays[i];
       return {
         day,
         hours: Array.from({ length: 24 }, (_, h) => punchRows.find((r) => r.day === day && r.hour === h)?.count ?? 0),

@@ -5,6 +5,7 @@ import { sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { orders, signups } from "@/lib/db/schema";
 import { SALE } from "@/lib/sold";
+import { sofiaDaysBack } from "@/lib/sofia-days";
 import { listSpeakers } from "@/lib/speakers-data";
 
 /**
@@ -32,7 +33,9 @@ export const PERIODS: { id: PeriodId; label: string }[] = [
 export const isPeriod = (v: string | undefined): v is PeriodId => PERIODS.some((p) => p.id === v);
 
 const SOFIA = "Europe/Sofia";
-const TODAY0 = `(date_trunc('day', now() at time zone '${SOFIA}') at time zone '${SOFIA}')`;
+/** Midnight Sofia, `n` calendar days back - not 24-hour lumps, which slip an hour across a clock change. */
+const back = (n: number) => `((date_trunc('day', now() at time zone '${SOFIA}') - interval '${n} days') at time zone '${SOFIA}')`;
+const TODAY0 = back(0);
 
 type Window = { start: string; end: string };
 
@@ -43,13 +46,13 @@ function windows(p: PeriodId): { cur: Window; prev: Window | null; days: number 
       return {
         cur: { start: TODAY0, end: "now() + interval '1 second'" },
         // Yesterday up to the same time of day: a fair comparison at 16:30.
-        prev: { start: `${TODAY0} - interval '1 day'`, end: "now() - interval '1 day'" },
+        prev: { start: back(1), end: "now() - interval '1 day'" },
         days: 1,
       };
     case "vchera":
       return {
-        cur: { start: `${TODAY0} - interval '1 day'`, end: TODAY0 },
-        prev: { start: `${TODAY0} - interval '2 days'`, end: `${TODAY0} - interval '1 day'` },
+        cur: { start: back(1), end: TODAY0 },
+        prev: { start: back(2), end: back(1) },
         days: 1,
       };
     case "vsichko":
@@ -57,8 +60,8 @@ function windows(p: PeriodId): { cur: Window; prev: Window | null; days: number 
     default: {
       const n = Number(p);
       return {
-        cur: { start: `${TODAY0} - interval '${n - 1} days'`, end: "now() + interval '1 second'" },
-        prev: { start: `${TODAY0} - interval '${2 * n - 1} days'`, end: `${TODAY0} - interval '${n - 1} days'` },
+        cur: { start: back(n - 1), end: "now() + interval '1 second'" },
+        prev: { start: back(2 * n - 1), end: back(n - 1) },
         days: n,
       };
     }
@@ -345,10 +348,10 @@ export async function getTrafficReport(period: PeriodId, human: boolean): Promis
         count(distinct visitor) filter (where created_at >= now() - interval '30 minutes')::int as m30,
         count(*) filter (where created_at >= now() - interval '1 hour')::int as h1,
         count(distinct visitor) filter (where created_at >= ${sql.raw(TODAY0)})::int as today,
-        count(distinct visitor) filter (where created_at >= ${sql.raw(TODAY0)} - interval '1 day'
+        count(distinct visitor) filter (where created_at >= ${sql.raw(back(1))}
                                           and created_at < now() - interval '1 day')::int as "ydaySame"
       from site_views
-      where created_at >= ${sql.raw(TODAY0)} - interval '1 day' and ${filter}`),
+      where created_at >= ${sql.raw(back(1))} and ${filter}`),
     db.execute<Row<{ at: Date; path: string; utm_source: string | null; referrer_host: string | null; city: string | null; country: string | null; device: string | null; bot: boolean }>>(sql`
       select created_at as at, path, utm_source, referrer_host, city, country, device, ${IS_BOT} as bot
       from site_views
@@ -365,8 +368,8 @@ export async function getTrafficReport(period: PeriodId, human: boolean): Promis
   const vMap = new Map(dailyViews.map((r) => [r.day, r]));
   const oMap = new Map(dailyOrders.map((r) => [r.day, r]));
   const todayStr = sofiaDate.format(new Date());
-  const firstDay = period === "vsichko" ? (dailyViews[0]?.day ?? todayStr) : sofiaDate.format(new Date(Date.now() - (days - 1) * 86_400_000));
-  const startDay = period === "vchera" ? sofiaDate.format(new Date(Date.now() - 86_400_000)) : firstDay;
+  const firstDay = period === "vsichko" ? (dailyViews[0]?.day ?? todayStr) : sofiaDaysBack(days)[0];
+  const startDay = period === "vchera" ? sofiaDaysBack(2)[0] : firstDay;
   const endDay = period === "vchera" ? startDay : todayStr;
   const daily: DayRow[] = [];
   for (let t = Date.parse(`${startDay}T12:00:00Z`); daily.length < 400; t += 86_400_000) {
