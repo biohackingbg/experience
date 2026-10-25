@@ -129,3 +129,61 @@ export async function sendKindNow(_prev: MailState, formData: FormData): Promise
   if (step.skipped && !step.sent) return { status: "error", message: `Не е изпратено: ${step.skipped}.` };
   return { status: "ok", message: `Изпратени ${step.sent}${step.skipped ? ` (${step.skipped})` : ""}.` };
 }
+
+/* ------------------------------------------------------------------ *
+ * The letter to the medical-conference ticket holders (lib/med-offer.ts)
+ * ------------------------------------------------------------------ */
+
+import { getMedOffer, parseRecipients, saveMedOffer, sendMedOffer, sendMedTest } from "@/lib/med-offer";
+
+export async function saveMedText(_prev: MailState, formData: FormData): Promise<MailState> {
+  if (!(await canAccess("pisma"))) return { status: "error", message: "Няма достъп." };
+  const subject = String(formData.get("subject") ?? "").trim().slice(0, 200);
+  const body = String(formData.get("body") ?? "").trim().slice(0, 8000);
+  if (!subject || !body) return { status: "error", message: "Темата и текстът не могат да са празни." };
+  const cur = await getMedOffer();
+  await saveMedOffer({ ...cur, subject, body });
+  revalidatePath("/admin/pisma");
+  return { status: "ok", message: "Записано." };
+}
+
+export async function addMedRecipients(_prev: MailState, formData: FormData): Promise<MailState> {
+  if (!(await canAccess("pisma"))) return { status: "error", message: "Няма достъп." };
+  const { ok, unread } = parseRecipients(String(formData.get("people") ?? ""));
+  if (ok.length === 0) return { status: "error", message: unread.length ? `Не разчетох: ${unread.join(" | ")}` : "Напиши поне един ред: име; имейл." };
+  const cur = await getMedOffer();
+  const have = new Set(cur.recipients.map((r) => r.email));
+  const fresh = ok.filter((r, i) => !have.has(r.email) && ok.findIndex((x) => x.email === r.email) === i);
+  await saveMedOffer({ ...cur, recipients: [...cur.recipients, ...fresh] });
+  revalidatePath("/admin/pisma");
+  const skipped = ok.length - fresh.length;
+  return {
+    status: unread.length ? "error" : "ok",
+    message: `Добавени ${fresh.length}${skipped ? `, ${skipped} вече ги има` : ""}.${unread.length ? ` Не разчетох: ${unread.join(" | ")}` : ""}`,
+  };
+}
+
+export async function removeMedRecipient(formData: FormData): Promise<void> {
+  if (!(await canAccess("pisma"))) return;
+  const email = String(formData.get("email") ?? "").toLowerCase();
+  const cur = await getMedOffer();
+  await saveMedOffer({ ...cur, recipients: cur.recipients.filter((r) => r.email !== email) });
+  revalidatePath("/admin/pisma");
+}
+
+export async function sendMedTestAction(_prev: MailState, formData: FormData): Promise<MailState> {
+  if (!(await canAccess("pisma"))) return { status: "error", message: "Няма достъп." };
+  const to = String(formData.get("to") ?? "").trim().toLowerCase();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)) return { status: "error", message: "Невалиден имейл." };
+  return (await sendMedTest(to))
+    ? { status: "ok", message: `Тестът е изпратен до ${to}.` }
+    : { status: "error", message: "Изпращането не мина. Провери дневника." };
+}
+
+export async function sendMedAll(): Promise<MailState> {
+  if (!(await canAccess("pisma"))) return { status: "error", message: "Няма достъп." };
+  const r = await sendMedOffer();
+  revalidatePath("/admin/pisma");
+  if (r.failed) return { status: "error", message: `Изпратени ${r.sent}, неуспешни ${r.failed}. Остават ${r.remaining} - натисни пак.` };
+  return { status: "ok", message: r.sent ? `Изпратени ${r.sent}. Остават ${r.remaining}.` : "Няма на кого - всички са получили писмото." };
+}

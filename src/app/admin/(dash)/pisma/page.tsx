@@ -7,6 +7,7 @@ import { MAIL_GROUPS, MAIL_KINDS, mailPreview } from "@/lib/mail-samples";
 import { MAIL_SLOTS, defaultMailTexts, getMailTexts } from "@/lib/mail-texts";
 
 import { SendAllForm, TestForm } from "./Forms";
+import { MedOfferSection } from "./MedOfferSection";
 import { SequencesSection } from "./SequencesSection";
 import { TextForm } from "./TextForm";
 
@@ -73,6 +74,8 @@ export default async function MailPage() {
         </section>
 
         <SequencesSection />
+
+        <MedOfferSection />
 
         {MAIL_GROUPS.map((g) => (
           <section key={g.id} className="mt-10">

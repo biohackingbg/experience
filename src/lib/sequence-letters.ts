@@ -68,6 +68,32 @@ function frame(input: { subject: string; bodyHtml: string; bodyText: string[]; w
   return { subject: input.subject, html, text };
 }
 
+/**
+ * A hand-written letter in the same frame: blocks separated by a blank line,
+ * a block whose lines all start with "- " is a bullet list, `**bold**` is the
+ * only markup and a single line break inside a block stays a line break.
+ */
+export function plainLetter(input: { subject: string; text: string; why: string; unsubUrl: string }): Letter {
+  const blocks = input.text.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
+  const html = blocks
+    .map((b) => {
+      const lines = b.split("\n");
+      // A heading line may sit directly above its bullets.
+      const firstBullet = lines.findIndex((l) => l.trim().startsWith("- "));
+      const head = firstBullet === -1 ? lines : lines.slice(0, firstBullet);
+      const rest = firstBullet === -1 ? [] : lines.slice(firstBullet);
+      const out: string[] = [];
+      if (head.length) {
+        const inner = esc(head.join("\n")).replace(/\*\*(.+?)\*\*/g, '<strong style="color:#02251f">$1</strong>').replaceAll("\n", "<br>");
+        out.push(`<p style="margin:0 0 ${rest.length ? 8 : 16}px;font:400 15px/1.65 ${FONT};color:#02251f">${inner}</p>`);
+      }
+      if (rest.length) out.push(bullets(rest.filter((l) => l.trim().startsWith("- ")).map((l) => l.trim().slice(2))));
+      return out.join("");
+    })
+    .join("");
+  return frame({ subject: input.subject, bodyHtml: html, bodyText: blocks.map((b) => plain(b)), why: input.why, unsubUrl: input.unsubUrl });
+}
+
 const eur = (cents: number) => `${formatPrice(cents)} €`;
 const hi = (name: string) => `Здравей, ${name.trim().split(/\s+/)[0] || name}!`;
 
