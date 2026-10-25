@@ -151,8 +151,11 @@ function WeekStrip({ week }: { week: WeekDay[] }) {
           const title = `${d.day} · ${d.tickets} билета · ${d.orders} поръчки · ${formatPrice(d.grossCents)} €${
             d.byTier.length ? `\n${d.byTier.map((t) => `${t.name} ${t.n} · ${formatPrice(t.grossCents)} €`).join("\n")}` : ""
           }`;
+          // min-w-0 + basis-0: every column is the same width. Without them a column
+          // cannot be narrower than its widest label, so the days with a four-digit
+          // turnover came out wider than the three-digit ones.
           return (
-            <div key={d.day} className="group relative flex flex-1 flex-col items-center justify-end" style={{ height: "100%" }} title={title}>
+            <div key={d.day} className="group relative flex min-w-0 flex-1 basis-0 flex-col items-center justify-end" style={{ height: "100%" }} title={title}>
               {/* The bars get their own zone: a percentage of the whole column
                   also had to fit the number above and the dates below, so the
                   tallest bars were squeezed to the same height. The zone keeps
