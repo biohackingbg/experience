@@ -287,7 +287,8 @@ async function runUpgrade(rule: UpgradeRule, dry: boolean, now: Date, pricing: P
         and ${extra}`,
     )
     .orderBy(orders.paidAt)
-    .limit(PER_RUN);
+    // The cap protects a real send; the dashboard's dry count has to see everyone due.
+    .limit(dry ? 5000 : PER_RUN);
   const out = await optedOut(rows.map((r) => r.email));
   const targetCents = priceOf(pricing, rule.to);
   const to: string[] = [];

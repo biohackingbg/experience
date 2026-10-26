@@ -17,6 +17,8 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = "force-dynamic";
+// The page's server actions inherit this: "Прати сега" sends batch after batch.
+export const maxDuration = 60;
 
 const bgWhen = (d: Date) =>
   d.toLocaleDateString("bg-BG", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "Europe/Sofia" });

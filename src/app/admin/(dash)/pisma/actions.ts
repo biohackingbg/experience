@@ -6,7 +6,10 @@ import { canAccess } from "@/lib/access";
 import { sendInfoMail, sendInfoMailTest } from "@/lib/event-mail";
 import { MAIL_SLOTS, saveMailTexts } from "@/lib/mail-texts";
 import { type ListLetterId, LIST_LETTERS } from "@/lib/sequence-letters";
-import { SEQUENCE_KINDS, runSequences, saveKindConfig, sendSequenceTest, skipListLetter } from "@/lib/sequences";
+import { SEQUENCE_KINDS, type Step, runSequences, saveKindConfig, sendSequenceTest, skipListLetter } from "@/lib/sequences";
+
+/** "Прати сега" keeps sending batches for this long (the page allows 60 s). */
+const SEND_NOW_BUDGET_MS = 35_000;
 
 export type MailState = { status: "idle" | "ok" | "error"; message?: string };
 
@@ -122,12 +125,20 @@ export async function sendKindNow(_prev: MailState, formData: FormData): Promise
   if (!(await canAccess("pisma"))) return { status: "error", message: "Няма достъп." };
   const kind = String(formData.get("kind") ?? "");
   if (!isKind(kind)) return { status: "error", message: "Няма такова писмо." };
-  const { steps } = await runSequences({ force: true, only: kind });
+  // One run takes at most a batch (so it cannot outlive the function); keep going until
+  // nobody is left or the time budget is spent, then say how many are still waiting.
+  const started = Date.now();
+  let sent = 0;
+  let step: Step | undefined;
+  do {
+    step = (await runSequences({ force: true, only: kind })).steps[0];
+    sent += step?.sent ?? 0;
+  } while (step && !step.skipped && step.sent > 0 && Date.now() - started < SEND_NOW_BUDGET_MS);
+  const left = (await runSequences({ dry: true, force: true, only: kind })).steps[0]?.sent ?? 0;
   revalidatePath("/admin/pisma");
-  const step = steps[0];
   if (!step) return { status: "error", message: "Нищо не тръгна." };
-  if (step.skipped && !step.sent) return { status: "error", message: `Не е изпратено: ${step.skipped}.` };
-  return { status: "ok", message: `Изпратени ${step.sent}${step.skipped ? ` (${step.skipped})` : ""}.` };
+  if (step.skipped && !sent) return { status: "error", message: `Не е изпратено: ${step.skipped}.` };
+  return { status: "ok", message: `Изпратени ${sent}.${left > 0 ? ` Остават още ${left} - натисни пак.` : ""}` };
 }
 
 /* ------------------------------------------------------------------ *
