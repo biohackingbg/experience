@@ -61,7 +61,7 @@ export async function joinWaitlist(_prev: WaitlistState, formData: FormData): Pr
 }
 
 export type PromoPreview =
-  | { ok: true; code: string; kind: "percent" | "fixed"; value: number; label: string }
+  | { ok: true; code: string; kind: "percent" | "fixed"; value: number; label: string; tiers: string[] | null }
   | { ok: false; message: string };
 
 /**
@@ -76,7 +76,7 @@ export async function checkPromo(raw: string): Promise<PromoPreview> {
   const r = await resolvePromo(raw, 100_00);
   if (!r.ok) return { ok: false, message: promoReasonText[r.reason] };
   void discountFor; // the client computes the amount from kind + value
-  return { ok: true, code: r.code, kind: r.kind, value: r.value, label: r.label };
+  return { ok: true, code: r.code, kind: r.kind, value: r.value, label: r.label, tiers: r.tiers };
 }
 
 function fail(

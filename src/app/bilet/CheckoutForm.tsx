@@ -136,8 +136,9 @@ export function CheckoutForm({
   }, []);
   const gross = (prices[tier.id] ?? tier.listPriceCents) * quantity;
   // Preview only - the server resolves the code again when the order is made.
+  const promoFits = promo?.ok ? !promo.tiers || promo.tiers.includes(tier.id) : false;
   const discount =
-    promo?.ok
+    promo?.ok && promoFits
       ? Math.max(0, Math.min(gross, promo.kind === "percent" ? Math.round((gross * promo.value) / 100) : promo.value))
       : 0;
   const total = gross - discount;
@@ -171,7 +172,7 @@ export function CheckoutForm({
         trackGaEvent("begin_checkout", {
           currency: "EUR",
           value: total / 100,
-          ...(promo?.ok ? { coupon: promoInput.trim().toUpperCase() } : {}),
+          ...(promo?.ok && promoFits ? { coupon: promoInput.trim().toUpperCase() } : {}),
           items: [
             {
               item_id: tier.id,
@@ -318,8 +319,12 @@ export function CheckoutForm({
             </button>
           </div>
           {promo && (
-            <p className={`mt-1.5 text-xs ${promo.ok ? "text-bh-pine" : "text-red-700"}`}>
-              {promo.ok ? t.promoOk(promo.code, promo.label) : promo.message}
+            <p className={`mt-1.5 text-xs ${promo.ok && promoFits ? "text-bh-pine" : "text-red-700"}`}>
+              {promo.ok
+                ? promoFits
+                  ? t.promoOk(promo.code, promo.label)
+                  : t.promoOnlyFor(promo.tiers!.map((id) => TIERS.find((x) => x.id === id)?.name ?? id).join(", "))
+                : promo.message}
             </p>
           )}
           <Err>{state.fieldErrors?.promo}</Err>
@@ -366,7 +371,7 @@ export function CheckoutForm({
             </dt>
             <dd className="text-bh-ink">{formatPrice(gross)} €</dd>
           </div>
-          {discount > 0 && promo?.ok && (
+          {discount > 0 && promo?.ok && promoFits && (
             <div className="flex justify-between text-bh-pine">
               <dt>{t.discount} · {promo.code}</dt>
               <dd>-{formatPrice(discount)} €</dd>

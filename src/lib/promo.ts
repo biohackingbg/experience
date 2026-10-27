@@ -6,6 +6,7 @@ import { getDb } from "@/lib/db";
 import { orderItems, orders, promoCodes } from "@/lib/db/schema";
 import { PENDING_HOLD_MINUTES } from "@/lib/orders-const";
 import { SALE } from "@/lib/sold";
+import { TIERS } from "@/lib/tickets";
 
 /**
  * Discount codes, resolved against the gross the buyer is about to pay.
@@ -20,8 +21,16 @@ export const isPromoKind = (v: unknown): v is PromoKind => v === "percent" || v 
 export const normaliseCode = (v: string) => v.trim().toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 32);
 
 export type PromoResult =
-  | { ok: true; code: string; kind: PromoKind; value: number; discountCents: number; label: string }
-  | { ok: false; reason: "unknown" | "inactive" | "expired" | "exhausted" };
+  | { ok: true; code: string; kind: PromoKind; value: number; discountCents: number; label: string; tiers: string[] | null }
+  | { ok: false; reason: "unknown" | "inactive" | "expired" | "exhausted" | "wrong_tier"; tiers?: string[] };
+
+const TIER_IDS: string[] = TIERS.map((t) => t.id);
+
+/** "plus,peak" as a list of known tier ids; null (or nothing valid) means the code is not limited. */
+export function tiersOf(raw: string | null): string[] | null {
+  const list = (raw ?? "").split(",").map((s) => s.trim()).filter((s) => TIER_IDS.includes(s));
+  return list.length ? list : null;
+}
 
 export function promoLabel(kind: PromoKind, value: number): string {
   return kind === "percent" ? `-${value} %` : `-${(value / 100).toLocaleString("bg-BG")} €`;
@@ -46,14 +55,37 @@ async function usesOf(code: string): Promise<number> {
   return r?.n ?? 0;
 }
 
-export async function resolvePromo(raw: string, grossCents: number): Promise<PromoResult> {
+/** Tickets on paid orders with the code, plus those in checkouts still inside the seat hold. */
+async function ticketsOf(code: string): Promise<number> {
+  const [r] = await getDb()
+    .select({ n: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int` })
+    .from(orderItems)
+    .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
+    .where(
+      sql`${orders.promoCode} = ${code} and (
+        ${orders.status} = 'paid'
+        or (${orders.status} = 'pending' and ${orders.createdAt} > now() - interval '${sql.raw(String(PENDING_HOLD_MINUTES))} minutes')
+      )`,
+    );
+  return r?.n ?? 0;
+}
+
+/** `tierId` is the tier being bought; without it (the checkout preview) a limited code still resolves and reports which tiers it is for. */
+export async function resolvePromo(raw: string, grossCents: number, tierId?: string, quantity = 1): Promise<PromoResult> {
   const code = normaliseCode(raw);
   if (!code) return { ok: false, reason: "unknown" };
   const [p] = await getDb().select().from(promoCodes).where(eq(promoCodes.code, code)).limit(1);
   if (!p || !isPromoKind(p.kind)) return { ok: false, reason: "unknown" };
   if (!p.active) return { ok: false, reason: "inactive" };
   if (p.validUntil && p.validUntil.getTime() < Date.now()) return { ok: false, reason: "expired" };
-  if (p.maxUses !== null && (await usesOf(code)) >= p.maxUses) return { ok: false, reason: "exhausted" };
+  if (p.maxUses !== null) {
+    // A free code hands out places, so its limit counts tickets: an order for
+    // three would otherwise spend one use. Other codes count orders.
+    const free = p.kind === "percent" && p.value >= 100;
+    if (free ? (await ticketsOf(code)) + quantity > p.maxUses : (await usesOf(code)) >= p.maxUses) return { ok: false, reason: "exhausted" };
+  }
+  const tiers = tiersOf(p.tiers);
+  if (tiers && tierId && !tiers.includes(tierId)) return { ok: false, reason: "wrong_tier", tiers };
   return {
     ok: true,
     code,
@@ -61,6 +93,7 @@ export async function resolvePromo(raw: string, grossCents: number): Promise<Pro
     value: p.value,
     discountCents: discountFor(p.kind, p.value, grossCents),
     label: promoLabel(p.kind, p.value),
+    tiers,
   };
 }
 
@@ -69,6 +102,7 @@ export const promoReasonText: Record<Extract<PromoResult, { ok: false }>["reason
   inactive: "Кодът е спрян.",
   expired: "Срокът на кода е изтекъл.",
   exhausted: "Кодът е използван максималния брой пъти.",
+  wrong_tier: "Кодът не важи за това ниво на билет.",
 };
 
 export type PromoRow = {
@@ -81,6 +115,8 @@ export type PromoRow = {
   validUntil: Date | null;
   note: string | null;
   active: boolean;
+  /** Tier ids it is limited to; null for every tier. */
+  tiers: string[] | null;
   createdAt: Date;
   /** Paid orders that used it. */
   uses: number;
@@ -130,13 +166,14 @@ export async function listPromos(): Promise<PromoRow[]> {
       validUntil: p.validUntil,
       note: p.note,
       active: p.active,
+      tiers: tiersOf(p.tiers),
       createdAt: p.createdAt,
       uses: u?.uses ?? 0,
       tickets: u?.tickets ?? 0,
       discountCents: u?.discount ?? 0,
       revenueCents: u?.revenue ?? 0,
       expired: !!p.validUntil && p.validUntil.getTime() < now,
-      exhausted: p.maxUses !== null && (u?.uses ?? 0) >= p.maxUses,
+      exhausted: p.maxUses !== null && ((kind === "percent" && p.value >= 100 ? u?.tickets : u?.uses) ?? 0) >= p.maxUses,
     };
   });
 }
@@ -148,9 +185,16 @@ export async function createPromo(input: {
   maxUses: number | null;
   validUntil: Date | null;
   note: string | null;
+  /** Comma-separated tier ids; omitted for every tier. */
+  tiers?: string | null;
 }): Promise<"ok" | "exists"> {
   const rows = await getDb().insert(promoCodes).values(input).onConflictDoNothing({ target: promoCodes.code }).returning({ id: promoCodes.id });
   return rows.length ? "ok" : "exists";
+}
+
+/** Which tiers a code works for; an empty list lifts the limit. */
+export async function setPromoTiers(id: string, tiers: string[]): Promise<void> {
+  await getDb().update(promoCodes).set({ tiers: tiersOf(tiers.join(","))?.join(",") ?? null }).where(eq(promoCodes.id, id));
 }
 
 export async function setPromoActive(id: string, active: boolean): Promise<void> {

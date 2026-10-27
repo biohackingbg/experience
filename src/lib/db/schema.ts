@@ -641,6 +641,8 @@ export const promoCodes = pgTable("promo_codes", {
   validUntil: timestamp("valid_until", { withTimezone: true }),
   note: text("note"),
   active: boolean("active").notNull().default(true),
+  /** Comma-separated tier ids the code is limited to ("plus,peak"); null means every tier. */
+  tiers: text("tiers"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

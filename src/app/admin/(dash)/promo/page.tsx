@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import { HomeLink } from "@/components/admin/HomeLink";
 import { requireAccess } from "@/lib/access";
 import { listPromos } from "@/lib/promo";
-import { formatPrice } from "@/lib/tickets";
+import { TIERS, formatPrice } from "@/lib/tickets";
 
-import { removePromo, togglePromo } from "./actions";
+import { removePromo, togglePromo, updatePromoTiers } from "./actions";
 import { PromoForm } from "./Forms";
 
 export const metadata: Metadata = {
@@ -40,8 +40,10 @@ export default async function PromoPage() {
           Купувачът въвежда кода на страницата за плащане. Отстъпката е от крайната
           цена с ДДС и излиза като отделен ред във фактурата. Код за 100 % прави
           билета безплатен: издава се веднага, без плащане и без фактура - удобно
-          за лектори и гости на партньори. Използван код не може да се изтрие, само
-          да се спре.
+          за лектори и гости на партньори. Ако е зададен „макс. брой“, при код за 100 % той
+          е броят на билетите (не на поръчките), а за другите кодове - на поръчките.
+          Код може да важи само за някои билети, например само CORE. Използван код
+          не може да се изтрие, само да се спре.
         </p>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -89,7 +91,24 @@ export default async function PromoPage() {
                     return (
                       <tr key={c.id} className="border-b border-bh-ink/6 last:border-0">
                         <td className="px-3 py-2 font-mono font-semibold text-bh-ink">{c.code}</td>
-                        <td className="px-3 py-2 text-bh-ink">{c.label}</td>
+                        <td className="px-3 py-2 text-bh-ink">
+                          {c.label}
+                          <details className="mt-1">
+                            <summary className="cursor-pointer text-[0.7rem] font-semibold text-bh-ink/60">
+                              {c.tiers ? `само ${c.tiers.map((id) => id.toUpperCase()).join(", ")}` : "за всички билети"} · промени
+                            </summary>
+                            <form action={updatePromoTiers} className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-bh-ink/75">
+                              <input type="hidden" name="id" value={c.id} />
+                              {TIERS.map((t) => (
+                                <label key={t.id} className="flex items-center gap-1.5">
+                                  <input type="checkbox" name="tiers" value={t.id} defaultChecked={c.tiers?.includes(t.id) ?? false} className="accent-[#146455]" /> {t.name}
+                                </label>
+                              ))}
+                              <button type="submit" className="rounded-full border border-bh-ink/20 px-3 py-1 text-xs font-semibold text-bh-ink hover:border-bh-ink">Запиши</button>
+                            </form>
+                            <p className="mt-1 text-[0.65rem] text-bh-ink/50">Нищо отметнато = важи за всички.</p>
+                          </details>
+                        </td>
                         <td className="px-3 py-2 text-bh-ink/75">{c.uses}{c.maxUses ? ` / ${c.maxUses}` : ""}{c.tickets ? ` · ${c.tickets} билета` : ""}</td>
                         <td className="px-3 py-2 text-bh-ink/75">{c.validUntil ? bgDate(c.validUntil) : "-"}</td>
                         <td className="px-3 py-2 text-bh-ink/75">{c.note ?? "-"}</td>

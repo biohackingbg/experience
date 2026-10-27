@@ -120,7 +120,7 @@ export async function createPendingOrder(
   let discountCents = 0;
   let promoCode: string | null = null;
   if (input.promoCode?.trim()) {
-    const promo = await resolvePromo(input.promoCode, grossCents);
+    const promo = await resolvePromo(input.promoCode, grossCents, tier.id, input.quantity);
     if (!promo.ok) return { ok: false, reason: "bad_promo", message: promo.reason };
     discountCents = promo.discountCents;
     promoCode = promo.code;

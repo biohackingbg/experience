@@ -379,6 +379,13 @@
       "when": 1789000000052,
       "tag": "0053_fix_order_email_g2mhfy",
       "breakpoints": true
+    },
+    {
+      "idx": 53,
+      "version": "7",
+      "when": 1789000000053,
+      "tag": "0054_promo_tiers",
+      "breakpoints": true
     }
   ]
 }
