@@ -100,6 +100,8 @@ export const orders = pgTable(
     invoiceCompany: text("invoice_company"),
     invoiceVatNumber: text("invoice_vat_number"),
     invoiceAddress: text("invoice_address"),
+    /** The company's representative (МОЛ), printed on the invoice when it is known. */
+    invoiceMol: text("invoice_mol"),
 
     /**
      * Invoice number from the site's own series, drawn from a Postgres

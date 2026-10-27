@@ -38,6 +38,7 @@ const T = {
   vatNo: ["ДДС №", "VAT no."],
   eikOrVat: ["ЕИК / ДДС №", "Company ID / VAT no."],
   manager: ["Управител", "Managing director"],
+  mol: ["МОЛ", "Representative"],
   contact: ["Лице за контакт", "Contact"],
   item: ["Наименование", "Description"],
   unit: ["Ед. цена", "Unit price"],
@@ -111,6 +112,12 @@ function Parties({ inv, lang, dim }: { inv: InvoiceData; lang: Lang; dim: string
         <h2 className={`font-mono text-[0.65rem] uppercase tracking-[0.2em] ${dim}`}>{label(lang, "recipient")}</h2>
         <p className="mt-3 font-semibold">{inv.company ?? inv.buyerName}</p>
         <p className="mt-1 text-sm leading-relaxed text-bh-ink/70">
+          {inv.mol && (
+            <>
+              {label(lang, "mol")}: {inv.mol}
+              <br />
+            </>
+          )}
           {buyerIsCompany && (
             <>
               {label(lang, "contact")}: {inv.buyerName}

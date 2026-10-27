@@ -16,6 +16,8 @@ export type InvoiceData = {
   company: string | null;
   vatNumber: string | null;
   address: string | null;
+  /** The company's representative (МОЛ); unset on documents and on orders that never gave one. */
+  mol?: string | null;
   subtotalCents: number;
   vatCents: number;
   totalCents: number;
@@ -55,6 +57,7 @@ export async function getInvoice(reference: string): Promise<InvoiceData | null>
       company: orders.invoiceCompany,
       vatNumber: orders.invoiceVatNumber,
       address: orders.invoiceAddress,
+      mol: orders.invoiceMol,
       subtotalCents: orders.subtotalCents,
       vatCents: orders.vatCents,
       totalCents: orders.totalCents,
@@ -185,6 +188,7 @@ export async function getAllInvoices(range?: DateRange): Promise<InvoiceExportRo
       company: orders.invoiceCompany,
       vatNumber: orders.invoiceVatNumber,
       address: orders.invoiceAddress,
+      mol: orders.invoiceMol,
       subtotalCents: orders.subtotalCents,
       vatCents: orders.vatCents,
       totalCents: orders.totalCents,
