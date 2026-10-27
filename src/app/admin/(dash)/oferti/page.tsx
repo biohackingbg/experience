@@ -7,6 +7,7 @@ import { listOffersWithState } from "@/lib/offers";
 import { listPartners } from "@/lib/partner-profiles";
 import { TIERS } from "@/lib/tickets";
 
+import { LogoUpload } from "../partniori/Forms";
 import { NewOfferForm, OfferEditor, type OfferRow } from "./Forms";
 
 export const metadata: Metadata = {
@@ -109,7 +110,14 @@ export default async function OffersAdminPage() {
                       {o.to && <span>до {o.to.split("-").reverse().join(".")}</span>}
                       {o.url && <a href={o.url} target="_blank" rel="noreferrer" className="underline">линк</a>}
                     </div>
-                    <div className="mt-3">
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      {o.partnerId ? (
+                        <LogoUpload id={o.partnerId} has={!!logo} />
+                      ) : (
+                        <span className="text-xs text-bh-ink/50">Без профил няма лого - избери партньор в „Редактирай“ или направи профил в „Партньори“.</span>
+                      )}
+                    </div>
+                    <div className="mt-2">
                       <OfferEditor o={o} partners={partnerOptions} tiers={tiers} />
                     </div>
                   </div>

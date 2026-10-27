@@ -286,12 +286,13 @@ export async function getDashboardData(): Promise<DashboardData> {
           items: sql<number>`(select coalesce(sum(i.quantity), 0) from order_items i where i.order_id = orders.id)::int`,
           tickets: sql<number>`(select count(*) from tickets t where t.order_id = orders.id)::int`,
           hasStripe: sql<boolean>`${orders.stripePaymentIntentId} is not null`,
+          isUpgrade: sql<boolean>`${orders.upgradesTicketCode} is not null`,
           refundedCents: orders.refundedCents,
         })
         .from(orders)
         .where(sql`${orders.status} = 'paid' and not ${orders.isTest} and (
           ${orders.stripePaymentIntentId} is null and ${orders.totalCents} > 0 and ${orders.paymentMethod} = 'card'
-          or not exists (select 1 from tickets t where t.order_id = ${orders.id})
+          or (not exists (select 1 from tickets t where t.order_id = ${orders.id}) and ${orders.upgradesTicketCode} is null)
           or not exists (select 1 from order_items i where i.order_id = ${orders.id})
           or coalesce(${orders.refundedCents}, 0) >= ${orders.totalCents}
         )`)
@@ -451,7 +452,8 @@ export async function getDashboardData(): Promise<DashboardData> {
     isTest: o.isTest,
     issues: [
       ...(o.items === 0 ? ["няма артикули - не влиза в „продадени билета“"] : []),
-      ...(o.tickets === 0 ? ["няма издадени билети"] : []),
+      // An upgrade moves an existing ticket up a tier and mints none of its own.
+      ...(o.tickets === 0 && !o.isUpgrade ? ["няма издадени билети"] : []),
       ...(!o.hasStripe && o.totalCents > 0 ? ["няма плащане в Stripe"] : []),
       ...((o.refundedCents ?? 0) >= o.totalCents && o.totalCents > 0 ? ["върната изцяло по сума - не се брои"] : []),
     ],
