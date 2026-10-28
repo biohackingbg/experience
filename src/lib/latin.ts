@@ -35,6 +35,8 @@ const OVERRIDES: Record<string, string> = {
   "Мария Силвестър": "Maria Silvester",
   "Джулия Димитрова": "Julia Dimitrova",
   "Мария Варсанова": "Maria Varsanova",
+  "Алекс": "Alex",
+  "Мая Пауновска": "Maya Paunovska",
 };
 
 function word(w: string): string {

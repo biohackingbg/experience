@@ -72,7 +72,7 @@ export default async function IssuePage({
                     <span className="ml-2 font-medium text-bh-ink">{o.company ?? o.name}</span>
                     {o.company && <span className="ml-1 text-xs text-bh-ink/55">· {o.name}</span>}
                     <div className="text-xs text-bh-ink/60">
-                      {o.items} · {formatPrice(o.totalCents)} € · {o.email} · създадена {bgDate(o.createdAt)}
+                      {o.items} · {formatPrice(o.totalCents)} € · {o.email || "без имейл"} · създадена {bgDate(o.createdAt)}
                       {o.bankDueAt && <span className={o.overdue ? " font-semibold text-[#9c3d5c]" : ""}> · срок {bgDate(o.bankDueAt)}{o.overdue ? " (изтекъл - местата са свободни)" : ""}</span>}
                       {o.note && <span> · {o.note}</span>}
                     </div>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { SummitFooter } from "@/components/summit/SummitFooter";
 import { SiteNotice } from "@/components/summit/SiteNotice";
+import { SummitMovement } from "@/components/summit/SummitMovement";
 import { SummitNav } from "@/components/summit/SummitNav";
 import { SummitProgram } from "@/components/summit/SummitProgram";
 
@@ -20,6 +21,7 @@ export default function ProgramPageEn() {
       <SummitNav lang="en" />
       <main className="pb-16">
         <SummitProgram lang="en" />
+        <SummitMovement lang="en" />
       </main>
       <SummitFooter lang="en" />
     </div>

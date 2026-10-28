@@ -7,7 +7,7 @@ import { cancelBankOrder, createManualOrder, markBankOrderPaid, saveBankDetails 
 import { getTier } from "@/lib/tickets";
 import { notifyWaitlist } from "@/lib/waitlist";
 
-export type IssueState = { status: "idle" | "ok" | "error"; message?: string; reference?: string };
+export type IssueState = { status: "idle" | "ok" | "error"; message?: string; reference?: string; /** The proforma was not mailed: the form offers the PDF instead. */ pdf?: boolean };
 
 function done() {
   revalidatePath("/admin/izdai");
@@ -28,7 +28,9 @@ export async function issueOrder(_prev: IssueState, formData: FormData): Promise
   const lang = formData.get("lang") === "en" ? "en" : "bg";
 
   if (!name || name.length < 2) return { status: "error", message: "Напиши име." };
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { status: "error", message: "Провери имейла." };
+  // "Only save it": the proforma is downloaded, so the address may stay empty. A typed one must still be valid.
+  const skipEmail = kind === "bank" && formData.get("noEmail") !== null;
+  if (!(skipEmail && !email) && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { status: "error", message: "Провери имейла." };
   if (!getTier(tierId)) return { status: "error", message: "Избери ниво." };
   if (!Number.isInteger(quantity) || quantity < 1 || quantity > 200) return { status: "error", message: "Броят трябва да е между 1 и 200." };
   if (kind === "bank" && (!Number.isInteger(dueDays) || dueDays < 1 || dueDays > 60)) return { status: "error", message: "Срокът за превод: 1 до 60 дни." };
@@ -46,6 +48,7 @@ export async function issueOrder(_prev: IssueState, formData: FormData): Promise
     note: s("note", 300),
     dueDays,
     lang,
+    skipEmail,
   });
   done();
   if (!r.ok) {
@@ -57,7 +60,13 @@ export async function issueOrder(_prev: IssueState, formData: FormData): Promise
   return {
     status: "ok",
     reference: r.reference,
-    message: kind === "free" ? `Билетите са издадени и изпратени на ${email} (поръчка ${r.reference}).` : `Проформата е изпратена на ${email} (поръчка ${r.reference}). Местата са запазени ${dueDays} дни.`,
+    pdf: skipEmail,
+    message:
+      kind === "free"
+        ? `Билетите са издадени и изпратени на ${email} (поръчка ${r.reference}).`
+        : skipEmail
+          ? `Поръчка ${r.reference} е създадена, писмо не е пратено. Местата са запазени ${dueDays} дни.`
+          : `Проформата е изпратена на ${email} (поръчка ${r.reference}). Местата са запазени ${dueDays} дни.`,
   };
 }
 

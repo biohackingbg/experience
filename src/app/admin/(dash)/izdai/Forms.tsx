@@ -17,6 +17,7 @@ export function IssueForm({ prefill, prices }: { prefill: Prefill; prices: Recor
   const [kind, setKind] = useState<"free" | "bank">(prefill.kind ?? "free");
   const [tierId, setTierId] = useState(prefill.tierId ?? "plus");
   const [qty, setQty] = useState(prefill.quantity ?? 1);
+  const [noEmail, setNoEmail] = useState(false);
   const total = (prices[tierId] ?? 0) * qty;
 
   return (
@@ -32,7 +33,7 @@ export function IssueForm({ prefill, prices }: { prefill: Prefill; prices: Recor
 
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
         <input name="name" defaultValue={prefill.name ?? ""} required placeholder="име и фамилия на получателя" className={field} />
-        <input name="email" type="email" defaultValue={prefill.email ?? ""} required placeholder="имейл - там отиват билетите" className={field} />
+        <input name="email" type="email" defaultValue={prefill.email ?? ""} required={!(kind === "bank" && noEmail)} placeholder={kind === "bank" && noEmail ? "имейл (по избор)" : "имейл - там отиват билетите"} className={field} />
         <input name="phone" placeholder="телефон (по избор)" className={field} />
         <input name="note" defaultValue={prefill.note ?? ""} placeholder="бележка за нас: партньор, договор…" className={field} />
       </div>
@@ -58,6 +59,10 @@ export function IssueForm({ prefill, prices }: { prefill: Prefill; prices: Recor
           <input name="company" placeholder="фирма" className={field} />
           <input name="vatNumber" placeholder="ЕИК / ДДС номер" className={field} />
           <input name="address" placeholder="адрес" className={field} />
+          <label className="flex items-center gap-2 text-xs text-bh-ink/70 sm:col-span-3">
+            <input type="checkbox" name="noEmail" checked={noEmail} onChange={(e) => setNoEmail(e.target.checked)} className="h-3.5 w-3.5 accent-[#146455]" />
+            не пращай писмо, само да сваля проформата (PDF). Имейлът може да остане празен
+          </label>
         </div>
       )}
 
@@ -68,7 +73,15 @@ export function IssueForm({ prefill, prices }: { prefill: Prefill; prices: Recor
         {kind === "bank" && <span className="text-xs text-bh-ink/55">местата се запазват до срока; при получен превод натискаш „Платена“ по-долу</span>}
       </div>
       {state.status !== "idle" && (
-        <p className={`mt-3 text-sm ${state.status === "ok" ? "text-bh-pine" : "text-red-600"}`}>{state.message}</p>
+        <p className={`mt-3 text-sm ${state.status === "ok" ? "text-bh-pine" : "text-red-600"}`}>
+          {state.message}
+          {state.status === "ok" && state.pdf && state.reference && (
+            <>
+              {" "}
+              <a href={`/proforma/${state.reference}?pdf=1`} target="_blank" rel="noreferrer" className="font-semibold underline">Свали проформата (PDF)</a>
+            </>
+          )}
+        </p>
       )}
     </form>
   );

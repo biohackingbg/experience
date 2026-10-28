@@ -137,7 +137,7 @@ const DAY1: Row[] = [
     { t: "Деменцията може да се забави: какво зависи от нас", te: "Dementia can be slowed: what is up to us", who: "доц. д-р Иван Койчев", sp: "невропсихиатър", spe: "neuropsychiatrist" },
     { t: "Колко добре спим наистина?", te: "How well do we really sleep?", who: "доц. д-р Кирил Терзийски" },
   ]),
-  keynote("15:05-15:35", "Живеем по-дълго. Оставаме ли същите?", "We live longer. Do we stay the same?", "Виолета Михайлова", "психолог", "psychologist"),
+  keynote("15:05-15:35", "Живеем по-дълго. Оставаме ли същите?", "We live longer. Do we stay the same?", "Виолета Азис", "клиничен психолог", "clinical psychologist"),
   pause("15:35-15:50", "Кафе пауза", "Coffee break"),
   mod(4, "Метаболитно здраве и дълголетие", "Metabolic health and longevity"),
   keynote(

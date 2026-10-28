@@ -60,6 +60,8 @@ export type ManualOrderInput = {
   /** Bank orders: days the seats are held for the transfer. */
   dueDays: number;
   lang: "bg" | "en";
+  /** Bank orders: create the order and its proforma without mailing it - the team downloads the PDF and sends it themselves. */
+  skipEmail?: boolean;
 };
 
 export type ManualOrderResult =
@@ -140,7 +142,7 @@ export async function createManualOrder(input: ManualOrderInput): Promise<Manual
         lang: input.lang,
       });
     }
-  } else {
+  } else if (!input.skipEmail) {
     await sendProformaEmail({
       to: input.email,
       buyerName: input.name,
@@ -215,15 +217,19 @@ export async function markBankOrderPaid(reference: string): Promise<"ok" | "not_
         userAgent: paid.order.metaUserAgent,
       });
     }
-    await sendTicketEmail({
-      to: paid.order.email,
-      buyerName: paid.order.name,
-      reference: paid.order.reference,
-      totalCents: paid.order.totalCents,
-      invoiceNumber: paid.order.invoiceNumber,
-      tickets: paid.order.tickets,
-      lang: o.lang === "en" ? "en" : "bg",
-    });
+    // An order saved without an address (proforma downloaded, not mailed) has
+    // nowhere to send the tickets: the team sends them from Фактури, to an address typed there.
+    if (paid.order.email) {
+      await sendTicketEmail({
+        to: paid.order.email,
+        buyerName: paid.order.name,
+        reference: paid.order.reference,
+        totalCents: paid.order.totalCents,
+        invoiceNumber: paid.order.invoiceNumber,
+        tickets: paid.order.tickets,
+        lang: o.lang === "en" ? "en" : "bg",
+      });
+    }
   }
   return "ok";
 }

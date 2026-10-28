@@ -242,7 +242,7 @@ export const CONCEPT: Copy<{
         { id: "lagree", title: "Lagree" },
         { id: "mobility", title: "Mobility" },
         { id: "mat-pilates", title: "Mat pilates" },
-        { id: "psychosomatics", title: "Психосоматика - workshop с Виолета Михайлова" },
+        { id: "psychosomatics", title: "Психосоматика - workshop с д-р Виолета Азис" },
         { id: "power-of-breath", title: "Яни Драгов - „Power of breath“" },
         { id: "mitolight", title: "Mitolight breathwork" },
         { id: "power-plate-rev", title: "Power Plate REV" },
@@ -277,7 +277,7 @@ export const CONCEPT: Copy<{
         { id: "lagree", title: "Lagree" },
         { id: "mobility", title: "Mobility" },
         { id: "mat-pilates", title: "Mat pilates" },
-        { id: "psychosomatics", title: "Psychosomatics - workshop with Violeta Mihaylova" },
+        { id: "psychosomatics", title: "Psychosomatics - workshop with Dr Violeta Azis" },
         { id: "power-of-breath", title: "Yani Dragov - “Power of breath”" },
         { id: "mitolight", title: "Mitolight breathwork" },
         { id: "power-plate-rev", title: "Power Plate REV" },
@@ -326,6 +326,40 @@ export const SPEAKERS_SECTION: Copy<{ eyebrow: string; title: string; intro: str
     title: "International names, in plain language",
     intro: "Doctors and researchers from Bulgaria and abroad, on one stage across the two days.",
     showAll: () => "See all speakers",
+  },
+};
+
+export const MOVEMENT_SECTION: Copy<{
+  eyebrow: string;
+  title: string;
+  intro: string;
+  stations: string;
+  rooms: string;
+  workshop: string;
+  seats: (n: number, upTo?: boolean) => string;
+  withHost: string;
+}> = {
+  bg: {
+    eyebrow: "Зали и станции",
+    title: "Движение и възстановяване",
+    intro:
+      "Докато на сцената вървят лекциите, залите Newton и Columbus и станциите за измерване и възстановяване работят през целия ден. Местата са ограничени.",
+    stations: "Станции, и двата дни",
+    rooms: "Зали Newton и Columbus 1",
+    workshop: "Работилница",
+    seats: (n, upTo) => `${upTo ? "до " : ""}${n} места`,
+    withHost: "с",
+  },
+  en: {
+    eyebrow: "Rooms and stations",
+    title: "Movement and recovery",
+    intro:
+      "While the stage runs the talks, the Newton and Columbus rooms and the measurement and recovery stations are open all day. Places are limited.",
+    stations: "Stations, both days",
+    rooms: "Newton and Columbus 1 rooms",
+    workshop: "Workshop",
+    seats: (n, upTo) => `${upTo ? "up to " : ""}${n} seats`,
+    withHost: "with",
   },
 };
 

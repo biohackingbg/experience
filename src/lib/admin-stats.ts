@@ -294,7 +294,7 @@ export async function getDashboardData(): Promise<DashboardData> {
           ${orders.stripePaymentIntentId} is null and ${orders.totalCents} > 0 and ${orders.paymentMethod} = 'card'
           or (not exists (select 1 from tickets t where t.order_id = ${orders.id}) and ${orders.upgradesTicketCode} is null)
           or not exists (select 1 from order_items i where i.order_id = ${orders.id})
-          or coalesce(${orders.refundedCents}, 0) >= ${orders.totalCents}
+          or (${orders.totalCents} > 0 and coalesce(${orders.refundedCents}, 0) >= ${orders.totalCents})
         )`)
         .orderBy(desc(orders.createdAt))
         .limit(20),
