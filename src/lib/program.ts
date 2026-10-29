@@ -43,7 +43,7 @@ export const UNCONFIRMED: string[] = [
   "Sara Hägg",
   "Louise Newson",
   "Brad Currier",
-  "Melanie Angelova",
+  "Мелани Ангелова",
   "Симеон Личев",
   "Анелия Биволарска",
   "Guido Axmann",
@@ -143,7 +143,7 @@ const DAY1: Row[] = [
     { t: "Деменцията може да се забави: какво зависи от нас", te: "Dementia can be slowed: what is up to us", who: "доц. д-р Иван Койчев", sp: "невропсихиатър", spe: "neuropsychiatrist" },
     { t: "Колко добре спим наистина?", te: "How well do we really sleep?", who: "доц. д-р Кирил Терзийски" },
   ], JULIA),
-  keynote("15:05-15:35", "Живеем по-дълго. Оставаме ли същите?", "We live longer. Do we stay the same?", "Виолета Азис", "клиничен психолог", "clinical psychologist"),
+  keynote("15:05-15:35", "Живеем по-дълго. Оставаме ли същите?", "We live longer. Do we stay the same?", "д-р Виолета Азис", "клиничен психолог", "clinical psychologist"),
   pause("15:35-15:50", "Кафе пауза", "Coffee break"),
   mod(4, "Метаболитно здраве и дълголетие", "Metabolic health and longevity"),
   keynote(
@@ -156,7 +156,7 @@ const DAY1: Row[] = [
     ["Представяне на книгата „Безтегловност“.", "Presentation of the book “Weightless”."],
   ),
   keynote("16:30-17:00", "Микробиомът и дълголетието без митове", "The microbiome and longevity without myths", "проф. Godfrey Grech", "онколог", "oncologist"),
-  panel("17:05-18:20", "Панел с 2 гости", "Panel with 2 guests", [
+  panel("17:05-17:45", "Панел с 2 гости", "Panel with 2 guests", [
     { t: "Захарта, която ни състарява", te: "The sugar that ages us", who: ["Весела Михнева", "Ивайло Богомилов"], sp: "ендокринолози", spe: "endocrinologists" },
     { t: "Затлъстелият черен дроб и топящите се мускули: тихите рискове", te: "The fatty liver and the melting muscles: the silent risks", who: "Милен Василев", sp: "хепатолог", spe: "hepatologist" },
   ], MARIA),
@@ -216,7 +216,7 @@ const DAY2: Row[] = [
   },
   mod(7, "Дерматология и дълголетие", "Dermatology and longevity"),
   panel("14:20-14:50", "Панел с 2 гости", "Panel with 2 guests", [
-    { t: "Кожата - огледало на стареенето", te: "The skin - a mirror of ageing", who: "Melanie Angelova", sp: "дерматолог", spe: "dermatologist" },
+    { t: "Кожата - огледало на стареенето", te: "The skin - a mirror of ageing", who: "Мелани Ангелова", sp: "дерматолог", spe: "dermatologist" },
     { t: "Какво разказва косата ни за стреса и възрастта", te: "What our hair tells us about stress and age", who: "проф. дхн Милен Богданов", sp: "органична и физична органична химия", spe: "organic and physical organic chemistry" },
   ], DIANA),
   panel("14:55-15:25", "Панел с 2 гости", "Panel with 2 guests", [

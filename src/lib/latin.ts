@@ -36,6 +36,7 @@ const OVERRIDES: Record<string, string> = {
   "Джулия Димитрова": "Julia Dimitrova",
   "Мария Варсанова": "Maria Varsanova",
   "Алекс": "Alex",
+  "Мелани Ангелова": "Melanie Angelova",
   "Мая Пауновска": "Maya Paunovska",
 };
 

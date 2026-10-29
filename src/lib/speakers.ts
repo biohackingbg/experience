@@ -432,7 +432,7 @@ export const SPEAKERS: Speaker[] = [
   { id: "paul-lee", name: "Paul Lee" },
   { id: "brad-currier", name: "Brad Currier" },
   { id: "radina-denkova", name: "Радина Денкова" },
-  { id: "melanie-angelova", name: "Melanie Angelova" },
+  { id: "melanie-angelova", name: "Мелани Ангелова" },
   { id: "simeon-lichev", name: "Симеон Личев" },
   { id: "aneliya-bivolarska", name: "Анелия Биволарска" },
   { id: "silvena-rowe", name: "Silvena Rowe" },
