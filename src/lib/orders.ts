@@ -368,6 +368,8 @@ export async function markOrderPaid(
 /**
  * Seats left per tier, counted the way the checkout counts them: paid, plus
  * pending inside the hold. This is what "изчерпано" on the page means.
+ * Counted against `publicCapacity` where a tier has one, so seats held back
+ * for the organisers stay out of what the public page and the waitlist see.
  */
 export async function getRemainingAll(): Promise<Record<string, number>> {
   const rows = await getDb()
@@ -381,7 +383,7 @@ export async function getRemainingAll(): Promise<Record<string, number>> {
     )
     .groupBy(orderItems.tierId);
   const out: Record<string, number> = {};
-  for (const t of TIERS) out[t.id] = Math.max(0, t.capacity - (rows.find((r) => r.tierId === t.id)?.n ?? 0));
+  for (const t of TIERS) out[t.id] = Math.max(0, (t.publicCapacity ?? t.capacity) - (rows.find((r) => r.tierId === t.id)?.n ?? 0));
   return out;
 }
 

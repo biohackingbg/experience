@@ -109,6 +109,13 @@ export type Tier = {
   listPriceCents: number;
   /** Hard cap on how many of this tier may be sold. */
   capacity: number;
+  /**
+   * What the public page counts against, when it is lower than `capacity`.
+   * The seats between the two are held back for the organisers: the site
+   * shows the tier gone at this number while the admin can still issue
+   * (and the dashboard counts) up to `capacity`.
+   */
+  publicCapacity?: number;
   tagline?: string;
   featured?: boolean;
   features: string[];
@@ -134,7 +141,8 @@ export const TIERS: Tier[] = [
     name: "PLUS",
     earlyPriceCents: 8900,
     listPriceCents: 12900,
-    capacity: 250,
+    capacity: 300,
+    publicCapacity: 250,
     featured: true,
     features: [
       "И двата дни",
