@@ -2,7 +2,8 @@ import { latin } from "@/lib/latin";
 
 /**
  * The public programme, transcribed from the organisers' final programme
- * "Biohacking Experience - част от Sofia Life Summit 2026" (22.10.2026).
+ * "Biohacking Experience - част от Sofia Life Summit 2026" (22.10.2026), updated
+ * from the organisers' revised version of 29.10.2026 (moderators named per panel).
  *
  * Each panel is one row: the title says what kind of session it is, the note
  * lists the talks with their speakers, and `people` carries the names - the
@@ -79,6 +80,10 @@ function talkNote(talks: Talk[], en: boolean): string {
 
 type Row = { slot: Slot; en: SlotEn };
 
+const JULIA = { role: "Модератор: Джулия Димитрова", roleEn: "Host: Julia Dimitrova" };
+const MARIA = { role: "Модератор: Мария Варсанова", roleEn: "Host: Maria Varsanova" };
+const DIANA = { role: "Модератор: Диана Радева", roleEn: "Host: Diana Radeva" };
+
 const mod = (n: number, bg: string, en: string): Row => ({
   slot: { time: "", title: `Модул ${n}: ${bg}`, pause: true },
   en: { title: `Module ${n}: ${en}` },
@@ -94,8 +99,8 @@ const panel = (time: string, title: string, titleEn: string, talks: Talk[], extr
 
 /** A keynote: one title, one speaker, and what they are in the role line. */
 const keynote = (time: string, title: string, titleEn: string, who: string, sp: string, spe: string, note?: [string, string]): Row => ({
-  slot: { time, title, role: `Keynote · ${sp}`, people: [who], ...(note ? { note: note[0] } : {}) },
-  en: { title: titleEn, role: `Keynote · ${spe}`, ...(note ? { note: note[1] } : {}) },
+  slot: { time, title, role: sp ? `Keynote · ${sp}` : "Keynote", people: [who], ...(note ? { note: note[0] } : {}) },
+  en: { title: titleEn, role: spe ? `Keynote · ${spe}` : "Keynote", ...(note ? { note: note[1] } : {}) },
 });
 
 const DAY1: Row[] = [
@@ -109,25 +114,26 @@ const DAY1: Row[] = [
     slot: {
       time: "09:50-10:20",
       title: "Светът остарява: какво означава това за всеки от нас",
-      role: "Fireside с 2 участници",
-      note: "Кънчо Стойчев, социолог\nпроф. д-р Георги Бърдаров, демограф",
-      people: ["Кънчо Стойчев", "проф. д-р Георги Бърдаров"],
+      role: "Модератор: Мария Варсанова, 3 участници",
+      note: "Кънчо Стойчев, социолог\nпроф. д-р Георги Бърдаров, демограф\nд-р Александър Симидчиев, пулмолог",
+      people: ["Кънчо Стойчев", "проф. д-р Георги Бърдаров", "д-р Александър Симидчиев"],
     },
     en: {
       title: "The world is ageing: what it means for each of us",
-      role: "Fireside with 2 guests",
-      note: `${latin("Кънчо Стойчев")}, sociologist\n${latin("проф. д-р Георги Бърдаров")}, demographer`,
+      role: "Host: Maria Varsanova, 3 guests",
+      note: `${latin("Кънчо Стойчев")}, sociologist\n${latin("проф. д-р Георги Бърдаров")}, demographer\n${latin("д-р Александър Симидчиев")}, pulmonologist`,
     },
   },
-  keynote("10:20-11:00", "Можем ли да измерим скоростта на стареене?", "Can we measure the speed of ageing?", "Sara Hägg", "биолог, молекулярна епидемиология", "biologist, molecular epidemiology"),
+  keynote("10:20-10:50", "Можем ли да измерим скоростта на стареене?", "Can we measure the speed of ageing?", "Sara Hägg", "биолог, молекулярна епидемиология", "biologist, molecular epidemiology"),
   mod(2, "Дълголетие на сърцето", "Longevity of the heart"),
-  panel("11:10-11:40", "Панел с 4 гости", "Panel with 4 guests", [
+  panel("11:00-11:40", "Панел с 4 гости", "Panel with 4 guests", [
     { t: "Сърцето - двигателят на дългия живот", te: "The heart - the engine of a long life", who: "проф. Цветомир Луканов", sp: "кардиохирург", spe: "cardiac surgeon" },
     { t: "Как метаболизмът състарява сърцето", te: "How metabolism ages the heart", who: "доц. Красимира Христова", sp: "кардиолог", spe: "cardiologist" },
     { t: "Толкова млади, колкото са съдовете ни", te: "As young as our vessels", who: "проф. Милена Станева", sp: "ангиолог", spe: "angiologist" },
     { t: "На колко години е сърцето ти?", te: "How old is your heart?", who: "д-р Танер Шахин", sp: "кардиолог", spe: "cardiologist" },
-  ]),
-  keynote("11:45-12:15", "Белият дроб като ранен сигнал за здравето", "The lung as an early signal of health", "д-р Александър Симидчиев", "пулмолог, специалист по белодробни болести", "pulmonologist, specialist in lung diseases"),
+  ], JULIA),
+  keynote("11:45-12:00", "Диетата за дълголетие не съществува", "The longevity diet does not exist", "Кристина Вавура", "", ""),
+  keynote("12:00-12:20", "Липедемът: не е просто наднормено тегло", "Lipedema: it is not just excess weight", "Sheila Veronese", "професор, инженер", "professor, engineer"),
   keynote("12:20-12:50", "Колко рано можем да видим сърдечносъдовия риск?", "How early can we see cardiovascular risk?", "проф. д-р Иво Петров", "кардиолог", "cardiologist"),
   pause("12:50-13:50", "Обедна почивка", "Lunch break"),
   mod(3, "Мозък и когнитивно дълголетие", "Brain and cognitive longevity"),
@@ -136,7 +142,7 @@ const DAY1: Row[] = [
     { t: "Какво разказва ЯМР за това как остарява мозъкът", te: "What an MRI tells us about how the brain ages", who: "доц. Марин Пенков", sp: "образна диагностика", spe: "imaging diagnostics" },
     { t: "Деменцията може да се забави: какво зависи от нас", te: "Dementia can be slowed: what is up to us", who: "доц. д-р Иван Койчев", sp: "невропсихиатър", spe: "neuropsychiatrist" },
     { t: "Колко добре спим наистина?", te: "How well do we really sleep?", who: "доц. д-р Кирил Терзийски" },
-  ]),
+  ], JULIA),
   keynote("15:05-15:35", "Живеем по-дълго. Оставаме ли същите?", "We live longer. Do we stay the same?", "Виолета Азис", "клиничен психолог", "clinical psychologist"),
   pause("15:35-15:50", "Кафе пауза", "Coffee break"),
   mod(4, "Метаболитно здраве и дълголетие", "Metabolic health and longevity"),
@@ -150,16 +156,10 @@ const DAY1: Row[] = [
     ["Представяне на книгата „Безтегловност“.", "Presentation of the book “Weightless”."],
   ),
   keynote("16:30-17:00", "Микробиомът и дълголетието без митове", "The microbiome and longevity without myths", "проф. Godfrey Grech", "онколог", "oncologist"),
-  panel("17:05-17:45", "Панел", "Panel", [
+  panel("17:05-18:20", "Панел с 2 гости", "Panel with 2 guests", [
     { t: "Захарта, която ни състарява", te: "The sugar that ages us", who: ["Весела Михнева", "Ивайло Богомилов"], sp: "ендокринолози", spe: "endocrinologists" },
     { t: "Затлъстелият черен дроб и топящите се мускули: тихите рискове", te: "The fatty liver and the melting muscles: the silent risks", who: "Милен Василев", sp: "хепатолог", spe: "hepatologist" },
-  ]),
-  {
-    // The final programme lists this slot with her name and nothing else; the
-    // title stays her name until the team gives the session one.
-    slot: { time: "17:45-18:20", title: "Кристина Вавура" },
-    en: { title: latin("Кристина Вавура") },
-  },
+  ], MARIA),
   {
     slot: {
       time: "17:10-18:10",
@@ -181,13 +181,12 @@ const DAY2: Row[] = [
     { t: "Имат ли мъжете своята пауза?", te: "Do men have their pause?", who: "проф. Здравко Каменов", sp: "ендокринолог", spe: "endocrinologist" },
     { who: "д-р Атанас Чернев" },
     { t: "Мъжко хормонално здраве и тестостерон", te: "Male hormonal health and testosterone", who: "д-р Бранимир Радуилов", sp: "обща медицина", spe: "general medicine" },
-  ]),
-  panel("09:50-10:35", "Панел с експерти", "Panel of experts", [
+  ], MARIA),
+  panel("09:50-10:35", "Панел с 3 експерти", "Panel with 3 experts", [
     { who: "проф. Мария Юнакова" },
     { who: "д-р Наталия Петракиева" },
     { who: "доц. Малина Петкова" },
-    { who: "Кристина Вавура" },
-  ]),
+  ], MARIA),
   {
     slot: {
       time: "10:40-11:00",
@@ -202,9 +201,9 @@ const DAY2: Row[] = [
   panel("11:35-12:15", "Панел с 4 гости", "Panel with 4 guests", [
     { t: "Щитовидната жлеза - тихият диригент на стареенето", te: "The thyroid - the quiet conductor of ageing", who: "доц. д-р Александър Шинков", sp: "ендокринолог", spe: "endocrinologist" },
     { t: "Ранното откриване променя историята", te: "Early detection changes the story", who: "д-р Ваня Митова", sp: "мамолог", spe: "breast specialist" },
-    { who: "д-р Цвета Алайков" },
+    { who: "д-р Цветан Алайков" },
     { t: "Какво казват гените ни за риска от рак", te: "What our genes say about cancer risk", who: "Боряна Герасимова", sp: "шеф на Regena", spe: "head of Regena" },
-  ]),
+  ], JULIA),
   keynote("12:20-12:40", "Силни кости и мускули за дълъг живот", "Strong bones and muscles for a long life", "Paul Lee", "ортопед", "orthopaedist"),
   pause("12:45-13:45", "Обедна почивка", "Lunch break"),
   {
@@ -219,18 +218,19 @@ const DAY2: Row[] = [
   panel("14:20-14:50", "Панел с 2 гости", "Panel with 2 guests", [
     { t: "Кожата - огледало на стареенето", te: "The skin - a mirror of ageing", who: "Melanie Angelova", sp: "дерматолог", spe: "dermatologist" },
     { t: "Какво разказва косата ни за стреса и възрастта", te: "What our hair tells us about stress and age", who: "проф. дхн Милен Богданов", sp: "органична и физична органична химия", spe: "organic and physical organic chemistry" },
-  ]),
+  ], DIANA),
   panel("14:55-15:25", "Панел с 2 гости", "Panel with 2 guests", [
-    { t: "Липедемът: не е просто наднормено тегло", te: "Lipedema: it is not just excess weight", who: "Sheila Veronese", sp: "професор, инженер", spe: "professor, engineer" },
+    { t: "Между skinny fat и затлъстяването: какво не вижда кантарът в перименопаузата", te: "Between skinny fat and obesity: what the scale misses in perimenopause", who: "Тяна Пресолска" },
     { t: "Хормоните - липсващото звено за млада кожа", te: "Hormones - the missing link for young skin", who: "Andre-Robert Rotmann", sp: "гинеколог", spe: "gynaecologist" },
-  ]),
+  ], MARIA),
   pause("15:25-15:40", "Кафе пауза", "Coffee break"),
   mod(8, "Интервенции за дълголетие - от начина на живот до медицината", "Longevity interventions - from lifestyle to medicine"),
-  panel("15:45-16:30", "Панел с 3 гости", "Panel with 3 guests", [
+  panel("15:45-16:30", "Панел с 4 гости", "Panel with 4 guests", [
     { t: "Чуваш, виждаш, движиш се - значи мислиш ясно", te: "You hear, you see, you move - so you think clearly", who: "д-р Десислава Димова", sp: "офталмолог", spe: "ophthalmologist" },
     { t: "Светлината като лекарство: патентован метод за дълголетие", te: "Light as medicine: a patented method for longevity", who: "Милена Драганова", sp: "инженер", spe: "engineer" },
+    { who: "д-р Каролина Стайкова" },
     { t: "Нека храната бъде твоето лекарство", te: "Let food be thy medicine", who: "Дерйа Хюсеин Кандиларов", sp: "клиничен диетолог", spe: "clinical dietitian" },
-  ]),
+  ], JULIA),
   panel("16:35-17:15", "Панел с 4 гости", "Panel with 4 guests", [
     { t: "Уелнес и дишане срещу стареенето", te: "Wellness and breathing against ageing", who: "Fahri Saatcioglu", sp: "физиолог", spe: "physiologist" },
     { who: "Анна Грозданова" },
@@ -241,9 +241,10 @@ const DAY2: Row[] = [
     slot: {
       time: "17:20-18:00",
       title: "Sofia Life Conversation: как искаме да живеем след 60, 70 и 80",
-      people: ["Красимир Балъков", "Мария Варсанова", "Джулия Димитрова", "Милена Хаджииванова"],
+      role: MARIA.role,
+      people: ["Красимир Балъков", "проф. Даниела Илиева", "Кристин Илиева", "Милена Хаджииванова"],
     },
-    en: { title: "Sofia Life Conversation: how we want to live at 60, 70 and 80" },
+    en: { title: "Sofia Life Conversation: how we want to live at 60, 70 and 80", role: MARIA.roleEn },
   },
   {
     slot: { time: "18:00-18:15", title: "Закриване: The Longevity Promise", role: "Организаторите", note: "Една измерима промяна за следващите 30 дни." },
