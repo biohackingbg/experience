@@ -3,10 +3,11 @@ import type { Metadata } from "next";
 import { HomeLink } from "@/components/admin/HomeLink";
 import { requireAccess } from "@/lib/access";
 import { listPromos } from "@/lib/promo";
-import { TIERS, formatPrice } from "@/lib/tickets";
+import { formatPrice } from "@/lib/tickets";
 
 import { removePromo, togglePromo, updatePromoTiers } from "./actions";
 import { PromoForm } from "./Forms";
+import { TIER_CHOICES, tierValue } from "./tier-choices";
 
 export const metadata: Metadata = {
   title: "Промо кодове | Администрация",
@@ -42,7 +43,7 @@ export default async function PromoPage() {
           билета безплатен: издава се веднага, без плащане и без фактура - удобно
           за лектори и гости на партньори. Ако е зададен „макс. брой“, при код за 100 % той
           е броят на билетите (не на поръчките), а за другите кодове - на поръчките.
-          Код може да важи само за някои билети, например само CORE. Използван код
+          Код може да важи само за избран билет, например само CORE (избираш от падащото меню). Използван код
           не може да се изтрие, само да се спре.
         </p>
 
@@ -99,14 +100,12 @@ export default async function PromoPage() {
                             </summary>
                             <form action={updatePromoTiers} className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-bh-ink/75">
                               <input type="hidden" name="id" value={c.id} />
-                              {TIERS.map((t) => (
-                                <label key={t.id} className="flex items-center gap-1.5">
-                                  <input type="checkbox" name="tiers" value={t.id} defaultChecked={c.tiers?.includes(t.id) ?? false} className="accent-[#146455]" /> {t.name}
-                                </label>
-                              ))}
+                              <select name="tiers" defaultValue={tierValue(c.tiers)} className="rounded-full border border-bh-ink/15 bg-bh-paper px-3 py-1.5 text-xs text-bh-ink">
+                                {TIER_CHOICES.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                              </select>
                               <button type="submit" className="rounded-full border border-bh-ink/20 px-3 py-1 text-xs font-semibold text-bh-ink hover:border-bh-ink">Запиши</button>
                             </form>
-                            <p className="mt-1 text-[0.65rem] text-bh-ink/50">Нищо отметнато = важи за всички.</p>
+                            <p className="mt-1 text-[0.65rem] text-bh-ink/50">„Всички билети“ = важи за всички нива.</p>
                           </details>
                         </td>
                         <td className="px-3 py-2 text-bh-ink/75">{c.uses}{c.maxUses ? ` / ${c.maxUses}` : ""}{c.tickets ? ` · ${c.tickets} билета` : ""}</td>

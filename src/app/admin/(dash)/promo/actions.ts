@@ -27,7 +27,7 @@ export async function addPromo(_prev: FormState, formData: FormData): Promise<Fo
   const validUntil = untilRaw ? new Date(`${untilRaw}T23:59:59+03:00`) : null;
   if (validUntil && Number.isNaN(validUntil.getTime())) return { status: "error", message: "Датата не е валидна." };
 
-  const tiers = tiersOf(formData.getAll("tiers").map(String).join(","));
+  const tiers = tiersOf(formData.getAll("tiers").map(String).join(","));  // one dropdown value like "core,plus", or empty = every tier
   const r = await createPromo({ code, kind, value, maxUses, validUntil, note: String(formData.get("note") ?? "").trim().slice(0, 200) || null, tiers: tiers?.join(",") ?? null });
   revalidatePath("/admin/promo");
   return r === "ok" ? { status: "ok", message: `Кодът ${code} е готов.` } : { status: "error", message: `Кодът ${code} вече съществува.` };
@@ -41,12 +41,12 @@ export async function togglePromo(formData: FormData): Promise<void> {
   revalidatePath("/admin/promo");
 }
 
-/** Ticks on a row: the tiers the code works for, whenever it was made. Nothing ticked = every tier. */
+/** The dropdown on a row: the tiers the code works for, whenever it was made. Empty = every tier. */
 export async function updatePromoTiers(formData: FormData): Promise<void> {
   if (!(await canAccess("promo"))) return;
   const id = String(formData.get("id") ?? "");
   if (!UUID.test(id)) return;
-  await setPromoTiers(id, formData.getAll("tiers").map(String));
+  await setPromoTiers(id, formData.getAll("tiers").flatMap((v) => String(v).split(",")).filter(Boolean));
   revalidatePath("/admin/promo");
 }
 
