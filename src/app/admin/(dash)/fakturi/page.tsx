@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireAccess } from "@/lib/access";
 
 import { ResendForm } from "./ResendForm";
+import { PeopleForm } from "./PeopleForm";
 import { INVOICE_SERIES_START } from "@/lib/company";
 import { listInvoices } from "@/lib/invoices";
 import { formatPrice } from "@/lib/tickets";
@@ -214,6 +215,7 @@ export default async function InvoicesPage({
                         {/* Resending means resending the ticket mail; a
                             sponsorship invoice has no tickets behind it. */}
                         {!r.isDocument && <ResendForm reference={r.reference} />}
+                        {!r.isDocument && <PeopleForm reference={r.reference} />}
                       </div>
                     </td>
                   </tr>

@@ -27,6 +27,14 @@ export function ResendForm({ reference }: { reference: string }) {
         placeholder="друг имейл (по избор)"
         className="w-48 rounded-full border border-bh-ink/15 bg-bh-paper px-3 py-1.5 text-xs text-bh-ink placeholder:text-bh-ink/35"
       />
+      <input
+        type="number"
+        name="only"
+        min={1}
+        placeholder="билет №"
+        title="Само този билет от поръчката (1, 2…). Празно = всички."
+        className="w-20 rounded-full border border-bh-ink/15 bg-bh-paper px-3 py-1.5 text-xs text-bh-ink placeholder:text-bh-ink/35"
+      />
       <button
         type="submit"
         disabled={pending}
