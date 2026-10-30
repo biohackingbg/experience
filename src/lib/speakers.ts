@@ -127,6 +127,18 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/kancho-stoychev.jpg",
   },
   {
+    id: "georgi-bardarov",
+    announced: true,
+    title: "Проф. д-р",
+    name: "Георги Бърдаров",
+    specialty: "Демография и социално-икономическа география",
+    role: "Директор на Филиал - Бургас",
+    affiliation: "Софийски университет „Св. Климент Охридски“",
+    country: "България",
+    topic: "Преподавател в Геолого-географския факултет, писател и сценарист",
+    photo: "/speakers/georgi-bardarov.jpg",
+  },
+  {
     // His seat in parliament is left off deliberately: the card exists to say
     // why he belongs on a medical stage, and naming a party on a page that
     // sells tickets reads as a political statement the event is not making.
