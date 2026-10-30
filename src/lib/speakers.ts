@@ -213,6 +213,18 @@ export const SPEAKERS: Speaker[] = [
   },
   {
     announced: true,
+    id: "milena-staneva",
+    title: "Проф.",
+    name: "Милена Станева, дм",
+    specialty: "Кардиология и ангиология",
+    role: "Основател и ръководител на Клиника по ангиология",
+    affiliation: "Acibadem City Clinic УМБАЛ Токуда",
+    country: "България",
+    topic: "Сертифицирана за лечение на лимфедем от Клиника Фьолди, Германия",
+    photo: "/speakers/milena-staneva.jpg",
+  },
+  {
+    announced: true,
     id: "ivo-petrov",
     title: "Член-кор. проф. д-р",
     name: "Иво Петров, дмн",
