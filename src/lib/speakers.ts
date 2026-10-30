@@ -225,6 +225,17 @@ export const SPEAKERS: Speaker[] = [
   },
   {
     announced: true,
+    id: "taner-shahin",
+    title: "Д-р",
+    name: "Танер Шахин",
+    specialty: "Кардиология и ехокардиография",
+    affiliation: "Acibadem City Clinic УМБАЛ Токуда",
+    country: "България",
+    topic: "Функционална диагностика и сърдечно-съдова профилактика",
+    photo: "/speakers/taner-shahin.jpg",
+  },
+  {
+    announced: true,
     id: "ivo-petrov",
     title: "Член-кор. проф. д-р",
     name: "Иво Петров, дмн",
