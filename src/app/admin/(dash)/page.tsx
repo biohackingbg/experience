@@ -726,7 +726,8 @@ export default async function AdminDashboard({
                   >
                     <td className="px-4 py-3 font-mono text-xs text-[#0b2a22]/70">
                       {o.reference}
-                      {o.status === "paid" && (
+                      {/* A free order is never invoiced (the number is drawn only when money is due), so the link would lead nowhere. */}
+                      {o.status === "paid" && o.totalCents > 0 && (
                         <Link href={`/faktura/${o.reference}`} className="ml-2 font-sans text-[0.65rem] text-[#0b2a22]/50 underline underline-offset-2 hover:text-[#0b2a22]">
                           фактура
                         </Link>
