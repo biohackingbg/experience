@@ -18,7 +18,9 @@ export const TIER_COLORS: Record<string, string> = {
 };
 
 /** The third colour: gift tickets. Apart from the three tier hues, so a gift never reads as a sale of any tier. */
-export const GIFT_COLOR = "#B14BFF";
+export const GIFT_COLOR = "#51B6EB";
+/** The same hue darkened for text: the light fill alone is too pale to read on white. */
+export const GIFT_TEXT = "#1B78A8";
 
 export function TierBars({ tiers }: { tiers: TierSales[] }) {
   const anySold = tiers.some((t) => t.sold > 0);
@@ -64,7 +66,7 @@ export function TierBars({ tiers }: { tiers: TierSales[] }) {
                 <div className="text-sm text-bh-ink/70">
                   <span className="font-semibold text-bh-ink">{tier.sold}</span>
                   {tier.gift > 0 && (
-                    <span className="font-semibold" style={{ color: GIFT_COLOR }}>
+                    <span className="font-semibold" style={{ color: GIFT_TEXT }}>
                       {" "}+ {tier.gift} gift
                     </span>
                   )}

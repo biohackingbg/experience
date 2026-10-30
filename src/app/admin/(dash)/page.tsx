@@ -17,7 +17,7 @@ import { ResendForm } from "./fakturi/ResendForm";
 import { PriceStages } from "./PriceStages";
 import { SiteNoticeCard } from "./SiteNoticeCard";
 import { ReminderForm } from "./ReminderForm";
-import { GIFT_COLOR, TIER_COLORS, TierBars } from "./TierBars";
+import { GIFT_COLOR, GIFT_TEXT, TIER_COLORS, TierBars } from "./TierBars";
 import { WhenChart } from "./WhenChart";
 
 export const metadata: Metadata = {
@@ -518,7 +518,7 @@ export default async function AdminDashboard({
             <p className="mt-2 flex items-center gap-2 text-sm text-[#0b2a22]/70">
               <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ background: GIFT_COLOR }} />
               <span>
-                от тях <span className="font-semibold" style={{ color: GIFT_COLOR }}>{d.ticketsGift} gift</span>, останалите са на лектори, партньори и екипа
+                от тях <span className="font-semibold" style={{ color: GIFT_TEXT }}>{d.ticketsGift} gift</span>, останалите са на лектори, партньори и екипа
               </span>
             </p>
           )}
@@ -712,7 +712,7 @@ export default async function AdminDashboard({
           {d.giftToday > 0 && (
             <span className="inline-flex items-center gap-1.5">
               <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ background: GIFT_COLOR }} />
-              <span className="font-semibold" style={{ color: GIFT_COLOR }}>{d.giftToday} gift</span>
+              <span className="font-semibold" style={{ color: GIFT_TEXT }}>{d.giftToday} gift</span>
             </span>
           )}
           {d.freeToday > 0 && <span>{d.freeToday} други безплатни</span>}
@@ -774,7 +774,7 @@ export default async function AdminDashboard({
                       <StatusChip status={o.status} />
                       {o.status === "paid" && o.totalCents === 0 && (
                         <span
-                          className="ml-1.5 rounded-full px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide text-white"
+                          className="ml-1.5 rounded-full px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide text-[#02251f]"
                           style={{ background: GIFT_COLOR }}
                           title="Безплатна поръчка: не е продажба"
                         >
