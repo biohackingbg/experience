@@ -109,8 +109,11 @@ export function SalesHistory({ history, launches }: { history: WeekDay[]; launch
   const days = Number.isFinite(r.days) ? history.slice(-r.days) : history;
   const weekly = days.length > 40;
   const bars = toBars(days, launches, weekly);
-  // Bars are sales only; free tickets are a violet dot over the day, outside the sum.
-  const max = bars.reduce((m, b) => Math.max(m, b.tickets), 0);
+  // The figure over a bar is the sales; free tickets stand on top of it in their
+  // own neon colour (named in the legend) and are never part of that figure.
+  const totalOf = (b: Bar) => b.tickets + b.gift + b.free;
+  const max = bars.reduce((m, b) => Math.max(m, totalOf(b)), 0);
+  const maxSales = bars.reduce((m, b) => Math.max(m, b.tickets), 0);
   const anyGift = bars.some((b) => b.gift > 0);
   const anyFree = bars.some((b) => b.free > 0);
   const tickets = bars.reduce((a, b) => a + b.tickets, 0);
@@ -155,8 +158,9 @@ export function SalesHistory({ history, launches }: { history: WeekDay[]; launch
         <div className="absolute inset-0 flex items-end gap-[3px] sm:gap-1.5">
           {bars.map((b) => {
             const free = b.gift + b.free;
-            const h = b.tickets > 0 ? Math.max(pct(b.tickets), 4) : 0;
-            const peak = max > 0 && b.tickets === max;
+            const total = totalOf(b);
+            const h = total > 0 ? Math.max(pct(total), 4) : 0;
+            const peak = maxSales > 0 && b.tickets === maxSales;
             const title = [
               `${b.sub} · ${b.tickets} билета · ${b.orders} поръчки · ${formatPrice(b.grossCents)} €`,
               ...b.byTier.map((t) => `${t.name} ${t.n} · ${formatPrice(t.grossCents)} €`),
@@ -177,21 +181,13 @@ export function SalesHistory({ history, launches }: { history: WeekDay[]; launch
                 )}
                 <div
                   className="flex w-full max-w-[1.6rem] flex-col-reverse overflow-hidden rounded-full"
-                  style={{ height: `${b.tickets > 0 ? h : 100}%`, background: b.tickets > 0 ? undefined : HATCH }}
+                  style={{ height: `${total > 0 ? h : 100}%`, background: total > 0 ? undefined : HATCH }}
                 >
                   {b.byTier.map((t) => (
-                    <div key={t.id} style={{ height: `${(t.n / b.tickets) * 100}%`, background: TIER_COLORS[t.id] ?? "#146455", opacity: b.today ? 0.75 : 1 }} />
+                    <div key={t.id} style={{ height: `${(t.n / total) * 100}%`, background: TIER_COLORS[t.id] ?? "#146455", opacity: b.today ? 0.75 : 1 }} />
                   ))}
+                  {free > 0 && <div style={{ height: `${(free / total) * 100}%`, background: GIFT_COLOR, opacity: b.today ? 0.8 : 1 }} />}
                 </div>
-                {free > 0 && (
-                  <span
-                    className={`pointer-events-none absolute left-1/2 flex -translate-x-1/2 items-center justify-center rounded-full font-bold leading-none text-white ${n <= 30 ? "h-4 min-w-4 px-0.5 text-[0.5rem]" : "h-2.5 w-2.5"}`}
-                    // Above the figure when the bar carries one (it is 20px tall with its gap), so the dot never covers the number.
-                    style={{ bottom: `calc(${b.tickets > 0 ? h : 100}% + ${peak || (n <= 20 && b.tickets > 0) ? 28 : 6}px)`, background: GIFT_COLOR }}
-                  >
-                    {n <= 30 ? free : null}
-                  </span>
-                )}
                 {taggedOf(b) > 0 && (
                   <span
                     className="pointer-events-none absolute left-1/2 h-2.5 w-2.5 -translate-x-1/2 translate-y-1/2 rounded-full border-2 bg-[#ACEC1D]"
@@ -245,7 +241,7 @@ export function SalesHistory({ history, launches }: { history: WeekDay[]; launch
         {(anyGift || anyFree) && (
           <span className="inline-flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full" style={{ background: GIFT_COLOR }} />
-            безплатни билети: не са в колоните
+            безплатни билети: не са в числото над колоната
           </span>
         )}
         <span className="inline-flex items-center gap-1.5">

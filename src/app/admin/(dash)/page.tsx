@@ -140,10 +140,11 @@ function Stat({
  * The hover keeps the full split per tier.
  */
 function WeekStrip({ week }: { week: WeekDay[] }) {
-  // A bar is the sales and nothing else - the same figure the pace and the
-  // forecast use. Free tickets are a violet dot over the day, outside the bar,
-  // so it is visible at a glance that they are not in the sum.
-  const max = week.reduce((m, d) => Math.max(m, d.tickets), 0);
+  // The figure over a bar is the sales - what the pace and the forecast use.
+  // Free tickets stand on top of the bar in their own neon colour (named in the
+  // legend), so they are seen but never read as sales.
+  const totalOf = (d: WeekDay) => d.tickets + d.gift + d.free;
+  const max = week.reduce((m, d) => Math.max(m, totalOf(d)), 0);
   const tiersSeen = week.flatMap((d) => d.byTier.map((t) => t.id));
   const anyGift = week.some((d) => d.gift > 0);
   const anyFree = week.some((d) => d.free > 0);
@@ -152,8 +153,9 @@ function WeekStrip({ week }: { week: WeekDay[] }) {
       <div className="mt-2 flex h-full min-h-44 w-full items-end gap-1.5 sm:gap-2.5">
         {week.map((d) => {
           const free = d.gift + d.free;
-          const h = max ? Math.max((d.tickets / max) * 100, 8) : 8;
-          const peak = max > 0 && d.tickets === max;
+          const total = totalOf(d);
+          const h = max ? Math.max((total / max) * 100, 8) : 8;
+          const peak = max > 0 && d.tickets > 0 && d.tickets === Math.max(...week.map((x) => x.tickets));
           const title = `${d.day} · ${d.tickets} билета · ${d.orders} поръчки · ${formatPrice(d.grossCents)} €${
             d.byTier.length ? `\n${d.byTier.map((t) => `${t.name} ${t.n} · ${formatPrice(t.grossCents)} €`).join("\n")}` : ""
           }${d.gift ? `\nбезплатни, gift: ${d.gift} (не са в сметката)` : ""}${d.free ? `\nбезплатни, други: ${d.free} (не са в сметката)` : ""}`;
@@ -169,7 +171,7 @@ function WeekStrip({ week }: { week: WeekDay[] }) {
               <div className="relative w-full min-h-0 flex-1">
                 <div className="absolute inset-x-0 bottom-0 top-14 flex justify-center">
                   <div className="relative flex h-full w-full max-w-[1.6rem] items-end">
-                    <div className="relative w-full" style={{ height: `${d.tickets > 0 ? h : 100}%` }}>
+                    <div className="relative w-full" style={{ height: `${total > 0 ? h : 100}%` }}>
                       <span
                         className={`absolute bottom-full left-1/2 mb-2 -translate-x-1/2 rounded-md px-1 py-0.5 text-[0.6rem] font-semibold ${
                           peak ? "bg-[#0b2a22] text-white" : d.tickets > 0 ? "text-[#0b2a22]" : "text-[#0b2a22]/30"
@@ -177,22 +179,14 @@ function WeekStrip({ week }: { week: WeekDay[] }) {
                       >
                         {d.tickets}
                       </span>
-                      {free > 0 && (
-                        <span
-                          className="absolute left-1/2 mb-[1.65rem] flex h-4 min-w-4 -translate-x-1/2 items-center justify-center rounded-full px-1 text-[0.55rem] font-bold leading-none text-white"
-                          style={{ bottom: "100%", background: GIFT_COLOR }}
-                          title={`${free} безплатни билета, не са в сметката`}
-                        >
-                          {free}
-                        </span>
-                      )}
                       <div
                         className="flex h-full w-full flex-col-reverse overflow-hidden rounded-full"
-                        style={{ background: d.tickets > 0 ? undefined : HATCH }}
+                        style={{ background: total > 0 ? undefined : HATCH }}
                       >
                         {d.byTier.map((t) => (
-                          <div key={t.id} style={{ height: `${(t.n / d.tickets) * 100}%`, background: TIER_COLORS[t.id] ?? GREEN, opacity: d.today ? 0.75 : 1 }} />
+                          <div key={t.id} style={{ height: `${(t.n / total) * 100}%`, background: TIER_COLORS[t.id] ?? GREEN, opacity: d.today ? 0.75 : 1 }} />
                         ))}
+                        {free > 0 && <div style={{ height: `${(free / total) * 100}%`, background: GIFT_COLOR, opacity: d.today ? 0.8 : 1 }} />}
                       </div>
                     </div>
                   </div>
@@ -216,7 +210,7 @@ function WeekStrip({ week }: { week: WeekDay[] }) {
         {(anyGift || anyFree) && (
           <span className="inline-flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full" style={{ background: GIFT_COLOR }} />
-            безплатни, над колоната: не са в сметката
+            безплатни билети, не са в числото и в сметката
           </span>
         )}
         <span className="ml-auto">под датата: оборот за деня в €</span>
