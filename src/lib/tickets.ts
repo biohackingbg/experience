@@ -32,12 +32,12 @@ export const ONE_DAY_TIERS = ["core"];
 export const picksDay = (tierId: string) => ONE_DAY_TIERS.includes(tierId);
 
 /**
- * Gift tickets: given away through a promo code with "gift" in it
- * (giftbla, juliagift ...). They are CORE tickets for both days, and the ticket says so
- * - on the page, at the door and on the badge list - so nobody has to look
- * the order up to know why a CORE ticket is not one-day.
+ * Gift tickets: every ticket on an order that cost nothing - a 100% code, or
+ * one the team issued for a speaker, a partner, a guest. The price is the only
+ * test, so there is no naming convention to get wrong ("giftbla", "peakpresent",
+ * "mariabio" are all gifts the moment the total is zero).
  */
-export const isGiftCode = (promoCode?: string | null): boolean => !!promoCode && /gift/i.test(promoCode);
+export const isGift = (totalCents: number): boolean => totalCents === 0;
 
 /**
  * The tier name as shown on a ticket: "CORE", or for a gift "CORE GIFT" with
@@ -45,9 +45,9 @@ export const isGiftCode = (promoCode?: string | null): boolean => !!promoCode &&
  * The label follows the ticket's real day, never the code's name: a gift ticket
  * the holder picked Saturday for must not read as a two-day one at the door.
  */
-export function ticketTierLabel(tierId: string, promoCode?: string | null, lang: "bg" | "en" = "bg", day?: number | null): string {
+export function ticketTierLabel(tierId: string, totalCents: number, lang: "bg" | "en" = "bg", day?: number | null): string {
   const name = getTier(tierId)?.name ?? tierId;
-  if (!isGiftCode(promoCode)) return name;
+  if (!isGift(totalCents)) return name;
   const when = day === 1 || day === 2 ? DAY_LABEL[day][lang] : lang === "en" ? "both days" : "двата дни";
   return `${name} GIFT, ${when}`;
 }

@@ -27,5 +27,5 @@ export const SALE = sql`${SOLD} and ${orders.totalCents} > 0`;
 /** The other half: sold, seated, and free. */
 export const COMPED = sql`${SOLD} and ${orders.totalCents} = 0`;
 
-/** A gift order: the promo code has "gift" in it (giftbla, juliagift ...). Free like the rest of COMPED, told apart on the dashboard. */
-export const GIFT = sql`${orders.promoCode} ilike '%gift%'`;
+/** A gift: every free order - a 100% code, or one the team issued. Same as COMPED; kept as its own name so the dashboard reads as it speaks. */
+export const GIFT = sql`${orders.totalCents} = 0`;

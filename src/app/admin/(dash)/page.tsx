@@ -9,7 +9,7 @@ import { getFinances } from "@/lib/finances";
 import { getNotice } from "@/lib/notice";
 import { getPricing } from "@/lib/pricing";
 import { getTrafficData } from "@/lib/site-views";
-import { formatPrice, isGiftCode } from "@/lib/tickets";
+import { formatPrice } from "@/lib/tickets";
 
 import { setTestOrder } from "./actions";
 import { SalesHistory } from "./SalesHistory";
@@ -502,14 +502,12 @@ export default async function AdminDashboard({
             <span className="text-4xl font-black tracking-tight">{d.ticketsComped}</span>
             <span className="text-sm text-[#0b2a22]/55">{d.ticketsComped === 1 ? "билет" : "билета"} · не се броят като продажби, заемат места</span>
           </div>
-          {d.ticketsGift > 0 && (
-            <p className="mt-2 flex items-center gap-2 text-sm text-[#0b2a22]/70">
-              <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ background: GIFT_COLOR }} />
-              <span>
-                от тях <span className="font-semibold" style={{ color: GIFT_TEXT }}>{d.ticketsGift} gift</span>, останалите са на лектори, партньори и екипа
-              </span>
-            </p>
-          )}
+          <p className="mt-2 flex items-center gap-2 text-sm text-[#0b2a22]/70">
+            <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ background: GIFT_COLOR }} />
+            <span>
+              всички са <span className="font-semibold" style={{ color: GIFT_TEXT }}>gift</span>: с код 100% или издадени от екипа
+            </span>
+          </p>
           {d.compedByTier.length > 0 && (
             <ul className="mt-3 flex flex-wrap gap-2">
               {d.compedByTier.map((t) => (
@@ -703,7 +701,6 @@ export default async function AdminDashboard({
               <span className="font-semibold" style={{ color: GIFT_TEXT }}>{d.giftToday} gift</span>
             </span>
           )}
-          {d.freeToday > 0 && <span>{d.freeToday} други безплатни</span>}
         </p>
         <p className="mt-1 text-xs text-[#0b2a22]/50">Платени и върнати поръчки. Незавършените са в „Недовършени поръчки“ по-горе и се намират през търсенето.</p>
         {d.recent.length === 0 ? (
@@ -766,7 +763,7 @@ export default async function AdminDashboard({
                           style={{ background: GIFT_COLOR }}
                           title="Безплатна поръчка: не е продажба"
                         >
-                          {isGiftCode(o.promoCode) ? "gift" : "безплатна"}
+                          gift
                         </span>
                       )}
                       {o.isTest && <span className="ml-1.5 rounded-full bg-[#d0a11a]/15 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide text-[#7a5c05]">тест</span>}
