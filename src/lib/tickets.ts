@@ -39,10 +39,17 @@ export const picksDay = (tierId: string) => ONE_DAY_TIERS.includes(tierId);
  */
 export const isGiftCode = (promoCode?: string | null): boolean => !!promoCode && /gift/i.test(promoCode);
 
-/** The tier name as shown on a ticket: "CORE", or "CORE GIFT, двата дни" for a gift. */
-export function ticketTierLabel(tierId: string, promoCode?: string | null, lang: "bg" | "en" = "bg"): string {
+/**
+ * The tier name as shown on a ticket: "CORE", or for a gift "CORE GIFT" with
+ * what it admits - both days when no day is stored, otherwise the day it is for.
+ * The label follows the ticket's real day, never the code's name: a gift ticket
+ * the holder picked Saturday for must not read as a two-day one at the door.
+ */
+export function ticketTierLabel(tierId: string, promoCode?: string | null, lang: "bg" | "en" = "bg", day?: number | null): string {
   const name = getTier(tierId)?.name ?? tierId;
-  return isGiftCode(promoCode) ? `${name} GIFT, ${lang === "en" ? "both days" : "двата дни"}` : name;
+  if (!isGiftCode(promoCode)) return name;
+  const when = day === 1 || day === 2 ? DAY_LABEL[day][lang] : lang === "en" ? "both days" : "двата дни";
+  return `${name} GIFT, ${when}`;
 }
 
 /** 1 = Saturday, 2 = Sunday - the shape stored on the order and the ticket. */

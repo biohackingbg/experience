@@ -58,7 +58,7 @@ export async function findTicket(code: string): Promise<TicketView | null> {
 
   const { promoCode, ...rest } = row;
   const lang = row.lang === "en" ? "en" : "bg";
-  return { ...rest, lang, tierName: ticketTierLabel(row.tierId, promoCode, lang) };
+  return { ...rest, lang, tierName: ticketTierLabel(row.tierId, promoCode, lang, row.day) };
 }
 
 /**
@@ -155,7 +155,7 @@ export async function listAttendees(): Promise<AttendeeRow[]> {
       name: r.attendeeName ?? r.buyerName,
       named: !!r.attendeeName,
       day: r.day,
-      tierName: ticketTierLabel(r.tierId, r.promoCode),
+      tierName: ticketTierLabel(r.tierId, r.promoCode, "bg", r.day),
       reference: r.reference,
       buyerName: r.buyerName,
       email: r.email,
@@ -213,6 +213,7 @@ export async function getDoorStats(): Promise<{
         attendeeName: tickets.attendeeName,
         buyerName: orders.name,
         promoCode: orders.promoCode,
+        day: tickets.day,
         at: tickets.checkedInAt,
       })
       .from(tickets)
@@ -229,7 +230,7 @@ export async function getDoorStats(): Promise<{
     saturday: row?.saturday ?? 0,
     sunday: row?.sunday ?? 0,
     recent: recentRows.flatMap((r) =>
-      r.at ? [{ code: r.code, name: r.attendeeName ?? r.buyerName, tierName: ticketTierLabel(r.tierId, r.promoCode), at: r.at }] : [],
+      r.at ? [{ code: r.code, name: r.attendeeName ?? r.buyerName, tierName: ticketTierLabel(r.tierId, r.promoCode, "bg", r.day), at: r.at }] : [],
     ),
   };
 }
@@ -271,6 +272,6 @@ export async function searchTickets(q: string): Promise<(TicketView & { email: s
     .limit(30);
   return rows.map(({ promoCode, ...r }) => {
     const lang = r.lang === "en" ? ("en" as const) : ("bg" as const);
-    return { ...r, lang, tierName: ticketTierLabel(r.tierId, promoCode, lang) };
+    return { ...r, lang, tierName: ticketTierLabel(r.tierId, promoCode, lang, r.day) };
   });
 }
