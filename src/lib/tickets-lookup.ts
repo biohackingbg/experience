@@ -5,7 +5,7 @@ import { sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { orderItems, orders, tickets } from "@/lib/db/schema";
 import { SOLD } from "@/lib/sold";
-import { getTier } from "@/lib/tickets";
+import { ticketTierLabel } from "@/lib/tickets";
 
 export type TicketView = {
   code: string;
@@ -47,6 +47,7 @@ export async function findTicket(code: string): Promise<TicketView | null> {
       buyerName: orders.name,
       reference: orders.reference,
       lang: orders.lang,
+      promoCode: orders.promoCode,
     })
     .from(tickets)
     .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
@@ -55,11 +56,9 @@ export async function findTicket(code: string): Promise<TicketView | null> {
 
   if (!row) return null;
 
-  return {
-    ...row,
-    lang: row.lang === "en" ? "en" : "bg",
-    tierName: getTier(row.tierId)?.name ?? row.tierId,
-  };
+  const { promoCode, ...rest } = row;
+  const lang = row.lang === "en" ? "en" : "bg";
+  return { ...rest, lang, tierName: ticketTierLabel(row.tierId, promoCode, lang) };
 }
 
 /**
@@ -145,6 +144,7 @@ export async function listAttendees(): Promise<AttendeeRow[]> {
       reference: orders.reference,
       email: orders.email,
       company: orders.invoiceCompany,
+      promoCode: orders.promoCode,
     })
     .from(tickets)
     .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
@@ -155,7 +155,7 @@ export async function listAttendees(): Promise<AttendeeRow[]> {
       name: r.attendeeName ?? r.buyerName,
       named: !!r.attendeeName,
       day: r.day,
-      tierName: getTier(r.tierId)?.name ?? r.tierId,
+      tierName: ticketTierLabel(r.tierId, r.promoCode),
       reference: r.reference,
       buyerName: r.buyerName,
       email: r.email,
@@ -212,6 +212,7 @@ export async function getDoorStats(): Promise<{
         tierId: tickets.tierId,
         attendeeName: tickets.attendeeName,
         buyerName: orders.name,
+        promoCode: orders.promoCode,
         at: tickets.checkedInAt,
       })
       .from(tickets)
@@ -228,7 +229,7 @@ export async function getDoorStats(): Promise<{
     saturday: row?.saturday ?? 0,
     sunday: row?.sunday ?? 0,
     recent: recentRows.flatMap((r) =>
-      r.at ? [{ code: r.code, name: r.attendeeName ?? r.buyerName, tierName: getTier(r.tierId)?.name ?? r.tierId, at: r.at }] : [],
+      r.at ? [{ code: r.code, name: r.attendeeName ?? r.buyerName, tierName: ticketTierLabel(r.tierId, r.promoCode), at: r.at }] : [],
     ),
   };
 }
@@ -255,6 +256,7 @@ export async function searchTickets(q: string): Promise<(TicketView & { email: s
       reference: orders.reference,
       email: orders.email,
       lang: orders.lang,
+      promoCode: orders.promoCode,
     })
     .from(tickets)
     .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
@@ -267,5 +269,8 @@ export async function searchTickets(q: string): Promise<(TicketView & { email: s
     )
     .orderBy(orders.name, tickets.code)
     .limit(30);
-  return rows.map((r) => ({ ...r, lang: r.lang === "en" ? ("en" as const) : ("bg" as const), tierName: getTier(r.tierId)?.name ?? r.tierId }));
+  return rows.map(({ promoCode, ...r }) => {
+    const lang = r.lang === "en" ? ("en" as const) : ("bg" as const);
+    return { ...r, lang, tierName: ticketTierLabel(r.tierId, promoCode, lang) };
+  });
 }
