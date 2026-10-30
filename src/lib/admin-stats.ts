@@ -69,6 +69,9 @@ export type WeekDay = {
   label: string;
   orders: number;
   tickets: number;
+  /** Free tickets that day: gift-code ones, and every other kind - drawn on top of the sales, never counted in them. */
+  gift: number;
+  free: number;
   /** Tickets and money of each tier that day, in tier order, only the ones sold. */
   byTier: { id: TierId; name: string; n: number; grossCents: number }[];
   grossCents: number;
@@ -434,6 +437,19 @@ export async function getDashboardData(page = 1): Promise<DashboardData> {
   ]);
   const giftByTier = new Map(giftRows.map((r) => [r.tierId, r.count]));
 
+  // Free tickets per day, for the bar charts: a day that was mostly gifts must
+  // not look like a quiet one, nor like a good one.
+  const freeDayRows = await db
+    .select({
+      day: sql<string>`to_char(${orders.paidAt} at time zone 'Europe/Sofia', 'YYYY-MM-DD')`,
+      gift: sql<number>`count(*) filter (where ${GIFT})::int`,
+      other: sql<number>`count(*) filter (where not ${GIFT})::int`,
+    })
+    .from(tickets)
+    .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
+    .where(sql`${COMPED} and ${orders.paidAt} is not null`)
+    .groupBy(sql`to_char(${orders.paidAt} at time zone 'Europe/Sofia', 'YYYY-MM-DD')`);
+
   const soldByTier = new Map(perTierRows.map((r) => [r.tierId, r]));
   const daysByTier = new Map(daySplitRows.map((r) => [r.tierId, r]));
 
@@ -465,6 +481,8 @@ export async function getDashboardData(page = 1): Promise<DashboardData> {
       label: String(Number(day.slice(-2))),
       orders: row?.count ?? 0,
       tickets: row?.tickets ?? 0,
+      gift: freeDayRows.find((r) => r.day === day)?.gift ?? 0,
+      free: freeDayRows.find((r) => r.day === day)?.other ?? 0,
       byTier: TIERS.map((t) => {
         const r = dayTierRows.find((x) => x.day === day && x.tierId === t.id);
         return { id: t.id, name: t.name, n: r?.n ?? 0, grossCents: r?.gross ?? 0 };
