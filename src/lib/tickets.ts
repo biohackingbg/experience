@@ -32,12 +32,12 @@ export const ONE_DAY_TIERS = ["core"];
 export const picksDay = (tierId: string) => ONE_DAY_TIERS.includes(tierId);
 
 /**
- * Gift tickets: given away through a promo code that starts with "gift"
- * (giftbla ...). They are CORE tickets for both days, and the ticket says so
+ * Gift tickets: given away through a promo code with "gift" in it
+ * (giftbla, juliagift ...). They are CORE tickets for both days, and the ticket says so
  * - on the page, at the door and on the badge list - so nobody has to look
  * the order up to know why a CORE ticket is not one-day.
  */
-export const isGiftCode = (promoCode?: string | null): boolean => !!promoCode && /^gift/i.test(promoCode.trim());
+export const isGiftCode = (promoCode?: string | null): boolean => !!promoCode && /gift/i.test(promoCode);
 
 /** The tier name as shown on a ticket: "CORE", or "CORE GIFT, двата дни" for a gift. */
 export function ticketTierLabel(tierId: string, promoCode?: string | null, lang: "bg" | "en" = "bg"): string {
