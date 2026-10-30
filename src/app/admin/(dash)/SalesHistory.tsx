@@ -5,7 +5,7 @@ import { useState } from "react";
 import type { Launch, WeekDay } from "@/lib/admin-stats";
 import { formatPrice } from "@/lib/tickets";
 
-import { GIFT_COLOR, TIER_COLORS } from "./TierBars";
+import { TIER_COLORS } from "./TierBars";
 
 /**
  * Sales against marketing, on one timeline.
@@ -109,13 +109,8 @@ export function SalesHistory({ history, launches }: { history: WeekDay[]; launch
   const days = Number.isFinite(r.days) ? history.slice(-r.days) : history;
   const weekly = days.length > 100;
   const bars = toBars(days, launches, weekly);
-  // The figure over a bar is the sales; free tickets stand on top of it in their
-  // own neon colour (named in the legend) and are never part of that figure.
-  const totalOf = (b: Bar) => b.tickets + b.gift + b.free;
-  const max = bars.reduce((m, b) => Math.max(m, totalOf(b)), 0);
-  const maxSales = bars.reduce((m, b) => Math.max(m, b.tickets), 0);
-  const anyGift = bars.some((b) => b.gift > 0);
-  const anyFree = bars.some((b) => b.free > 0);
+  // A bar is the sales; free tickets are not drawn, hovering a day lists them.
+  const max = bars.reduce((m, b) => Math.max(m, b.tickets), 0);
   const tickets = bars.reduce((a, b) => a + b.tickets, 0);
   const gross = bars.reduce((a, b) => a + b.grossCents, 0);
   const tagged = bars.reduce((a, b) => a + taggedOf(b), 0);
@@ -157,10 +152,9 @@ export function SalesHistory({ history, launches }: { history: WeekDay[]; launch
       <div className="relative mt-6 h-48">
         <div className="absolute inset-0 flex items-end gap-[3px] sm:gap-1.5">
           {bars.map((b) => {
-            const free = b.gift + b.free;
-            const total = totalOf(b);
+            const total = b.tickets;
             const h = total > 0 ? Math.max(pct(total), 4) : 0;
-            const peak = maxSales > 0 && b.tickets === maxSales;
+            const peak = max > 0 && b.tickets === max;
             const title = [
               `${b.sub} · ${b.tickets} билета · ${b.orders} поръчки · ${formatPrice(b.grossCents)} €`,
               ...b.byTier.map((t) => `${t.name} ${t.n} · ${formatPrice(t.grossCents)} €`),
@@ -186,7 +180,6 @@ export function SalesHistory({ history, launches }: { history: WeekDay[]; launch
                   {b.byTier.map((t) => (
                     <div key={t.id} style={{ height: `${(t.n / total) * 100}%`, background: TIER_COLORS[t.id] ?? "#146455", opacity: b.today ? 0.75 : 1 }} />
                   ))}
-                  {free > 0 && <div style={{ height: `${(free / total) * 100}%`, background: GIFT_COLOR, opacity: b.today ? 0.8 : 1 }} />}
                 </div>
                 {taggedOf(b) > 0 && (
                   <span
@@ -238,12 +231,6 @@ export function SalesHistory({ history, launches }: { history: WeekDay[]; launch
               {id.toUpperCase()}
             </span>
           ))}
-        {(anyGift || anyFree) && (
-          <span className="inline-flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full" style={{ background: GIFT_COLOR }} />
-            безплатни билети: не са в числото над колоната
-          </span>
-        )}
         <span className="inline-flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-full border-2 bg-[#ACEC1D]" style={{ borderColor: LINE }} />
           продажби по линк с код
