@@ -6,7 +6,7 @@ import { getDb } from "@/lib/db";
 import { genderSplit } from "@/lib/gender";
 import { campaigns, orderItems, orders, signups, tickets } from "@/lib/db/schema";
 import { PENDING_HOLD_MINUTES } from "@/lib/orders";
-import { COMPED, KEPT_CENTS, SALE, SOLD } from "@/lib/sold";
+import { COMPED, GIFT, KEPT_CENTS, SALE, SOLD } from "@/lib/sold";
 import { sofiaDaysBack } from "@/lib/sofia-days";
 import { TIERS, VAT_RATE, type TierId, picksDay } from "@/lib/tickets";
 
@@ -24,6 +24,8 @@ export type TierSales = {
   sold: number;
   capacity: number;
   grossCents: number;
+  /** Gift tickets of this tier (a gift promo code): seated like a sale, but not one. */
+  gift: number;
   /**
    * For the tiers that admit one day: how the tickets split between the two.
    * `unset` are the ones sold or issued before the choice existed - they
@@ -112,6 +114,11 @@ export type DashboardData = {
   /** Issued at no charge - speakers, partners, the team. Seated, not sold. */
   ticketsComped: number;
   compedByTier: { id: TierId; name: string; count: number }[];
+  /** Of the free tickets, those given through a gift code - drawn in their own colour. */
+  ticketsGift: number;
+  /** Free tickets that landed today (Sofia day): gift codes, and every other kind. */
+  giftToday: number;
+  freeToday: number;
   capacityTotal: number;
   /** Paid tickets in the last seven days - the pace the room is filling at. */
   soldLast7Days: number;
@@ -395,6 +402,25 @@ export async function getDashboardData(): Promise<DashboardData> {
     itemsByOrder.set(item.orderId, list);
   }
 
+  // Gift tickets, per tier and today. Their own queries: the free total above
+  // lumps speakers, partners and gifts together, and a gift is the one kind the
+  // team wants to tell apart from a sale at a glance.
+  const todaySofia = sql`(${orders.paidAt} at time zone 'Europe/Sofia')::date = (now() at time zone 'Europe/Sofia')::date`;
+  const [giftRows, freeTodayRows] = await Promise.all([
+    db
+      .select({ tierId: tickets.tierId, count: sql<number>`count(*)::int`, today: sql<number>`count(*) filter (where ${todaySofia})::int` })
+      .from(tickets)
+      .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
+      .where(sql`${COMPED} and ${GIFT}`)
+      .groupBy(tickets.tierId),
+    db
+      .select({ n: sql<number>`count(*)::int` })
+      .from(tickets)
+      .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
+      .where(sql`${COMPED} and not ${GIFT} and ${todaySofia}`),
+  ]);
+  const giftByTier = new Map(giftRows.map((r) => [r.tierId, r.count]));
+
   const soldByTier = new Map(perTierRows.map((r) => [r.tierId, r]));
   const daysByTier = new Map(daySplitRows.map((r) => [r.tierId, r]));
 
@@ -404,6 +430,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     capacity: tier.capacity,
     sold: soldByTier.get(tier.id)?.sold ?? 0,
     grossCents: soldByTier.get(tier.id)?.gross ?? 0,
+    gift: giftByTier.get(tier.id) ?? 0,
     days: picksDay(tier.id)
       ? {
           saturday: daysByTier.get(tier.id)?.saturday ?? 0,
@@ -480,6 +507,9 @@ export async function getDashboardData(): Promise<DashboardData> {
     ticketsSold: perTier.reduce((sum, t) => sum + t.sold, 0),
     ticketsComped: compedRows.reduce((sum, r) => sum + r.count, 0),
     compedByTier: TIERS.map((tier) => ({ id: tier.id, name: tier.name, count: compedRows.find((r) => r.tierId === tier.id)?.count ?? 0 })).filter((t) => t.count > 0),
+    ticketsGift: giftRows.reduce((sum, r) => sum + r.count, 0),
+    giftToday: giftRows.reduce((sum, r) => sum + r.today, 0),
+    freeToday: freeTodayRows[0]?.n ?? 0,
     capacityTotal: TIERS.reduce((sum, t) => sum + t.capacity, 0),
     soldLast7Days: last7Row[0]?.n ?? 0,
     soldToday: dayRow[0]?.today ?? 0,

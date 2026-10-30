@@ -9,7 +9,7 @@ import { getFinances } from "@/lib/finances";
 import { getNotice } from "@/lib/notice";
 import { getPricing } from "@/lib/pricing";
 import { getTrafficData } from "@/lib/site-views";
-import { formatPrice } from "@/lib/tickets";
+import { formatPrice, isGiftCode } from "@/lib/tickets";
 
 import { setTestOrder } from "./actions";
 import { SalesHistory } from "./SalesHistory";
@@ -17,7 +17,7 @@ import { ResendForm } from "./fakturi/ResendForm";
 import { PriceStages } from "./PriceStages";
 import { SiteNoticeCard } from "./SiteNoticeCard";
 import { ReminderForm } from "./ReminderForm";
-import { TIER_COLORS, TierBars } from "./TierBars";
+import { GIFT_COLOR, TIER_COLORS, TierBars } from "./TierBars";
 import { WhenChart } from "./WhenChart";
 
 export const metadata: Metadata = {
@@ -497,6 +497,14 @@ export default async function AdminDashboard({
             <span className="text-4xl font-black tracking-tight">{d.ticketsComped}</span>
             <span className="text-sm text-[#0b2a22]/55">{d.ticketsComped === 1 ? "билет" : "билета"} · не се броят като продажби, заемат места</span>
           </div>
+          {d.ticketsGift > 0 && (
+            <p className="mt-2 flex items-center gap-2 text-sm text-[#0b2a22]/70">
+              <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ background: GIFT_COLOR }} />
+              <span>
+                от тях <span className="font-semibold" style={{ color: GIFT_COLOR }}>{d.ticketsGift} gift</span>, останалите са на лектори, партньори и екипа
+              </span>
+            </p>
+          )}
           {d.compedByTier.length > 0 && (
             <ul className="mt-3 flex flex-wrap gap-2">
               {d.compedByTier.map((t) => (
@@ -680,6 +688,18 @@ export default async function AdminDashboard({
 
       <section id="porachki" className="mt-4 rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6">
         <h2 className="text-lg font-bold tracking-tight">Последни продажби</h2>
+        <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[#0b2a22]/75">
+          <span>
+            Днес: <span className="font-semibold text-[#0b2a22]">{d.soldToday}</span> продадени
+          </span>
+          {d.giftToday > 0 && (
+            <span className="inline-flex items-center gap-1.5">
+              <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ background: GIFT_COLOR }} />
+              <span className="font-semibold" style={{ color: GIFT_COLOR }}>{d.giftToday} gift</span>
+            </span>
+          )}
+          {d.freeToday > 0 && <span>{d.freeToday} други безплатни</span>}
+        </p>
         <p className="mt-1 text-xs text-[#0b2a22]/50">Платени и върнати поръчки. Незавършените са в „Недовършени поръчки“ по-горе и се намират през търсенето.</p>
         {d.recent.length === 0 ? (
           <p className="mt-4 py-6 text-center text-sm text-[#0b2a22]/55">Още няма поръчки. Тук ще се появят веднага щом продажбите тръгнат.</p>
@@ -699,7 +719,11 @@ export default async function AdminDashboard({
               </thead>
               <tbody>
                 {d.recent.map((o) => (
-                  <tr key={o.reference} className={`border-b border-[#0b2a22]/6 last:border-0 ${o.isTest ? "opacity-50" : ""}`}>
+                  <tr
+                    key={o.reference}
+                    className={`border-b border-[#0b2a22]/6 last:border-0 ${o.isTest ? "opacity-50" : ""}`}
+                    style={o.status === "paid" && o.totalCents === 0 ? { background: `${GIFT_COLOR}0F`, boxShadow: `inset 3px 0 0 ${GIFT_COLOR}` } : undefined}
+                  >
                     <td className="px-4 py-3 font-mono text-xs text-[#0b2a22]/70">
                       {o.reference}
                       {o.status === "paid" && (
@@ -730,6 +754,15 @@ export default async function AdminDashboard({
                     <td className="px-4 py-3 text-[#0b2a22]/75">{o.items}</td>
                     <td className="px-4 py-3">
                       <StatusChip status={o.status} />
+                      {o.status === "paid" && o.totalCents === 0 && (
+                        <span
+                          className="ml-1.5 rounded-full px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide text-white"
+                          style={{ background: GIFT_COLOR }}
+                          title="Безплатна поръчка: не е продажба"
+                        >
+                          {isGiftCode(o.promoCode) ? "gift" : "безплатна"}
+                        </span>
+                      )}
                       {o.isTest && <span className="ml-1.5 rounded-full bg-[#d0a11a]/15 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide text-[#7a5c05]">тест</span>}
                       {/* Whether Analytics can tie this sale to a session, and so
                           to the advert. Without it the sale is revenue with no

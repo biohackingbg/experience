@@ -17,18 +17,35 @@ export const TIER_COLORS: Record<string, string> = {
   peak: "#C4607F",
 };
 
+/** The third colour: gift tickets. Apart from the three tier hues, so a gift never reads as a sale of any tier. */
+export const GIFT_COLOR = "#7B5CD6";
+
 export function TierBars({ tiers }: { tiers: TierSales[] }) {
   const anySold = tiers.some((t) => t.sold > 0);
 
   return (
     <section id="niva" className="rounded-3xl bg-bh-cloud p-6 ring-1 ring-bh-ink/6">
       <h2 className="text-lg font-bold tracking-tight text-bh-ink">По нива</h2>
-      <p className="mt-1 text-sm text-bh-ink/55">Продадени срещу капацитет.</p>
+      <p className="mt-1 text-sm text-bh-ink/55">
+        Продадени срещу капацитет.
+        {tiers.some((t) => t.gift > 0) && (
+          <>
+            {" "}
+            <span className="inline-flex items-center gap-1.5">
+              <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: GIFT_COLOR }} />
+              gift, безплатни, не са продажби
+            </span>
+          </>
+        )}
+      </p>
 
       <div className="mt-5 flex flex-col gap-5">
         {tiers.map((tier) => {
           const pct = tier.capacity
             ? Math.min(100, (tier.sold / tier.capacity) * 100)
+            : 0;
+          const giftPct = tier.capacity
+            ? Math.min(100 - pct, (tier.gift / tier.capacity) * 100)
             : 0;
 
           return (
@@ -46,6 +63,11 @@ export function TierBars({ tiers }: { tiers: TierSales[] }) {
                 </div>
                 <div className="text-sm text-bh-ink/70">
                   <span className="font-semibold text-bh-ink">{tier.sold}</span>
+                  {tier.gift > 0 && (
+                    <span className="font-semibold" style={{ color: GIFT_COLOR }}>
+                      {" "}+ {tier.gift} gift
+                    </span>
+                  )}
                   <span className="text-bh-ink/45"> / {tier.capacity}</span>
                   {tier.grossCents > 0 && (
                     <span className="ml-3 text-bh-ink/55">
@@ -55,9 +77,9 @@ export function TierBars({ tiers }: { tiers: TierSales[] }) {
                 </div>
               </div>
 
-              <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-bh-ink/8">
+              <div className="mt-2 flex h-2.5 w-full overflow-hidden rounded-full bg-bh-ink/8">
                 <div
-                  className="h-full rounded-full"
+                  className="h-full"
                   style={{
                     width: `${pct}%`,
                     background: TIER_COLORS[tier.id],
@@ -65,6 +87,12 @@ export function TierBars({ tiers }: { tiers: TierSales[] }) {
                     minWidth: tier.sold > 0 ? 6 : 0,
                   }}
                 />
+                {tier.gift > 0 && (
+                  <div
+                    className="h-full"
+                    style={{ width: `${giftPct}%`, background: GIFT_COLOR, minWidth: 6 }}
+                  />
+                )}
               </div>
 
               {/* A one-day ticket names its day, so this is where the two days
