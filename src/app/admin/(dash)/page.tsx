@@ -146,7 +146,7 @@ function WeekStrip({ week }: { week: WeekDay[] }) {
   const tiersSeen = week.flatMap((d) => d.byTier.map((t) => t.id));
   return (
     <div className="flex h-full w-full flex-col">
-      <div className="mt-2 flex h-full min-h-44 w-full items-end gap-1.5 sm:gap-2.5">
+      <div className="mt-2 flex h-full min-h-64 w-full items-end gap-1.5 sm:gap-2.5">
         {week.map((d) => {
           const total = d.tickets;
           const h = max ? Math.max((total / max) * 100, 8) : 8;
@@ -165,7 +165,7 @@ function WeekStrip({ week }: { week: WeekDay[] }) {
                   a strip free at the top for the number. */}
               <div className="relative w-full min-h-0 flex-1">
                 <div className="absolute inset-x-0 bottom-0 top-14 flex justify-center">
-                  <div className="relative flex h-full w-full max-w-[1.6rem] items-end">
+                  <div className="relative flex h-full w-full max-w-[0.9rem] items-end">
                     <div className="relative w-full" style={{ height: `${total > 0 ? h : 100}%` }}>
                       <span
                         className={`absolute bottom-full left-1/2 mb-2 -translate-x-1/2 rounded-md px-1 py-0.5 text-[0.6rem] font-semibold ${

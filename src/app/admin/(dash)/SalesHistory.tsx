@@ -149,7 +149,7 @@ export function SalesHistory({ history, launches }: { history: WeekDay[]; launch
 
       {/* The bar area: bars, their numbers, the tagged line and its dots all
           share this box, so one scale places them against each other. */}
-      <div className="relative mt-6 h-48">
+      <div className="relative mt-6 h-64">
         <div className="absolute inset-0 flex items-end gap-[3px] sm:gap-1.5">
           {bars.map((b) => {
             const total = b.tickets;
@@ -174,7 +174,7 @@ export function SalesHistory({ history, launches }: { history: WeekDay[]; launch
                   </span>
                 )}
                 <div
-                  className="flex w-full max-w-[1.6rem] flex-col-reverse overflow-hidden rounded-full"
+                  className="flex w-full max-w-[0.9rem] flex-col-reverse overflow-hidden rounded-full"
                   style={{ height: `${total > 0 ? h : 100}%`, background: total > 0 ? undefined : HATCH }}
                 >
                   {b.byTier.map((t) => (
