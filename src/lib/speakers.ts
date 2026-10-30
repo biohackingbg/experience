@@ -114,6 +114,19 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/sara-hagg.jpg",
   },
   {
+    // Hosts the opening panel on ageing; the card says what he does (social
+    // research), not the electoral polling the same agency is known for.
+    id: "kancho-stoychev",
+    announced: true,
+    name: "Кънчо Стойчев",
+    specialty: "Социология и пазарни изследвания",
+    role: "Главен изпълнителен директор",
+    affiliation: "TNS за Балканския полуостров",
+    country: "България",
+    topic: "Съосновател на BBSS „Галъп Интърнешънъл“",
+    photo: "/speakers/kancho-stoychev.jpg",
+  },
+  {
     // His seat in parliament is left off deliberately: the card exists to say
     // why he belongs on a medical stage, and naming a party on a page that
     // sells tickets reads as a political statement the event is not making.
