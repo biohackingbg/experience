@@ -17,8 +17,8 @@ import { GIFT_COLOR, TIER_COLORS } from "./TierBars";
  * bump after a flag can be read for what it is. The hover on a bar lists
  * the tiers, the tagged sales by campaign and the launches of that day.
  *
- * Ranges: 14 or 30 days by day; 90 days or everything by week - more than
- * ~40 bars stop reading as days. Client-side so a switch never reloads a
+ * Ranges: by day up to 100 days (so 90 days and the whole period so far show
+ * every day); only past that do the bars become weeks. Client-side so a switch never reloads a
  * page that queries the database.
  */
 
@@ -107,7 +107,7 @@ export function SalesHistory({ history, launches }: { history: WeekDay[]; launch
   const [range, setRange] = useState<RangeId>("30");
   const r = RANGES.find((x) => x.id === range)!;
   const days = Number.isFinite(r.days) ? history.slice(-r.days) : history;
-  const weekly = days.length > 40;
+  const weekly = days.length > 100;
   const bars = toBars(days, launches, weekly);
   // The figure over a bar is the sales; free tickets stand on top of it in their
   // own neon colour (named in the legend) and are never part of that figure.
