@@ -185,9 +185,12 @@ export function SalesHistory({ history, launches }: { history: WeekDay[]; launch
                 </div>
                 {free > 0 && (
                   <span
-                    className="pointer-events-none absolute left-1/2 h-2.5 w-2.5 -translate-x-1/2 rounded-full"
-                    style={{ bottom: `calc(${b.tickets > 0 ? h : 100}% + ${n <= 20 ? 22 : 6}px)`, background: GIFT_COLOR }}
-                  />
+                    className={`pointer-events-none absolute left-1/2 flex -translate-x-1/2 items-center justify-center rounded-full font-bold leading-none text-white ${n <= 30 ? "h-4 min-w-4 px-0.5 text-[0.5rem]" : "h-2.5 w-2.5"}`}
+                    // Above the figure when the bar carries one (it is 20px tall with its gap), so the dot never covers the number.
+                    style={{ bottom: `calc(${b.tickets > 0 ? h : 100}% + ${peak || (n <= 20 && b.tickets > 0) ? 28 : 6}px)`, background: GIFT_COLOR }}
+                  >
+                    {n <= 30 ? free : null}
+                  </span>
                 )}
                 {taggedOf(b) > 0 && (
                   <span

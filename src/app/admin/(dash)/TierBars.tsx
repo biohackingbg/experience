@@ -18,7 +18,7 @@ export const TIER_COLORS: Record<string, string> = {
 };
 
 /** The third colour: gift tickets. Apart from the three tier hues, so a gift never reads as a sale of any tier. */
-export const GIFT_COLOR = "#7B5CD6";
+export const GIFT_COLOR = "#B14BFF";
 
 export function TierBars({ tiers }: { tiers: TierSales[] }) {
   const anySold = tiers.some((t) => t.sold > 0);
