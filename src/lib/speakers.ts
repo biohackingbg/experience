@@ -322,7 +322,8 @@ export const SPEAKERS: Speaker[] = [
     photo: "/speakers/desislava-dimova.jpg",
   },
   {
-    announced: true,
+    // Not in the 29.10 programme - hidden, not deleted, in case he is back.
+    announced: false,
     id: "ivan-sigridov",
     title: "Д-р",
     name: "Иван Сигридов",
