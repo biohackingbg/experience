@@ -715,6 +715,17 @@ export default async function AdminDashboard({
                         <CompanyChip company={o.company} />
                       </div>
                       <div className="text-xs text-[#0b2a22]/55">{o.email}{o.phone ? ` · ${o.phone}` : ""}</div>
+                      {/* Which code the buyer used, and what it took off - so a free or cut-price order can be traced to its campaign. */}
+                      {o.promoCode && (
+                        <span className="mt-1 inline-block rounded-full bg-[#ACEC1D]/35 px-2 py-0.5 font-mono text-[0.65rem] font-semibold uppercase tracking-wide text-[#0b2a22]">
+                          код {o.promoCode}
+                          {o.discountCents > 0 && (
+                            <>
+                              , −<Money cents={o.discountCents} />
+                            </>
+                          )}
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-[#0b2a22]/75">{o.items}</td>
                     <td className="px-4 py-3">

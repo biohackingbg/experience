@@ -55,6 +55,9 @@ export type RecentOrder = {
   /** Set when the buyer asked for a company invoice - the accountant's flag. */
   company: string | null;
   phone: string | null;
+  /** The promo code the buyer entered, and what it took off - null for a full-price sale. */
+  promoCode: string | null;
+  discountCents: number;
   items: string;
 };
 
@@ -225,6 +228,8 @@ export async function getDashboardData(): Promise<DashboardData> {
           // advert that brought it. Shown per order, because when it broke
           // it broke silently, for a month, for every sale.
           gaSessionId: orders.gaSessionId,
+          promoCode: orders.promoCode,
+          discountCents: orders.discountCents,
         })
         .from(orders)
         // Sales only. An unfinished checkout is not an order the team can act
@@ -516,6 +521,8 @@ export async function getDashboardData(): Promise<DashboardData> {
       paidAt: o.paidAt,
       company: o.company,
       phone: o.phone,
+      promoCode: o.promoCode,
+      discountCents: o.discountCents,
       isTest: o.isTest,
       items: (itemsByOrder.get(o.id) ?? []).join(", "),
     })),
@@ -553,6 +560,8 @@ export async function searchOrders(q: string): Promise<FoundOrder[]> {
       phone: orders.phone,
       isTest: orders.isTest,
       gaSessionId: orders.gaSessionId,
+      promoCode: orders.promoCode,
+      discountCents: orders.discountCents,
     })
     .from(orders)
     .where(
@@ -590,6 +599,8 @@ export async function searchOrders(q: string): Promise<FoundOrder[]> {
     paidAt: o.paidAt,
     company: o.company,
     phone: o.phone,
+    promoCode: o.promoCode,
+    discountCents: o.discountCents,
     isTest: o.isTest,
     items: items.filter((i) => i.orderId === o.id).map((i) => `${i.quantity}× ${i.tierName}`).join(", "),
     tickets: tix
