@@ -109,8 +109,8 @@ export function SalesHistory({ history, launches }: { history: WeekDay[]; launch
   const days = Number.isFinite(r.days) ? history.slice(-r.days) : history;
   const weekly = days.length > 40;
   const bars = toBars(days, launches, weekly);
-  const totalOf = (b: Bar) => b.tickets + b.gift + b.free;
-  const max = bars.reduce((m, b) => Math.max(m, totalOf(b)), 0);
+  // Bars are sales only; free tickets are a violet dot over the day, outside the sum.
+  const max = bars.reduce((m, b) => Math.max(m, b.tickets), 0);
   const anyGift = bars.some((b) => b.gift > 0);
   const anyFree = bars.some((b) => b.free > 0);
   const tickets = bars.reduce((a, b) => a + b.tickets, 0);
@@ -154,14 +154,14 @@ export function SalesHistory({ history, launches }: { history: WeekDay[]; launch
       <div className="relative mt-6 h-48">
         <div className="absolute inset-0 flex items-end gap-[3px] sm:gap-1.5">
           {bars.map((b) => {
-            const total = totalOf(b);
-            const h = total > 0 ? Math.max(pct(total), 4) : 0;
-            const peak = max > 0 && b.tickets > 0 && b.tickets === max;
+            const free = b.gift + b.free;
+            const h = b.tickets > 0 ? Math.max(pct(b.tickets), 4) : 0;
+            const peak = max > 0 && b.tickets === max;
             const title = [
               `${b.sub} · ${b.tickets} билета · ${b.orders} поръчки · ${formatPrice(b.grossCents)} €`,
               ...b.byTier.map((t) => `${t.name} ${t.n} · ${formatPrice(t.grossCents)} €`),
-              ...(b.gift ? [`gift ${b.gift}`] : []),
-              ...(b.free ? [`други безплатни ${b.free}`] : []),
+              ...(b.gift ? [`безплатни, gift: ${b.gift} (не са в сметката)`] : []),
+              ...(b.free ? [`безплатни, други: ${b.free} (не са в сметката)`] : []),
               ...(b.tagged.length ? ["по линк с код:", ...b.tagged.map((t) => `  ${t.title ?? t.code}: ${t.n}`)] : []),
               ...(b.launches.length ? ["пуснато:", ...b.launches.map((l) => `  ${l.title}${l.spendCents ? ` · ${formatPrice(l.spendCents)} €` : ""}`)] : []),
             ].join("\n");
@@ -177,14 +177,18 @@ export function SalesHistory({ history, launches }: { history: WeekDay[]; launch
                 )}
                 <div
                   className="flex w-full max-w-[1.6rem] flex-col-reverse overflow-hidden rounded-full"
-                  style={{ height: `${total > 0 ? h : 100}%`, background: total > 0 ? undefined : HATCH }}
+                  style={{ height: `${b.tickets > 0 ? h : 100}%`, background: b.tickets > 0 ? undefined : HATCH }}
                 >
                   {b.byTier.map((t) => (
-                    <div key={t.id} style={{ height: `${(t.n / total) * 100}%`, background: TIER_COLORS[t.id] ?? "#146455", opacity: b.today ? 0.75 : 1 }} />
+                    <div key={t.id} style={{ height: `${(t.n / b.tickets) * 100}%`, background: TIER_COLORS[t.id] ?? "#146455", opacity: b.today ? 0.75 : 1 }} />
                   ))}
-                  {b.gift > 0 && <div style={{ height: `${(b.gift / total) * 100}%`, background: GIFT_COLOR, opacity: b.today ? 0.75 : 1 }} />}
-                  {b.free > 0 && <div style={{ height: `${(b.free / total) * 100}%`, background: GIFT_COLOR, opacity: b.today ? 0.4 : 0.5 }} />}
                 </div>
+                {free > 0 && (
+                  <span
+                    className="pointer-events-none absolute left-1/2 h-2.5 w-2.5 -translate-x-1/2 rounded-full"
+                    style={{ bottom: `calc(${b.tickets > 0 ? h : 100}% + ${n <= 20 ? 22 : 6}px)`, background: GIFT_COLOR }}
+                  />
+                )}
                 {taggedOf(b) > 0 && (
                   <span
                     className="pointer-events-none absolute left-1/2 h-2.5 w-2.5 -translate-x-1/2 translate-y-1/2 rounded-full border-2 bg-[#ACEC1D]"
@@ -235,16 +239,10 @@ export function SalesHistory({ history, launches }: { history: WeekDay[]; launch
               {id.toUpperCase()}
             </span>
           ))}
-        {anyGift && (
+        {(anyGift || anyFree) && (
           <span className="inline-flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full" style={{ background: GIFT_COLOR }} />
-            gift
-          </span>
-        )}
-        {anyFree && (
-          <span className="inline-flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full" style={{ background: GIFT_COLOR, opacity: 0.5 }} />
-            други безплатни
+            безплатни билети: не са в колоните
           </span>
         )}
         <span className="inline-flex items-center gap-1.5">
