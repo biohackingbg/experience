@@ -141,13 +141,21 @@ export type DashboardData = {
   /** Buyers by an estimate from the name - see lib/gender.ts. */
   buyers: { female: number; male: number; unknown: number };
   recent: RecentOrder[];
+  /** Which page of "Последни продажби" this is (1 = newest), how many rows a page holds, and how many sales there are in all. */
+  recentPage: number;
+  recentPageSize: number;
+  recentTotal: number;
 };
 
 /** Doors open on the first festival morning. */
 const EVENT_DAY = new Date("2026-11-07T09:00:00+02:00");
 
-export async function getDashboardData(): Promise<DashboardData> {
+/** Rows on one page of the sales list. */
+export const RECENT_PAGE_SIZE = 25;
+
+export async function getDashboardData(page = 1): Promise<DashboardData> {
   const db = getDb();
+  const recentPage = Math.max(1, Math.floor(page) || 1);
   // Read once here, on the server, rather than in the page's render - React
   // treats a clock read during render as impure, and it is right to.
   const daysToEvent = Math.max(1, Math.ceil((EVENT_DAY.getTime() - Date.now()) / 86_400_000));
@@ -243,7 +251,8 @@ export async function getDashboardData(): Promise<DashboardData> {
         // on here; it has its own card, and mixed in it read as a sale.
         .where(sql`${orders.status} in ('paid', 'refunded')`)
         .orderBy(desc(orders.createdAt))
-        .limit(25),
+        .limit(RECENT_PAGE_SIZE)
+        .offset((recentPage - 1) * RECENT_PAGE_SIZE),
 
       db.select({ n: sql<number>`count(*) filter (where ${signups.unsubscribedAt} is null)::int`, week: sql<number>`count(*) filter (where ${signups.unsubscribedAt} is null and ${signups.createdAt} > now() - interval '7 days')::int` }).from(signups),
 
@@ -406,7 +415,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   // lumps speakers, partners and gifts together, and a gift is the one kind the
   // team wants to tell apart from a sale at a glance.
   const todaySofia = sql`(${orders.paidAt} at time zone 'Europe/Sofia')::date = (now() at time zone 'Europe/Sofia')::date`;
-  const [giftRows, freeTodayRows] = await Promise.all([
+  const [giftRows, freeTodayRows, [recentTotalRow]] = await Promise.all([
     db
       .select({ tierId: tickets.tierId, count: sql<number>`count(*)::int`, today: sql<number>`count(*) filter (where ${todaySofia})::int` })
       .from(tickets)
@@ -418,6 +427,10 @@ export async function getDashboardData(): Promise<DashboardData> {
       .from(tickets)
       .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
       .where(sql`${COMPED} and not ${GIFT} and ${todaySofia}`),
+    db
+      .select({ n: sql<number>`count(*)::int` })
+      .from(orders)
+      .where(sql`${orders.status} in ('paid', 'refunded')`),
   ]);
   const giftByTier = new Map(giftRows.map((r) => [r.tierId, r.count]));
 
@@ -507,6 +520,9 @@ export async function getDashboardData(): Promise<DashboardData> {
     ticketsSold: perTier.reduce((sum, t) => sum + t.sold, 0),
     ticketsComped: compedRows.reduce((sum, r) => sum + r.count, 0),
     compedByTier: TIERS.map((tier) => ({ id: tier.id, name: tier.name, count: compedRows.find((r) => r.tierId === tier.id)?.count ?? 0 })).filter((t) => t.count > 0),
+    recentPage,
+    recentPageSize: RECENT_PAGE_SIZE,
+    recentTotal: recentTotalRow?.n ?? 0,
     ticketsGift: giftRows.reduce((sum, r) => sum + r.count, 0),
     giftToday: giftRows.reduce((sum, r) => sum + r.today, 0),
     freeToday: freeTodayRows[0]?.n ?? 0,

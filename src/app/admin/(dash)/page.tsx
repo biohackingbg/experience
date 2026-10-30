@@ -247,15 +247,16 @@ function Gauge({ pct }: { pct: number }) {
 export default async function AdminDashboard({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; page?: string }>;
 }) {
   // The layout also checks, but a layout is not an auth boundary - the
   // Next docs are explicit that it may be skipped on RSC navigations.
   await requireAccess("tablo");
 
-  const { q = "" } = await searchParams;
+  const { q = "", page: pageParam } = await searchParams;
+  const page = Math.max(1, Number.parseInt(pageParam ?? "1", 10) || 1);
   const [d, traffic, found, fin, pricing, abandoned, pendingNow, notice, reminders] = await Promise.all([
-    getDashboardData(),
+    getDashboardData(page),
     getTrafficData(30),
     searchOrders(q),
     getFinances(),
@@ -785,6 +786,29 @@ export default async function AdminDashboard({
               </tbody>
             </table>
           </div>
+        )}
+
+        {/* The list was cut at the newest 25; older sales are a page away. */}
+        {d.recentTotal > d.recentPageSize && (
+          <nav className="mt-4 flex items-center justify-between gap-4 text-sm" aria-label="Страници на продажбите">
+            {d.recentPage > 1 ? (
+              <Link href={`/admin?page=${d.recentPage - 1}#porachki`} className="rounded-full border border-[#0b2a22]/20 px-4 py-2 font-semibold text-[#0b2a22] hover:border-[#0b2a22]">
+                ← По-нови
+              </Link>
+            ) : (
+              <span />
+            )}
+            <span className="text-xs text-[#0b2a22]/55">
+              Страница {d.recentPage} от {Math.ceil(d.recentTotal / d.recentPageSize)}, общо {d.recentTotal} поръчки
+            </span>
+            {d.recentPage * d.recentPageSize < d.recentTotal ? (
+              <Link href={`/admin?page=${d.recentPage + 1}#porachki`} className="rounded-full border border-[#0b2a22]/20 px-4 py-2 font-semibold text-[#0b2a22] hover:border-[#0b2a22]">
+                По-стари →
+              </Link>
+            ) : (
+              <span />
+            )}
+          </nav>
         )}
       </section>
     </div>
