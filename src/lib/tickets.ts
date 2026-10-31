@@ -163,7 +163,6 @@ export const TIERS: Tier[] = [
     earlyPriceCents: 8900,
     listPriceCents: 12900,
     capacity: 300,
-    publicCapacity: 250,
     featured: true,
     features: [
       "И двата дни",
