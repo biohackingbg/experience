@@ -5,7 +5,7 @@ import { desc, eq, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { orderItems, orders, promoCodes } from "@/lib/db/schema";
 import { PENDING_HOLD_MINUTES } from "@/lib/orders-const";
-import { SALE } from "@/lib/sold";
+import { SOLD } from "@/lib/sold";
 import { TIERS } from "@/lib/tickets";
 
 /**
@@ -130,7 +130,11 @@ export type PromoRow = {
 
 export async function listPromos(): Promise<PromoRow[]> {
   const db = getDb();
-  const paidWithCode = sql`${orders.promoCode} is not null and ${SALE}`;
+  // SOLD, not SALE: a 100% code makes an order that cost nothing, and SALE
+  // (money changed hands) skipped every one of them - so a free code always read
+  // "0 uses" here while the checkout, which counts paid orders, had already run
+  // it down to its limit.
+  const paidWithCode = sql`${orders.promoCode} is not null and ${SOLD}`;
   const [codes, usageRows, ticketRows] = await Promise.all([
     db.select().from(promoCodes).orderBy(desc(promoCodes.createdAt)),
     db
