@@ -7,6 +7,7 @@ import { CHECKOUT, type Lang } from "@/lib/i18n";
 import { allowsAnalytics, consentPending, consentSnapshot, subscribeToConsent } from "@/lib/consent-browser";
 import { trackGaEvent } from "@/lib/ga-browser";
 import { trackMetaEvent } from "@/lib/meta-browser";
+import { suggestEmail } from "@/lib/email-typos";
 import { PURCHASE_TERMS_TEXT, PURCHASE_TERMS_TEXT_EN } from "@/lib/purchase-terms";
 import { TIERS, formatPrice, picksDay, splitVat } from "@/lib/tickets";
 import { type PromoPreview, checkPromo, startCheckout } from "./actions";
@@ -70,6 +71,10 @@ export function CheckoutForm({
     initialCheckoutState,
   );
   const t = CHECKOUT[lang];
+  // A typo in the address means the ticket mail bounces - which is how three buyers
+  // paid and got nothing. Offered a correction, never forced.
+  const emailRef = useRef<HTMLInputElement>(null);
+  const [emailHint, setEmailHint] = useState<string | null>(null);
 
   // Stripe's checkout lives on another origin, so the jump has to happen here
   // rather than as a server redirect.
@@ -282,7 +287,26 @@ export function CheckoutForm({
               required
               autoComplete="email"
               className={fieldBase}
+              ref={emailRef}
+              onBlur={(e) => setEmailHint(suggestEmail(e.target.value))}
+              onChange={() => setEmailHint(null)}
             />
+            {emailHint && (
+              <p role="status" className="mt-1.5 text-sm text-bh-ink">
+                {lang === "en" ? "Did you mean " : "Дали не е "}
+                <button
+                  type="button"
+                  className="font-semibold underline underline-offset-2"
+                  onClick={() => {
+                    if (emailRef.current) emailRef.current.value = emailHint;
+                    setEmailHint(null);
+                  }}
+                >
+                  {emailHint}
+                </button>
+                {lang === "en" ? "? Your ticket is sent to this address." : "? Билетът се изпраща на този адрес."}
+              </p>
+            )}
             <Err>{state.fieldErrors?.email}</Err>
           </div>
         </div>
