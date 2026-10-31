@@ -158,7 +158,7 @@ const DAY1: Row[] = [
   keynote("16:30-17:00", "Микробиомът и дълголетието без митове", "The microbiome and longevity without myths", "проф. Godfrey Grech", "онколог", "oncologist"),
   panel("17:05-17:45", "Панел с 2 гости", "Panel with 2 guests", [
     { t: "Захарта, която ни състарява", te: "The sugar that ages us", who: ["Весела Михнева", "Ивайло Богомилов"], sp: "ендокринолози", spe: "endocrinologists" },
-    { t: "7-те стълба на дълголетието", te: "The 7 pillars of longevity", who: "Милен Василев", sp: "хепатолог", spe: "hepatologist" },
+    { t: "7-те стълба на дълголетието", te: "The 7 pillars of longevity", who: "Милен Василев" },
   ], MARIA),
   {
     slot: {
