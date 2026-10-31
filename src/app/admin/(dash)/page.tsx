@@ -262,7 +262,7 @@ export default async function AdminDashboard({
   const filter: RecentFilter = {
     tier: tierParam === "core" || tierParam === "plus" || tierParam === "peak" ? tierParam : "",
     code: codeParam.trim().toUpperCase().slice(0, 64),
-    kind: kindParam === "sale" || kindParam === "gift" ? kindParam : "",
+    kind: kindParam === "sale" || kindParam === "gift" || kindParam === "issued" ? kindParam : "",
   };
   const [d, traffic, found, fin, pricing, abandoned, pendingNow, notice, reminders] = await Promise.all([
     getDashboardData(page, filter),
@@ -747,7 +747,8 @@ export default async function AdminDashboard({
             <select name="kind" defaultValue={d.recentFilter.kind} className="rounded-full border border-[#0b2a22]/15 bg-white px-3 py-2 text-sm font-medium text-[#0b2a22]">
               <option value="">Платени и gift</option>
               <option value="sale">Само платени</option>
-              <option value="gift">Само gift</option>
+              <option value="gift">Само gift (всички безплатни)</option>
+              <option value="issued">Издадени от нас (през „Издай“)</option>
             </select>
           </label>
           <button type="submit" className="rounded-full bg-[#0b2a22] px-5 py-2 text-sm font-semibold text-white">
@@ -805,6 +806,7 @@ export default async function AdminDashboard({
                         <CompanyChip company={o.company} />
                       </div>
                       <div className="text-xs text-[#0b2a22]/55">{o.email}{o.phone ? ` · ${o.phone}` : ""}</div>
+                      {o.note && <div className="mt-0.5 text-xs italic text-[#0b2a22]/60">бележка: {o.note}</div>}
                       {/* Which code the buyer used, and what it took off - so a free or cut-price order can be traced to its campaign. */}
                       {o.promoCode && (
                         <span className="mt-1 inline-block rounded-full bg-[#ACEC1D]/35 px-2 py-0.5 font-mono text-[0.65rem] font-semibold uppercase tracking-wide text-[#0b2a22]">

@@ -60,6 +60,8 @@ export type RecentOrder = {
   /** The promo code the buyer entered, and what it took off - null for a full-price sale. */
   promoCode: string | null;
   discountCents: number;
+  /** The team's note on an order it issued by hand (partner, speaker, guest); null on a bought one. */
+  note?: string | null;
   items: string;
 };
 
@@ -159,7 +161,7 @@ export type RecentFilter = {
   tier: "" | TierId;
   /** Upper-case promo code, "none" for orders without one, or "" for any. */
   code: string;
-  kind: "" | "sale" | "gift";
+  kind: "" | "sale" | "gift" | "issued";
 };
 
 /** Doors open on the first festival morning. */
@@ -176,7 +178,7 @@ export async function getDashboardData(page = 1, filter: RecentFilter = { tier: 
       sql`${orders.status} in ('paid', 'refunded')`,
       filter.tier ? sql`exists (select 1 from ${orderItems} where ${orderItems.orderId} = ${orders.id} and ${orderItems.tierId} = ${filter.tier})` : undefined,
       filter.code === "none" ? sql`${orders.promoCode} is null` : filter.code ? sql`upper(${orders.promoCode}) = ${filter.code}` : undefined,
-      filter.kind === "gift" ? sql`${orders.totalCents} = 0` : filter.kind === "sale" ? sql`${orders.totalCents} > 0` : undefined,
+      filter.kind === "issued" ? sql`${orders.paymentMethod} = 'free'` : filter.kind === "gift" ? sql`${orders.totalCents} = 0` : filter.kind === "sale" ? sql`${orders.totalCents} > 0` : undefined,
     ].filter((x): x is NonNullable<typeof x> => x !== undefined),
     sql` and `,
   );
@@ -270,6 +272,7 @@ export async function getDashboardData(page = 1, filter: RecentFilter = { tier: 
           gaSessionId: orders.gaSessionId,
           promoCode: orders.promoCode,
           discountCents: orders.discountCents,
+          note: orders.note,
         })
         .from(orders)
         // Sales only. An unfinished checkout is not an order the team can act
@@ -621,6 +624,7 @@ export async function getDashboardData(page = 1, filter: RecentFilter = { tier: 
       phone: o.phone,
       promoCode: o.promoCode,
       discountCents: o.discountCents,
+      note: o.note,
       isTest: o.isTest,
       items: (itemsByOrder.get(o.id) ?? []).join(", "),
     })),
