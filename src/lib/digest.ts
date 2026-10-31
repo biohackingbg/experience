@@ -8,27 +8,28 @@ import { getDb } from "@/lib/db";
 import { orderItems, orders, signups, siteViews } from "@/lib/db/schema";
 import { getPreparation } from "@/lib/preparation";
 import { STAGE_LABEL, getPricing } from "@/lib/pricing";
-import { SALE } from "@/lib/sold";
+import { SALE, SOLD } from "@/lib/sold";
 import { formatPrice } from "@/lib/tickets";
 
 /**
- * The morning email: what happened yesterday and whether the room is filling
- * fast enough. Written so it can be read on a phone in the queue for coffee -
- * the verdict in the subject, the figures in five lines, the names only
- * where there is something to do about them.
+ * The end-of-day email (18:30): what happened today and whether the room is
+ * filling fast enough. It replaced a mail per sale - one summary a day instead
+ * of thirty - and lists the day's orders so nothing is lost by it. Written so
+ * it can be read on a phone - the verdict in the subject, the figures in a few
+ * lines, the names only where there is something to do about them.
  *
- * "Yesterday" is a Sofia calendar day, not a UTC one: the team lives there.
+ * "Today" is a Sofia calendar day, not a UTC one: the team lives there.
  */
 
 const TZ = "Europe/Sofia";
-const yesterday = sql`(${sql.raw(`now() at time zone '${TZ}'`)})::date - 1`;
+const today = sql`(${sql.raw(`now() at time zone '${TZ}'`)})::date`;
 const localDay = (col: unknown) => sql`(${col} at time zone ${TZ})::date`;
 
 export type Digest = { subject: string; text: string; html: string };
 
 export async function buildDigest(): Promise<Digest> {
   const db = getDb();
-  const [d, pricing, abandoned, prep, [sales], [visits], [signup]] = await Promise.all([
+  const [d, pricing, abandoned, prep, [sales], [visits], [signup], todayOrders] = await Promise.all([
     getDashboardData(),
     getPricing(),
     getAbandonedOrders(50),
@@ -41,19 +42,37 @@ export async function buildDigest(): Promise<Digest> {
       })
       .from(orders)
       .innerJoin(orderItems, sql`${orderItems.orderId} = ${orders.id}`)
-      .where(sql`${SALE} and ${localDay(orders.paidAt)} = ${yesterday}`),
+      .where(sql`${SALE} and ${localDay(orders.paidAt)} = ${today}`),
     db
       .select({
         visitors: sql<number>`count(distinct ${siteViews.visitor})::int`,
         ticketPage: sql<number>`count(distinct ${siteViews.visitor}) filter (where ${siteViews.path} = '/bilet')::int`,
       })
       .from(siteViews)
-      .where(sql`${localDay(siteViews.createdAt)} = ${yesterday}`),
+      .where(sql`${localDay(siteViews.createdAt)} = ${today}`),
     db
       .select({ n: sql<number>`count(*)::int` })
       .from(signups)
-      .where(sql`${localDay(signups.createdAt)} = ${yesterday}`),
+      .where(sql`${localDay(signups.createdAt)} = ${today}`),
+    // Every order paid today, free ones too: the digest tells them apart.
+    db
+      .select({
+        reference: orders.reference,
+        name: orders.name,
+        total: orders.totalCents,
+        promo: orders.promoCode,
+        paidAt: orders.paidAt,
+        items: sql<string>`(select string_agg(i.quantity || '× ' || i.tier_name, ', ') from order_items i where i.order_id = orders.id)`,
+      })
+      .from(orders)
+      .where(sql`${SOLD} and ${localDay(orders.paidAt)} = ${today}`)
+      .orderBy(orders.paidAt),
   ]);
+  const paidToday = todayOrders.filter((o) => o.total > 0);
+  const giftToday = todayOrders.filter((o) => o.total === 0);
+  // "2× CORE, 1× PLUS" - the counts in front of each ×.
+  const ticketsOf = (items: string | null) => [...(items ?? "").matchAll(/(\d+)×/g)].reduce((n, m) => n + Number(m[1]), 0) || 1;
+  const giftTickets = giftToday.reduce((n, o) => n + ticketsOf(o.items), 0);
 
   const seatsLeft = Math.max(0, d.capacityTotal - d.ticketsSold - d.ticketsComped);
   const neededPerDay = seatsLeft / d.daysToEvent;
@@ -65,18 +84,19 @@ export async function buildDigest(): Promise<Digest> {
   );
   const toRemind = abandoned.filter((o) => o.canRemind);
 
-  const dateLabel = new Date(Date.now() - 86_400_000).toLocaleDateString("bg-BG", {
+  const dateLabel = new Date().toLocaleDateString("bg-BG", {
     day: "numeric",
     month: "long",
     timeZone: TZ,
   });
 
-  const subject = `${sales.tickets} билета вчера · ${d.ticketsSold} от ${d.capacityTotal} · ${
+  const subject = `${sales.tickets} билета днес · ${d.ticketsSold} от ${d.capacityTotal} · ${
     onPace ? "в темпо" : "под темпото"
   } · ${d.daysToEvent} дни`;
 
   const lines: [string, string][] = [
-    ["Вчера", `${sales.tickets} билета в ${sales.orders} поръчки · ${formatPrice(sales.gross)} €`],
+    ["Днес", `${sales.tickets} билета в ${sales.orders} поръчки · ${formatPrice(sales.gross)} €`],
+    ...(giftToday.length ? [["Gift днес", `${giftTickets} безплатни билета в ${giftToday.length} поръчки (не са продажби)`] as [string, string]] : []),
     ["Общо", `${d.ticketsSold} от ${d.capacityTotal} места · ${formatPrice(d.grossCents)} € с ДДС`],
     [
       "Темпо",
@@ -84,7 +104,7 @@ export async function buildDigest(): Promise<Digest> {
         ? "залата е пълна"
         : `нужни ${fmt1(neededPerDay)} на ден, продаваме ${fmt1(pacePerDay)} · ${d.daysToEvent} дни до събитието`,
     ],
-    ["Сайт", `${visits.visitors === 1 ? "1 човек" : `${visits.visitors} души`} вчера · ${visits.ticketPage} отворили билетите · ${signup.n} нови в списъка`],
+    ["Сайт", `${visits.visitors === 1 ? "1 човек" : `${visits.visitors} души`} днес · ${visits.ticketPage} отворили билетите · ${signup.n} нови в списъка`],
     [
       "Цени",
       `${STAGE_LABEL[pricing.stage].toLowerCase()}${pricing.discounted ? ` (${pricing.label})` : ""}`,
@@ -93,7 +113,7 @@ export async function buildDigest(): Promise<Digest> {
       "Недовършени",
       abandoned.length === 0
         ? "няма"
-        : `${abandonedYesterday.length} нови вчера · ${toRemind.length} чакат напомняне`,
+        : `${abandonedYesterday.length} нови за 2 дни · ${toRemind.length} чакат напомняне`,
     ],
     [
       "Партньори",
@@ -111,10 +131,14 @@ export async function buildDigest(): Promise<Digest> {
   ];
 
   const remindList = toRemind.slice(0, 5);
+  const orderLine = (o: (typeof todayOrders)[number]) =>
+    `${o.reference} · ${o.name} · ${o.items ?? "билет"} · ${o.total > 0 ? `${formatPrice(o.total)} €` : "gift"}${o.promo ? ` · код ${o.promo}` : ""}`;
   const text = [
     `Sofia Life Summit · ${dateLabel}`,
     "",
     ...lines.map(([k, v]) => `${k}: ${v}`),
+    ...(paidToday.length ? ["", "Поръчките днес:", ...paidToday.map((o) => `- ${orderLine(o)}`)] : []),
+    ...(giftToday.length ? ["", "Gift днес:", ...giftToday.map((o) => `- ${orderLine(o)}`)] : []),
     ...(remindList.length
       ? [
           "",
@@ -136,7 +160,7 @@ export async function buildDigest(): Promise<Digest> {
         Sofia Life Summit · ${dateLabel}
       </div>
       <h1 style="margin:14px 0 0;font:800 24px/1.2 ${f};color:#02251f">
-        ${sales.tickets} билета вчера · ${onPace ? "в темпо" : "под темпото"}
+        ${sales.tickets} билета днес · ${onPace ? "в темпо" : "под темпото"}
       </h1>
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:20px">
         ${lines
@@ -148,6 +172,18 @@ export async function buildDigest(): Promise<Digest> {
           )
           .join("")}
       </table>
+      ${
+        paidToday.length
+          ? `<p style="margin:22px 0 6px;font:600 13px/1.4 ${f};color:#02251f">Поръчките днес</p>
+      ${paidToday.map((o) => `<div style="font:400 13px/1.6 ${f};color:#02251fb3">${esc(orderLine(o))}</div>`).join("")}`
+          : ""
+      }
+      ${
+        giftToday.length
+          ? `<p style="margin:22px 0 6px;font:600 13px/1.4 ${f};color:#02251f">Gift днес (не са продажби)</p>
+      ${giftToday.map((o) => `<div style="font:400 13px/1.6 ${f};color:#02251fb3">${esc(orderLine(o))}</div>`).join("")}`
+          : ""
+      }
       ${
         remindList.length
           ? `<p style="margin:22px 0 6px;font:600 13px/1.4 ${f};color:#02251f">За напомняне (бутонът е в Dashboard)</p>

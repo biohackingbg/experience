@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 /**
- * The morning digest, run by Vercel Cron (see vercel.json). Same lock as the
+ * The end-of-day digest (16:30 UTC = 18:30 in Sofia), run by Vercel Cron (see vercel.json). Same lock as the
  * health check: only the cron's bearer secret gets a send out of this.
  */
 export async function GET(request: Request) {

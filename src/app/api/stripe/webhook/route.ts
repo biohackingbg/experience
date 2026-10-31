@@ -2,7 +2,7 @@ import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 
-import { sendTicketEmail } from "@/lib/email";
+import { sendAlertEmail, sendTicketEmail } from "@/lib/email";
 import { sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
@@ -126,6 +126,12 @@ export async function POST(request: Request) {
           if (!sent) {
             console.error(
               `[stripe] ticket email NOT sent for ${order.reference} - deliver it manually`,
+            );
+            // Told at once, not at the end of the day: a buyer who paid and got
+            // nothing is writing to us within the hour.
+            await sendAlertEmail(
+              `Билетът НЕ е изпратен: ${order.reference}`,
+              `Поръчка ${order.reference} (${order.name}, ${order.email}) е платена, но писмото с билета не излезе. Прати го отново от Фактури: https://thelongevitysummit.eu/admin/fakturi`,
             );
           }
         }
