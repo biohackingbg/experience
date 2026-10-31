@@ -22,10 +22,14 @@ const bgDate = (d: Date) => d.toLocaleDateString("bg-BG", { day: "2-digit", mont
 export default async function PromoPage() {
   await requireAccess("promo");
   const codes = await listPromos();
-  const totals = codes.reduce(
+  // A code for 100% is a gift, never a sale: its orders are listed on the row,
+  // but kept out of the totals, which are about what discounts cost and brought.
+  const isGiftCode = (c: (typeof codes)[number]) => c.kind === "percent" && c.value >= 100;
+  const totals = codes.filter((c) => !isGiftCode(c)).reduce(
     (a, c) => ({ uses: a.uses + c.uses, tickets: a.tickets + c.tickets, discount: a.discount + c.discountCents, revenue: a.revenue + c.revenueCents }),
     { uses: 0, tickets: 0, discount: 0, revenue: 0 },
   );
+  const giftTickets = codes.filter(isGiftCode).reduce((a, c) => a + c.tickets, 0);
 
   return (
     <div className="px-5 py-8 sm:px-8">
@@ -49,7 +53,7 @@ export default async function PromoPage() {
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[
-            ["Поръчки с код", totals.uses, `${totals.tickets} билета`],
+            ["Поръчки с код", totals.uses, `${totals.tickets} билета${giftTickets ? `, без ${giftTickets} подарени по кодове за 100 %` : ""}`],
             ["Отстъпени", `${formatPrice(totals.discount)} €`, "общо, с ДДС"],
             ["Платено с код", `${formatPrice(totals.revenue)} €`, "след отстъпката"],
             ["Активни кодове", codes.filter((c) => c.active && !c.expired && !c.exhausted).length, `от ${codes.length}`],
@@ -111,7 +115,7 @@ export default async function PromoPage() {
                         <td className="px-3 py-2 text-bh-ink/75">{c.uses}{c.maxUses ? ` / ${c.maxUses}` : ""}{c.tickets ? ` · ${c.tickets} билета` : ""}</td>
                         <td className="px-3 py-2 text-bh-ink/75">{c.validUntil ? bgDate(c.validUntil) : "-"}</td>
                         <td className="px-3 py-2 text-bh-ink/75">{c.note ?? "-"}</td>
-                        <td className="px-3 py-2 text-bh-ink/75">{formatPrice(c.discountCents)} € · {formatPrice(c.revenueCents)} €</td>
+                        <td className="px-3 py-2 text-bh-ink/75">{isGiftCode(c) ? "подарък, не е продажба" : `${formatPrice(c.discountCents)} € · ${formatPrice(c.revenueCents)} €`}</td>
                         <td className="px-3 py-2">
                           <span className={`rounded-full px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide ${state === "активен" ? "bg-[#0E8C7D]/15 text-[#0b6d61]" : "bg-bh-ink/10 text-bh-ink/60"}`}>
                             {state}
