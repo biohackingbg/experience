@@ -158,7 +158,7 @@ const DAY1: Row[] = [
   keynote("16:30-17:00", "Микробиомът и дълголетието без митове", "The microbiome and longevity without myths", "проф. Godfrey Grech", "онколог", "oncologist"),
   panel("17:05-17:45", "Панел с 2 гости", "Panel with 2 guests", [
     { t: "Захарта, която ни състарява", te: "The sugar that ages us", who: ["Весела Михнева", "Ивайло Богомилов"], sp: "ендокринолози", spe: "endocrinologists" },
-    { t: "Затлъстелият черен дроб и топящите се мускули: тихите рискове", te: "The fatty liver and the melting muscles: the silent risks", who: "Милен Василев", sp: "хепатолог", spe: "hepatologist" },
+    { t: "7-те стълба на дълголетието", te: "The 7 pillars of longevity", who: "Милен Василев", sp: "хепатолог", spe: "hepatologist" },
   ], MARIA),
   {
     slot: {
@@ -217,7 +217,7 @@ const DAY2: Row[] = [
   mod(7, "Дерматология и дълголетие", "Dermatology and longevity"),
   panel("14:20-14:50", "Панел с 2 гости", "Panel with 2 guests", [
     { t: "Кожата - огледало на стареенето", te: "The skin - a mirror of ageing", who: "Мелани Ангелова", sp: "дерматолог", spe: "dermatologist" },
-    { t: "Какво разказва косата ни за стреса и възрастта", te: "What our hair tells us about stress and age", who: "проф. дхн Милен Богданов", sp: "органична и физична органична химия", spe: "organic and physical organic chemistry" },
+    { t: "Какво разказва косата ни за стреса и възрастта", te: "What our hair tells us about stress and age", who: "проф. д-р Милен Богданов", sp: "органична и физична органична химия", spe: "organic and physical organic chemistry" },
   ], DIANA),
   panel("14:55-15:25", "Панел с 2 гости", "Panel with 2 guests", [
     { t: "Между skinny fat и затлъстяването: какво не вижда кантарът в перименопаузата", te: "Between skinny fat and obesity: what the scale misses in perimenopause", who: "Тяна Пресолска" },
