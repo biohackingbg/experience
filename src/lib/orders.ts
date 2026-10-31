@@ -334,8 +334,10 @@ export async function markOrderPaid(
         orderId,
         tierId: item.tierId,
         code: `${randomCode(4)}-${randomCode(4)}`,
-        // Only the one-day tiers carry a day; the rest admit both.
-        day: picksDay(item.tierId) ? coreDay : null,
+        // Only the one-day tiers carry a day; the rest admit both. A free order
+        // (a 100% code, a gift) admits both days whatever the tier: a gift is
+        // the whole summit, not a day of it.
+        day: picksDay(item.tierId) && order.totalCents > 0 ? coreDay : null,
       })),
     );
 
