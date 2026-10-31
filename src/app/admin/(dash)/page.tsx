@@ -4,7 +4,7 @@ import Link from "next/link";
 import { FitNumber } from "@/components/admin/FitNumber";
 import { getAbandonedOrders, getPendingOrders, getReminderStats } from "@/lib/abandoned";
 import { requireAccess } from "@/lib/access";
-import { type WeekDay, getDashboardData, searchOrders } from "@/lib/admin-stats";
+import { type RecentFilter, type WeekDay, getDashboardData, searchOrders } from "@/lib/admin-stats";
 import { getFinances } from "@/lib/finances";
 import { getNotice } from "@/lib/notice";
 import { getPricing } from "@/lib/pricing";
@@ -250,16 +250,22 @@ function Gauge({ pct }: { pct: number }) {
 export default async function AdminDashboard({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; tier?: string; code?: string; kind?: string }>;
 }) {
   // The layout also checks, but a layout is not an auth boundary - the
   // Next docs are explicit that it may be skipped on RSC navigations.
   await requireAccess("tablo");
 
-  const { q = "", page: pageParam } = await searchParams;
+  const { q = "", page: pageParam, tier: tierParam = "", code: codeParam = "", kind: kindParam = "" } = await searchParams;
   const page = Math.max(1, Number.parseInt(pageParam ?? "1", 10) || 1);
+  // The sales-list filter, read from the address so a filtered view can be linked and paged.
+  const filter: RecentFilter = {
+    tier: tierParam === "core" || tierParam === "plus" || tierParam === "peak" ? tierParam : "",
+    code: codeParam.trim().toUpperCase().slice(0, 64),
+    kind: kindParam === "sale" || kindParam === "gift" ? kindParam : "",
+  };
   const [d, traffic, found, fin, pricing, abandoned, pendingNow, notice, reminders] = await Promise.all([
-    getDashboardData(page),
+    getDashboardData(page, filter),
     getTrafficData(30),
     searchOrders(q),
     getFinances(),
@@ -269,6 +275,15 @@ export default async function AdminDashboard({
     getNotice(),
     getReminderStats(),
   ]);
+  // A page of the sales list, with the filter carried along.
+  const listHref = (p: number) => {
+    const qs = new URLSearchParams();
+    if (filter.tier) qs.set("tier", filter.tier);
+    if (filter.code) qs.set("code", filter.code);
+    if (filter.kind) qs.set("kind", filter.kind);
+    qs.set("page", String(p));
+    return `/admin?${qs.toString()}#porachki`;
+  };
   const soldPct = d.capacityTotal ? Math.round((d.ticketsSold / d.capacityTotal) * 100) : 0;
   // What a ticket brings on average, and what today and yesterday brought:
   // the strip has the days, the tile only needs the two that are "now".
@@ -703,8 +718,56 @@ export default async function AdminDashboard({
           )}
         </p>
         <p className="mt-1 text-xs text-[#0b2a22]/50">Платени и върнати поръчки. Незавършените са в „Недовършени поръчки“ по-горе и се намират през търсенето.</p>
+
+        {/* Narrow the list to a ticket kind, a promo code, or sold vs gift. A plain GET form, so the view is a link. */}
+        <form method="get" action="/admin#porachki" className="mt-4 flex flex-wrap items-end gap-3 rounded-2xl bg-[#0b2a22]/[0.04] p-3 text-sm">
+          <label className="flex flex-col gap-1 text-xs font-semibold text-[#0b2a22]/60">
+            Билет
+            <select name="tier" defaultValue={d.recentFilter.tier} className="rounded-full border border-[#0b2a22]/15 bg-white px-3 py-2 text-sm font-medium text-[#0b2a22]">
+              <option value="">Всички</option>
+              <option value="core">CORE</option>
+              <option value="plus">PLUS</option>
+              <option value="peak">PEAK</option>
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-xs font-semibold text-[#0b2a22]/60">
+            Промокод
+            <select name="code" defaultValue={d.recentFilter.code} className="rounded-full border border-[#0b2a22]/15 bg-white px-3 py-2 text-sm font-medium text-[#0b2a22]">
+              <option value="">Всички</option>
+              <option value="none">Без код</option>
+              {d.promoCodes.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.code} ({c.orders})
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-xs font-semibold text-[#0b2a22]/60">
+            Вид
+            <select name="kind" defaultValue={d.recentFilter.kind} className="rounded-full border border-[#0b2a22]/15 bg-white px-3 py-2 text-sm font-medium text-[#0b2a22]">
+              <option value="">Платени и gift</option>
+              <option value="sale">Само платени</option>
+              <option value="gift">Само gift</option>
+            </select>
+          </label>
+          <button type="submit" className="rounded-full bg-[#0b2a22] px-5 py-2 text-sm font-semibold text-white">
+            Филтрирай
+          </button>
+          {(d.recentFilter.tier || d.recentFilter.code || d.recentFilter.kind) && (
+            <>
+              <Link href="/admin#porachki" className="px-2 py-2 text-xs font-semibold text-[#0b2a22]/60 underline underline-offset-2 hover:text-[#0b2a22]">
+                Изчисти
+              </Link>
+              <span className="ml-auto text-xs font-semibold text-[#0b2a22]/70">
+                {d.recentTotal} поръчки, {d.recentTickets} {d.recentFilter.tier ? `${d.recentFilter.tier.toUpperCase()} ` : ""}билета
+              </span>
+            </>
+          )}
+        </form>
         {d.recent.length === 0 ? (
-          <p className="mt-4 py-6 text-center text-sm text-[#0b2a22]/55">Още няма поръчки. Тук ще се появят веднага щом продажбите тръгнат.</p>
+          <p className="mt-4 py-6 text-center text-sm text-[#0b2a22]/55">
+            {d.recentFilter.tier || d.recentFilter.code || d.recentFilter.kind ? "Няма поръчки с този филтър." : "Още няма поръчки. Тук ще се появят веднага щом продажбите тръгнат."}
+          </p>
         ) : (
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[58rem] text-left text-sm">
@@ -793,7 +856,7 @@ export default async function AdminDashboard({
         {d.recentTotal > d.recentPageSize && (
           <nav className="mt-4 flex items-center justify-between gap-4 text-sm" aria-label="Страници на продажбите">
             {d.recentPage > 1 ? (
-              <Link href={`/admin?page=${d.recentPage - 1}#porachki`} className="rounded-full border border-[#0b2a22]/20 px-4 py-2 font-semibold text-[#0b2a22] hover:border-[#0b2a22]">
+              <Link href={listHref(d.recentPage - 1)} className="rounded-full border border-[#0b2a22]/20 px-4 py-2 font-semibold text-[#0b2a22] hover:border-[#0b2a22]">
                 ← По-нови
               </Link>
             ) : (
@@ -803,7 +866,7 @@ export default async function AdminDashboard({
               Страница {d.recentPage} от {Math.ceil(d.recentTotal / d.recentPageSize)}, общо {d.recentTotal} поръчки
             </span>
             {d.recentPage * d.recentPageSize < d.recentTotal ? (
-              <Link href={`/admin?page=${d.recentPage + 1}#porachki`} className="rounded-full border border-[#0b2a22]/20 px-4 py-2 font-semibold text-[#0b2a22] hover:border-[#0b2a22]">
+              <Link href={listHref(d.recentPage + 1)} className="rounded-full border border-[#0b2a22]/20 px-4 py-2 font-semibold text-[#0b2a22] hover:border-[#0b2a22]">
                 По-стари →
               </Link>
             ) : (

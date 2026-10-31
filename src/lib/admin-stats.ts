@@ -148,6 +148,18 @@ export type DashboardData = {
   recentPage: number;
   recentPageSize: number;
   recentTotal: number;
+  /** The filter the list was cut with, how many tickets the matching orders hold, and the promo codes that exist to pick from. */
+  recentFilter: RecentFilter;
+  recentTickets: number;
+  promoCodes: { code: string; orders: number }[];
+};
+
+/** What the sales list can be narrowed to. Empty = no narrowing on that axis. */
+export type RecentFilter = {
+  tier: "" | TierId;
+  /** Upper-case promo code, "none" for orders without one, or "" for any. */
+  code: string;
+  kind: "" | "sale" | "gift";
 };
 
 /** Doors open on the first festival morning. */
@@ -156,8 +168,18 @@ const EVENT_DAY = new Date("2026-11-07T09:00:00+02:00");
 /** Rows on one page of the sales list. */
 export const RECENT_PAGE_SIZE = 25;
 
-export async function getDashboardData(page = 1): Promise<DashboardData> {
+export async function getDashboardData(page = 1, filter: RecentFilter = { tier: "", code: "", kind: "" }): Promise<DashboardData> {
   const db = getDb();
+  // The sales list, narrowed. A tier matches an order that holds a ticket of it.
+  const recentWhere = sql.join(
+    [
+      sql`${orders.status} in ('paid', 'refunded')`,
+      filter.tier ? sql`exists (select 1 from ${orderItems} where ${orderItems.orderId} = ${orders.id} and ${orderItems.tierId} = ${filter.tier})` : undefined,
+      filter.code === "none" ? sql`${orders.promoCode} is null` : filter.code ? sql`upper(${orders.promoCode}) = ${filter.code}` : undefined,
+      filter.kind === "gift" ? sql`${orders.totalCents} = 0` : filter.kind === "sale" ? sql`${orders.totalCents} > 0` : undefined,
+    ].filter((x): x is NonNullable<typeof x> => x !== undefined),
+    sql` and `,
+  );
   const recentPage = Math.max(1, Math.floor(page) || 1);
   // Read once here, on the server, rather than in the page's render - React
   // treats a clock read during render as impure, and it is right to.
@@ -252,7 +274,7 @@ export async function getDashboardData(page = 1): Promise<DashboardData> {
         .from(orders)
         // Sales only. An unfinished checkout is not an order the team can act
         // on here; it has its own card, and mixed in it read as a sale.
-        .where(sql`${orders.status} in ('paid', 'refunded')`)
+        .where(recentWhere)
         .orderBy(desc(orders.createdAt))
         .limit(RECENT_PAGE_SIZE)
         .offset((recentPage - 1) * RECENT_PAGE_SIZE),
@@ -418,7 +440,7 @@ export async function getDashboardData(page = 1): Promise<DashboardData> {
   // lumps speakers, partners and gifts together, and a gift is the one kind the
   // team wants to tell apart from a sale at a glance.
   const todaySofia = sql`(${orders.paidAt} at time zone 'Europe/Sofia')::date = (now() at time zone 'Europe/Sofia')::date`;
-  const [giftRows, freeTodayRows, [recentTotalRow]] = await Promise.all([
+  const [giftRows, freeTodayRows, [recentTotalRow], promoCodeRows, [recentTicketsRow]] = await Promise.all([
     db
       .select({ tierId: tickets.tierId, count: sql<number>`count(*)::int`, today: sql<number>`count(*) filter (where ${todaySofia})::int` })
       .from(tickets)
@@ -430,10 +452,19 @@ export async function getDashboardData(page = 1): Promise<DashboardData> {
       .from(tickets)
       .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
       .where(sql`${COMPED} and not ${GIFT} and ${todaySofia}`),
+    db.select({ n: sql<number>`count(*)::int` }).from(orders).where(recentWhere),
     db
-      .select({ n: sql<number>`count(*)::int` })
+      .select({ code: sql<string>`upper(${orders.promoCode})`, n: sql<number>`count(*)::int` })
       .from(orders)
-      .where(sql`${orders.status} in ('paid', 'refunded')`),
+      .where(sql`${orders.status} in ('paid', 'refunded') and ${orders.promoCode} is not null`)
+      .groupBy(sql`upper(${orders.promoCode})`)
+      .orderBy(sql`upper(${orders.promoCode})`),
+    // Tickets, not orders: the tier filter counts only the tickets of that tier.
+    db
+      .select({ n: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int` })
+      .from(orderItems)
+      .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
+      .where(filter.tier ? sql`${recentWhere} and ${orderItems.tierId} = ${filter.tier}` : recentWhere),
   ]);
   const giftByTier = new Map(giftRows.map((r) => [r.tierId, r.count]));
 
@@ -541,6 +572,9 @@ export async function getDashboardData(page = 1): Promise<DashboardData> {
     recentPage,
     recentPageSize: RECENT_PAGE_SIZE,
     recentTotal: recentTotalRow?.n ?? 0,
+    recentFilter: filter,
+    recentTickets: recentTicketsRow?.n ?? 0,
+    promoCodes: promoCodeRows.map((r) => ({ code: r.code, orders: r.n })),
     ticketsGift: giftRows.reduce((sum, r) => sum + r.count, 0),
     giftToday: giftRows.reduce((sum, r) => sum + r.today, 0),
     freeToday: freeTodayRows[0]?.n ?? 0,
