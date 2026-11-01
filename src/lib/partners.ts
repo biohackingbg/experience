@@ -62,4 +62,5 @@ export const PARTNERS: Partner[] = [
   { name: "Baldaran Spring Water", logo: "/partners/baldaran-white.png" },
   { name: "Real Food", logo: "/partners/real-food-white.png" },
   { name: "ELIXR", logo: "/partners/elixr-white.png" },
+  { name: "BLSTC", logo: "/partners/blstc-white.png" },
 ];

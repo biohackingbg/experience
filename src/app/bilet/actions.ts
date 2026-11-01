@@ -233,7 +233,9 @@ export async function startCheckout(
     if (paid.order) {
       await alertSale(paid.order.reference);
       await sendGaPurchase(order.orderId);
-      if (paid.order.marketingConsentVersion === MARKETING_CONSENT_VERSION) {
+      // A free order is a gift, not a sale: Meta would count it as a purchase
+      // and learn from people who paid nothing. (This path is only reached at 0.)
+      if (paid.order.totalCents > 0 && paid.order.marketingConsentVersion === MARKETING_CONSENT_VERSION) {
         await sendPurchase({
           eventId: paid.order.reference,
           email: paid.order.email,

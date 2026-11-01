@@ -12,8 +12,22 @@ export const dynamic = "force-dynamic";
  * keeps that to one render per card an hour; the admin sees an edit within
  * the hour, or at once with a hard refresh of the card link.
  */
-/** Height in px of one band of the darkening under the words. */
-const BAND = 8;
+/**
+ * The darkening under the words, as one SVG gradient laid over the photo.
+ * Flat bands (the earlier way) left hairlines of the photograph between them
+ * on pale pictures; a gradient inside an image has no seams, and resvg, not
+ * Satori, draws its stops where they are written.
+ */
+function scrimSrc(w: number, h: number): string {
+  const steps = 24;
+  const stops = Array.from({ length: steps }, (_, i) => {
+    const t = i / (steps - 1);
+    const a = Math.min(1, t ** 1.5 * 1.06);
+    return `<stop offset="${(t * 100).toFixed(1)}%" stop-color="#02251f" stop-opacity="${a.toFixed(3)}"/>`;
+  }).join("");
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">${stops}</linearGradient></defs><rect width="${w}" height="${h}" fill="url(#g)"/></svg>`;
+  return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
+}
 
 const CARD_CACHE = { "Cache-Control": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400" };
 
@@ -105,7 +119,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
   const labelKey = url.searchParams.get("label");
   const kicker = LABELS[(labelKey && labelKey in LABELS ? labelKey : "stage") as keyof typeof LABELS][en ? 1 : 0];
   const pad = Math.round(w * 0.075);
-  const bands = Math.ceil((h * 0.62) / BAND);
+  const scrimH = Math.round(h * 0.62);
   const src = photo ? `data:${photo.mime};base64,${photo.bytes.toString("base64")}` : null;
   const name = [title, speaker.name].filter(Boolean).join(" ");
   const fonts = [
@@ -163,21 +177,9 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
             style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }}
           />
         )}
-        {/* The words sit on the picture, so the picture darkens under them.
-            Banded rather than a gradient: Satori puts the stops of a
-            multi-stop linear-gradient nowhere near where they are written -
-            measured, a stop at 72% still showed the bare photograph - while
-            flat bands land exactly where they are put. Enough of them, on a
-            curve, and the steps stop being visible. */}
-        {/* No band at the top any more: the tag carries its own ground. */}
-        {/* Whole-pixel bands: with flexGrow the band heights came out
-            fractional and a hairline of the photograph showed between them,
-            which a 1920-high story made plain. */}
-        <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: Math.round(h * 0.62), display: "flex", flexDirection: "column", overflow: "hidden" }}>
-          {Array.from({ length: bands }, (_, i) => (
-            <div key={i} style={{ display: "flex", flexShrink: 0, height: BAND, background: `rgba(2,37,31,${Math.min(1, ((i + 1) / bands) ** 1.5 * 1.06).toFixed(3)})` }} />
-          ))}
-        </div>
+        {/* The words sit on the picture, so the picture darkens under them. No band at the top: the tag carries its own ground. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={scrimSrc(w, scrimH)} alt="" width={w} height={scrimH} style={{ position: "absolute", left: 0, bottom: 0, width: w, height: scrimH }} />
 
         <div style={{ position: "relative", display: "flex", flexDirection: "column", justifyContent: "space-between", width: "100%", height: "100%", padding: pad }}>
           <div style={{ display: "flex", alignItems: "flex-start" }}>

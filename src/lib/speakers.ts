@@ -371,6 +371,15 @@ export const SPEAKERS: Speaker[] = [
   },
   {
     announced: true,
+    id: "kristin-ilieva",
+    name: "Кристин Илиева",
+    specialty: "Модел и вдъхновяваща жена",
+    country: "България",
+    topic: "Устойчивост и самоприемане след тежка катастрофа",
+    photo: "/speakers/kristin-ilieva.jpg",
+  },
+  {
+    announced: true,
     id: "yana-balnikova",
     name: "Яна Балникова",
     specialty: "(Пери)менопауза и женско здраве",
@@ -619,6 +628,10 @@ export const SPEAKERS_EN: Record<string, SpeakerEn> = {
     specialty: "Neuro-linguistic programming, communication and personal development",
     role: "Professor of management, business communication and personal development",
     topic: "Certified NLP Trainer and Coach",
+  },
+  "kristin-ilieva": {
+    specialty: "Model and inspirational speaker",
+    topic: "Resilience and self-acceptance after a serious accident",
   },
   "yana-balnikova": {
     specialty: "(Peri)menopause and women\u2019s health",
