@@ -112,11 +112,11 @@ export function CheckoutForm({
 
   const [tierId, setTierId] = useState(() => {
     const wanted = TIERS.some((t) => t.id === initialTier) && !soldOut.includes(initialTier!) ? initialTier! : null;
-    // No valid tier asked for: open on PLUS, the one most people end up
-    // with, rather than on whichever happens to be first in the list.
+    // No valid tier asked for: open on CORE, the first card on the page and
+    // the lowest price, so a visitor does not meet the expensive ticket first.
     if (wanted) return wanted;
-    if (!soldOut.includes("plus")) return "plus";
-    return TIERS.find((t) => !soldOut.includes(t.id))?.id ?? "plus";
+    if (!soldOut.includes("core")) return "core";
+    return TIERS.find((t) => !soldOut.includes(t.id))?.id ?? "core";
   });
   const [quantity, setQuantity] = useState(1);
   const [day, setDay] = useState(1);

@@ -7,15 +7,14 @@ import { TIERS, type Tier, formatPrice } from "@/lib/tickets";
 /**
  * The three tiers as a choice rather than a price list.
  *
- * Before this the page showed three radio rows - a name and a number each,
- * cheapest first and preselected. With nothing but prices to compare, the
- * lowest wins, and the ads were landing people exactly there. Now PLUS
- * comes first and open, PEAK anchors above it, CORE sits last and says what
- * it leaves out; each card carries what the money buys. The order is this
- * component's alone: `TIERS` keeps its own, which the reports and the admin
- * rely on.
+ * Each card carries what the money buys. The order is CORE, PLUS, PEAK -
+ * cheapest first - since the regular prices came in on 31 October and a
+ * buyer who lands on a PLUS-first list reads the page as expensive. It was
+ * PLUS, PEAK, CORE while the early prices ran, to anchor the buyer high. The
+ * order is this component's alone: `TIERS` keeps its own, which the reports
+ * and the admin rely on.
  */
-const ORDER: Tier["id"][] = ["plus", "peak", "core"];
+const ORDER: Tier["id"][] = ["core", "plus", "peak"];
 
 function Check({ className }: { className?: string }) {
   return (

@@ -108,11 +108,10 @@ export default async function CheckoutPage({
           {t.intro}
         </p>
 
-        {/* The offer line sits under the cards now, and the page opens on
-            PLUS unless the link asked for a tier: an ad that lands here
-            should meet the ticket most people buy, not the cheapest row. */}
+        {/* The offer line sits under the cards now. The page opens on CORE,
+            the first card, unless the link asked for a tier (?nivo=plus). */}
         <CheckoutForm
-          initialTier={nivo ?? "plus"}
+          initialTier={nivo ?? "core"}
           prices={pricing.prices}
           soldOut={soldOut}
           lang={lang}
