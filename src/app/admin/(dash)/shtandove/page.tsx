@@ -46,7 +46,7 @@ export default async function BoothsPage() {
           <HomeLink />
         </div>
         <p className="mt-4 max-w-3xl text-sm leading-relaxed text-bh-ink/60">
-          Изложбената зона във фоайето на Grand Millennium: {BOOTHS.length} модула по 3 × 2 m в четири зони.
+          Изложбената зона във фоайето на Grand Millennium: {BOOTHS.length} модула в четири зони, повечето 3 × 2 m (B0 е 1 × 2 m).
           Натисни модул, за да сложиш партньор на него. „Платен“ не се пише тук - идва от парите на партньора в Подготовка.
         </p>
 

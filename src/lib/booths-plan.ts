@@ -1,9 +1,10 @@
 /**
- * The exhibition plan: 25 modules of 3 × 2 m plus the bar, in the Grand Millennium
- * foyer, as drawn in "Sofia_Life_Summit_2026_Exhibition_booths 2" (October
+ * The exhibition plan: 25 modules of 3 × 2 m, the 1 × 2 m B0 and the bar, in the
+ * Grand Millennium foyer, as drawn in "Sofia_Life_Summit_2026_Exhibition_booths 2" (October
  * 2026). The second drawing moved the B row and C1, turned B1/B2/C5/D1/D7
  * upright, and gave B6's place to the bar and the hydration station, so B6
- * is gone. Client-safe:
+ * is gone. B0, the small module by the lifts above B3, is on the same drawing
+ * but was not in the first image, so v3 of the image has it painted in. Client-safe:
  * no server code, so the board can draw it in the browser.
  *
  * Each box is a position on the plan image, in percent of its width and
@@ -14,7 +15,7 @@
 
 // Versioned name: the app caches the plan by URL, and a new drawing must not
 // be served from an old cache under the old boxes.
-export const PLAN_IMAGE = "/plan-shtandove-v2.webp";
+export const PLAN_IMAGE = "/plan-shtandove-v3.webp";
 /** width / height of the plan image, so the overlay keeps its shape. */
 export const PLAN_ASPECT = 1825 / 1680;
 
@@ -37,6 +38,7 @@ export const BOOTHS: { id: string; zone: ZoneId; box: Box }[] = [
   { id: "A4", zone: "A", box: [8.09, 48.76, 4.4, 7.17] },
   { id: "A5", zone: "A", box: [8.09, 56.4, 4.4, 7.17] },
   { id: "A6", zone: "A", box: [8.09, 64.06, 4.4, 7.17] },
+  { id: "B0", zone: "B", box: [51.8, 32.8, 2.45, 4.8] },
   { id: "B1", zone: "B", box: [40.27, 50.48, 4.4, 7.17] },
   { id: "B2", zone: "B", box: [34.25, 62.74, 4.4, 7.17] },
   { id: "B3", zone: "B", box: [50.08, 41.01, 4.4, 7.17] },
