@@ -7,7 +7,7 @@
 
 import { type Pricing, priceOf } from "@/lib/pricing";
 import { CONCEPT_TOTAL } from "@/lib/site-copy";
-import { TIERS, type Tier, formatPrice, getTier } from "@/lib/tickets";
+import { TIERS, type Tier, dayLabel, formatPrice, getTier } from "@/lib/tickets";
 
 const SITE = "https://thelongevitysummit.eu";
 const FONT = "-apple-system,Segoe UI,Roboto,sans-serif";
@@ -226,6 +226,35 @@ export function checkinLetter(i: { name: string; codes: string[]; unsubUrl: stri
     bodyHtml: para(lines[0]) + links.map((l) => button(l.label, l.url)).join("") + para(lines[1]) + para(lines[2]) + button("Свали приложението", APP_STORE_URL, "ink"),
     bodyText: [plain(lines[0]), "", ...links.map((l) => `${l.label}: ${l.url}`), "", lines[1], "", lines[2], `App Store: ${APP_STORE_URL}`],
     why: "Получаваш това писмо, защото имаш билет за Sofia Life Summit.",
+    unsubUrl: i.unsubUrl,
+  });
+}
+
+export type CoreDayTicket = { code: string; attendeeName: string | null; day: number | null };
+
+/** To the buyer of CORE tickets: pick the day of each, or change the one it has. */
+export function coreDayLetter(i: { name: string; tickets: CoreDayTicket[]; unsubUrl: string }): Letter {
+  const many = i.tickets.length > 1;
+  const link = (c: string) => `${SITE}/bilet/${encodeURIComponent(c)}?utm_source=email&utm_campaign=core-day#den`;
+  const now = (t: CoreDayTicket) => {
+    const who = t.attendeeName ? `${t.code}, ${t.attendeeName}` : t.code;
+    return `Билет ${who}: ${dayLabel(t.day) ? `сега е за ${dayLabel(t.day)}` : "още без избран ден"}`;
+  };
+  const lines = [
+    `${hi(i.name)} ${many ? "Билетите ти CORE важат всеки за един от двата дни" : "Билетът ти CORE важи за един от двата дни"} на Sofia Life Summit: събота, 7 ноември, или неделя, 8 ноември. Програмата в двата дни е различна, затова избираш ти.`,
+    `Можеш да избереш деня, или да смениш вече избрания, **безплатно до началото на събитието**. Става с едно натискане на страницата на билета, а QR кодът остава същият.`,
+    `Ако денят, който имаш, ти е удобен, не е нужно да правиш нищо.`,
+  ];
+  return frame({
+    subject: many ? "Избери или смени деня на билетите си за Sofia Life Summit" : "Избери или смени деня на билета си за Sofia Life Summit",
+    bodyHtml:
+      para(lines[0]) +
+      para(lines[1]) +
+      bullets(i.tickets.map(now)) +
+      i.tickets.map((t) => button(many ? `Избери ден за ${t.code}` : "Избери или смени деня", link(t.code))).join("") +
+      para(lines[2]),
+    bodyText: [plain(lines[0]), "", plain(lines[1]), "", ...i.tickets.map((t) => `${now(t)}\n${link(t.code)}`), "", lines[2]],
+    why: "Получаваш това писмо, защото имаш билет CORE за Sofia Life Summit.",
     unsubUrl: i.unsubUrl,
   });
 }

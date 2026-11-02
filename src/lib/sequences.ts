@@ -10,11 +10,13 @@ import { getRemaining } from "@/lib/orders";
 import { type Pricing, getPricing, priceOf } from "@/lib/pricing";
 import {
   LIST_LETTERS,
+  type CoreDayTicket,
   type Letter,
   type ListLetterId,
   type UpgradeStep,
   abandoned2,
   checkinLetter,
+  coreDayLetter,
   listLetter,
   upgradeLetter,
 } from "@/lib/sequence-letters";
@@ -65,6 +67,7 @@ export const SEQUENCE_KINDS = [
   { kind: "upgrade-plus-5", title: "CORE → PLUS · ден 5", when: "5 дни след покупката. Купилите преди пускането го получават на първия пуск." },
   { kind: "upgrade-plus-3d", title: "CORE → PLUS · 3 дни преди", when: "4 ноември от 09:00, на всеки, който още е с CORE." },
   { kind: "upgrade-peak", title: "PLUS → PEAK", when: "28 октомври от 09:00, веднъж, докато има места в PEAK." },
+  { kind: "core-day", title: "CORE · избери или смени деня", when: "Веднага щом се пусне, на всеки с неизползван платен CORE билет, веднъж на поръчка. До началото на събитието." },
   { kind: "checkin", title: "Избери час за влизане", when: "2 ноември от 10:00, на всеки с билет без избран час. Само ако входът на вълни е пуснат от Вход." },
   ...LIST_LETTERS.map((l) => ({ kind: `list-${l.id}`, title: `Списък · ${l.title}`, when: sofia(l.at) })),
 ] as const;
@@ -309,6 +312,47 @@ async function runUpgrade(rule: UpgradeRule, dry: boolean, now: Date, pricing: P
 }
 
 /* ------------------------------------------------------------------ *
+ * 3a · Pick or change the day of a CORE ticket
+ * ------------------------------------------------------------------ */
+
+type CoreDayOrder = { reference: string; name: string; email: string; tickets: CoreDayTicket[] };
+
+/** Paid orders with an unused CORE ticket, one row per order. */
+async function coreDayOrders(): Promise<CoreDayOrder[]> {
+  const rows = await getDb()
+    .select({ reference: orders.reference, name: orders.name, email: orders.email, code: tickets.code, attendeeName: tickets.attendeeName, day: tickets.day })
+    .from(tickets)
+    .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
+    .where(sql`${SOLD} and ${orders.totalCents} > 0 and ${orders.upgradesTicketCode} is null and ${tickets.tierId} = 'core' and ${tickets.checkedInAt} is null`)
+    .orderBy(orders.paidAt, tickets.createdAt);
+  const byRef = new Map<string, CoreDayOrder>();
+  for (const r of rows) {
+    const o = byRef.get(r.reference) ?? { reference: r.reference, name: r.name, email: r.email, tickets: [] };
+    o.tickets.push({ code: r.code, attendeeName: r.attendeeName, day: r.day });
+    byRef.set(r.reference, o);
+  }
+  return [...byRef.values()];
+}
+
+async function runCoreDay(dry: boolean, now: Date): Promise<Step> {
+  const kind = "core-day";
+  if (now >= EVENT_AT) return { kind, sent: 0, skipped: "събитието започна" };
+  const sent = await getDb().select({ target: emailSends.target }).from(emailSends).where(sql`${emailSends.kind} = ${kind}`);
+  const done = new Set(sent.map((r) => r.target));
+  const all = (await coreDayOrders()).filter((o) => !done.has(o.reference));
+  const out = await optedOut(all.map((r) => r.email));
+  const due = all.filter((o) => !out.has(o.email.toLowerCase()));
+  // A dry run only counts; a real one is capped so a backlog cannot outrun the function.
+  if (dry) return { kind, sent: due.length, to: due.slice(0, 5).map((o) => o.email) };
+  const to: string[] = [];
+  for (const o of due.slice(0, PER_RUN)) {
+    const letter = coreDayLetter({ name: o.name, tickets: o.tickets, unsubUrl: unsubscribeUrl(o.email) });
+    if (await deliver(kind, o.reference, o.email, letter, false)) to.push(o.email);
+  }
+  return { kind, sent: to.length, to };
+}
+
+/* ------------------------------------------------------------------ *
  * 3b · Pick your arrival time
  * ------------------------------------------------------------------ */
 
@@ -476,6 +520,7 @@ export async function runSequences(opts: { dry?: boolean; now?: Date; force?: bo
   await push("abandoned-1", () => runAbandoned1(dry));
   await push("abandoned-2", () => runAbandoned2(dry, pricing));
   for (const rule of upgradeRules()) await push(rule.kind, () => runUpgrade(rule, dry, now, pricing, force));
+  await push("core-day", () => runCoreDay(dry, now));
   await push("checkin", () => runCheckin(dry, now, force));
   steps.push(...(await runList(dry, now, pricing, cfg, force, only)));
   return { steps };
@@ -497,6 +542,7 @@ export async function gateReasons(now = new Date()): Promise<Record<string, stri
   timed("abandoned-1", null);
   timed("abandoned-2", null);
   for (const rule of upgradeRules()) timed(rule.kind, rule.at);
+  timed("core-day", null);
   timed("checkin", CHECKIN_AT);
   if (out.checkin === null && !plan.on) out.checkin = "входът на вълни не е пуснат";
   for (const def of LIST_LETTERS) {
@@ -599,6 +645,8 @@ export async function sequencePreview(kind: string, to = "ti@example.com"): Prom
     case "upgrade-plus-5": return upgrade(core, plus, "plus-5");
     case "upgrade-plus-3d": return upgrade(core, plus, "plus-3d");
     case "upgrade-peak": return upgrade(plus, peak, "peak");
+    case "core-day":
+      return coreDayLetter({ name: "Мария", tickets: [{ code: "AB12-CD34", attendeeName: null, day: 1 }], unsubUrl: u });
     case "checkin": return checkinLetter({ name: "Мария", codes: ["AB12-CD34"], unsubUrl: u });
   }
   if (kind.startsWith("list-")) {

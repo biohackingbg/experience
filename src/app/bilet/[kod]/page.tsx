@@ -7,12 +7,14 @@ import { Calendar, Pin, TicketIcon } from "@/components/ui/Pictograms";
 import { arrivalDaysFor, getArrivalPlan, slotCounts, slotLabel } from "@/lib/arrivals";
 import { TICKET_PAGE } from "@/lib/i18n";
 import { getTicketPlaces, listWorkshops } from "@/lib/workshops";
-import { dayLabel } from "@/lib/tickets";
+import { dayLabel, picksDay } from "@/lib/tickets";
+import { dayChangeOpen } from "@/lib/ticket-day";
 import { findTicket } from "@/lib/tickets-lookup";
 import { walletConfigured } from "@/lib/wallet-pass";
 
 import { ArrivalPicker, type ArrivalDayView } from "./ArrivalPicker";
 import { AttendeeForm } from "./AttendeeForm";
+import { DayPicker } from "./DayPicker";
 import { Workshops } from "./Workshops";
 
 export const metadata: Metadata = {
@@ -172,6 +174,10 @@ export default async function TicketPage({
               </div>
             </div>
           </dl>
+
+          {!ticket.checkedInAt && picksDay(ticket.tierId) && dayChangeOpen() && (
+            <DayPicker code={ticket.code} lang={ticket.lang} current={ticket.day} />
+          )}
 
           {!ticket.checkedInAt && (
             <AttendeeForm code={ticket.code} current={ticket.attendeeName} lang={ticket.lang} />

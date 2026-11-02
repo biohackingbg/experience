@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { chooseArrival } from "@/lib/arrivals";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { changeTicketDay } from "@/lib/ticket-day";
 import { setAttendeeName } from "@/lib/tickets-lookup";
 import { bookPlace, cancelPlace } from "@/lib/workshops";
 
@@ -96,4 +97,28 @@ export async function chooseArrivalSlot(_prev: ArrivalState, formData: FormData)
   const r = await chooseArrival(code, day, slot);
   revalidatePath(`/bilet/${code}`);
   return r.ok ? { status: "ok" } : { status: "error", message: ARRIVAL_ERROR[r.reason][lang] };
+}
+
+export type DayState = { status: "idle" | "ok" | "error"; message?: string };
+
+const DAY_ERROR: Record<string, { bg: string; en: string }> = {
+  not_found: { bg: "Билетът не е намерен.", en: "Ticket not found." },
+  used: { bg: "Билетът вече е използван на входа.", en: "The ticket was already used at the door." },
+  not_pickable: { bg: "Този билет важи за двата дни.", en: "This ticket is valid for both days." },
+  closed: { bg: "Изборът на ден е затворен.", en: "Choosing a day is closed." },
+};
+
+/** The holder of a one-day ticket picks or changes its day; the rules live in ticket-day.ts. */
+export async function chooseTicketDay(_prev: DayState, formData: FormData): Promise<DayState> {
+  const head = await headers();
+  const ip = head.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const lang = formData.get("lang") === "en" ? "en" : "bg";
+  if (!checkRateLimit(`day:${ip}`, 20).allowed) return { status: "error", message: lang === "en" ? "Too many attempts. Try again shortly." : "Твърде много опити. Опитай след малко." };
+  const code = String(formData.get("code") ?? "").trim().toUpperCase();
+  const day = Number(formData.get("day"));
+  if (day !== 1 && day !== 2) return { status: "error", message: lang === "en" ? "Pick Saturday or Sunday." : "Избери събота или неделя." };
+  const r = await changeTicketDay(code, day);
+  revalidatePath(`/bilet/${code}`);
+  if (!r.ok) return { status: "error", message: DAY_ERROR[r.reason][lang] };
+  return { status: "ok", message: r.droppedBookings > 0 ? (lang === "en" ? "Your workshop bookings for the other day were released." : "Записаните работилници за другия ден са освободени.") : undefined };
 }
