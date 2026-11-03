@@ -4,6 +4,11 @@ import { requireAccess } from "@/lib/access";
 
 import { ResendForm } from "./ResendForm";
 import { PeopleForm } from "./PeopleForm";
+import { CreditNoteForm } from "./CreditNoteForm";
+import { listPartialCreditNotes } from "@/lib/credit-notes";
+import { getDb } from "@/lib/db";
+import { orderItems, orders } from "@/lib/db/schema";
+import { inArray, sql } from "drizzle-orm";
 import { INVOICE_SERIES_START } from "@/lib/company";
 import { listInvoices } from "@/lib/invoices";
 import { formatPrice } from "@/lib/tickets";
@@ -36,6 +41,21 @@ export default async function InvoicesPage({
   const from = day(sp.ot);
   const to = day(sp.do);
   const rows = await listInvoices({ from, to });
+  const partialNotes = await listPartialCreditNotes();
+  const notesByOrder = new Map<string, typeof partialNotes>();
+  for (const n of partialNotes) notesByOrder.set(n.reference, [...(notesByOrder.get(n.reference) ?? []), n]);
+
+  // The kinds of ticket on each order that is waiting for a credit note, for the form's tier choice.
+  const waiting = rows.filter((r) => !r.isDocument && r.refundedCents && r.status !== "refunded" && !r.creditNoteNumber).map((r) => r.reference);
+  const tiersByOrder = new Map<string, { id: string; name: string }[]>();
+  if (waiting.length > 0) {
+    const lines = await getDb()
+      .select({ reference: orders.reference, id: orderItems.tierId, name: orderItems.tierName })
+      .from(orderItems)
+      .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
+      .where(inArray(orders.reference, waiting));
+    for (const l of lines) tiersByOrder.set(l.reference, [...(tiersByOrder.get(l.reference) ?? []), { id: l.id, name: l.name }]);
+  }
 
   // Whatever is on screen is what the export and the print sheet carry.
   const qs = new URLSearchParams({ ...(from ? { ot: from } : {}), ...(to ? { do: to } : {}) }).toString();
@@ -187,6 +207,17 @@ export default async function InvoicesPage({
                       {r.refundedCents ? (
                         <span className="block text-[0.65rem] font-semibold uppercase tracking-wide text-[#9c3d5c]">
                           {r.status === "refunded" ? "върната" : `върнати ${formatPrice(r.refundedCents)} €`}
+                          {(notesByOrder.get(r.reference) ?? []).map((n) => (
+                            <a
+                              key={n.number}
+                              href={`/faktura/${r.reference}/kredit?n=${n.number}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="ml-1 block underline underline-offset-2"
+                            >
+                              КИ № {String(n.number).padStart(10, "0")}: {n.quantity} × {n.tierName}, {formatPrice(n.totalCents)} €
+                            </a>
+                          ))}
                           {r.creditNoteNumber ? (
                             <a
                               href={`/faktura/${r.reference}/kredit`}
@@ -196,9 +227,9 @@ export default async function InvoicesPage({
                             >
                               КИ № {String(r.creditNoteNumber).padStart(10, "0")}
                             </a>
-                          ) : (
+                          ) : (notesByOrder.get(r.reference) ?? []).length === 0 ? (
                             " · очаква кредитно известие"
-                          )}
+                          ) : null}
                         </span>
                       ) : null}
                     </td>
@@ -216,6 +247,9 @@ export default async function InvoicesPage({
                             sponsorship invoice has no tickets behind it. */}
                         {!r.isDocument && <ResendForm reference={r.reference} />}
                         {!r.isDocument && <PeopleForm reference={r.reference} />}
+                        {!r.isDocument && r.refundedCents && r.status !== "refunded" && !r.creditNoteNumber ? (
+                          <CreditNoteForm reference={r.reference} tiers={tiersByOrder.get(r.reference) ?? []} />
+                        ) : null}
                       </div>
                     </td>
                   </tr>

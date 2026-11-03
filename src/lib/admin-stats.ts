@@ -214,8 +214,8 @@ export async function getDashboardData(page = 1, filter: RecentFilter = { tier: 
       db
         .select({
           tierId: orderItems.tierId,
-          sold: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int`,
-          gross: sql<number>`coalesce(sum(${orderItems.quantity} * ${orderItems.unitPriceCents}), 0)::int`,
+          sold: sql<number>`coalesce(sum((${orderItems.quantity} - ${orderItems.creditedQuantity})), 0)::int`,
+          gross: sql<number>`coalesce(sum((${orderItems.quantity} - ${orderItems.creditedQuantity}) * ${orderItems.unitPriceCents}), 0)::int`,
         })
         .from(orderItems)
         .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
@@ -245,8 +245,8 @@ export async function getDashboardData(page = 1, filter: RecentFilter = { tier: 
         .select({
           day: sql<string>`to_char(${orders.paidAt} at time zone 'Europe/Sofia', 'YYYY-MM-DD')`,
           tierId: orderItems.tierId,
-          n: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int`,
-          gross: sql<number>`coalesce(sum(${orderItems.quantity} * ${orderItems.unitPriceCents}), 0)::int`,
+          n: sql<number>`coalesce(sum((${orderItems.quantity} - ${orderItems.creditedQuantity})), 0)::int`,
+          gross: sql<number>`coalesce(sum((${orderItems.quantity} - ${orderItems.creditedQuantity}) * ${orderItems.unitPriceCents}), 0)::int`,
         })
         .from(orderItems)
         .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
@@ -285,7 +285,7 @@ export async function getDashboardData(page = 1, filter: RecentFilter = { tier: 
       db.select({ n: sql<number>`count(*) filter (where ${signups.unsubscribedAt} is null)::int`, week: sql<number>`count(*) filter (where ${signups.unsubscribedAt} is null and ${signups.createdAt} > now() - interval '7 days')::int` }).from(signups),
 
       db
-        .select({ n: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int` })
+        .select({ n: sql<number>`coalesce(sum((${orderItems.quantity} - ${orderItems.creditedQuantity})), 0)::int` })
         .from(orderItems)
         .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
         .where(sql`${SALE} and ${orders.paidAt} > now() - interval '7 days'`),
@@ -311,8 +311,8 @@ export async function getDashboardData(page = 1, filter: RecentFilter = { tier: 
 
       db
         .select({
-          today: sql<number>`coalesce(sum(${orderItems.quantity}) filter (where (${orders.paidAt} at time zone 'Europe/Sofia')::date = (now() at time zone 'Europe/Sofia')::date), 0)::int`,
-          yesterday: sql<number>`coalesce(sum(${orderItems.quantity}) filter (where (${orders.paidAt} at time zone 'Europe/Sofia')::date = (now() at time zone 'Europe/Sofia')::date - 1), 0)::int`,
+          today: sql<number>`coalesce(sum((${orderItems.quantity} - ${orderItems.creditedQuantity})) filter (where (${orders.paidAt} at time zone 'Europe/Sofia')::date = (now() at time zone 'Europe/Sofia')::date), 0)::int`,
+          yesterday: sql<number>`coalesce(sum((${orderItems.quantity} - ${orderItems.creditedQuantity})) filter (where (${orders.paidAt} at time zone 'Europe/Sofia')::date = (now() at time zone 'Europe/Sofia')::date - 1), 0)::int`,
         })
         .from(orderItems)
         .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
@@ -464,7 +464,7 @@ export async function getDashboardData(page = 1, filter: RecentFilter = { tier: 
       .orderBy(sql`upper(${orders.promoCode})`),
     // Tickets, not orders: the tier filter counts only the tickets of that tier.
     db
-      .select({ n: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int` })
+      .select({ n: sql<number>`coalesce(sum((${orderItems.quantity} - ${orderItems.creditedQuantity})), 0)::int` })
       .from(orderItems)
       .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
       .where(filter.tier ? sql`${recentWhere} and ${orderItems.tierId} = ${filter.tier}` : recentWhere),

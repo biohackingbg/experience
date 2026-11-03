@@ -1,10 +1,12 @@
 "use server";
 
 import { sql } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 
 import { canAccess } from "@/lib/access";
 import { getDb } from "@/lib/db";
 import { orderItems, orders, tickets } from "@/lib/db/schema";
+import { CREDIT_ERROR, issuePartialCreditNote } from "@/lib/credit-notes";
 import { sendTicketEmail } from "@/lib/email";
 import { setAttendeeName } from "@/lib/tickets-lookup";
 
@@ -156,4 +158,34 @@ export async function sendTicketsToPeople(_prev: ResendState, formData: FormData
   return failed.length === 0
     ? { status: "ok", message: `Изпратени ${sent} от ${people.length}.` }
     : { status: "error", message: `Изпратени ${sent} от ${people.length}. Не минаха: ${failed.join(", ")}.` };
+}
+
+/**
+ * Issues a credit note for some of the tickets of an order - the answer to a
+ * partial refund. The refund itself is made in Stripe by hand; this only
+ * writes the document, numbers it, and takes the seats back out of the sold
+ * counts. Tickets named by code are cancelled in the same step.
+ */
+export async function issueCreditNote(_prev: ResendState, formData: FormData): Promise<ResendState> {
+  if (!(await canAccess("fakturi"))) return { status: "error", message: "Няма достъп." };
+
+  const reference = String(formData.get("reference") ?? "").trim().toUpperCase();
+  const tierId = String(formData.get("tier") ?? "").trim();
+  const quantity = Number.parseInt(String(formData.get("quantity") ?? "1"), 10);
+  const ticketCodes = String(formData.get("codes") ?? "")
+    .split(/[\s,;]+/)
+    .filter(Boolean);
+  if (!reference) return { status: "error", message: "Липсва номер на поръчка." };
+  if (!Number.isInteger(quantity) || quantity < 1) return { status: "error", message: "Броят билети е 1, 2, 3…" };
+
+  const r = await issuePartialCreditNote({ reference, tierId: tierId || undefined, quantity, ticketCodes });
+  if (!r.ok) return { status: "error", message: CREDIT_ERROR[r.reason] };
+
+  revalidatePath("/admin/fakturi");
+  revalidatePath("/admin");
+  const no = String(r.number).padStart(10, "0");
+  return {
+    status: "ok",
+    message: `Издадено кредитно известие № ${no} за ${(r.totalCents / 100).toFixed(2)} €.${r.refundCovered ? "" : " Внимание: във Stripe още не е върнато толкова."}`,
+  };
 }

@@ -5,6 +5,7 @@ import {
   date,
   index,
   integer,
+  jsonb,
   pgTable,
   primaryKey,
   text,
@@ -251,8 +252,45 @@ export const orderItems = pgTable(
     tierName: text("tier_name").notNull(),
     unitPriceCents: integer("unit_price_cents").notNull(),
     quantity: integer("quantity").notNull(),
+    /**
+     * How many of `quantity` a partial credit note has taken back. The
+     * invoice keeps printing `quantity` - it is a document, and a document
+     * is answered by a credit note, never rewritten - while every count of
+     * what is still sold reads `quantity - credited_quantity`.
+     */
+    creditedQuantity: integer("credited_quantity").notNull().default(0),
   },
   (table) => [index("order_items_order_id_idx").on(table.orderId)],
+);
+
+/**
+ * A credit note for part of an order: some tickets given back and their
+ * price refunded, the rest of the order standing. Numbered from the same
+ * run as invoices (see orders.creditNoteNumber, which answers a full refund
+ * and stays as it was). The lines are copied here, so the note prints as it
+ * was issued whatever happens to the order afterwards.
+ */
+export const creditNotes = pgTable(
+  "credit_notes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orderId: uuid("order_id")
+      .notNull()
+      .references(() => orders.id, { onDelete: "cascade" }),
+    number: bigint("number", { mode: "number" }).notNull(),
+    issuedAt: timestamp("issued_at", { withTimezone: true }).notNull().defaultNow(),
+    /** [{ tierId, tierName, unitPriceCents, quantity }] - what was taken back. */
+    items: jsonb("items").$type<{ tierId: string; tierName: string; unitPriceCents: number; quantity: number }[]>().notNull(),
+    /** What was refunded, VAT included, split the way the invoice splits it. */
+    subtotalCents: integer("subtotal_cents").notNull(),
+    vatCents: integer("vat_cents").notNull(),
+    totalCents: integer("total_cents").notNull(),
+    /** The part of the items' price a promo code had already taken off. */
+    discountCents: integer("discount_cents").notNull().default(0),
+    /** Codes of the tickets cancelled with it, for the record. */
+    ticketCodes: text("ticket_codes").array(),
+  },
+  (table) => [uniqueIndex("credit_notes_number_idx").on(table.number), index("credit_notes_order_id_idx").on(table.orderId)],
 );
 
 /**

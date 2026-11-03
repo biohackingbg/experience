@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 
 import { CreditNoteDocument } from "@/components/InvoiceDocument";
 import type { Lang } from "@/lib/i18n";
+import { getPartialCreditNote } from "@/lib/credit-notes";
 import { getDocumentInvoice } from "@/lib/documents";
 import { getInvoice } from "@/lib/invoices";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -27,10 +28,10 @@ export default async function CreditNotePage({
   searchParams,
 }: {
   params: Promise<{ reference: string }>;
-  searchParams: Promise<{ lang?: string }>;
+  searchParams: Promise<{ lang?: string; n?: string }>;
 }) {
   const { reference } = await params;
-  const { lang: langParam } = await searchParams;
+  const { lang: langParam, n } = await searchParams;
 
   const head = await headers();
   const ip = head.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
@@ -38,7 +39,12 @@ export default async function CreditNotePage({
 
   // A ticket order's, or one raised for a sponsor or a service - one run, one sheet.
   const ref = decodeURIComponent(reference).toUpperCase();
-  const order = await getInvoice(ref);
+  // ?n= names one of an order's partial credit notes; without it, the credit
+  // note of a full refund.
+  const partialNo = n && /^\d{1,12}$/.test(n) ? Number(n) : null;
+  const partial = partialNo ? await getPartialCreditNote(ref, partialNo) : null;
+  if (n && !partial) notFound();
+  const order = partial ?? (await getInvoice(ref));
   const inv = order ?? (await getDocumentInvoice(ref));
   if (!inv?.creditNoteNumber) notFound();
   const lang: Lang = langParam === "en" || (!langParam && inv.lang === "en") ? "en" : "bg";
@@ -55,7 +61,7 @@ export default async function CreditNotePage({
           </Link>
           <PrintButton />
         </div>
-        <CreditNoteDocument inv={inv} lang={lang} reason={order ? "reason" : "reasonDocument"} />
+        <CreditNoteDocument inv={inv} lang={lang} reason={partial ? "reasonPartial" : order ? "reason" : "reasonDocument"} />
       </div>
     </div>
   );

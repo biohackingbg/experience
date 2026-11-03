@@ -386,6 +386,13 @@
       "when": 1789000000053,
       "tag": "0054_promo_tiers",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1789000000054,
+      "tag": "0055_credit_notes_partial",
+      "breakpoints": true
     }
   ]
 }

@@ -63,6 +63,10 @@ const T = {
     "Основание: връщане на платената сума - отказ от поръчката. Сумата е възстановена по картата на купувача.",
     "Reason: refund of the amount paid - order cancelled. The amount was returned to the buyer's card.",
   ],
+  reasonPartial: [
+    "Основание: частично връщане на платената сума - отказ от част от билетите в поръчката. Сумата е възстановена по картата на купувача.",
+    "Reason: partial refund of the amount paid - part of the tickets in the order were cancelled. The amount was returned to the buyer's card.",
+  ],
   reasonDocument: [
     "Основание: анулиране на фактурата - издадена е по грешка или сделката не се е осъществила.",
     "Reason: the invoice is cancelled - it was issued in error or the deal did not take place.",
@@ -285,7 +289,7 @@ export function CreditNoteDocument({
   inv: InvoiceData;
   lang?: Lang;
   /** A ticket refund went back to a card; a sponsor or service invoice is simply annulled. */
-  reason?: "reason" | "reasonDocument";
+  reason?: "reason" | "reasonPartial" | "reasonDocument";
 }) {
   const dim = "text-bh-ink/65";
   const noteDate = inv.creditNotedAt ?? inv.issuedAt;
