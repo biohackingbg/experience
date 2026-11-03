@@ -52,8 +52,16 @@ export function SummitMovement({ lang = "bg" }: { lang?: Lang }) {
 
                 {rooms.map((r) => (
                   <div key={r.room}>
-                    <div className="border-t border-bh-ink/8 bg-bh-ink/[0.05] px-7 py-3">
+                    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-bh-ink/8 bg-bh-ink/[0.05] px-7 py-3">
                       <p className="font-mono text-[0.68rem] font-medium uppercase tracking-[0.12em] text-bh-pine">{r.room}</p>
+                      {r.partner && (
+                        // The studio's white wordmark on an ink pill, so it reads on the mint card in both themes.
+                        <span className="inline-flex items-center gap-2 rounded-full bg-bh-ink py-1.5 pl-3 pr-2.5 text-[0.62rem] font-medium uppercase tracking-[0.1em] text-bh-paper/80">
+                          {r.partner.label}
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={r.partner.logo} alt={r.partner.name} className="h-3.5 w-auto" />
+                        </span>
+                      )}
                     </div>
                     <ul>
                       {r.slots.map((s) => (

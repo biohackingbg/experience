@@ -25,7 +25,14 @@ export type MoveSlot = {
   workshop?: boolean;
 };
 
-export type MoveRoom = { room: string; slots: MoveSlot[] };
+export type MoveRoom = {
+  room: string;
+  /** The studio behind the whole room, shown in its header as "Pilates Reformer by <logo>". */
+  partner?: { label: string; logo: string; name: string };
+  slots: MoveSlot[];
+};
+
+const BODY_SPACE = { label: "Pilates Reformer & Lagree by", logo: "/partners/bodyspace-wordmark-white.png", name: "Body Space" };
 
 const body = (time: string, title: string, seats: number): MoveSlot => ({ time, title, by: "Body Space", seats });
 const workshops = (): MoveSlot[] => [
@@ -48,6 +55,7 @@ export const MOVEMENT_DAYS: MoveRoom[][] = [
     },
     {
       room: "Columbus 1",
+      partner: BODY_SPACE,
       slots: [
         body("10:30-11:10", "Reformer Reset", 6),
         body("11:40-12:20", "Lagree Burn", 4),
@@ -70,6 +78,7 @@ export const MOVEMENT_DAYS: MoveRoom[][] = [
     },
     {
       room: "Columbus 1",
+      partner: BODY_SPACE,
       slots: [
         body("10:30-11:10", "Lagree Burn", 4),
         body("11:40-12:20", "Reformer Reset", 6),
