@@ -117,8 +117,14 @@ export type InvoiceListRow = {
  * everything else, in one run. They share a numbering sequence, so showing
  * them apart would make the series look full of holes.
  */
-export async function listInvoices(range?: DateRange, limit = 200): Promise<InvoiceListRow[]> {
+export async function listInvoices(range?: DateRange, limit = 200, q?: string): Promise<InvoiceListRow[]> {
   const db = getDb();
+  // A search matches the number, the order reference, the buyer's name, email or company.
+  const term = q?.trim().replace(/[%_]/g, "") ?? "";
+  const like = `%${term}%`;
+  const search = term
+    ? [sql`(${orders.reference} ilike ${like} or ${orders.name} ilike ${like} or ${orders.email} ilike ${like} or coalesce(${orders.invoiceCompany}, '') ilike ${like} or ${orders.invoiceNumber}::text like ${like})`]
+    : [];
   const [ticketRows, documentRows] = await Promise.all([
     db
       .select({
@@ -136,15 +142,19 @@ export async function listInvoices(range?: DateRange, limit = 200): Promise<Invo
         creditNoteNumber: orders.creditNoteNumber,
       })
       .from(orders)
-      .where(sql.join([sql`${orders.invoiceNumber} is not null`, ...inRange("invoiced_at", range)], sql` and `))
+      .where(sql.join([sql`${orders.invoiceNumber} is not null`, ...inRange("invoiced_at", range), ...search], sql` and `))
       .orderBy(sql`${orders.invoiceNumber} desc`)
       .limit(limit),
     listDocumentInvoices(range),
   ]);
+  const lower = term.toLowerCase();
+  const documentsFound = term
+    ? documentRows.filter((d) => [d.reference, d.buyerName, d.buyerEmail, d.company ?? "", String(d.number)].some((v) => v.toLowerCase().includes(lower)))
+    : documentRows;
 
   const merged: InvoiceListRow[] = [
     ...ticketRows.map((r) => ({ ...r, isDocument: false })),
-    ...documentRows.map((d) => ({
+    ...documentsFound.map((d) => ({
       number: d.number,
       issuedAt: d.issuedAt,
       reference: d.reference,

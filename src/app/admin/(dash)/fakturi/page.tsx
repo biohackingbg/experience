@@ -31,7 +31,7 @@ const day = (v: string | undefined) => (v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v :
 export default async function InvoicesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ ot?: string; do?: string }>;
+  searchParams: Promise<{ ot?: string; do?: string; q?: string }>;
 }) {
   // The layout also checks, but a layout is not an auth boundary - the
   // Next docs are explicit that it may be skipped on RSC navigations.
@@ -40,7 +40,8 @@ export default async function InvoicesPage({
   const sp = await searchParams;
   const from = day(sp.ot);
   const to = day(sp.do);
-  const rows = await listInvoices({ from, to });
+  const q = sp.q?.trim().slice(0, 80) || undefined;
+  const rows = await listInvoices({ from, to }, 200, q);
   const partialNotes = await listPartialCreditNotes();
   const notesByOrder = new Map<string, typeof partialNotes>();
   for (const n of partialNotes) notesByOrder.set(n.reference, [...(notesByOrder.get(n.reference) ?? []), n]);
@@ -147,14 +148,15 @@ export default async function InvoicesPage({
               {m.label}
             </Link>
           ))}
-          {(from || to) && (
+          {q && <input type="hidden" name="q" value={q} />}
+          {(from || to || q) && (
             <Link href="/admin/fakturi" className="px-2 py-2 text-xs font-semibold text-bh-ink/55 underline underline-offset-2">
-              всички
+              {q ? `изчисти търсенето „${q}“` : "всички"}
             </Link>
           )}
           <span className="ml-auto text-xs text-bh-ink/55">
             {rows.length} {rows.length === 1 ? "фактура" : "фактури"}
-            {from || to ? " в периода" : " общо"}
+            {q ? ` за „${q}“` : from || to ? " в периода" : " общо"}
           </span>
         </form>
 

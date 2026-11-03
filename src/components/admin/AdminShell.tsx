@@ -3,6 +3,7 @@ import Link from "next/link";
 import { logout } from "@/app/admin/actions";
 import type { Access } from "@/lib/access";
 
+import { AdminSearch } from "./AdminSearch";
 import { MobileMenu } from "./MobileMenu";
 import { NavLink } from "./NavLink";
 import { RefreshStamp } from "./RefreshStamp";
@@ -178,15 +179,7 @@ export function AdminShell({ access, children }: { access: Access; children: Rea
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           <header className="flex flex-wrap items-center justify-between gap-3 rounded-[1.5rem] bg-[#f6f7f5] px-4 py-3">
             {(admin || access.scopes.includes("tablo")) ? (
-            <form action="/admin" method="get" className="flex min-w-[16rem] flex-1 items-center gap-3 rounded-full bg-white px-4 py-2.5 ring-1 ring-[#0b2a22]/8 sm:max-w-md">
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4 shrink-0 text-[#0b2a22]/50"><circle cx="9" cy="9" r="5.5"/><path d="M13.5 13.5 17 17" strokeLinecap="round"/></svg>
-              <input
-                type="search"
-                name="q"
-                placeholder="Търси поръчка: номер, имейл или име"
-                className="w-full bg-transparent text-sm text-[#0b2a22] outline-none placeholder:text-[#0b2a22]/40"
-              />
-            </form>
+            <AdminSearch />
             ) : (
               <div className="flex-1 text-sm text-[#0b2a22]/60">Sofia Life Summit · админ</div>
             )}
