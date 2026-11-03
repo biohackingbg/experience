@@ -157,7 +157,19 @@ export async function getPartialCreditNote(reference: string, number: number): P
   };
 }
 
-export type PartialCreditNoteRow = { number: number; issuedAt: Date; reference: string; totalCents: number; quantity: number; tierName: string };
+export type PartialCreditNoteRow = {
+  number: number;
+  issuedAt: Date;
+  reference: string;
+  /** The invoice it answers. */
+  invoiceNumber: number;
+  name: string;
+  email: string;
+  company: string | null;
+  totalCents: number;
+  quantity: number;
+  tierName: string;
+};
 
 /** Newest first, for the admin list. */
 export async function listPartialCreditNotes(): Promise<PartialCreditNoteRow[]> {
@@ -166,6 +178,10 @@ export async function listPartialCreditNotes(): Promise<PartialCreditNoteRow[]> 
       number: creditNotes.number,
       issuedAt: creditNotes.issuedAt,
       reference: orders.reference,
+      invoiceNumber: orders.invoiceNumber,
+      name: orders.name,
+      email: orders.email,
+      company: orders.invoiceCompany,
       totalCents: creditNotes.totalCents,
       items: creditNotes.items,
     })
@@ -176,6 +192,10 @@ export async function listPartialCreditNotes(): Promise<PartialCreditNoteRow[]> 
     number: r.number,
     issuedAt: r.issuedAt,
     reference: r.reference,
+    invoiceNumber: r.invoiceNumber ?? 0,
+    name: r.name,
+    email: r.email,
+    company: r.company,
     totalCents: r.totalCents,
     quantity: r.items.reduce((s, i) => s + i.quantity, 0),
     tierName: r.items.map((i) => i.tierName).join(", "),

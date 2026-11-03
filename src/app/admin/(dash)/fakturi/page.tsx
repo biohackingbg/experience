@@ -46,6 +46,22 @@ export default async function InvoicesPage({
   const notesByOrder = new Map<string, typeof partialNotes>();
   for (const n of partialNotes) notesByOrder.set(n.reference, [...(notesByOrder.get(n.reference) ?? []), n]);
 
+  // Credit notes are numbered from the same run as invoices, so they take
+  // their own place in the list - the same period and search apply to them.
+  const sofiaDay = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia" }).format(d);
+  const lower = q?.toLowerCase();
+  const creditRows = partialNotes.filter((n) => {
+    const d = sofiaDay(n.issuedAt);
+    if ((from && d < from) || (to && d > to)) return false;
+    if (!lower) return true;
+    return [n.reference, n.name, n.email, n.company ?? "", String(n.number), String(n.invoiceNumber)].some((v) => v.toLowerCase().includes(lower));
+  });
+  type Entry = { kind: "invoice"; number: number; row: (typeof rows)[number] } | { kind: "credit"; number: number; note: (typeof creditRows)[number] };
+  const entries: Entry[] = [
+    ...rows.map((row): Entry => ({ kind: "invoice", number: row.number ?? 0, row })),
+    ...creditRows.map((note): Entry => ({ kind: "credit", number: note.number, note })),
+  ].sort((a, b) => b.number - a.number);
+
   // The kinds of ticket on each order that is waiting for a credit note, for the form's tier choice.
   const waiting = rows.filter((r) => !r.isDocument && r.refundedCents && r.status !== "refunded" && !r.creditNoteNumber).map((r) => r.reference);
   const tiersByOrder = new Map<string, { id: string; name: string }[]>();
@@ -156,6 +172,7 @@ export default async function InvoicesPage({
           )}
           <span className="ml-auto text-xs text-bh-ink/55">
             {rows.length} {rows.length === 1 ? "фактура" : "фактури"}
+            {creditRows.length > 0 ? ` и ${creditRows.length} ${creditRows.length === 1 ? "кредитно" : "кредитни"}` : ""}
             {q ? ` за „${q}“` : from || to ? " в периода" : " общо"}
           </span>
         </form>
@@ -177,7 +194,37 @@ export default async function InvoicesPage({
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => (
+                {entries.map((e) =>
+                  e.kind === "credit" ? (
+                    <tr key={`ki-${e.number}`} className="border-t border-bh-ink/8 align-middle">
+                      <td className="py-3 pr-4 font-mono tabular-nums text-bh-ink">
+                        {String(e.number).padStart(10, "0")}
+                        <span className="block text-[0.65rem] text-bh-ink/40">{e.note.reference}</span>
+                      </td>
+                      <td className="py-3 pr-4 tabular-nums text-bh-ink/70">{bgDate(e.note.issuedAt)}</td>
+                      <td className="py-3 pr-4">
+                        <span className="font-medium text-bh-ink">{e.note.company ?? e.note.name}</span>
+                        <span className="ml-2 rounded-full bg-[#9c3d5c]/10 px-2 py-0.5 text-[0.62rem] font-semibold uppercase tracking-wide text-[#9c3d5c]">
+                          кредитно известие към № {String(e.note.invoiceNumber).padStart(10, "0")}
+                        </span>
+                        <span className="block text-xs text-bh-ink/50">
+                          {e.note.quantity} × {e.note.tierName} · {e.note.email}
+                        </span>
+                      </td>
+                      <td className="py-3 pr-4 text-right tabular-nums text-[#9c3d5c]">-{formatPrice(e.note.totalCents)} €</td>
+                      <td className="py-3">
+                        <a
+                          href={`/faktura/${e.note.reference}/kredit?n=${e.number}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="rounded-full bg-[#9c3d5c] px-3 py-1.5 text-xs font-semibold text-bh-paper"
+                        >
+                          Отвори
+                        </a>
+                      </td>
+                    </tr>
+                  ) : (
+                  (({ row: r }) => (
                   <tr
                     key={r.reference}
                     className="border-t border-bh-ink/8 align-middle"
@@ -255,7 +302,9 @@ export default async function InvoicesPage({
                       </div>
                     </td>
                   </tr>
-                ))}
+                  ))(e)
+                  ),
+                )}
               </tbody>
             </table>
           </div>
