@@ -18,6 +18,24 @@ import { type WorkshopKind, allowanceFor } from "@/lib/workshop-options";
  * (workshop-options.ts) instead of repeating it.
  */
 
+/**
+ * Booking opens 24 hours before the summit does (10:00 on Saturday, the
+ * start in the event's schema), so the places go to people who are coming,
+ * not to whoever got in first on the day the tickets were bought. Cancelling
+ * is never closed, and a place booked before this stays booked.
+ */
+export const BOOKING_OPENS_AT = new Date("2026-11-06T10:00:00+02:00");
+export const bookingOpen = () => Date.now() >= BOOKING_OPENS_AT.getTime();
+
+/** When it opens, in words, in Sofia time: "6 ноември в 10:00". */
+export function bookingOpensLabel(lang: "bg" | "en"): string {
+  const fmt = (o: Intl.DateTimeFormatOptions) =>
+    new Intl.DateTimeFormat(lang === "en" ? "en-GB" : "bg-BG", { timeZone: "Europe/Sofia", ...o }).format(BOOKING_OPENS_AT);
+  const date = fmt({ day: "numeric", month: "long" });
+  const time = fmt({ hour: "2-digit", minute: "2-digit", hour12: false });
+  return lang === "en" ? `${date} at ${time}` : `${date} в ${time}`;
+}
+
 export type Workshop = {
   id: string;
   kind: WorkshopKind;
@@ -110,9 +128,10 @@ export async function getTicketPlaces(code: string): Promise<TicketPlaces | null
 
 export type BookResult =
   | { ok: true }
-  | { ok: false; reason: "no_ticket" | "not_found" | "not_allowed" | "full" | "clash" | "already" | "closed" };
+  | { ok: false; reason: "no_ticket" | "not_found" | "not_allowed" | "full" | "clash" | "already" | "closed" | "not_open" };
 
 export async function bookPlace(code: string, workshopId: string): Promise<BookResult> {
+  if (!bookingOpen()) return { ok: false, reason: "not_open" };
   const db = getDb();
   const [t] = await db
     .select({ id: tickets.id, tierId: tickets.tierId })

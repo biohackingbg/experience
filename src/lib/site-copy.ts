@@ -437,6 +437,7 @@ export const TICKETS_SECTION: Copy<{
       ["Запазени места", "-", "-", "Премиум зона"],
       ["Работилници", "-", "Включени", "Включени с приоритет"],
       ["Специални преживявания", "-", "1 по избор", "Всички включени"],
+      ["Обяд", "-", "-", "Безплатен, през двата дни"],
       ["Goody bag", "-", "Стойност €100+", "Стойност €250+"],
       ["Premium Lounge", "-", "-", "Включен"],
       ["Meet & Greet с лектори", "-", "-", "Включен"],
@@ -471,6 +472,7 @@ export const TICKETS_SECTION: Copy<{
       ["Reserved seating", "-", "-", "Premium area"],
       ["Workshops", "-", "Included", "Included, with priority"],
       ["Special experiences", "-", "One of your choice", "All included"],
+      ["Lunch", "-", "-", "Free, on both days"],
       ["Goody bag", "-", "Worth €100+", "Worth €250+"],
       ["Premium Lounge", "-", "-", "Included"],
       ["Meet & Greet with speakers", "-", "-", "Included"],
@@ -521,12 +523,12 @@ export const TIER_FEATURES: Record<string, Copy<{ features: string[]; absent: st
   peak: {
     bg: {
       tagline: "Ограничени места",
-      features: ["Гарантиран достъп + премиум зона", "Работилници и преживявания с приоритет", "Goody bag на стойност €250+", "Premium Lounge", "Meet & Greet с лектори", "Приоритетен вход"],
+      features: ["Гарантиран достъп + премиум зона", "Работилници и преживявания с приоритет", "Безплатен обяд през двата дни", "Goody bag на стойност €250+", "Premium Lounge", "Meet & Greet с лектори", "Приоритетен вход"],
       absent: [],
     },
     en: {
       tagline: "Limited places",
-      features: ["Guaranteed access + premium area", "Workshops and experiences with priority", "Goody bag worth €250+", "Premium Lounge", "Meet & Greet with speakers", "Priority entrance"],
+      features: ["Guaranteed access + premium area", "Workshops and experiences with priority", "Free lunch on both days", "Goody bag worth €250+", "Premium Lounge", "Meet & Greet with speakers", "Priority entrance"],
       absent: [],
     },
   },

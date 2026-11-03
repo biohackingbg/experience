@@ -35,6 +35,7 @@ export function Workshops({
   sessions,
   booked,
   remaining,
+  opensLabel,
 }: {
   code: string;
   lang: Lang;
@@ -42,6 +43,8 @@ export function Workshops({
   sessions: Session[];
   booked: string[];
   remaining: Record<WorkshopKind, number | null>;
+  /** When booking opens, in words, while it is still shut; null once it is open. */
+  opensLabel: string | null;
 }) {
   const [state, action, pending] = useActionState(bookWorkshop, initial);
   const t = BOOKING[lang];
@@ -60,6 +63,9 @@ export function Workshops({
       ) : (
         <>
           <p className="mt-1 text-xs leading-relaxed text-bh-ink/55">{t.intro}</p>
+          {opensLabel && (
+            <p className="mt-3 rounded-2xl bg-bh-pine/10 px-4 py-3 text-sm font-medium text-bh-ink">{t.opensNote(opensLabel)}</p>
+          )}
           {mine.length > 0 && (
             <p className="mt-3 rounded-2xl bg-bh-paper px-4 py-3 text-sm text-bh-ink ring-1 ring-bh-ink/8">
               <span className="font-mono text-[0.62rem] uppercase tracking-[0.15em] text-bh-ink/50">{t.yours}</span>
@@ -85,13 +91,15 @@ export function Workshops({
                     const allowance = remaining[s.kind];
                     const reason = isBooked
                       ? null
-                      : s.left === 0
-                        ? t.full
-                        : clash(s)
-                          ? t.clash
-                          : allowance === 0
-                            ? (tierId === "core" ? t.notAllowed : t.usedUp)
-                            : null;
+                      : opensLabel
+                        ? t.notYet
+                        : s.left === 0
+                          ? t.full
+                          : clash(s)
+                            ? t.clash
+                            : allowance === 0
+                              ? (tierId === "core" ? t.notAllowed : t.usedUp)
+                              : null;
                     return (
                       <li key={s.id} className="flex flex-wrap items-start justify-between gap-3 py-3">
                         <div className="min-w-0">

@@ -7,7 +7,8 @@ import { chooseArrival } from "@/lib/arrivals";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { changeTicketDay } from "@/lib/ticket-day";
 import { setAttendeeName } from "@/lib/tickets-lookup";
-import { bookPlace, cancelPlace } from "@/lib/workshops";
+import { BOOKING } from "@/lib/i18n";
+import { bookPlace, bookingOpensLabel, cancelPlace } from "@/lib/workshops";
 
 export type AttendeeState = { status: "idle" | "ok" | "error"; message?: string };
 
@@ -46,7 +47,9 @@ export async function bookWorkshop(_prev: BookingState, formData: FormData): Pro
 
   const r = await bookPlace(code, workshopId);
   revalidatePath(`/bilet/${code}`);
-  return r.ok ? { status: "ok" } : { status: "error", message: BOOK_ERROR[r.reason][lang] };
+  if (r.ok) return { status: "ok" };
+  if (r.reason === "not_open") return { status: "error", message: BOOKING[lang].opensNote(bookingOpensLabel(lang)) };
+  return { status: "error", message: BOOK_ERROR[r.reason][lang] };
 }
 
 /**

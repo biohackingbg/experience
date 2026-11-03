@@ -30,6 +30,7 @@ export function isEmailConfigured(): boolean {
   return Boolean(process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
 }
 
+import { googleWalletConfigured } from "@/lib/google-wallet";
 import { walletConfigured } from "@/lib/wallet-pass";
 
 const SITE = "https://thelongevitysummit.eu";
@@ -42,11 +43,15 @@ const SITE = "https://thelongevitysummit.eu";
  */
 const REPLY_TO = process.env.EMAIL_REPLY_TO?.trim() || "hi@biohacking.bg";
 
-/** A small link under the ticket button; on an iPhone the file opens straight into Wallet. */
-const walletLink = (code: string, en: boolean, f: string) =>
-  walletConfigured()
-    ? `<div style="margin-top:8px"><a href="${SITE}/api/wallet/${code}" style="font:500 12px/1 ${f};color:#146455;text-decoration:underline">${en ? "Add to Apple Wallet" : "Добави в Apple Wallet"}</a></div>`
-    : "";
+/** Small links under the ticket button; on an iPhone the file opens straight into Wallet, on Android the link goes to Google Wallet. */
+const walletLink = (code: string, en: boolean, f: string) => {
+  const link = (href: string, text: string) =>
+    `<div style="margin-top:8px"><a href="${SITE}${href}" style="font:500 12px/1 ${f};color:#146455;text-decoration:underline">${text}</a></div>`;
+  return (
+    (walletConfigured() ? link(`/api/wallet/${code}`, en ? "Add to Apple Wallet" : "Добави в Apple Wallet") : "") +
+    (googleWalletConfigured() ? link(`/api/google-wallet/${code}`, en ? "Add to Google Wallet" : "Добави в Google Wallet") : "")
+  );
+};
 
 /**
  * The buyer's name is attacker-controlled at checkout and lands inside HTML.

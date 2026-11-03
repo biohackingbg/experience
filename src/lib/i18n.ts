@@ -112,11 +112,11 @@ export const CHECKOUT = {
 
 export const TICKET_PAGE = {
   bg: { ticketFor: "Билет за", show: "Покажи този код на входа", when: "Кога", where: "Къде", attendee: "Участник", order: "Поръчка", used: "Този билет вече е използван на", keep: "Запази страницата или я разпечатай. Билетът важи за един човек.", dates: "07-08 ноември 2026", venue: "Гранд Хотел Милениум, София",
-    whoTitle: "Име на участника", whoAsk: "За кого е този билет?", whoHint: "Ако билетът е за друг човек, напиши името му - така ще го намерим на входа и баджът ще е с неговото име. Ако е за теб, остави празно.", whoPlaceholder: "Име и фамилия", save: "Запиши", saving: "Записва…", wallet: "Добави в Apple Wallet", walletHint: "На iPhone билетът се появява сам на заключения екран в деня на събитието.",
+    whoTitle: "Име на участника", whoAsk: "За кого е този билет?", whoHint: "Ако билетът е за друг човек, напиши името му - така ще го намерим на входа и баджът ще е с неговото име. Ако е за теб, остави празно.", whoPlaceholder: "Име и фамилия", save: "Запиши", saving: "Записва…", googleWallet: "Добави в Google Wallet", googleHint: "В Google Wallet билетът е винаги под ръка, дори без интернет.", install: "Добави на началния екран", installHint: "Билетът ще се отваря като приложение и без интернет.", wallet: "Добави в Apple Wallet", walletHint: "На iPhone билетът се появява сам на заключения екран в деня на събитието.",
     arrivalTitle: "Час за влизане", arrivalHint: "Избери кога ще дойдеш, за да няма опашка на входа и баджът ти да е готов. Билетът важи по всяко време - това е само уговорка за сутринта.", arrivalChosen: "Избрано", arrivalFree: "свободни", arrivalFull: "пълно", arrivalPick: "Избери час",
     dayTitle: "Ден на посещение", dayAskNone: "Избери за кой ден е билетът", dayHint: "CORE важи за един от двата дни, а програмата в събота и в неделя е различна. Можеш да смениш деня безплатно до началото на събитието; QR кодът остава същият.", dayCurrent: "Сега", dayPick: "Избери" },
   en: { ticketFor: "Ticket for", show: "Show this code at the entrance", when: "When", where: "Where", attendee: "Attendee", order: "Order", used: "This ticket was already used on", keep: "Save this page or print it. One ticket admits one person.", dates: "7-8 November 2026", venue: "Grand Hotel Millennium, Sofia",
-    whoTitle: "Attendee name", whoAsk: "Who is this ticket for?", whoHint: "If the ticket is for someone else, write their name - that is how we find them at the entrance and print their badge. If it is for you, leave it empty.", whoPlaceholder: "Full name", save: "Save", saving: "Saving…", wallet: "Add to Apple Wallet", walletHint: "On iPhone the ticket shows up on the lock screen by itself on the day.",
+    whoTitle: "Attendee name", whoAsk: "Who is this ticket for?", whoHint: "If the ticket is for someone else, write their name - that is how we find them at the entrance and print their badge. If it is for you, leave it empty.", whoPlaceholder: "Full name", save: "Save", saving: "Saving…", googleWallet: "Add to Google Wallet", googleHint: "In Google Wallet the ticket is always at hand, even with no signal.", install: "Add to home screen", installHint: "The ticket opens like an app, even with no signal.", wallet: "Add to Apple Wallet", walletHint: "On iPhone the ticket shows up on the lock screen by itself on the day.",
     arrivalTitle: "Arrival time", arrivalHint: "Pick when you will come, so there is no queue at the door and your badge is ready. The ticket admits at any time - this only spreads the morning.", arrivalChosen: "Chosen", arrivalFree: "free", arrivalFull: "full", arrivalPick: "Pick a time",
     dayTitle: "Day of your visit", dayAskNone: "Choose which day this ticket is for", dayHint: "CORE admits one of the two days, and Saturday and Sunday have different programmes. You can change the day for free until the event starts; the QR code stays the same.", dayCurrent: "Now", dayPick: "Choose" },
 } as const;
@@ -167,6 +167,8 @@ export const BOOKING = {
     none: "Записването отваря скоро - ще пишем на купувачите, щом програмата се отвори.",
     coreNote: "Работилниците и преживяванията са включени в PLUS и PEAK.",
     yours: "Твоята програма",
+    opensNote: (when: string) => `Записването се отваря на ${when}, 24 часа преди началото. До тогава можеш да разгледаш какво предстои.`,
+    notYet: "Отваря скоро",
   },
   en: {
     title: "Workshops and experiences",
@@ -186,6 +188,8 @@ export const BOOKING = {
     none: "Booking opens soon - we will write to ticket holders when it does.",
     coreNote: "Workshops and experiences are included with PLUS and PEAK.",
     yours: "Your programme",
+    opensNote: (when: string) => `Booking opens on ${when}, 24 hours before the summit starts. Until then you can look through what is coming.`,
+    notYet: "Opens soon",
   },
 } as const;
 
