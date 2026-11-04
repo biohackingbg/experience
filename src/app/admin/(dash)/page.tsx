@@ -29,8 +29,6 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 const GREEN = "#146455";
-// The gift blue of the tier bars, so a given-away seat reads the same on both cards.
-const GIFT_BLUE = GIFT_COLOR;
 const HATCH =
   "repeating-linear-gradient(135deg, #c9cfca 0 2px, transparent 2px 7px)";
 
@@ -210,20 +208,17 @@ function WeekStrip({ week }: { week: WeekDay[] }) {
 }
 
 /**
- * Half-ring: the taken share of the room - sold in green, given away in the
- * gift blue of the tier bars, drawn on top of the sales - the rest hatched.
- * Number and caption are SVG text, so they scale with the ring and never
- * collide with it on a phone. The fills keep the same round caps as the
- * track, so their start sits exactly inside the track's rounded end; a tiny
- * share is stretched to a short pill rather than left as a dot.
+ * Half-ring: the taken share of the room - every seat with a ticket on it,
+ * sold or given - the rest hatched. Number and caption are SVG text, so
+ * they scale with the ring and never collide with it on a phone. The fill
+ * keeps the same round caps as the track, so its start sits exactly inside
+ * the track's rounded end; a tiny share is stretched to a short pill rather
+ * than left as a dot.
  */
-function Gauge({ soldPct, freePct }: { soldPct: number; freePct: number }) {
+function Gauge({ pct }: { pct: number }) {
   const r = 80;
   const c = Math.PI * r; // half circumference
-  const sold = Math.min(100, Math.max(0, soldPct)) / 100;
-  const taken = Math.min(100, Math.max(0, soldPct + freePct)) / 100;
-  const pct = Math.round(taken * 100);
-  const soldLen = sold > 0 ? Math.max(sold * c, 6) : 0;
+  const taken = Math.min(100, Math.max(0, pct)) / 100;
   const takenLen = taken > 0 ? Math.max(taken * c, 6) : 0;
   return (
     <svg viewBox="0 0 200 118" className="mx-auto mt-2 w-full max-w-[17rem]" role="img" aria-label={`${pct}% от залата е заета`}>
@@ -233,12 +228,8 @@ function Gauge({ soldPct, freePct }: { soldPct: number; freePct: number }) {
         </pattern>
       </defs>
       <path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="url(#hatch)" strokeWidth="26" strokeLinecap="round" />
-      {/* The gift arc runs to the taken share and the sold arc covers its start, so the blue shows only past the sales. */}
-      {taken > sold && (
-        <path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke={GIFT_BLUE} strokeWidth="26" strokeLinecap="round" strokeDasharray={`${takenLen} ${c + 30}`} />
-      )}
-      {sold > 0 && (
-        <path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke={GREEN} strokeWidth="26" strokeLinecap="round" strokeDasharray={`${soldLen} ${c + 30}`} />
+      {taken > 0 && (
+        <path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke={GREEN} strokeWidth="26" strokeLinecap="round" strokeDasharray={`${takenLen} ${c + 30}`} />
       )}
       <text x="100" y="88" textAnchor="middle" fontSize="34" fontWeight="900" fill="#0b2a22" fontFamily="inherit" letterSpacing="-1">
         {pct}%
@@ -496,10 +487,9 @@ export default async function AdminDashboard({
       <div className="mt-4 grid gap-4 xl:grid-cols-4">
         <section className="rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6">
           <h2 className="text-lg font-bold tracking-tight">Запълване</h2>
-          <Gauge soldPct={soldPct} freePct={d.capacityTotal ? (d.ticketsComped / d.capacityTotal) * 100 : 0} />
+          <Gauge pct={d.capacityTotal ? Math.round(((d.ticketsSold + d.ticketsComped) / d.capacityTotal) * 100) : 0} />
           <div className="mt-5 flex flex-wrap justify-center gap-4 text-xs text-[#0b2a22]/65">
-            <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-[#146455]" />продадени {d.ticketsSold}</span>
-            <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-full" style={{ background: GIFT_BLUE }} />безплатни {d.ticketsComped}</span>
+            <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-[#146455]" />заети {d.ticketsSold + d.ticketsComped}</span>
             <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-[#c9cfca]" />свободни {seatsLeft}</span>
           </div>
         </section>
