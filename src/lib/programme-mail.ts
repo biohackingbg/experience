@@ -27,6 +27,9 @@ async function buyers(): Promise<Buyer[]> {
     select distinct on (lower(${orders.email})) lower(${orders.email}) as email, ${orders.name} as name, ${orders.lang} as lang
     from ${orders}
     where ${orders.status} = 'paid' and not ${orders.isTest}
+      -- An order without a usable address (a bank transfer typed in by hand)
+      -- would make the provider refuse the whole batch of a hundred.
+      and ${orders.email} ~ '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$'
     order by lower(${orders.email}), ${orders.createdAt} desc`);
   // Every ticket the address bought, so a buyer of several sees them all and can hand each on.
   const tix = await getDb()
