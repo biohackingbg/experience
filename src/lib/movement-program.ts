@@ -13,6 +13,8 @@
  */
 
 type Pair = { bg: string; en: string };
+/** The studio or brand behind a class or a station, shown as "powered by <logo>". */
+export type Backer = { name: string; logo: string };
 
 export type MoveSlot = {
   /** As printed: "10:30-11:15". */
@@ -22,6 +24,8 @@ export type MoveSlot = {
   /** Who leads it ("Алекс", "д-р Виолета Азис"); `by` is the studio or brand, shown after the name. */
   host?: string;
   by?: string;
+  /** The brand behind this one slot, when the room as a whole has none. */
+  partner?: Backer;
   seats: number;
   /** "up to 30 seats" - the room is bigger than the group it takes. */
   upTo?: boolean;
@@ -37,9 +41,12 @@ export type MoveRoom = {
 };
 
 const BODY_SPACE = { label: "Pilates Reformer & Lagree by", logo: "/partners/bodyspace-wordmark-white.png", name: "Body Space" };
+const MOVEZ: Backer = { name: "MOVEZ", logo: "/partners/movez-white.png" };
+const AGEHACK: Backer = { name: "AgeHack", logo: "/partners/agehack-white.png" };
+const TIANA: Backer = { name: "Tiana Presolska", logo: "/partners/tiana-presolska-white.png" };
 
 const body = (time: string, title: string, host: string, seats: number): MoveSlot => ({ time, title, host, by: "Body Space", seats });
-const movez = (time: string, title: string): MoveSlot => ({ time, title, host: "Тодор Захариев", by: "MOVEZ", seats: 30 });
+const movez = (time: string, title: string): MoveSlot => ({ time, title, host: "Тодор Захариев", partner: MOVEZ, seats: 30 });
 const maya = (time: string, title: string, upTo = false): MoveSlot => ({ time, title, host: "Мая Пауновска", seats: 30, upTo });
 const yoga = (time: string): MoveSlot => ({ time, title: "Morning Yoga Flow", host: "Александра Михайлова", seats: 30 });
 
@@ -110,8 +117,14 @@ export const MOVEMENT_DAYS: MoveRoom[][] = [
   ],
 ];
 
+/** The bookable workshops, in programme order, with the day they fall on (0 = Saturday). */
+export const WORKSHOPS = MOVEMENT_DAYS.flatMap((rooms, day) =>
+  rooms.flatMap((r) => r.slots.filter((s) => s.workshop).map((s) => ({ ...s, day, room: r.room }))),
+);
+
 export type Station = {
   zone: string;
+  partner?: Backer;
   items: { name: string; sub?: Pair }[];
   facts?: Pair;
   note?: Pair;
@@ -121,18 +134,21 @@ export type Station = {
 export const STATIONS: Station[] = [
   {
     zone: "Columbus 2",
+    partner: AGEHACK,
     items: [{ name: "REV × POWER", sub: { bg: "REV Cycling + Power Plate", en: "REV Cycling + Power Plate" } }],
     facts: { bg: "15 мин, 3 места REV и 6 Power Plate", en: "15 min, 3 seats REV and 6 Power Plate" },
     note: { bg: "Сесии на всеки 25 минути, 10:30-17:25, с обедна почивка", en: "Sessions every 25 minutes, 10:30-17:25, with a lunch break" },
   },
   {
     zone: "Щанд D4",
+    partner: TIANA,
     items: [{ name: "SCANECA 3D + INBODY", sub: { bg: "Body Assessment", en: "Body Assessment" } }],
     facts: { bg: "20 мин, 1 човек", en: "20 min, 1 person" },
     note: { bg: "Индивидуални часове 10:00-16:40, и двата дни", en: "Individual slots 10:00-16:40, both days" },
   },
   {
     zone: "Щанд D4",
+    partner: TIANA,
     items: [
       { name: "ENDOSPHERES", sub: { bg: "Терапия, само в събота", en: "Therapy, Saturday only" } },
       { name: "EMSELLA", sub: { bg: "Терапия, и двата дни", en: "Therapy, both days" } },

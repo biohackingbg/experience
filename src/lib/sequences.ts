@@ -168,7 +168,7 @@ async function settle(id: string, emailId: string | null): Promise<void> {
 const unsub = (email: string) => ({ url: unsubscribeUrl(email), postUrl: unsubscribePostUrl(email) });
 
 /** Sends one letter under a claimed slot; false when the slot was taken or the send failed. */
-async function deliver(kind: string, target: string, to: string, letter: Letter, dry: boolean): Promise<boolean> {
+export async function deliver(kind: string, target: string, to: string, letter: Letter, dry: boolean): Promise<boolean> {
   if (dry) return true;
   const id = await claim(kind, target, to);
   if (!id) return false;

@@ -43,6 +43,7 @@ function Err({ children }: { children?: string }) {
  */
 export function CheckoutForm({
   initialTier,
+  initialPromo,
   prices,
   soldOut = [],
   lang = "bg",
@@ -52,6 +53,8 @@ export function CheckoutForm({
   offerNote,
 }: {
   initialTier?: string;
+  /** A code carried in the link (a letter's button): filled in and checked on arrival. */
+  initialPromo?: string;
   /** A discounted stage is on: list prices are struck on the cards. */
   discounted?: boolean;
   /** The condition under which the struck price applies, e.g. "след първите 200 билета". */
@@ -121,7 +124,7 @@ export function CheckoutForm({
   const [quantity, setQuantity] = useState(1);
   const [day, setDay] = useState(1);
   const [wantsInvoice, setWantsInvoice] = useState(false);
-  const [promoInput, setPromoInput] = useState("");
+  const [promoInput, setPromoInput] = useState(initialPromo?.toUpperCase() ?? "");
   const [promo, setPromo] = useState<PromoPreview | null>(null);
   const [checking, setChecking] = useState(false);
 
@@ -162,6 +165,13 @@ export function CheckoutForm({
       setChecking(false);
     }
   };
+  useEffect(() => {
+    // Once, on arrival: the code came with the link, so it is checked as if typed.
+    if (!initialPromo) return;
+    const t = setTimeout(() => void applyPromo(), 0);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <form

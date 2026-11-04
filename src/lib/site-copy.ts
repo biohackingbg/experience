@@ -336,28 +336,37 @@ export const MOVEMENT_SECTION: Copy<{
   stations: string;
   rooms: string;
   workshop: string;
+  workshops: string;
+  experiences: string;
+  poweredBy: string;
   seats: (n: number, upTo?: boolean) => string;
   withHost: string;
 }> = {
   bg: {
     eyebrow: "Зали и станции",
-    title: "Движение и възстановяване",
+    title: "Workshops и experiences",
     intro:
-      "Докато на сцената вървят лекциите, залите Newton и Columbus и станциите за измерване и възстановяване работят през целия ден. Местата са ограничени.",
+      "Докато на сцената вървят лекциите, залите Newton и Columbus и станциите за измерване и възстановяване работят през целия ден. Местата са ограничени и се записват в приложението или от страницата на билета.",
     stations: "Станции, и двата дни",
     rooms: "Зали Newton и Columbus 1",
     workshop: "Workshop",
+    workshops: "Workshops",
+    experiences: "Experiences",
+    poweredBy: "powered by",
     seats: (n, upTo) => `${upTo ? "до " : ""}${n} места`,
     withHost: "с",
   },
   en: {
     eyebrow: "Rooms and stations",
-    title: "Movement and recovery",
+    title: "Workshops and experiences",
     intro:
-      "While the stage runs the talks, the Newton and Columbus rooms and the measurement and recovery stations are open all day. Places are limited.",
+      "While the stage runs the talks, the Newton and Columbus rooms and the measurement and recovery stations are open all day. Places are limited and are booked in the app or from your ticket page.",
     stations: "Stations, both days",
     rooms: "Newton and Columbus 1 rooms",
     workshop: "Workshop",
+    workshops: "Workshops",
+    experiences: "Experiences",
+    poweredBy: "powered by",
     seats: (n, upTo) => `${upTo ? "up to " : ""}${n} seats`,
     withHost: "with",
   },

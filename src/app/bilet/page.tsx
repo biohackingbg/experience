@@ -22,9 +22,9 @@ export const dynamic = "force-dynamic";
 export default async function CheckoutPage({
   searchParams,
 }: {
-  searchParams: Promise<{ nivo?: string; otkazano?: string; utm_source?: string; utm_campaign?: string; lang?: string }>;
+  searchParams: Promise<{ nivo?: string; otkazano?: string; utm_source?: string; utm_campaign?: string; lang?: string; promo?: string }>;
 }) {
-  const { nivo, otkazano, utm_source, utm_campaign, lang: langRaw } = await searchParams;
+  const { nivo, otkazano, utm_source, utm_campaign, lang: langRaw, promo } = await searchParams;
   const lang = langOf(langRaw);
   const t = CHECKOUT[lang];
   const testMode = isTestMode();
@@ -112,6 +112,7 @@ export default async function CheckoutPage({
             the first card, unless the link asked for a tier (?nivo=plus). */}
         <CheckoutForm
           initialTier={nivo ?? "core"}
+          initialPromo={promo && /^[A-Za-z0-9-]{3,32}$/.test(promo) ? promo : undefined}
           prices={pricing.prices}
           soldOut={soldOut}
           lang={lang}

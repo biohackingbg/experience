@@ -124,6 +124,28 @@ export function abandoned2(i: Abandoned2Input): Letter {
 }
 
 /* ------------------------------------------------------------------ *
+ * 1b · Abandoned checkout, the last-week offer (sent by hand, once)
+ * ------------------------------------------------------------------ */
+
+export type AbandonedOfferInput = { name: string; items: string; tierId: string; code: string; percent: number; unsubUrl: string };
+
+export function abandonedOfferLetter(i: AbandonedOfferInput): Letter {
+  const url = `${SITE}/bilet?nivo=${encodeURIComponent(i.tierId)}&promo=${encodeURIComponent(i.code)}&utm_source=email&utm_campaign=abandoned-offer`;
+  const lines = [
+    `${hi(i.name)} Преди време започна поръчка за **${i.items}** за Sofia Life Summit, но плащането не мина. Нищо не е таксувано.`,
+    `Събитието е този уикенд, 7 и 8 ноември в Гранд Хотел Милениум, и още има места. За да дойдеш, ти даваме **-${i.percent}% на всеки билет** с код **${i.code}**. Кодът важи до четвъртък, 6 ноември, 23:59.`,
+    `През бутона кодът е попълнен сам; иначе го напиши в полето „Промо код“ на страницата с билетите. Ако нещо те спира - ден, програма, въпрос - отговори на това писмо.`,
+  ];
+  return frame({
+    subject: `-${i.percent}% за билета ти до 6 ноември`,
+    bodyHtml: para(lines[0]) + para(lines[1]) + button(`Вземи билет с -${i.percent}%`, url) + para(lines[2]),
+    bodyText: [plain(lines[0]), "", plain(lines[1]), "", `Вземи билет с -${i.percent}%: ${url}`, "", lines[2]],
+    why: "Получаваш това писмо, защото започна поръчка за билет на thelongevitysummit.eu и не я завърши.",
+    unsubUrl: i.unsubUrl,
+  });
+}
+
+/* ------------------------------------------------------------------ *
  * 2 + 3 · Upgrade: pay the difference
  * ------------------------------------------------------------------ */
 

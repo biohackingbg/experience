@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { OFFER, sendOfferAll, sendOfferTest } from "@/lib/abandoned-offer";
 import { canAccess } from "@/lib/access";
 import { sendInfoMail, sendInfoMailTest } from "@/lib/event-mail";
 import { MAIL_SLOTS, saveMailTexts } from "@/lib/mail-texts";
@@ -201,4 +202,25 @@ export async function sendMedAll(): Promise<MailState> {
   revalidatePath("/admin/pisma");
   if (r.failed) return { status: "error", message: `Изпратени ${r.sent}, неуспешни ${r.failed}. Остават ${r.remaining} - натисни пак.` };
   return { status: "ok", message: r.sent ? `Изпратени ${r.sent}. Остават ${r.remaining}.` : "Няма на кого - всички са получили писмото." };
+}
+
+/* ------------------------------------------------------------------ *
+ * The last-week offer to abandoned checkouts
+ * ------------------------------------------------------------------ */
+
+export async function sendOfferTestAction(_prev: MailState, formData: FormData): Promise<MailState> {
+  if (!(await canAccess("pisma"))) return { status: "error", message: "Няма достъп." };
+  const to = String(formData.get("to") ?? "").trim().toLowerCase();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)) return { status: "error", message: "Невалиден имейл." };
+  const ok = await sendOfferTest(to);
+  return ok ? { status: "ok", message: `Пробата е изпратена до ${to}.` } : { status: "error", message: "Изпращането не мина. Провери дневника." };
+}
+
+export async function sendOfferAllAction(): Promise<MailState> {
+  if (!(await canAccess("pisma"))) return { status: "error", message: "Няма достъп." };
+  const r = await sendOfferAll();
+  revalidatePath("/admin/pisma");
+  revalidatePath("/admin/promo");
+  const tail = r.failed.length ? ` Не минаха: ${r.failed.join(", ")}.` : "";
+  return { status: r.failed.length ? "error" : "ok", message: `Изпратени ${r.sent} с код ${OFFER.code}.${tail}` };
 }
