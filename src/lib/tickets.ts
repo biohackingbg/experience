@@ -149,7 +149,7 @@ export const TIERS: Tier[] = [
     name: "CORE",
     earlyPriceCents: 3500,
     listPriceCents: 6900,
-    capacity: 700,
+    capacity: 650,
     features: [
       "Един ден по избор",
       "Лекции при наличие на места",
