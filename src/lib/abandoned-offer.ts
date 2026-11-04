@@ -3,7 +3,7 @@ import "server-only";
 import { sql } from "drizzle-orm";
 
 import { getDb } from "@/lib/db";
-import { emailSends, orderItems, orders } from "@/lib/db/schema";
+import { emailSends, orderItems, orders, promoCodes } from "@/lib/db/schema";
 import { sendSequenceMail } from "@/lib/email";
 import { createPromo } from "@/lib/promo";
 import { abandonedOfferLetter } from "@/lib/sequence-letters";
@@ -20,7 +20,7 @@ export const OFFER = {
   kind: "abandoned-offer",
   code: "SLS40",
   percent: 40,
-  until: new Date("2026-11-06T23:59:00+02:00"),
+  until: new Date("2026-11-05T00:00:00+02:00"),
 } as const;
 
 export type OfferRecipient = { reference: string; name: string; email: string; items: string; tierId: string; sent: boolean };
@@ -66,9 +66,9 @@ export async function listOfferRecipients(): Promise<OfferRecipient[]> {
   });
 }
 
-/** The code the letter promises, made once; a second press finds it there. */
+/** The code the letter promises, made once; a second press finds it there and keeps its deadline current. */
 export async function ensureOfferCode(): Promise<void> {
-  await createPromo({
+  const r = await createPromo({
     code: OFFER.code,
     kind: "percent",
     value: OFFER.percent,
@@ -77,6 +77,7 @@ export async function ensureOfferCode(): Promise<void> {
     note: "Писмото до недовършените поръчки, 4 ноември",
     tiers: null,
   });
+  if (r === "exists") await getDb().update(promoCodes).set({ validUntil: OFFER.until, active: true }).where(sql`${promoCodes.code} = ${OFFER.code}`);
 }
 
 const letterFor = (r: Pick<OfferRecipient, "name" | "items" | "tierId" | "email">) =>

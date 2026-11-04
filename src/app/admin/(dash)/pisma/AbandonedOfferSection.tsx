@@ -24,7 +24,7 @@ export async function AbandonedOfferSection() {
       </h2>
       <p className="mt-2 max-w-2xl text-sm leading-relaxed text-bh-ink/60">
         До всеки, който е започнал поръчка с карта и не я е платил, без тези, които после са купили или са се отписали. Едно писмо на адрес, с код{" "}
-        <span className="font-mono font-semibold text-bh-ink">{OFFER.code}</span> за -{OFFER.percent}% на всички билети до {bgWhen(OFFER.until)}. Кодът се прави сам при първото пращане и се вижда в Промо кодове.
+        <span className="font-mono font-semibold text-bh-ink">{OFFER.code}</span> за -{OFFER.percent}% на всички билети до {bgWhen(OFFER.until)} (полунощ след 4 ноември). Кодът се прави сам при първото пращане и се вижда в Промо кодове.
       </p>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
