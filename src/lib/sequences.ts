@@ -288,7 +288,7 @@ async function runUpgrade(rule: UpgradeRule, dry: boolean, now: Date, pricing: P
   // Orders with at least one ticket of the lower tier that is still unused;
   // the upgrade orders themselves (upgradesTicketCode) never qualify.
   const rows = await db
-    .select({ id: orders.id, reference: orders.reference, name: orders.name, email: orders.email })
+    .select({ id: orders.id, reference: orders.reference, name: orders.name, email: orders.email, lang: orders.lang })
     .from(orders)
     .where(
       sql`${SOLD} and ${orders.upgradesTicketCode} is null and ${orders.totalCents} > 0
@@ -309,7 +309,7 @@ async function runUpgrade(rule: UpgradeRule, dry: boolean, now: Date, pricing: P
     const list = await upgradableTickets(r.id, rule.from, targetCents);
     if (list.length === 0) continue;
     const letter = upgradeLetter(
-      { name: r.name, from: rule.from, to: rule.to, tickets: list, left, pricing, unsubUrl: unsubscribeUrl(r.email) },
+      { name: r.name, from: rule.from, to: rule.to, tickets: list, left, pricing, unsubUrl: unsubscribeUrl(r.email), lang: r.lang === "en" ? "en" : "bg" },
       rule.step,
     );
     if (await deliver(rule.kind, r.reference, r.email, letter, dry)) to.push(r.email);

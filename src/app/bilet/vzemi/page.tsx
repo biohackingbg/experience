@@ -15,13 +15,13 @@ const T = {
   bg: {
     back: "Към сайта",
     title: "Добави билета си",
-    intro: "Някой ти е купил билет? Въведи номера му, името си и имейла си. Пращаме ти код, за да потвърдиш имейла, и билетът става твой: виждаш го в приложението и сам си записваш workshops и experiences. Баджът на входа е с твоето име.",
+    intro: "Въведи номера на билета, името си и имейла си. Пращаме ти код, за да потвърдиш имейла, и билетът става твой: виждаш го в приложението с QR кода за входа, а с PLUS и PEAK си записваш workshops и experiences. Регистрирай го до 6 ноември, 00:00.",
     help: "Номерът е на билета, във вида ABCD-EFGH. Ако не го намираш, помоли човека, който е купил билета.",
   },
   en: {
     back: "Back to the site",
     title: "Add your ticket",
-    intro: "Someone bought you a ticket? Enter its number, your name and your email. We send you a code to confirm the address, and the ticket is yours: you see it in the app and book your own workshops and experiences. Your badge carries your name.",
+    intro: "Enter the ticket number, your name and your email. We send you a code to confirm the address, and the ticket is yours: you see it in the app with its QR code for the entrance, and with PLUS or PEAK you book workshops and experiences. Register it by 00:00 on 6 November.",
     help: "The number is on the ticket, in the form ABCD-EFGH. If you cannot find it, ask the person who bought the ticket.",
   },
 } as const;

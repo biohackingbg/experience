@@ -4,6 +4,8 @@ import { headers } from "next/headers";
 
 import { requestLoginCode, verifyEmailCode } from "@/lib/app-auth";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { sendClaimedEmail } from "@/lib/email";
+import { getTier } from "@/lib/tickets";
 import { claimTicket, findTicket } from "@/lib/tickets-lookup";
 
 export type ClaimState =
@@ -66,7 +68,12 @@ export async function claimStep(prev: ClaimState, formData: FormData): Promise<C
     const r = await verifyEmailCode(prev.email, String(formData.get("pin") ?? ""));
     if (r !== "ok") return { ...prev, error: r === "expired" ? w.expired : r === "too_many" ? w.codeTries : w.badCode };
     const c = await claimTicket(prev.code, prev.name, prev.email);
-    if (c === "ok") return { step: "done", email: prev.email, name: prev.name };
+    if (c === "ok") {
+      // The way into the app, in writing: the page is closed sooner than the mail.
+      const t = await findTicket(prev.code);
+      await sendClaimedEmail({ to: prev.email, name: prev.name, code: prev.code, tierName: getTier(t?.tierId ?? "")?.name ?? t?.tierName ?? "", lang });
+      return { step: "done", email: prev.email, name: prev.name };
+    }
     return { step: "details", code: prev.code, name: prev.name, email: prev.email, error: c === "used" ? w.used : c === "taken" ? w.taken : w.notFound };
   }
 

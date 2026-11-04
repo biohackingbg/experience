@@ -5,11 +5,12 @@
  * sample data without touching the database.
  */
 
-import { APP_LINK, WEB_APP_URL } from "@/lib/app-links";
+import { WEB_APP_URL } from "@/lib/app-links";
+import { latin } from "@/lib/latin";
 import { MOVEMENT_DAYS, STATIONS, WORKSHOPS } from "@/lib/movement-program";
 import type { Day } from "@/lib/program";
 import { type Pricing, priceOf } from "@/lib/pricing";
-import { CONCEPT_TOTAL } from "@/lib/site-copy";
+import { CONCEPT_TOTAL, TIER_FEATURES } from "@/lib/site-copy";
 import { TIERS, type Tier, dayLabel, formatPrice, getTier } from "@/lib/tickets";
 
 const SITE = "https://thelongevitysummit.eu";
@@ -44,29 +45,33 @@ function bullets(items: string[]): string {
  * subject as the heading, the body, and a footer that says why this person
  * is getting it and how to stop - the link is a one-click unsubscribe.
  */
-function frame(input: { subject: string; bodyHtml: string; bodyText: string[]; why: string; unsubUrl: string }): Letter {
-  const html = `<!doctype html><html lang="bg"><body style="margin:0;background:#f1f5f3;padding:28px 16px">
+function frame(input: { subject: string; bodyHtml: string; bodyText: string[]; why: string; unsubUrl: string; lang?: "bg" | "en" }): Letter {
+  const en = input.lang === "en";
+  const L = en
+    ? { dates: "Sofia Life Summit · 7-8 November", venue: "Grand Hotel Millennium, 89B Vitosha Blvd, Sofia", ask: "Questions: reply to this email or write to hi@biohacking.bg.", stop: "No more emails", textDates: "Sofia Life Summit · 7-8 November 2026 · Grand Hotel Millennium, 89B Vitosha Blvd, Sofia", textAsk: "Questions: hi@biohacking.bg", textStop: "No more emails" }
+    : { dates: "Sofia Life Summit · 07-08 ноември", venue: "Гранд Хотел Милениум, бул. „Витоша“ 89Б, София", ask: "Въпроси: отговори на това писмо или пиши на hi@biohacking.bg.", stop: "Не искам повече писма", textDates: "Sofia Life Summit · 07-08 ноември 2026 · Гранд Хотел Милениум, бул. „Витоша“ 89Б, София", textAsk: "Въпроси: hi@biohacking.bg", textStop: "Не искам повече писма" };
+  const html = `<!doctype html><html lang="${en ? "en" : "bg"}"><body style="margin:0;background:#f1f5f3;padding:28px 16px">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:20px;padding:32px">
     <tr><td>
       <img src="${SITE}/email-logo.png" width="200" height="54" alt="Biohacking Experience" style="display:block;border:0;outline:none;text-decoration:none;width:200px;height:auto;margin:0 0 20px">
-      <div style="font:700 12px/1 ${FONT};letter-spacing:2px;text-transform:uppercase;color:#14645599">Sofia Life Summit · 07-08 ноември</div>
+      <div style="font:700 12px/1 ${FONT};letter-spacing:2px;text-transform:uppercase;color:#14645599">${L.dates}</div>
       <h1 style="margin:12px 0 20px;font:800 24px/1.25 ${FONT};color:#02251f">${esc(input.subject)}</h1>
       ${input.bodyHtml}
       <div style="margin-top:8px;height:3px;background:#cef870;border-radius:2px"></div>
       <p style="margin:20px 0 0;font:400 12px/1.6 ${FONT};color:#02251f80">
-        Гранд Хотел Милениум, бул. „Витоша“ 89Б, София · <a href="${SITE}" style="color:#146455">thelongevitysummit.eu</a><br>
-        ${esc(input.why)} Въпроси: отговори на това писмо или пиши на hi@biohacking.bg.
-        <a href="${esc(input.unsubUrl)}" style="color:#02251f80">Не искам повече писма</a>.
+        ${L.venue} · <a href="${SITE}" style="color:#146455">thelongevitysummit.eu</a><br>
+        ${esc(input.why)} ${L.ask}
+        <a href="${esc(input.unsubUrl)}" style="color:#02251f80">${L.stop}</a>.
       </p>
     </td></tr>
   </table></body></html>`;
   const text = [
     ...input.bodyText,
     "",
-    "Sofia Life Summit · 07-08 ноември 2026 · Гранд Хотел Милениум, бул. „Витоша“ 89Б, София",
+    L.textDates,
     SITE,
-    `${input.why} Въпроси: hi@biohacking.bg`,
-    `Не искам повече писма: ${input.unsubUrl}`,
+    `${input.why} ${L.textAsk}`,
+    `${L.textStop}: ${input.unsubUrl}`,
   ].join("\n");
   return { subject: input.subject, html, text };
 }
@@ -152,70 +157,99 @@ export function abandonedOfferLetter(i: AbandonedOfferInput): Letter {
  * To buyers of several tickets: hand each one to its person
  * ------------------------------------------------------------------ */
 
-export type HandoverAskInput = { name: string; tickets: ProgrammeTicket[]; unsubUrl: string };
+export type HandoverAskInput = { name: string; tickets: ProgrammeTicket[]; unsubUrl: string; lang?: "bg" | "en" };
+
+/** By when every ticket should be registered to the person who uses it. */
+export const REGISTER_BY = { bg: "6 ноември, 00:00 (до края на четвъртък)", en: "00:00 on 6 November (the end of Thursday)" } as const;
 
 /**
  * "Register your ticket", to every buyer: one link per ticket, which the
  * buyer opens for their own ticket and forwards for anyone else's. Each
  * person types their name and their address, confirms it with a code, and
  * signs in to the app with it - the app books on one ticket per account, so
- * this is how every ticket gets its own places, and the badge the right name.
- * The words follow what the buyer holds: one ticket or several, and whether
- * any of them books (CORE does not).
+ * this is how every ticket gets its own places and the right name. The
+ * words follow what the buyer holds: one ticket or several, and whether any
+ * of them books (CORE does not).
  */
 export function handoverAskLetter(i: HandoverAskInput): Letter {
+  const en = i.lang === "en";
   const n = i.tickets.length;
   const many = n > 1;
   const tiers = new Set(i.tickets.map((t) => t.tierName));
   const books = tiers.has("PLUS") || tiers.has("PEAK");
-  const limits = [tiers.has("PLUS") ? "PLUS: 1 workshop и 1 experience" : null, tiers.has("PEAK") ? "PEAK: 3 workshops и 3 experiences" : null].filter(Boolean).join(", ");
+  const first = i.name.trim().split(/\s+/)[0] || i.name;
+  const by = REGISTER_BY[en ? "en" : "bg"];
+  const limits = en
+    ? [tiers.has("PLUS") ? "PLUS: 1 workshop and 1 experience" : null, tiers.has("PEAK") ? "PEAK: 3 workshops and 3 experiences" : null].filter(Boolean).join(", ")
+    : [tiers.has("PLUS") ? "PLUS: 1 workshop и 1 experience" : null, tiers.has("PEAK") ? "PEAK: 3 workshops и 3 experiences" : null].filter(Boolean).join(", ");
 
-  const lead = many
-    ? `${hi(i.name)} Имаш **${n} билета** за Sofia Life Summit. Всеки билет трябва да е регистриран на човека, който ще го ползва: така ${books ? "всеки си записва сам workshops и experiences, " : ""}баджът на входа е с неговото име и билетът му е в телефона му.`
-    : `${hi(i.name)} Регистрирай билета си за Sofia Life Summit: отнема минута, а после ${books ? "го имаш в приложението, записваш си workshops и experiences и " : "го имаш в приложението с QR кода за входа, а "}баджът на входа е с правилното име.`;
-  const forWhom = many
-    ? "Отвори линка за своя билет и регистрирай него. Линковете за другите билети изпрати на хората, за които са."
-    : "Ако билетът е за друг човек, изпрати му този линк и той ще го регистрира на себе си.";
-  const how = [
-    "Отваряш линка към билета, пишеш името и имейла си и потвърждаваш имейла с 6-цифрен код.",
-    "Влизаш с този имейл в приложението Sofia Life Summit: на iPhone от App Store, на Android и компютър от браузъра. Там е билетът с QR кода за входа.",
-    ...(books ? [`От **петък, 6 ноември, в 08:30** записваш workshops и experiences според билета (${limits}).`] : []),
-  ];
+  const w = en
+    ? {
+        lead: many
+          ? `Hi ${first}! You have **${n} tickets** for Sofia Life Summit. Each one must be registered **by ${by}** to the person who will use it: then ${books ? "everyone books their own workshops and experiences and " : ""}everyone has their ticket and its QR code on their own phone.`
+          : `Hi ${first}! Please register your ticket for Sofia Life Summit **by ${by}**. It takes a minute, and then ${books ? "your ticket is in the app and you book workshops and experiences there." : "your ticket and its QR code for the entrance are in the app."}`,
+        forWhom: many ? "Open the link for your own ticket and register it. Forward the links for the other tickets to the people they are for." : "If the ticket is for someone else, forward them this link and they register it to themselves.",
+        how: [
+          "Open the ticket link, write your name and email, and confirm the email with a 6-digit code.",
+          "Sign in to the Sofia Life Summit app with that email: from the App Store on iPhone, in the browser on Android or a computer. Your ticket with its QR code for the entrance is there.",
+          ...(books ? [`From **Friday, 6 November, at 08:30** you book workshops and experiences on your ticket (${limits}).`] : []),
+        ],
+        unnamed: "no name yet",
+        register: "Register the ticket",
+        app: "The app",
+        ios: "iPhone: App Store",
+        web: "Android and computer",
+        subject: many ? `Register your ${n} tickets by 6 November: each to its person` : "Register your Sofia Life Summit ticket by 6 November",
+        why: "You are getting this because you have a ticket for Sofia Life Summit.",
+      }
+    : {
+        lead: many
+          ? `${hi(i.name)} Имаш **${n} билета** за Sofia Life Summit. Всеки трябва да е регистриран **до ${by}** на човека, който ще го ползва: така ${books ? "всеки си записва сам workshops и experiences и " : ""}всеки има билета си с QR кода в своя телефон.`
+          : `${hi(i.name)} Регистрирай билета си за Sofia Life Summit **до ${by}**. Отнема минута, а после ${books ? "билетът ти е в приложението и записваш workshops и experiences там." : "билетът ти с QR кода за входа е в приложението."}`,
+        forWhom: many ? "Отвори линка за своя билет и регистрирай него. Линковете за другите билети изпрати на хората, за които са." : "Ако билетът е за друг човек, изпрати му този линк и той ще го регистрира на себе си.",
+        how: [
+          "Отваряш линка към билета, пишеш името и имейла си и потвърждаваш имейла с 6-цифрен код.",
+          "Влизаш с този имейл в приложението Sofia Life Summit: на iPhone от App Store, на Android и компютър от браузъра. Там е билетът с QR кода за входа.",
+          ...(books ? [`От **петък, 6 ноември, в 08:30** записваш workshops и experiences според билета (${limits}).`] : []),
+        ],
+        unnamed: "още без име",
+        register: "Регистрирай билета",
+        app: "Приложението",
+        ios: "iPhone: App Store",
+        web: "Android и компютър",
+        subject: many ? `Регистрирай ${n}-те си билета до 6 ноември: всеки на своя човек` : "Регистрирай билета си за Sofia Life Summit до 6 ноември",
+        why: "Получаваш това писмо, защото имаш билет за Sofia Life Summit.",
+      };
+  const link = (code: string) => `${SITE}/vzemi?kod=${encodeURIComponent(code)}${en ? "&lang=en" : ""}`;
 
   const rowsHtml = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;border-collapse:collapse">${i.tickets
     .map((t) => {
-      const url = `${SITE}/vzemi?kod=${encodeURIComponent(t.code)}`;
-      const who = t.attendeeEmail ? `${t.attendeeName ?? ""} (${t.attendeeEmail})` : t.attendeeName ?? (many ? "още без име" : "");
+      const url = link(t.code);
+      const who = t.attendeeEmail ? `${t.attendeeName ?? ""} (${t.attendeeEmail})` : t.attendeeName ?? (many ? w.unnamed : "");
       return `<tr>
         <td valign="top" style="width:70px;padding:9px 10px 9px 0;border-top:1px solid #02251f14;font:600 13px/1.45 ${FONT};color:#146455">${esc(t.tierName)}</td>
         <td valign="top" style="padding:9px 0;border-top:1px solid #02251f14;font:400 14px/1.45 ${FONT};color:#02251f">${who ? `${esc(who)}<br>` : ""}<a href="${esc(url)}" style="font:400 12px/1.45 ${FONT};color:#146455;word-break:break-all">${esc(url)}</a></td>
       </tr>`;
     })
     .join("")}</table>`;
-  const register = !many ? button("Регистрирай билета", `${SITE}/vzemi?kod=${encodeURIComponent(i.tickets[0]?.code ?? "")}`) : "";
-  const apps = `<p style="margin:6px 0 22px">
-      <a href="${APP_STORE_URL}" style="display:inline-block;margin:0 8px 8px 0;background:#02251f;color:#f1f5f3;text-decoration:none;font:600 14px/1 ${FONT};padding:14px 22px;border-radius:999px">iPhone: App Store</a>
-      <a href="${WEB_APP_URL}" style="display:inline-block;margin:0 0 8px;background:#146455;color:#f1f5f3;text-decoration:none;font:600 14px/1 ${FONT};padding:14px 22px;border-radius:999px">Android и компютър</a>
-    </p>`;
+  const register = !many && i.tickets[0] ? button(w.register, link(i.tickets[0].code)) : "";
 
   return frame({
-    subject: many ? `Регистрирай ${n}-те си билета: всеки на своя човек` : "Регистрирай билета си за Sofia Life Summit",
-    bodyHtml: para(lead) + rowsHtml + register + para(forWhom) + bullets(how.map(plain)) + h2("Приложението") + apps,
-    bodyText: [
-      plain(lead),
-      "",
-      ...i.tickets.map((t) => `${t.tierName} ${t.code}${t.attendeeName ? `: ${t.attendeeName}` : ""}  ${SITE}/vzemi?kod=${t.code}`),
-      "",
-      forWhom,
-      "",
-      ...how.map((h) => `- ${plain(h)}`),
-      "",
-      `iPhone: ${APP_STORE_URL}`,
-      `Android и компютър: ${WEB_APP_URL}`,
-    ],
-    why: "Получаваш това писмо, защото имаш билет за Sofia Life Summit.",
+    subject: w.subject,
+    bodyHtml: para(w.lead) + rowsHtml + register + para(w.forWhom) + bullets(w.how.map(plain)) + h2(w.app) + appButtons(w.ios, w.web),
+    bodyText: [plain(w.lead), "", ...i.tickets.map((t) => `${t.tierName} ${t.code}${t.attendeeName ? `: ${t.attendeeName}` : ""}  ${link(t.code)}`), "", w.forWhom, "", ...w.how.map((h) => `- ${plain(h)}`), "", `${w.ios}: ${APP_STORE_URL}`, `${w.web}: ${WEB_APP_URL}`],
+    why: w.why,
     unsubUrl: i.unsubUrl,
+    lang: en ? "en" : "bg",
   });
+}
+
+/** The two ways into the app, side by side: the App Store for iPhone, the web app for everything else. */
+function appButtons(ios: string, web: string): string {
+  return `<p style="margin:6px 0 22px">
+      <a href="${APP_STORE_URL}" style="display:inline-block;margin:0 8px 8px 0;background:#02251f;color:#f1f5f3;text-decoration:none;font:600 14px/1 ${FONT};padding:14px 22px;border-radius:999px">${esc(ios)}</a>
+      <a href="${WEB_APP_URL}" style="display:inline-block;margin:0 0 8px;background:#146455;color:#f1f5f3;text-decoration:none;font:600 14px/1 ${FONT};padding:14px 22px;border-radius:999px">${esc(web)}</a>
+    </p>`;
 }
 
 /* ------------------------------------------------------------------ *
@@ -244,52 +278,81 @@ function rows(items: { time: string; title: string; sub?: string; quiet?: boolea
 }
 
 export type ProgrammeTicket = { code: string; tierName: string; attendeeName: string | null; attendeeEmail: string | null };
-export type ProgrammeLetterInput = { name: string; days: Day[]; unsubUrl: string; tickets?: ProgrammeTicket[] };
+export type ProgrammeLetterInput = { name: string; days: Day[]; unsubUrl: string; tickets?: ProgrammeTicket[]; lang?: "bg" | "en" };
 
 /**
  * The whole programme in one letter: the talks on the stage by day and
  * module, the workshops, the experiences in the rooms and at the stations,
  * and when and how places are booked. Speakers not yet confirmed are left
  * out, and a talk whose every speaker is unconfirmed with them, so the
- * letter promises nobody who may not come.
+ * letter promises nobody who may not come. English buyers get it in English:
+ * `days` then comes from the English programme, and names are transliterated.
  */
 export function programmeLetter(i: ProgrammeLetterInput): Letter {
-  const programmeUrl = `${SITE}/programa?utm_source=email&utm_campaign=programme`;
+  const en = i.lang === "en";
+  const programmeUrl = `${SITE}${en ? "/en" : ""}/programa?utm_source=email&utm_campaign=programme`;
   const html: string[] = [];
   const text: string[] = [];
+  const nm = (v: string) => (en ? latin(v) : v);
+  const days = en ? ["Saturday", "Sunday"] : DAY_NAMES;
+  const w = en
+    ? {
+        intro: `Hi ${i.name.trim().split(/\s+/)[0] || i.name}! We start on Saturday. Here is the whole programme in one place: the talks on the stage, and the workshops and experiences in the rooms and at the stations.`,
+        ask: (n: number) => `You have **${n} tickets**. Each one should be registered **by ${REGISTER_BY.en}** to the person who uses it: forward each person the link to their ticket. They write their name and email, confirm it with a code, and sign in to the app with it, where they book their own workshops and experiences.`,
+        mine: "Your tickets", unnamed: "no name yet", forward: "Link for the person", stage: "The stage", with: "with", seats: (n: number, up?: boolean) => `${up ? "up to " : ""}${n} seats`,
+        wsNote: "In the Newton room, with limited seats and booking.", stations: "Stations, both days", and: " and ",
+        booking: [
+          "Booking for workshops and experiences opens on **Friday, 6 November, at 08:30**, in the Sofia Life Summit app and on your ticket page. Places are limited and go in the order people book.",
+          "**PLUS:** 1 workshop and 1 experience of your choice. **PEAK:** 3 workshops and 3 experiences. **CORE** admits you to the stage and the Village.",
+        ],
+        bookTitle: "Booking", site: "See the programme on the site", app: "The app", ios: "iPhone: App Store", web: "Android and computer",
+        appLine: "Sign in to the app with the email you bought the ticket with, or the one your ticket was registered to.",
+        subject: "The programme: talks, workshops and experiences", why: "You are getting this because you have a ticket for Sofia Life Summit.",
+      }
+    : {
+        intro: `${hi(i.name)} В събота започваме. Ето цялата програма на едно място: лекциите на сцената, workshops и experiences в залите и станциите.`,
+        ask: (n: number) => `Имаш **${n} билета**. Всеки трябва да е регистриран **до ${REGISTER_BY.bg}** на човека, който ще го ползва: изпрати на всеки линка към неговия билет. Той пише името и имейла си, потвърждава с код и влиза с него в приложението, където сам си записва workshops и experiences.`,
+        mine: "Твоите билети", unnamed: "още без име", forward: "Линк за човека", stage: "Сцената", with: "с", seats: (n: number, up?: boolean) => `${up ? "до " : ""}${n} места`,
+        wsNote: "В зала Newton, с ограничени места и записване.", stations: "Станции, и двата дни", and: " и ",
+        booking: [
+          "Записването за workshops и experiences отваря в **петък, 6 ноември, в 08:30**, в приложението Sofia Life Summit и на страницата на билета ти. Местата са ограничени и се пазят с реда на записване.",
+          "**PLUS:** 1 workshop и 1 experience по избор. **PEAK:** 3 workshops и 3 experiences. **CORE** дава достъп до сцената и Village.",
+        ],
+        bookTitle: "Записване", site: "Виж програмата на сайта", app: "Приложението", ios: "iPhone: App Store", web: "Android и компютър",
+        appLine: "Влизаш в приложението с имейла, с който си купил билета, или с който е регистриран билетът ти.",
+        subject: "Програмата: лекции, workshops и experiences", why: "Получаваш това писмо, защото имаш билет за Sofia Life Summit.",
+      };
 
-  const intro = `${hi(i.name)} В събота започваме. Ето цялата програма на едно място: лекциите на сцената, workshops и experiences в залите и станциите.`;
-  html.push(para(intro));
-  text.push(plain(intro), "");
+  html.push(para(w.intro));
+  text.push(plain(w.intro), "");
 
   // More than one ticket: each should reach the person who uses it, first of all.
   const mine = i.tickets ?? [];
   if (mine.length > 1) {
-    const ask = `Имаш **${mine.length} билета**. Изпрати на всеки човек линка към неговия билет (или само номера му). Той въвежда името и имейла си, потвърждава имейла с код и после влиза с него в приложението, където сам си записва workshops и experiences. Баджът на входа е с неговото име.`;
-    html.push(h2("Твоите билети"), para(ask));
+    const ask = w.ask(mine.length);
+    const link = (code: string) => `${SITE}/vzemi?kod=${encodeURIComponent(code)}${en ? "&lang=en" : ""}`;
+    html.push(h2(w.mine), para(ask));
     html.push(
       `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;border-collapse:collapse">${mine
         .map((t) => {
-          // The link to forward: it opens the claim page with the number filled in.
-          const url = `${SITE}/vzemi?kod=${encodeURIComponent(t.code)}`;
-          const who = t.attendeeEmail ? `${t.attendeeName ?? ""} (${t.attendeeEmail})` : t.attendeeName ?? "още без име";
+          const who = t.attendeeEmail ? `${t.attendeeName ?? ""} (${t.attendeeEmail})` : t.attendeeName ?? w.unnamed;
           return `<tr>
         <td valign="top" style="width:92px;padding:8px 10px 8px 0;border-top:1px solid #02251f14;font:600 13px/1.45 ${FONT};color:#146455">${esc(t.tierName)}</td>
         <td valign="top" style="padding:8px 0;border-top:1px solid #02251f14;font:400 14px/1.45 ${FONT};color:#02251f">${esc(who)}<br><span style="font:400 12px/1.45 ${FONT};color:#02251f80">${esc(t.code)}</span></td>
-        <td valign="top" align="right" style="padding:8px 0;border-top:1px solid #02251f14"><a href="${esc(url)}" style="font:600 13px/1.45 ${FONT};color:#146455">Линк за човека</a></td>
+        <td valign="top" align="right" style="padding:8px 0;border-top:1px solid #02251f14"><a href="${esc(link(t.code))}" style="font:600 13px/1.45 ${FONT};color:#146455">${esc(w.forward)}</a></td>
       </tr>`;
         })
         .join("")}</table>`,
     );
-    text.push("ТВОИТЕ БИЛЕТИ", "", plain(ask), "", ...mine.map((t) => `${t.tierName} ${t.code}: ${t.attendeeName ?? "още без име"}${t.attendeeEmail ? ` (${t.attendeeEmail})` : ""}  ${SITE}/vzemi?kod=${t.code}`), "");
+    text.push(w.mine.toUpperCase(), "", plain(ask), "", ...mine.map((t) => `${t.tierName} ${t.code}: ${t.attendeeName ?? w.unnamed}${t.attendeeEmail ? ` (${t.attendeeEmail})` : ""}  ${link(t.code)}`), "");
   }
 
   // The stage, day by day, module by module.
-  html.push(h2("Сцената"));
-  text.push("СЦЕНАТА", "");
+  html.push(h2(w.stage));
+  text.push(w.stage.toUpperCase(), "");
   i.days.forEach((d, n) => {
-    html.push(h3(`${DAY_NAMES[n] ?? d.day}, ${DATES[n] ?? d.date}: ${d.theme}`));
-    text.push(`${DAY_NAMES[n] ?? d.day}, ${DATES[n] ?? d.date}: ${d.theme}`);
+    html.push(h3(`${days[n] ?? d.day}, ${DATES[n] ?? d.date}: ${d.theme}`));
+    text.push(`${days[n] ?? d.day}, ${DATES[n] ?? d.date}: ${d.theme}`);
     let block: { time: string; title: string; sub?: string; quiet?: boolean }[] = [];
     const flush = () => {
       if (block.length) html.push(rows(block));
@@ -314,62 +377,52 @@ export function programmeLetter(i: ProgrammeLetterInput): Letter {
 
   // Workshops: five, in Newton.
   html.push(h2("Workshops"));
-  text.push("WORKSHOPS, ЗАЛА NEWTON", "");
-  const ws = WORKSHOPS.map((w) => ({
-    time: `${DAY_NAMES[w.day].slice(0, 3)} ${w.time}`,
-    title: w.title,
-    sub: [w.host ? `с ${w.host}` : null, `${w.upTo ? "до " : ""}${w.seats} места`].filter(Boolean).join(", "),
+  text.push("WORKSHOPS, NEWTON", "");
+  const ws = WORKSHOPS.map((x) => ({
+    time: `${days[x.day].slice(0, 3)} ${x.time}`,
+    title: en && x.titleEn ? x.titleEn : x.title,
+    sub: [x.host ? `${w.with} ${nm(x.host)}` : null, w.seats(x.seats, x.upTo)].filter(Boolean).join(", "),
   }));
-  html.push(para("В зала Newton, с ограничени места и записване."), rows(ws));
-  text.push(...ws.map((w) => `${w.time}  ${w.title} (${w.sub})`), "");
+  html.push(para(w.wsNote), rows(ws));
+  text.push(...ws.map((x) => `${x.time}  ${x.title} (${x.sub})`), "");
 
   // Experiences: the classes in the rooms, then the stations.
   html.push(h2("Experiences"));
   text.push("EXPERIENCES", "");
   MOVEMENT_DAYS.forEach((rooms, n) => {
-    html.push(h3(`${DAY_NAMES[n]}, ${DATES[n]}`));
-    text.push(`${DAY_NAMES[n]}, ${DATES[n]}`);
+    html.push(h3(`${days[n]}, ${DATES[n]}`));
+    text.push(`${days[n]}, ${DATES[n]}`);
     for (const r of rooms) {
-      const list = r.slots.filter((s) => !s.workshop);
+      const list = r.slots.filter((x) => !x.workshop);
       if (list.length === 0) continue;
       const by = r.partner ? `, ${r.partner.label} ${r.partner.name}` : "";
       html.push(`<p style="margin:12px 0 4px;font:700 13px/1.4 ${FONT};color:#02251f">${esc(r.room + by)}</p>`);
-      html.push(rows(list.map((s) => ({ time: s.time, title: s.title, sub: [s.host ? `с ${s.host}` : null, s.partner ? `powered by ${s.partner.name}` : null].filter(Boolean).join(", ") || undefined }))));
-      text.push(`${r.room}${by}`, ...list.map((s) => `${s.time}  ${s.title}${s.host ? ` (с ${s.host})` : ""}`));
+      html.push(rows(list.map((x) => ({ time: x.time, title: en && x.titleEn ? x.titleEn : x.title, sub: [x.host ? `${w.with} ${nm(x.host)}` : null, x.partner ? `powered by ${x.partner.name}` : null].filter(Boolean).join(", ") || undefined }))));
+      text.push(`${r.room}${by}`, ...list.map((x) => `${x.time}  ${en && x.titleEn ? x.titleEn : x.title}${x.host ? ` (${w.with} ${nm(x.host)})` : ""}`));
     }
     text.push("");
   });
-  html.push(h3("Станции, и двата дни"));
-  text.push("Станции, и двата дни");
-  const st = STATIONS.map((s) => ({
-    time: s.zone,
-    title: s.items.map((it) => it.name).join(" и "),
+  html.push(h3(w.stations));
+  text.push(w.stations);
+  const L = en ? "en" : "bg";
+  const st = STATIONS.map((x) => ({
+    time: en ? x.zone.replace("Щанд", "Stand") : x.zone,
+    title: x.items.map((it) => it.name).join(w.and),
     // The item lines carry what differs by day ("само в събота"), so they go in first.
-    sub: [s.items.length > 1 ? s.items.map((it) => (it.sub ? `${it.name}: ${it.sub.bg.toLowerCase()}` : null)).filter(Boolean).join("; ") : null, s.facts?.bg, s.note?.bg, s.partner ? `powered by ${s.partner.name}` : null]
+    sub: [x.items.length > 1 ? x.items.map((it) => (it.sub ? `${it.name}: ${it.sub[L].toLowerCase()}` : null)).filter(Boolean).join("; ") : null, x.facts?.[L], x.note?.[L], x.partner ? `powered by ${x.partner.name}` : null]
       .filter(Boolean)
       .join(". ") || undefined,
   }));
   html.push(rows(st));
-  text.push(...st.map((s) => `${s.time}  ${s.title}${s.sub ? ` (${s.sub})` : ""}`), "");
+  text.push(...st.map((x) => `${x.time}  ${x.title}${x.sub ? ` (${x.sub})` : ""}`), "");
 
-  // Booking.
-  const booking = [
-    "Записването за workshops и experiences отваря в **петък, 6 ноември, в 08:30**, в приложението Sofia Life Summit и на страницата на билета ти (линкът е в писмото с билета). Местата са ограничени и се пазят с реда на записване.",
-    "**PLUS:** 1 workshop и 1 experience по избор. **PEAK:** 3 workshops и 3 experiences. **CORE** дава достъп до сцената и Village.",
-  ];
-  html.push(h2("Записване"), para(booking[0]), para(booking[1]), button("Виж програмата на сайта", programmeUrl));
-  text.push("ЗАПИСВАНЕ", "", plain(booking[0]), "", plain(booking[1]), "", `Програмата на сайта: ${programmeUrl}`);
-  const appLine = "Влизаш в приложението с имейла, с който си купил билета (или с който ти е даден). На iPhone линкът отваря App Store, на Android и компютър отваря уеб приложението.";
-  html.push(para(appLine), button("Отвори приложението", APP_LINK, "ink"));
-  text.push("", appLine, `Приложението: ${APP_LINK}`);
+  // Booking, and the way into the app.
+  html.push(h2(w.bookTitle), para(w.booking[0]), para(w.booking[1]), button(w.site, programmeUrl));
+  text.push(w.bookTitle.toUpperCase(), "", plain(w.booking[0]), "", plain(w.booking[1]), "", `${w.site}: ${programmeUrl}`);
+  html.push(h2(w.app), para(w.appLine), appButtons(w.ios, w.web));
+  text.push("", w.appLine, `${w.ios}: ${APP_STORE_URL}`, `${w.web}: ${WEB_APP_URL}`);
 
-  return frame({
-    subject: "Програмата: лекции, workshops и experiences",
-    bodyHtml: html.join(""),
-    bodyText: text,
-    why: "Получаваш това писмо, защото имаш билет за Sofia Life Summit.",
-    unsubUrl: i.unsubUrl,
-  });
+  return frame({ subject: w.subject, bodyHtml: html.join(""), bodyText: text, why: w.why, unsubUrl: i.unsubUrl, lang: L });
 }
 
 /* ------------------------------------------------------------------ *
@@ -386,6 +439,8 @@ export type UpgradeInput = {
   left: number;
   pricing: Pricing;
   unsubUrl: string;
+  /** The order's language; only the last-chance PEAK letter has an English version so far. */
+  lang?: "bg" | "en";
 };
 
 export type UpgradeStep = "plus-0" | "plus-5" | "plus-3d" | "peak" | "peak-last";
@@ -444,7 +499,33 @@ function upgradeBody(i: UpgradeInput, step: UpgradeStep) {
   return { html, text };
 }
 
+/** The last-chance PEAK letter for an English order: the same offer, in English. */
+function upgradePeakLastEn(i: UpgradeInput): Letter {
+  const many = i.tickets.length > 1;
+  const first = i.tickets[0];
+  const diff = first ? eur(first.diffCents) : "";
+  const first_ = i.name.trim().split(/\s+/)[0] || i.name;
+  const lines = [
+    `Hi ${first_}! Sofia Life Summit is this Saturday and Sunday, and booking for workshops and experiences opens **on Friday at 08:30**. With PLUS you book 1 workshop and 1 experience. With PEAK it is **3 workshops and 3 experiences**, plus **free lunch on both days**, the Premium Lounge and a Meet & Greet with the speakers.`,
+    `The upgrade is **${diff} more**${many ? " per ticket" : ""}: you pay only the difference, the ticket keeps its code, and you book on the PEAK allowance. PEAK has **${i.left} places** left.`,
+  ];
+  const perks = TIER_FEATURES.peak?.en.features ?? [];
+  const links = i.tickets.map((t) => {
+    const who = t.attendeeName ? ` (${latin(t.attendeeName)})` : many ? ` (ticket ${t.code})` : "";
+    return { label: `Upgrade to PEAK for ${eur(t.diffCents)}${who}`, url: `${SITE}/bilet/nadgradi/${encodeURIComponent(t.code)}?lang=en&utm_source=email&utm_campaign=upgrade-peak` };
+  });
+  return frame({
+    subject: "Before Friday 08:30: 3 workshops, 3 experiences and lunch with PEAK",
+    bodyHtml: lines.map(para).join("") + para("What PEAK adds:") + bullets(perks) + links.map((l) => button(l.label, l.url)).join(""),
+    bodyText: [...lines.map(plain), "", "What PEAK adds:", ...perks.map((p) => `- ${p}`), "", ...links.map((l) => `${l.label}: ${l.url}`)],
+    why: "You are getting this because you have a PLUS ticket for Sofia Life Summit.",
+    unsubUrl: i.unsubUrl,
+    lang: "en",
+  });
+}
+
 export function upgradeLetter(i: UpgradeInput, step: UpgradeStep): Letter {
+  if (step === "peak-last" && i.lang === "en") return upgradePeakLastEn(i);
   const subject: Record<UpgradeStep, string> = {
     "plus-0": "Билетът ти е тук. А двата дни?",
     "plus-5": "Един ден или двата? Разликата до PLUS",

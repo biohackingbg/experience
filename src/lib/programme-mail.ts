@@ -19,12 +19,12 @@ import { unsubscribePostUrl, unsubscribeUrl } from "@/lib/unsubscribe";
  */
 export const PROGRAMME_KIND = "programme-mail";
 
-type Buyer = { email: string; name: string; tickets: ProgrammeTicket[] };
+type Buyer = { email: string; name: string; lang: "bg" | "en"; tickets: ProgrammeTicket[] };
 
 /** Every address with a paid, real order, with the name from its latest order. */
 async function buyers(): Promise<Buyer[]> {
-  const rows = await getDb().execute<{ email: string; name: string }>(sql`
-    select distinct on (lower(${orders.email})) lower(${orders.email}) as email, ${orders.name} as name
+  const rows = await getDb().execute<{ email: string; name: string; lang: string }>(sql`
+    select distinct on (lower(${orders.email})) lower(${orders.email}) as email, ${orders.name} as name, ${orders.lang} as lang
     from ${orders}
     where ${orders.status} = 'paid' and not ${orders.isTest}
     order by lower(${orders.email}), ${orders.createdAt} desc`);
@@ -41,7 +41,7 @@ async function buyers(): Promise<Buyer[]> {
     list.push({ code: t.code, tierName: getTier(t.tierId)?.name ?? t.tierId, attendeeName: t.attendeeName, attendeeEmail: t.attendeeEmail });
     by.set(t.email, list);
   }
-  return [...rows].map((r) => ({ email: r.email, name: r.name, tickets: by.get(r.email) ?? [] }));
+  return [...rows].map((r) => ({ email: r.email, name: r.name, lang: r.lang === "en" ? ("en" as const) : ("bg" as const), tickets: by.get(r.email) ?? [] }));
 }
 
 async function sentSet(): Promise<Set<string>> {
@@ -75,13 +75,13 @@ export async function sendProgrammeTest(to: string): Promise<boolean> {
 
 /** Sends to everyone still waiting; stops at the first failed batch and says how many are left. */
 export async function sendProgrammeAll(): Promise<{ sent: number; remaining: number; error?: string }> {
-  const days = await getProgram("bg");
+  const days = { bg: await getProgram("bg"), en: await getProgram("en") };
   const done = await sentSet();
   const waiting = (await buyers()).filter((b) => !done.has(b.email));
   let sent = 0;
   for (let i = 0; i < waiting.length; i += 100) {
     const slice = waiting.slice(i, i + 100);
-    const letters = slice.map((b) => ({ b, l: programmeLetter({ name: b.name, days, unsubUrl: unsubscribeUrl(b.email), tickets: b.tickets }) }));
+    const letters = slice.map((b) => ({ b, l: programmeLetter({ name: b.name, days: days[b.lang], unsubUrl: unsubscribeUrl(b.email), tickets: b.tickets, lang: b.lang }) }));
     const res = await sendListMailBatch(
       letters.map(({ b, l }) => ({ to: b.email, name: null, subject: l.subject, body: "", ctaLabel: null, ctaUrl: null, html: l.html, text: l.text })),
     );
@@ -136,7 +136,7 @@ export async function sendHandoverAll(): Promise<{ sent: number; remaining: numb
   let sent = 0;
   for (let i = 0; i < waiting.length; i += 100) {
     const slice = waiting.slice(i, i + 100);
-    const letters = slice.map((b) => ({ b, l: handoverAskLetter({ name: b.name, tickets: b.tickets, unsubUrl: unsubscribeUrl(b.email) }) }));
+    const letters = slice.map((b) => ({ b, l: handoverAskLetter({ name: b.name, tickets: b.tickets, unsubUrl: unsubscribeUrl(b.email), lang: b.lang }) }));
     const res = await sendListMailBatch(
       letters.map(({ b, l }) => ({ to: b.email, name: null, subject: l.subject, body: "", ctaLabel: null, ctaUrl: null, html: l.html, text: l.text })),
     );

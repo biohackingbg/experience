@@ -2,7 +2,7 @@ import "server-only";
 
 import { Resend } from "resend";
 
-import { APP_LINK } from "@/lib/app-links";
+import { APP_STORE_URL, WEB_APP_URL } from "@/lib/app-links";
 import { type MailTexts, defaultMailTexts, getMailTexts, mailText } from "@/lib/mail-texts";
 import { DAY_LABEL, formatPrice } from "@/lib/tickets";
 
@@ -114,7 +114,7 @@ function ticketRows(input: TicketEmailInput, open = "Отвори билета",
 export function ticketEmailHtml(input: TicketEmailInput, t: MailTexts = defaultMailTexts): string {
   const en = input.lang === "en";
   const w = en
-    ? { lost: `Lost this email later? Get your tickets again: ${SITE}/bilet/moite?lang=en`, ready: "Your ticket is ready", hi: `Hi ${esc(input.buyerName)}! ${input.totalCents > 0 ? "Your payment is confirmed. " : ""}Open your ticket below and keep it - you will need it at the entrance.`, open: "Open ticket", code: "Code", dates: "7-8 November 2026", venue: "Grand Hotel Millennium, Sofia", order: "Order", invoice: "Invoice", noPay: "no payment", other: "Is a ticket for someone else? Open it and write their name - that is how we find them at the entrance and print their badge.", foot: "Questions? Reply to this email or write to hi@biohacking.bg. Sofia Life Summit is organised jointly by the Bulgarian Longevity Association and Biohacking.bg." }
+    ? { lost: `Lost this email later? Get your tickets again: ${SITE}/bilet/moite?lang=en`, ready: "Your ticket is ready", hi: `Hi ${esc(input.buyerName)}! ${input.totalCents > 0 ? "Your payment is confirmed. " : ""}Open your ticket below and keep it - you will need it at the entrance.`, open: "Open ticket", code: "Code", dates: "7-8 November 2026", venue: "Grand Hotel Millennium, Sofia", order: "Order", invoice: "Invoice", noPay: "no payment", other: "Is a ticket for someone else? Register it to them by 00:00 on 6 November: send them the number and they add it at thelongevitysummit.eu/vzemi with their name and email.", foot: "Questions? Reply to this email or write to hi@biohacking.bg. Sofia Life Summit is organised jointly by the Bulgarian Longevity Association and Biohacking.bg." }
     : { lost: `Изгуби писмото? Билетите се изпращат наново оттук: ${SITE}/bilet/moite`, ready: mailText(t, "bilet.zaglavie", {}, "html"), hi: mailText(t, "bilet.uvod", { "име": esc(input.buyerName), "плащане": input.totalCents > 0 ? "Плащането е потвърдено. " : "" }, "html"), open: "Отвори билета", code: "Код", dates: "07-08 ноември 2026", venue: "Гранд Хотел Милениум, София", order: "Поръчка", invoice: "Фактура", noPay: "без заплащане", other: mailText(t, "bilet.drug", {}, "html"), foot: mailText(t, "bilet.podpis", {}, "html") };
   return `<!doctype html>
 <html lang="${en ? "en" : "bg"}"><body style="margin:0;padding:24px;background:#f2f2ee">
@@ -422,7 +422,6 @@ export type EventInfoInput = {
   arrival?: boolean;
 };
 
-export const APP_STORE_URL = "https://apps.apple.com/bg/app/id6819034879";
 
 const VENUE_MAPS = "https://maps.google.com/?q=Grand+Hotel+Millennium+Sofia";
 
@@ -436,7 +435,7 @@ export function eventInfoHtml(input: EventInfoInput, t: MailTexts = defaultMailT
   const p = `font:400 15px/1.6 ${f};color:#02251fb3`;
   const en = input.lang === "en";
   const w = en
-    ? { title: `See you in ${input.daysLeft} ${input.daysLeft === 1 ? "day" : "days"}`, hi: `Hi ${esc(input.buyerName)}! Everything you need for the day.`, when: "When", whenV: "<strong style=\"color:#02251f\">7-8 November 2026</strong><br>Registration opens at 09:00, the programme starts at 10:00.", where: "Where", whereV: `<strong style="color:#02251f">Grand Hotel Millennium</strong><br>89B Vitosha Blvd, Sofia · <a href="${VENUE_MAPS}" style="color:#146455;font-weight:600">map</a>`, prog: "Programme", progV: `<a href="${SITE}/programa" style="color:#146455;font-weight:600">Speakers and the programme by the hour</a>`, tickets: "Your tickets", show: "Show the QR code at the entrance - on your phone or printed. One ticket admits one person.", noName: "no attendee name", open: "Open ticket", other: "Is a ticket for someone else? Open it and write their name - that is how we find them at the entrance and print their badge.", foot: `Questions? Reply to this email or write to hi@biohacking.bg. Order ${input.reference}. Sofia Life Summit is organised jointly by the Bulgarian Longevity Association and Biohacking.bg.` }
+    ? { title: `See you in ${input.daysLeft} ${input.daysLeft === 1 ? "day" : "days"}`, hi: `Hi ${esc(input.buyerName)}! Everything you need for the day.`, when: "When", whenV: "<strong style=\"color:#02251f\">7-8 November 2026</strong><br>Registration opens at 09:00, the programme starts at 10:00.", where: "Where", whereV: `<strong style="color:#02251f">Grand Hotel Millennium</strong><br>89B Vitosha Blvd, Sofia · <a href="${VENUE_MAPS}" style="color:#146455;font-weight:600">map</a>`, prog: "Programme", progV: `<a href="${SITE}/programa" style="color:#146455;font-weight:600">Speakers and the programme by the hour</a>`, tickets: "Your tickets", show: "Show the QR code at the entrance - on your phone or printed. One ticket admits one person.", noName: "no attendee name", open: "Open ticket", other: "Is a ticket for someone else? Register it to them by 00:00 on 6 November: send them the number and they add it at thelongevitysummit.eu/vzemi with their name and email.", foot: `Questions? Reply to this email or write to hi@biohacking.bg. Order ${input.reference}. Sofia Life Summit is organised jointly by the Bulgarian Longevity Association and Biohacking.bg.` }
     : { title: `Виждаме се след ${input.daysLeft} ${input.daysLeft === 1 ? "ден" : "дни"}`, hi: mailText(t, "predi.uvod", { "име": esc(input.buyerName) }, "html"), when: "Кога", whenV: `<strong style="color:#02251f">07-08 ноември 2026</strong><br>${mailText(t, "predi.chasove", {}, "html")}`, where: "Къде", whereV: `<strong style="color:#02251f">Гранд Хотел Милениум</strong><br>бул. „Витоша“ 89Б, София · <a href="${VENUE_MAPS}" style="color:#146455;font-weight:600">карта</a>`, prog: "Програма", progV: `<a href="${SITE}/#program" style="color:#146455;font-weight:600">Лектори и програма по часове</a>`, tickets: "Билетите ти", show: mailText(t, "predi.vhod", {}, "html"), noName: "без име на участник", open: "Отвори билета", other: mailText(t, "bilet.drug", {}, "html"), foot: mailText(t, "predi.podpis", { "поръчка": esc(input.reference) }, "html") };
   const rows = input.tickets
     .map(
@@ -1148,7 +1147,7 @@ export function handoverParts(i: HandoverInput): MailParts {
         title: "Your ticket for Sofia Life Summit",
         hi: hiName ? `Hi ${esc(hiName)}!` : "Hi!",
         lead: `${esc(i.buyerName)} gave you a <strong>${esc(i.tierName)}</strong> ticket for Sofia Life Summit, 7-8 November at the Grand Hotel Millennium, Sofia. The QR code on it is your way in.`,
-        app: `Sign in to the Sofia Life Summit app with <strong>${esc(i.to)}</strong>: your ticket is there, and from Friday, 6 November at 08:30 you book your own workshops and experiences. On iPhone the link opens the App Store; on Android or a computer it opens the web app.`,
+        app: `Sign in to the Sofia Life Summit app with <strong>${esc(i.to)}</strong>: your ticket is there, and from Friday, 6 November at 08:30 you book your own workshops and experiences.`,
         open: "Open the ticket",
         appBtn: "Open the app",
         foot: `Ticket ${i.code}. Questions: reply to this email or write to hi@biohacking.bg.`,
@@ -1158,7 +1157,7 @@ export function handoverParts(i: HandoverInput): MailParts {
         title: "Билетът ти за Sofia Life Summit",
         hi: hiName ? `Здравей, ${esc(hiName)}!` : "Здравей!",
         lead: `${esc(i.buyerName)} ти даде билет <strong>${esc(i.tierName)}</strong> за Sofia Life Summit, 7 и 8 ноември в Гранд Хотел Милениум, София. QR кодът на билета е входът ти.`,
-        app: `Влез в приложението Sofia Life Summit с имейла <strong>${esc(i.to)}</strong>: билетът ти е там, а от петък, 6 ноември, в 08:30 си записваш сам workshops и experiences. На iPhone линкът отваря App Store, на Android или компютър отваря уеб приложението.`,
+        app: `Влез в приложението Sofia Life Summit с имейла <strong>${esc(i.to)}</strong>: билетът ти е там, а от петък, 6 ноември, в 08:30 си записваш сам workshops и experiences.`,
         open: "Отвори билета",
         appBtn: "Отвори приложението",
         foot: `Билет ${i.code}. Въпроси: отговори на това писмо или пиши на hi@biohacking.bg.`,
@@ -1174,13 +1173,20 @@ export function handoverParts(i: HandoverInput): MailParts {
       <p style="margin:0 0 14px;${p}">${t.hi} ${t.lead}</p>
       ${btn(t.open, ticketUrl, "#146455")}
       <p style="margin:10px 0 14px;${p}">${t.app}</p>
-      ${btn(t.appBtn, APP_LINK, "#02251f")}
+      ${appBtns(en)}
       <div style="margin-top:12px;height:3px;background:#cef870;border-radius:2px"></div>
       <p style="margin:18px 0 0;font:400 12px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f80">${esc(t.foot)}</p>
     </td></tr>
   </table></body></html>`,
-    text: [t.title, "", `${strip(t.hi)} ${strip(t.lead)}`, "", `${t.open}: ${ticketUrl}`, "", strip(t.app), `${t.appBtn}: ${APP_LINK}`, "", t.foot].join("\n"),
+    text: [t.title, "", `${strip(t.hi)} ${strip(t.lead)}`, "", `${t.open}: ${ticketUrl}`, "", strip(t.app), `iPhone: ${APP_STORE_URL}`, `${en ? "Android and computer" : "Android и компютър"}: ${WEB_APP_URL}`, "", t.foot].join("\n"),
   };
+}
+
+/** The two ways into the app, as buttons: the App Store for iPhone, the web app for everything else. */
+function appBtns(en: boolean): string {
+  const b = (label: string, url: string, bg: string) =>
+    `<a href="${esc(url)}" style="display:inline-block;margin:0 8px 8px 0;background:${bg};color:#f1f5f3;text-decoration:none;font:600 14px/1 -apple-system,Segoe UI,Roboto,sans-serif;padding:14px 22px;border-radius:999px">${esc(label)}</a>`;
+  return `<p style="margin:6px 0 14px">${b("iPhone: App Store", APP_STORE_URL, "#02251f")}${b(en ? "Android and computer" : "Android и компютър", WEB_APP_URL, "#146455")}</p>`;
 }
 
 export async function sendHandoverEmail(i: HandoverInput): Promise<boolean> {
@@ -1196,6 +1202,73 @@ export async function sendHandoverEmail(i: HandoverInput): Promise<boolean> {
     return true;
   } catch (error) {
     console.error("[email] handover threw:", error);
+    return false;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * A ticket registered by its holder (/vzemi)
+ * ------------------------------------------------------------------ */
+
+export type ClaimedInput = { to: string; name: string; code: string; tierName: string; lang: "bg" | "en" };
+
+/** Straight after someone registers a ticket to themselves: it is theirs, and here is the way into the app. */
+export function claimedParts(i: ClaimedInput): MailParts {
+  const en = i.lang === "en";
+  const first = i.name.trim().split(/\s+/)[0] || i.name;
+  const ticketUrl = `${SITE}/bilet/${encodeURIComponent(i.code)}${en ? "?lang=en" : ""}`;
+  const p = `font:400 15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f`;
+  const books = i.tierName !== "CORE";
+  const t = en
+    ? {
+        subject: "Your Sofia Life Summit ticket is registered to you",
+        title: "The ticket is yours",
+        lead: `Hi ${esc(first)}! Your <strong>${esc(i.tierName)}</strong> ticket for Sofia Life Summit, 7-8 November at the Grand Hotel Millennium, is now registered to you.`,
+        app: `Sign in to the Sofia Life Summit app with <strong>${esc(i.to)}</strong>. Your ticket and its QR code for the entrance are there${books ? ", and from Friday, 6 November at 08:30 you book your workshops and experiences" : ""}.`,
+        open: "Open the ticket",
+        foot: `Ticket ${i.code}. Questions: reply to this email or write to hi@biohacking.bg.`,
+      }
+    : {
+        subject: "Билетът ти за Sofia Life Summit е регистриран на теб",
+        title: "Билетът е твой",
+        lead: `Здравей, ${esc(first)}! Билетът ти <strong>${esc(i.tierName)}</strong> за Sofia Life Summit, 7 и 8 ноември в Гранд Хотел Милениум, вече е регистриран на теб.`,
+        app: `Влез в приложението Sofia Life Summit с имейла <strong>${esc(i.to)}</strong>. Там е билетът ти с QR кода за входа${books ? ", а от петък, 6 ноември, в 08:30 си записваш workshops и experiences" : ""}.`,
+        open: "Отвори билета",
+        foot: `Билет ${i.code}. Въпроси: отговори на това писмо или пиши на hi@biohacking.bg.`,
+      };
+  const strip = (h: string) => h.replace(/<[^>]+>/g, "");
+  return {
+    subject: t.subject,
+    html: `<!doctype html><html lang="${i.lang}"><body style="margin:0;background:#f1f5f3;padding:28px 16px">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:20px;padding:32px">
+    <tr><td>
+      <img src="${SITE}/email-logo.png" width="200" height="54" alt="Biohacking Experience" style="display:block;border:0;outline:none;text-decoration:none;width:200px;height:auto;margin:0 0 20px">
+      <h1 style="margin:0 0 18px;font:800 24px/1.25 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f">${t.title}</h1>
+      <p style="margin:0 0 14px;${p}">${t.lead}</p>
+      <p style="margin:10px 0 14px;${p}">${t.app}</p>
+      ${appBtns(en)}
+      <p style="margin:4px 0 14px;${p}"><a href="${esc(ticketUrl)}" style="color:#146455">${t.open}</a></p>
+      <div style="margin-top:12px;height:3px;background:#cef870;border-radius:2px"></div>
+      <p style="margin:18px 0 0;font:400 12px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f80">${esc(t.foot)}</p>
+    </td></tr>
+  </table></body></html>`,
+    text: [t.title, "", strip(t.lead), "", strip(t.app), `iPhone: ${APP_STORE_URL}`, `${en ? "Android and computer" : "Android и компютър"}: ${WEB_APP_URL}`, "", `${t.open}: ${ticketUrl}`, "", t.foot].join("\n"),
+  };
+}
+
+export async function sendClaimedEmail(i: ClaimedInput): Promise<boolean> {
+  const resend = getResend();
+  const from = process.env.EMAIL_FROM;
+  if (!resend || !from) return false;
+  try {
+    const { error } = await resend.emails.send({ from, replyTo: REPLY_TO, to: i.to, ...claimedParts(i) });
+    if (error) {
+      console.error("[email] claimed failed:", error);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("[email] claimed threw:", error);
     return false;
   }
 }

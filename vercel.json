@@ -27,6 +27,10 @@
     {
       "path": "/api/cron/pisma",
       "schedule": "5 */3 * * *"
+    },
+    {
+      "path": "/api/cron/zapisvane",
+      "schedule": "30 6 6 11 *"
     }
   ]
 }

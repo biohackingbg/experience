@@ -12,14 +12,14 @@ const T = {
     code: "Номер на билета", codeHint: "ABCD-EFGH", name: "Име и фамилия", email: "Твоят имейл", send: "Прати ми код", sending: "Праща…",
     pin: (e: string) => `Пратихме 6-цифрен код на ${e}. Въведи го тук.`, check: "Потвърди", checking: "Проверява…", restart: "Друг имейл или билет",
     done: (n: string) => `Готово, ${n}! Билетът е твой.`,
-    next: (e: string) => `Влез в приложението Sofia Life Summit с ${e}: билетът ти е там, а от петък, 6 ноември, в 08:30 си записваш workshops и experiences.`,
+    next: (e: string) => `Влез в приложението Sofia Life Summit с ${e}: билетът ти е там. Пратихме ти и писмо с линковете.`,
     app: "Отвори приложението",
   },
   en: {
     code: "Ticket number", codeHint: "ABCD-EFGH", name: "Full name", email: "Your email", send: "Send me a code", sending: "Sending…",
     pin: (e: string) => `We sent a 6-digit code to ${e}. Enter it here.`, check: "Confirm", checking: "Checking…", restart: "Another email or ticket",
     done: (n: string) => `Done, ${n}! The ticket is yours.`,
-    next: (e: string) => `Sign in to the Sofia Life Summit app with ${e}: your ticket is there, and from Friday, 6 November at 08:30 you book workshops and experiences.`,
+    next: (e: string) => `Sign in to the Sofia Life Summit app with ${e}: your ticket is there. We also sent you an email with the links.`,
     app: "Open the app",
   },
 } as const;
