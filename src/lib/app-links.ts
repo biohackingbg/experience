@@ -5,5 +5,5 @@
  * line here instead of every letter already sent.
  */
 export const APP_STORE_URL = "https://apps.apple.com/bg/app/id6819034879";
-export const WEB_APP_URL = "https://sls-app-biohackingbg.vercel.app";
+export const WEB_APP_URL = "https://app.thelongevitysummit.eu";
 export const APP_LINK = "https://thelongevitysummit.eu/app";
