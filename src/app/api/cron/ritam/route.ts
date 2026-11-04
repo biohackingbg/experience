@@ -34,7 +34,12 @@ export async function GET(request: Request) {
     // The three days before: everyone who joined early gets one heads-up.
     if (!evening && day === -2) {
       to = await participantEmails(c);
-      msg = { title: "30 дни ритъм започва във вторник", body: "Избери си час за ставане в приложението, ако още не си. Ден 1 е 10 ноември.", collapseId: "ritam-pre" };
+      // The day and the date come from the challenge as set in the admin, not from the calendar of the year it was written.
+      const start = new Date(`${c.startsOn}T12:00:00+02:00`);
+      const weekday = new Intl.DateTimeFormat("bg-BG", { timeZone: "Europe/Sofia", weekday: "long" }).format(start);
+      const date = new Intl.DateTimeFormat("bg-BG", { timeZone: "Europe/Sofia", day: "numeric", month: "long" }).format(start);
+      const inOn = /^(вторник|четвъртък)$/.test(weekday) ? "във" : "в";
+      msg = { title: `${c.title} започва ${inOn} ${weekday}`, body: `Избери си час за ставане в приложението, ако още не си. Ден 1 е ${date}.`, collapseId: "ritam-pre" };
     }
   } else if (day > c.days) {
     if (!evening && day === c.days + 15) {
