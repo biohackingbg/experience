@@ -10,7 +10,7 @@ import { latin } from "@/lib/latin";
 import { MOVEMENT_DAYS, STATIONS, WORKSHOPS } from "@/lib/movement-program";
 import type { Day } from "@/lib/program";
 import { type Pricing, priceOf } from "@/lib/pricing";
-import { CONCEPT_TOTAL, TIER_FEATURES } from "@/lib/site-copy";
+import { CONCEPT_TOTAL } from "@/lib/site-copy";
 import { TIERS, type Tier, dayLabel, formatPrice, getTier } from "@/lib/tickets";
 
 const SITE = "https://thelongevitysummit.eu";
@@ -504,7 +504,8 @@ function upgradeBody(i: UpgradeInput, step: UpgradeStep) {
       ? `Разликата е спрямо днешната цена на ${to.name} (${eur(todayCents)}, ${i.pricing.label}). ${i.pricing.regularAfter.charAt(0).toUpperCase() + i.pricing.regularAfter.slice(1)} ${to.name} е ${eur(to.listPriceCents)} и разликата става ${eur(to.listPriceCents - (todayCents - first.diffCents))}.`
       : `Разликата е спрямо цената на ${to.name} днес (${eur(todayCents)}).`;
 
-  const gain = to.features;
+  // The last PEAK letter says what changes against PLUS, line by line, rather than PEAK's whole card.
+  const gain: string[] = step === "peak-last" ? [...PEAK_OVER_PLUS.bg] : to.features;
   const perks = bullets(gain);
   const perksText = gain.map((g) => `- ${g}`).join("\n");
 
@@ -525,11 +526,11 @@ function upgradeBody(i: UpgradeInput, step: UpgradeStep) {
       `${hi(i.name)} Имаш PLUS - двата дни, работилниците и преживяване по избор. PEAK е за хората, които искат да са най-близо до лекторите: има **${i.left} места** и е на **${diff} отгоре**${many ? " за билет" : ""} - плащаш само разликата, билетът ти се сменя на място.`,
     ],
     "peak-last": [
-      `${hi(i.name)} Sofia Life Summit е тази събота и неделя, а записването за workshops и experiences отваря **в петък в 08:30**. С PLUS записваш 1 workshop и 1 experience. С PEAK са **3 workshops и 3 experiences**, плюс **безплатен обяд и в двата дни**, Premium Lounge и Meet & Greet с лекторите.`,
+      `${hi(i.name)} Sofia Life Summit е тази събота и неделя, а записването за workshops и experiences отваря **в петък в 08:30**. Ако надградиш до PEAK преди това, записваш по лимита на PEAK и имаш **обяд и в двата дни**. Обядът не е включен в PLUS: с PLUS храната е за твоя сметка, с PEAK обядът е безплатен.`,
       `Надграждането е на **${diff} отгоре**${many ? " за билет" : ""}: плащаш само разликата, билетът остава със същия код и записваш вече по лимита на PEAK. В PEAK има още **${i.left} места**.`,
     ],
   };
-  const what = `Какво добавя ${to.name}:`;
+  const what = step === "peak-last" ? "Какво получаваш с PEAK, в сравнение с PLUS:" : `Какво добавя ${to.name}:`;
 
   const links = i.tickets.map((t) => {
     const url = `${SITE}/bilet/nadgradi/${encodeURIComponent(t.code)}?utm_source=email&utm_campaign=upgrade-${to.id}`;
@@ -547,6 +548,28 @@ function upgradeBody(i: UpgradeInput, step: UpgradeStep) {
   return { html, text };
 }
 
+/** What PEAK gives that PLUS does not, as the last upgrade letter lists it. */
+const PEAK_OVER_PLUS = {
+  bg: [
+    "Безплатен обяд и в двата дни",
+    "3 workshops и 3 experiences (с PLUS са 1 и 1)",
+    "Premium Lounge през двата дни",
+    "Meet & Greet с лекторите",
+    "Гарантирано място и премиум зона в залата",
+    "Приоритетен вход, без опашка",
+    "Goody bag на стойност €250+ (с PLUS е €100+)",
+  ],
+  en: [
+    "Free lunch on both days",
+    "3 workshops and 3 experiences (PLUS has 1 and 1)",
+    "The Premium Lounge on both days",
+    "Meet & Greet with the speakers",
+    "A guaranteed seat and the premium area in the hall",
+    "Priority entrance, no queue",
+    "A goody bag worth €250+ (PLUS: €100+)",
+  ],
+} as const;
+
 /** The last-chance PEAK letter for an English order: the same offer, in English. */
 function upgradePeakLastEn(i: UpgradeInput): Letter {
   const many = i.tickets.length > 1;
@@ -554,18 +577,18 @@ function upgradePeakLastEn(i: UpgradeInput): Letter {
   const diff = first ? eur(first.diffCents) : "";
   const first_ = i.name.trim().split(/\s+/)[0] || i.name;
   const lines = [
-    `Hi ${first_}! Sofia Life Summit is this Saturday and Sunday, and booking for workshops and experiences opens **on Friday at 08:30**. With PLUS you book 1 workshop and 1 experience. With PEAK it is **3 workshops and 3 experiences**, plus **free lunch on both days**, the Premium Lounge and a Meet & Greet with the speakers.`,
+    `Hi ${first_}! Sofia Life Summit is this Saturday and Sunday, and booking for workshops and experiences opens **on Friday at 08:30**. Upgrade to PEAK before then and you book on the PEAK allowance, with **lunch on both days**. Lunch is not included in PLUS: with PLUS food is at your own cost, with PEAK lunch is free.`,
     `The upgrade is **${diff} more**${many ? " per ticket" : ""}: you pay only the difference, the ticket keeps its code, and you book on the PEAK allowance. PEAK has **${i.left} places** left.`,
   ];
-  const perks = TIER_FEATURES.peak?.en.features ?? [];
+  const perks = PEAK_OVER_PLUS.en;
   const links = i.tickets.map((t) => {
     const who = t.attendeeName ? ` (${latin(t.attendeeName)})` : many ? ` (ticket ${t.code})` : "";
     return { label: `Upgrade to PEAK for ${eur(t.diffCents)}${who}`, url: `${SITE}/bilet/nadgradi/${encodeURIComponent(t.code)}?lang=en&utm_source=email&utm_campaign=upgrade-peak` };
   });
   return frame({
-    subject: "Before Friday 08:30: 3 workshops, 3 experiences and lunch with PEAK",
-    bodyHtml: lines.map(para).join("") + para("What PEAK adds:") + bullets(perks) + links.map((l) => button(l.label, l.url)).join(""),
-    bodyText: [...lines.map(plain), "", "What PEAK adds:", ...perks.map((p) => `- ${p}`), "", ...links.map((l) => `${l.label}: ${l.url}`)],
+    subject: "PEAK: lunch on both days, 3 workshops, 3 experiences and Meet & Greet",
+    bodyHtml: lines.map(para).join("") + para("What you get with PEAK, compared with PLUS:") + bullets([...perks]) + links.map((l) => button(l.label, l.url)).join(""),
+    bodyText: [...lines.map(plain), "", "What you get with PEAK, compared with PLUS:", ...perks.map((p) => `- ${p}`), "", ...links.map((l) => `${l.label}: ${l.url}`)],
     why: "You are getting this because you have a PLUS ticket for Sofia Life Summit.",
     unsubUrl: i.unsubUrl,
     lang: "en",
@@ -579,7 +602,7 @@ export function upgradeLetter(i: UpgradeInput, step: UpgradeStep): Letter {
     "plus-5": "Един ден или двата? Разликата до PLUS",
     "plus-3d": "Три дни до Sofia Life Summit - последен шанс за двата дни",
     peak: `PEAK: ${i.left} места най-близо до лекторите`,
-    "peak-last": "Преди петък в 08:30: 3 workshops, 3 experiences и обяд с PEAK",
+    "peak-last": "PEAK: обяд в двата дни, 3 workshops, 3 experiences и Meet & Greet",
   };
   const { html, text } = upgradeBody(i, step);
   return frame({
