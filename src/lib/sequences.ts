@@ -67,6 +67,7 @@ export const SEQUENCE_KINDS = [
   { kind: "upgrade-plus-5", title: "CORE → PLUS · ден 5", when: "5 дни след покупката. Купилите преди пускането го получават на първия пуск." },
   { kind: "upgrade-plus-3d", title: "CORE → PLUS · 3 дни преди", when: "4 ноември от 09:00, на всеки, който още е с CORE." },
   { kind: "upgrade-peak", title: "PLUS → PEAK", when: "28 октомври от 09:00, веднъж, докато има места в PEAK." },
+  { kind: "upgrade-peak-last", title: "PLUS → PEAK · последен шанс", when: "Пуска се на ръка с „Прати сега“, веднъж на поръчка, на всеки с неизползван PLUS, докато има места в PEAK." },
   { kind: "core-day", title: "CORE · избери или смени деня", when: "Веднага щом се пусне, на всеки с неизползван платен CORE билет, веднъж на поръчка. До началото на събитието." },
   { kind: "checkin", title: "Избери час за влизане", when: "2 ноември от 10:00, на всеки с билет без избран час. Само ако входът на вълни е пуснат от Вход." },
   ...LIST_LETTERS.map((l) => ({ kind: `list-${l.id}`, title: `Списък · ${l.title}`, when: sofia(l.at) })),
@@ -267,6 +268,11 @@ function upgradeRules(): UpgradeRule[] {
     {
       kind: "upgrade-peak", step: "peak", from: plus, to: peak, at: PEAK_AT,
       where: () => sql`not exists (select 1 from ${emailSends} s where s.kind = 'upgrade-peak' and s.target = ${orders.reference})`,
+    },
+    {
+      // The last push before booking opens: sent by hand, so no date of its own.
+      kind: "upgrade-peak-last", step: "peak-last", from: plus, to: peak, at: null,
+      where: () => sql`not exists (select 1 from ${emailSends} s where s.kind = 'upgrade-peak-last' and s.target = ${orders.reference})`,
     },
   ];
 }
@@ -645,6 +651,7 @@ export async function sequencePreview(kind: string, to = "ti@example.com"): Prom
     case "upgrade-plus-5": return upgrade(core, plus, "plus-5");
     case "upgrade-plus-3d": return upgrade(core, plus, "plus-3d");
     case "upgrade-peak": return upgrade(plus, peak, "peak");
+    case "upgrade-peak-last": return upgrade(plus, peak, "peak-last");
     case "core-day":
       return coreDayLetter({ name: "Мария", tickets: [{ code: "AB12-CD34", attendeeName: null, day: 1 }], unsubUrl: u });
     case "checkin": return checkinLetter({ name: "Мария", codes: ["AB12-CD34"], unsubUrl: u });

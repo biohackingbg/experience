@@ -361,7 +361,7 @@ export type UpgradeInput = {
   unsubUrl: string;
 };
 
-export type UpgradeStep = "plus-0" | "plus-5" | "plus-3d" | "peak";
+export type UpgradeStep = "plus-0" | "plus-5" | "plus-3d" | "peak" | "peak-last";
 
 function upgradeBody(i: UpgradeInput, step: UpgradeStep) {
   const to = i.to;
@@ -394,6 +394,10 @@ function upgradeBody(i: UpgradeInput, step: UpgradeStep) {
     peak: [
       `${hi(i.name)} Имаш PLUS - двата дни, работилниците и преживяване по избор. PEAK е за хората, които искат да са най-близо до лекторите: има **${i.left} места** и е на **${diff} отгоре**${many ? " за билет" : ""} - плащаш само разликата, билетът ти се сменя на място.`,
     ],
+    "peak-last": [
+      `${hi(i.name)} Sofia Life Summit е тази събота и неделя, а записването за workshops и experiences отваря **в петък в 08:30**. С PLUS записваш 1 workshop и 1 experience. С PEAK са **3 workshops и 3 experiences**, плюс **безплатен обяд и в двата дни**, Premium Lounge и Meet & Greet с лекторите.`,
+      `Надграждането е на **${diff} отгоре**${many ? " за билет" : ""}: плащаш само разликата, билетът остава със същия код и записваш вече по лимита на PEAK. В PEAK има още **${i.left} места**.`,
+    ],
   };
   const what = `Какво добавя ${to.name}:`;
 
@@ -419,6 +423,7 @@ export function upgradeLetter(i: UpgradeInput, step: UpgradeStep): Letter {
     "plus-5": "Един ден или двата? Разликата до PLUS",
     "plus-3d": "Три дни до Sofia Life Summit - последен шанс за двата дни",
     peak: `PEAK: ${i.left} места най-близо до лекторите`,
+    "peak-last": "Преди петък в 08:30: 3 workshops, 3 experiences и обяд с PEAK",
   };
   const { html, text } = upgradeBody(i, step);
   return frame({
