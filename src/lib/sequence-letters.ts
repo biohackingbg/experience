@@ -161,11 +161,15 @@ export type HandoverAskInput = { name: string; tickets: ProgrammeTicket[]; unsub
  * per account, so this is how every ticket gets its workshops.
  */
 export function handoverAskLetter(i: HandoverAskInput): Letter {
-  const lead = `${hi(i.name)} Имаш **${i.tickets.length} билета** за Sofia Life Summit. За да може всеки да си запише workshops и experiences и баджът му да е с неговото име, изпрати на всеки човек линка към неговия билет.`;
+  // CORE books nothing, so a buyer of CORE tickets only hears about names, the door and the app.
+  const books = i.tickets.some((t) => t.tierName !== "CORE");
+  const lead = books
+    ? `${hi(i.name)} Имаш **${i.tickets.length} билета** за Sofia Life Summit. За да може всеки да си запише workshops и experiences и баджът му да е с неговото име, изпрати на всеки човек линка към неговия билет.`
+    : `${hi(i.name)} Имаш **${i.tickets.length} билета** за Sofia Life Summit. За да е баджът на всеки с неговото име и всеки да има билета си в телефона, изпрати на всеки човек линка към неговия билет.`;
   const how = [
     "Човекът отваря линка, пише името и имейла си и потвърждава имейла с 6-цифрен код.",
-    "После влиза с този имейл в приложението Sofia Life Summit (на iPhone от App Store, на Android и компютър в браузъра) и вижда своя билет.",
-    "От **петък, 6 ноември, в 08:30** си записва сам workshops и experiences, с лимита на своя билет: PLUS 1 workshop и 1 experience, PEAK по 3.",
+    "После влиза с този имейл в приложението Sofia Life Summit (на iPhone от App Store, на Android и компютър в браузъра) и вижда своя билет с QR кода за входа.",
+    ...(books ? ["От **петък, 6 ноември, в 08:30** си записва сам workshops и experiences, с лимита на своя билет: PLUS 1 workshop и 1 experience, PEAK по 3."] : []),
   ];
   const rowsHtml = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;border-collapse:collapse">${i.tickets
     .map((t) => {
@@ -177,7 +181,7 @@ export function handoverAskLetter(i: HandoverAskInput): Letter {
       </tr>`;
     })
     .join("")}</table>`;
-  const close = "Ако някой от билетите е за теб, отвори неговия линк и въведи своето име и имейла, с който влизаш. Ако не искаш да пращаш линкове, можеш да впишеш името и имейла на човека директно на страницата на билета и ние ще му пратим билета.";
+  const close = "Ако някой от билетите е за теб, отвори неговия линк и въведи своето име и имейла, с който влизаш. Ако не искаш да пращаш линкове, отвори билета и впиши там името на човека (и имейла му, ако искаш да му го пратим). Важно е всеки билет да е с името на човека, който ще дойде: баджът се печата с него.";
   return frame({
     subject: `Дай всеки от ${i.tickets.length}-те билета на човека, който ще го ползва`,
     bodyHtml: para(lead) + rowsHtml + bullets(how.map(plain)) + para(close) + button("Отвори приложението", APP_LINK, "ink"),
