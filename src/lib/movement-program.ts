@@ -58,11 +58,11 @@ export const MOVEMENT_DAYS: MoveRoom[][] = [
       slots: [
         yoga("10:00-10:40"),
         maya("10:50-11:30", "Dynamic Flow"),
-        maya("11:40-12:25", "Dynamic Strength"),
-        { time: "12:35-13:30", title: "The Power of Breath", host: "Яни Драгов", seats: 30, workshop: true },
+        maya("11:40-12:20", "Dynamic Strength"),
+        { time: "12:30-13:30", title: "The Power of Breath", host: "Яни Драгов", seats: 30, workshop: true },
         { time: "14:00-15:00", title: "The Inflamed Gut: The Hidden Barrier to Longevity", host: "проф. Godfrey Grech", seats: 15, workshop: true },
-        { time: "15:20-16:50", title: "Тялото, в което съм", titleEn: "The body I live in", host: "д-р Виолета Азис", seats: 15, workshop: true },
-        movez("17:00-18:00", "Mobility Lab"),
+        { time: "15:10-16:10", title: "Тялото, в което съм", titleEn: "The body I live in", host: "д-р Виолета Азис", seats: 15, workshop: true },
+        movez("16:20-17:00", "Spine Longevity"),
       ],
     },
     {
@@ -85,7 +85,7 @@ export const MOVEMENT_DAYS: MoveRoom[][] = [
       room: "Newton",
       slots: [
         yoga("10:00-10:40"),
-        movez("10:50-11:30", "Mobility Lab"),
+        movez("10:50-11:30", "Front & middle split mobility"),
         movez("11:40-12:20", "Slow Strength"),
         maya("12:40-13:20", "Dynamic Strength"),
         maya("13:30-15:10", "Functional Training", true),
