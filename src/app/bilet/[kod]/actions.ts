@@ -34,7 +34,7 @@ const BOOK_ERROR: Record<string, { bg: string; en: string }> = {
 export async function bookWorkshop(_prev: BookingState, formData: FormData): Promise<BookingState> {
   const head = await headers();
   const ip = head.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  if (!checkRateLimit(`book:${ip}`, 40).allowed) return { status: "error", message: "Твърде много опити. Опитай след малко." };
+  if (!checkRateLimit(`book:${ip}`, 150).allowed) return { status: "error", message: "Твърде много опити. Опитай след малко." };
 
   const code = String(formData.get("code") ?? "").trim().toUpperCase();
   const workshopId = String(formData.get("workshopId") ?? "");
@@ -62,7 +62,7 @@ export async function bookWorkshop(_prev: BookingState, formData: FormData): Pro
 export async function saveAttendee(_prev: AttendeeState, formData: FormData): Promise<AttendeeState> {
   const head = await headers();
   const ip = head.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  if (!checkRateLimit(`attendee:${ip}`).allowed) {
+  if (!checkRateLimit(`attendee:${ip}`, 30).allowed) {
     return { status: "error", message: "Твърде много опити. Опитай след малко." };
   }
 

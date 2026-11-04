@@ -17,7 +17,7 @@ async function ticketOf(request: Request, ctx: Ctx) {
 
 /** Books a place for this ticket. The reason codes are the library's own, so the app can word each. */
 export async function POST(request: Request, ctx: Ctx) {
-  if (limited(request, "book", 30)) return fail(429, "too_many");
+  if (limited(request, "book", 150)) return fail(429, "too_many");
   const t = await ticketOf(request, ctx);
   if ("response" in t) return t.response;
   const body = await readBody<{ workshopId?: string }>(request);

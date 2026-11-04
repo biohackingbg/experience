@@ -50,7 +50,9 @@ const W = {
 async function slow(key: string): Promise<boolean> {
   const head = await headers();
   const ip = head.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  return !checkRateLimit(`${key}:${ip}`).allowed;
+  // Sized for a crowd behind one address (an office, the hotel Wi-Fi); the
+  // per-email cap on codes and the attempt count on each code stop guessing.
+  return !checkRateLimit(`${key}:${ip}`, 40).allowed;
 }
 
 /**

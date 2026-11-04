@@ -1110,17 +1110,27 @@ export async function sendLoginCodeEmail(input: LoginCodeInput): Promise<boolean
   const resend = getResend();
   const from = process.env.EMAIL_FROM;
   if (!resend || !from) return false;
-  try {
-    const { error } = await resend.emails.send({ from, replyTo: REPLY_TO, to: input.to, ...loginCodeParts(input) });
-    if (error) {
-      console.error("[email] login code failed:", error);
-      return false;
+  // The provider allows 10 sends a second for the whole account. When booking
+  // opens many people sign in at once, so a code that meets a full second waits
+  // a moment and tries again rather than failing the sign-in.
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      const { error } = await resend.emails.send({ from, replyTo: REPLY_TO, to: input.to, ...loginCodeParts(input) });
+      if (!error) return true;
+      const busy = error.name === "rate_limit_exceeded" || /rate limit|too many/i.test(error.message ?? "");
+      if (!busy || attempt === 3) {
+        console.error("[email] login code failed:", error);
+        return false;
+      }
+    } catch (error) {
+      if (attempt === 3) {
+        console.error("[email] login code threw:", error);
+        return false;
+      }
     }
-    return true;
-  } catch (error) {
-    console.error("[email] login code threw:", error);
-    return false;
+    await new Promise((r) => setTimeout(r, 400 * (attempt + 1) + Math.random() * 300));
   }
+  return false;
 }
 
 /* ------------------------------------------------------------------ *
