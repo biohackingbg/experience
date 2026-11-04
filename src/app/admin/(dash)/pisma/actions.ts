@@ -263,5 +263,5 @@ export async function sendHandoverAllAction(): Promise<MailState> {
   const r = await sendHandoverAll();
   revalidatePath("/admin/pisma");
   if (r.error) return { status: "error", message: `Изпратени ${r.sent}, спря с грешка: ${r.error}. Остават ${r.remaining}. Натисни пак, за да продължи.` };
-  return { status: "ok", message: `Изпратени ${r.sent}. Всички с повече от един билет имат писмото.` };
+  return { status: "ok", message: `Изпратени ${r.sent}. Всички с билет имат писмото.` };
 }

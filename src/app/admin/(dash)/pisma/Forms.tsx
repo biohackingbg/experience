@@ -156,7 +156,7 @@ export function HandoverSendForm({ count }: { count: number }) {
     <form
       action={action}
       onSubmit={(e) => {
-        if (!window.confirm(`Пращаш писмото до ${count} души с повече от един билет? Всеки го получава само веднъж.`)) e.preventDefault();
+        if (!window.confirm(`Пращаш „Регистрирай билета си“ до ${count} души с билет? Всеки го получава само веднъж.`)) e.preventDefault();
       }}
     >
       <button

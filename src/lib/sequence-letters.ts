@@ -5,7 +5,7 @@
  * sample data without touching the database.
  */
 
-import { APP_LINK } from "@/lib/app-links";
+import { APP_LINK, WEB_APP_URL } from "@/lib/app-links";
 import { MOVEMENT_DAYS, STATIONS, WORKSHOPS } from "@/lib/movement-program";
 import type { Day } from "@/lib/program";
 import { type Pricing, priceOf } from "@/lib/pricing";
@@ -155,38 +155,65 @@ export function abandonedOfferLetter(i: AbandonedOfferInput): Letter {
 export type HandoverAskInput = { name: string; tickets: ProgrammeTicket[]; unsubUrl: string };
 
 /**
- * One link per ticket, for the buyer to forward. Each person takes their
- * ticket under their own name and address, then signs in to the app with
- * that address and books their own places - the app books on one ticket
- * per account, so this is how every ticket gets its workshops.
+ * "Register your ticket", to every buyer: one link per ticket, which the
+ * buyer opens for their own ticket and forwards for anyone else's. Each
+ * person types their name and their address, confirms it with a code, and
+ * signs in to the app with it - the app books on one ticket per account, so
+ * this is how every ticket gets its own places, and the badge the right name.
+ * The words follow what the buyer holds: one ticket or several, and whether
+ * any of them books (CORE does not).
  */
 export function handoverAskLetter(i: HandoverAskInput): Letter {
-  // CORE books nothing, so a buyer of CORE tickets only hears about names, the door and the app.
-  const books = i.tickets.some((t) => t.tierName !== "CORE");
-  const lead = books
-    ? `${hi(i.name)} Имаш **${i.tickets.length} билета** за Sofia Life Summit. За да може всеки да си запише workshops и experiences и баджът му да е с неговото име, изпрати на всеки човек линка към неговия билет.`
-    : `${hi(i.name)} Имаш **${i.tickets.length} билета** за Sofia Life Summit. За да е баджът на всеки с неговото име и всеки да има билета си в телефона, изпрати на всеки човек линка към неговия билет.`;
+  const n = i.tickets.length;
+  const many = n > 1;
+  const tiers = new Set(i.tickets.map((t) => t.tierName));
+  const books = tiers.has("PLUS") || tiers.has("PEAK");
+  const limits = [tiers.has("PLUS") ? "PLUS: 1 workshop и 1 experience" : null, tiers.has("PEAK") ? "PEAK: 3 workshops и 3 experiences" : null].filter(Boolean).join(", ");
+
+  const lead = many
+    ? `${hi(i.name)} Имаш **${n} билета** за Sofia Life Summit. Всеки билет трябва да е регистриран на човека, който ще го ползва: така ${books ? "всеки си записва сам workshops и experiences, " : ""}баджът на входа е с неговото име и билетът му е в телефона му.`
+    : `${hi(i.name)} Регистрирай билета си за Sofia Life Summit: отнема минута, а после ${books ? "го имаш в приложението, записваш си workshops и experiences и " : "го имаш в приложението с QR кода за входа, а "}баджът на входа е с правилното име.`;
+  const forWhom = many
+    ? "Отвори линка за своя билет и регистрирай него. Линковете за другите билети изпрати на хората, за които са."
+    : "Ако билетът е за друг човек, изпрати му този линк и той ще го регистрира на себе си.";
   const how = [
-    "Човекът отваря линка, пише името и имейла си и потвърждава имейла с 6-цифрен код.",
-    "После влиза с този имейл в приложението Sofia Life Summit (на iPhone от App Store, на Android и компютър в браузъра) и вижда своя билет с QR кода за входа.",
-    ...(books ? ["От **петък, 6 ноември, в 08:30** си записва сам workshops и experiences, с лимита на своя билет: PLUS 1 workshop и 1 experience, PEAK по 3."] : []),
+    "Отваряш линка към билета, пишеш името и имейла си и потвърждаваш имейла с 6-цифрен код.",
+    "Влизаш с този имейл в приложението Sofia Life Summit: на iPhone от App Store, на Android и компютър от браузъра. Там е билетът с QR кода за входа.",
+    ...(books ? [`От **петък, 6 ноември, в 08:30** записваш workshops и experiences според билета (${limits}).`] : []),
   ];
+
   const rowsHtml = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;border-collapse:collapse">${i.tickets
     .map((t) => {
       const url = `${SITE}/vzemi?kod=${encodeURIComponent(t.code)}`;
-      const who = t.attendeeEmail ? `${t.attendeeName ?? ""} (${t.attendeeEmail})` : t.attendeeName ?? "още без име";
+      const who = t.attendeeEmail ? `${t.attendeeName ?? ""} (${t.attendeeEmail})` : t.attendeeName ?? (many ? "още без име" : "");
       return `<tr>
         <td valign="top" style="width:70px;padding:9px 10px 9px 0;border-top:1px solid #02251f14;font:600 13px/1.45 ${FONT};color:#146455">${esc(t.tierName)}</td>
-        <td valign="top" style="padding:9px 0;border-top:1px solid #02251f14;font:400 14px/1.45 ${FONT};color:#02251f">${esc(who)}<br><a href="${esc(url)}" style="font:400 12px/1.45 ${FONT};color:#146455;word-break:break-all">${esc(url)}</a></td>
+        <td valign="top" style="padding:9px 0;border-top:1px solid #02251f14;font:400 14px/1.45 ${FONT};color:#02251f">${who ? `${esc(who)}<br>` : ""}<a href="${esc(url)}" style="font:400 12px/1.45 ${FONT};color:#146455;word-break:break-all">${esc(url)}</a></td>
       </tr>`;
     })
     .join("")}</table>`;
-  const close = "Ако някой от билетите е за теб, отвори неговия линк и въведи своето име и имейла, с който влизаш. Ако не искаш да пращаш линкове, отвори билета и впиши там името на човека (и имейла му, ако искаш да му го пратим). Важно е всеки билет да е с името на човека, който ще дойде: баджът се печата с него.";
+  const register = !many ? button("Регистрирай билета", `${SITE}/vzemi?kod=${encodeURIComponent(i.tickets[0]?.code ?? "")}`) : "";
+  const apps = `<p style="margin:6px 0 22px">
+      <a href="${APP_STORE_URL}" style="display:inline-block;margin:0 8px 8px 0;background:#02251f;color:#f1f5f3;text-decoration:none;font:600 14px/1 ${FONT};padding:14px 22px;border-radius:999px">iPhone: App Store</a>
+      <a href="${WEB_APP_URL}" style="display:inline-block;margin:0 0 8px;background:#146455;color:#f1f5f3;text-decoration:none;font:600 14px/1 ${FONT};padding:14px 22px;border-radius:999px">Android и компютър</a>
+    </p>`;
+
   return frame({
-    subject: `Дай всеки от ${i.tickets.length}-те билета на човека, който ще го ползва`,
-    bodyHtml: para(lead) + rowsHtml + bullets(how.map(plain)) + para(close) + button("Отвори приложението", APP_LINK, "ink"),
-    bodyText: [plain(lead), "", ...i.tickets.map((t) => `${t.tierName} ${t.code}: ${t.attendeeName ?? "още без име"}  ${SITE}/vzemi?kod=${t.code}`), "", ...how.map((h) => `- ${plain(h)}`), "", close, `Приложението: ${APP_LINK}`],
-    why: "Получаваш това писмо, защото имаш повече от един билет за Sofia Life Summit.",
+    subject: many ? `Регистрирай ${n}-те си билета: всеки на своя човек` : "Регистрирай билета си за Sofia Life Summit",
+    bodyHtml: para(lead) + rowsHtml + register + para(forWhom) + bullets(how.map(plain)) + h2("Приложението") + apps,
+    bodyText: [
+      plain(lead),
+      "",
+      ...i.tickets.map((t) => `${t.tierName} ${t.code}${t.attendeeName ? `: ${t.attendeeName}` : ""}  ${SITE}/vzemi?kod=${t.code}`),
+      "",
+      forWhom,
+      "",
+      ...how.map((h) => `- ${plain(h)}`),
+      "",
+      `iPhone: ${APP_STORE_URL}`,
+      `Android и компютър: ${WEB_APP_URL}`,
+    ],
+    why: "Получаваш това писмо, защото имаш билет за Sofia Life Summit.",
     unsubUrl: i.unsubUrl,
   });
 }

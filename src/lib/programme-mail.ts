@@ -96,26 +96,26 @@ export async function sendProgrammeAll(): Promise<{ sent: number; remaining: num
 }
 
 /* ------------------------------------------------------------------ *
- * To buyers of several tickets: hand each one on
+ * "Register your ticket", to every buyer
  * ------------------------------------------------------------------ */
 
-export const HANDOVER_KIND = "handover-ask";
+export const HANDOVER_KIND = "register-tickets";
 
 async function handoverSent(): Promise<Set<string>> {
   const rows = await getDb().select({ target: emailSends.target }).from(emailSends).where(sql`${emailSends.kind} = ${HANDOVER_KIND}`);
   return new Set(rows.map((r) => r.target));
 }
 
-/** Addresses with two tickets or more, and how many of their tickets still have nobody's name on them. */
-export async function handoverAudience(): Promise<{ waiting: number; sent: number; tickets: number; unnamed: number }> {
+/** Every buyer's address, how many have several tickets, and how many tickets still have nobody's name on them. */
+export async function handoverAudience(): Promise<{ waiting: number; sent: number; tickets: number; unnamed: number; several: number }> {
   const [all, done] = await Promise.all([buyers(), handoverSent()]);
-  const many = all.filter((b) => b.tickets.length > 1);
-  const tickets = many.flatMap((b) => b.tickets);
+  const tickets = all.flatMap((b) => b.tickets);
   return {
-    waiting: many.filter((b) => !done.has(b.email)).length,
-    sent: many.filter((b) => done.has(b.email)).length,
+    waiting: all.filter((b) => b.tickets.length > 0 && !done.has(b.email)).length,
+    sent: all.filter((b) => done.has(b.email)).length,
     tickets: tickets.length,
     unnamed: tickets.filter((t) => !t.attendeeName).length,
+    several: all.filter((b) => b.tickets.length > 1).length,
   };
 }
 
@@ -132,7 +132,7 @@ export async function sendHandoverTest(to: string): Promise<boolean> {
 
 export async function sendHandoverAll(): Promise<{ sent: number; remaining: number; error?: string }> {
   const done = await handoverSent();
-  const waiting = (await buyers()).filter((b) => b.tickets.length > 1 && !done.has(b.email));
+  const waiting = (await buyers()).filter((b) => b.tickets.length > 0 && !done.has(b.email));
   let sent = 0;
   for (let i = 0; i < waiting.length; i += 100) {
     const slice = waiting.slice(i, i + 100);
