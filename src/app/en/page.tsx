@@ -7,6 +7,7 @@ import { SummitConcept } from "@/components/summit/SummitConcept";
 import { SummitPartners } from "@/components/summit/SummitPartners";
 import { SummitSpeakers } from "@/components/summit/SummitSpeakers";
 import { SummitTracks } from "@/components/summit/SummitTracks";
+import { SummitMovement } from "@/components/summit/SummitMovement";
 import { SummitProgram } from "@/components/summit/SummitProgram";
 import { SummitTickets } from "@/components/summit/SummitTickets";
 import { SummitRegister } from "@/components/summit/SummitRegister";
@@ -73,6 +74,7 @@ export default async function HomeEn() {
         <SummitConcept lang="en" />
         <SummitPartners lang="en" />
         <SummitProgram lang="en" />
+        <SummitMovement lang="en" />
         <SummitTickets lang="en" />
         <SummitRegister lang="en" />
         <SummitSponsors lang="en" />
