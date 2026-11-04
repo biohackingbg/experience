@@ -14,7 +14,7 @@
 
 type Pair = { bg: string; en: string };
 /** The studio or brand behind a class or a station, shown as "powered by <logo>". */
-export type Backer = { name: string; logo: string };
+export type Backer = { name: string; logo: string; /** Tailwind height class: marks differ in shape, so each gets the height that matches the others by eye. */ h?: string };
 
 export type MoveSlot = {
   /** As printed: "10:30-11:15". */
@@ -41,9 +41,9 @@ export type MoveRoom = {
 };
 
 const BODY_SPACE = { label: "Pilates Reformer & Lagree by", logo: "/partners/bodyspace-wordmark-white.png", name: "Body Space" };
-const MOVEZ: Backer = { name: "MOVEZ", logo: "/partners/movez-white.png" };
-const AGEHACK: Backer = { name: "AgeHack", logo: "/partners/agehack-white.png" };
-const TIANA: Backer = { name: "Tiana Presolska", logo: "/partners/tiana-presolska-white.png" };
+const MOVEZ: Backer = { name: "MOVEZ", logo: "/partners/movez-mark.png", h: "h-3" };
+const AGEHACK: Backer = { name: "AgeHack", logo: "/partners/agehack-mark.png", h: "h-5" };
+const TIANA: Backer = { name: "Tiana Presolska", logo: "/partners/tiana-presolska-mark.png", h: "h-6" };
 
 const body = (time: string, title: string, host: string, seats: number): MoveSlot => ({ time, title, host, by: "Body Space", seats });
 const movez = (time: string, title: string): MoveSlot => ({ time, title, host: "Тодор Захариев", partner: MOVEZ, seats: 30 });

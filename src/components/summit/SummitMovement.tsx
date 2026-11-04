@@ -12,7 +12,7 @@ function PoweredBy({ partner, label }: { partner: Backer; label: string }) {
     <span className="inline-flex items-center gap-2 rounded-full bg-bh-ink py-1.5 pl-3 pr-2.5 text-[0.62rem] font-medium uppercase tracking-[0.1em] text-bh-paper/80">
       {label}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={partner.logo} alt={partner.name} className="h-3.5 w-auto" />
+      <img src={partner.logo} alt={partner.name} className={`${partner.h ?? "h-3.5"} w-auto`} />
     </span>
   );
 }
