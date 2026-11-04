@@ -5,6 +5,8 @@
  * sample data without touching the database.
  */
 
+import { MOVEMENT_DAYS, STATIONS, WORKSHOPS } from "@/lib/movement-program";
+import type { Day } from "@/lib/program";
 import { type Pricing, priceOf } from "@/lib/pricing";
 import { CONCEPT_TOTAL } from "@/lib/site-copy";
 import { TIERS, type Tier, dayLabel, formatPrice, getTier } from "@/lib/tickets";
@@ -141,6 +143,136 @@ export function abandonedOfferLetter(i: AbandonedOfferInput): Letter {
     bodyHtml: para(lines[0]) + para(lines[1]) + button(`Вземи билет с -${i.percent}%`, url) + para(lines[2]),
     bodyText: [plain(lines[0]), "", plain(lines[1]), "", `Вземи билет с -${i.percent}%: ${url}`, "", lines[2]],
     why: "Получаваш това писмо, защото започна поръчка за билет на thelongevitysummit.eu и не я завърши.",
+    unsubUrl: i.unsubUrl,
+  });
+}
+
+/* ------------------------------------------------------------------ *
+ * The programme letter to every buyer (sent by hand, once per address)
+ * ------------------------------------------------------------------ */
+
+const DATES = ["07.11", "08.11"];
+const DAY_NAMES = ["Събота", "Неделя"];
+
+/** A heading inside the letter, between the paragraphs. */
+const h2 = (text: string) => `<h2 style="margin:28px 0 10px;font:800 18px/1.25 ${FONT};color:#02251f">${esc(text)}</h2>`;
+const h3 = (text: string) => `<p style="margin:18px 0 6px;font:700 12px/1.3 ${FONT};letter-spacing:1.5px;text-transform:uppercase;color:#146455">${esc(text)}</p>`;
+
+/** Time on the left, the rest on the right: the shape of a printed programme, kept in a table so every mail client lines it up. */
+function rows(items: { time: string; title: string; sub?: string; quiet?: boolean }[]): string {
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 8px;border-collapse:collapse">${items
+    .map(
+      (r) => `<tr>
+        <td valign="top" style="width:92px;padding:7px 10px 7px 0;border-top:1px solid #02251f14;font:400 13px/1.45 ${FONT};color:#02251f80;white-space:nowrap">${esc(r.time)}</td>
+        <td valign="top" style="padding:7px 0;border-top:1px solid #02251f14;font:${r.quiet ? 400 : 600} 14px/1.45 ${FONT};color:${r.quiet ? "#02251f80" : "#02251f"}">${esc(r.title)}${
+          r.sub ? `<br><span style="font:400 13px/1.45 ${FONT};color:#146455">${esc(r.sub)}</span>` : ""
+        }</td>
+      </tr>`,
+    )
+    .join("")}</table>`;
+}
+
+export type ProgrammeLetterInput = { name: string; days: Day[]; unsubUrl: string };
+
+/**
+ * The whole programme in one letter: the talks on the stage by day and
+ * module, the workshops, the experiences in the rooms and at the stations,
+ * and when and how places are booked. Speakers not yet confirmed are left
+ * out, and a talk whose every speaker is unconfirmed with them, so the
+ * letter promises nobody who may not come.
+ */
+export function programmeLetter(i: ProgrammeLetterInput): Letter {
+  const programmeUrl = `${SITE}/programa?utm_source=email&utm_campaign=programme`;
+  const workshopsUrl = `${SITE}/programa?utm_source=email&utm_campaign=programme#movement`;
+  const html: string[] = [];
+  const text: string[] = [];
+
+  const intro = `${hi(i.name)} В събота започваме. Ето цялата програма на едно място: лекциите на сцената, workshops и experiences в залите и станциите.`;
+  html.push(para(intro));
+  text.push(plain(intro), "");
+
+  // The stage, day by day, module by module.
+  html.push(h2("Сцената"));
+  text.push("СЦЕНАТА", "");
+  i.days.forEach((d, n) => {
+    html.push(h3(`${DAY_NAMES[n] ?? d.day}, ${DATES[n] ?? d.date}: ${d.theme}`));
+    text.push(`${DAY_NAMES[n] ?? d.day}, ${DATES[n] ?? d.date}: ${d.theme}`);
+    let block: { time: string; title: string; sub?: string; quiet?: boolean }[] = [];
+    const flush = () => {
+      if (block.length) html.push(rows(block));
+      block = [];
+    };
+    for (const s of d.slots) {
+      const people = (s.people ?? []).filter((p) => !(s.unconfirmed ?? []).includes(p));
+      if (s.people?.length && people.length === 0) continue;
+      if (!s.time) {
+        // A module heading: a line of its own between the talks.
+        flush();
+        html.push(`<p style="margin:14px 0 4px;font:700 13px/1.4 ${FONT};color:#02251f">${esc(s.title)}</p>`);
+        text.push("", s.title);
+        continue;
+      }
+      block.push({ time: s.time, title: s.title, sub: people.length ? people.join(", ") : undefined, quiet: s.pause });
+      text.push(`${s.time}  ${s.title}${people.length ? ` (${people.join(", ")})` : ""}`);
+    }
+    flush();
+    text.push("");
+  });
+
+  // Workshops: five, in Newton.
+  html.push(h2("Workshops"));
+  text.push("WORKSHOPS, ЗАЛА NEWTON", "");
+  const ws = WORKSHOPS.map((w) => ({
+    time: `${DAY_NAMES[w.day].slice(0, 3)} ${w.time}`,
+    title: w.title,
+    sub: [w.host ? `с ${w.host}` : null, `${w.upTo ? "до " : ""}${w.seats} места`].filter(Boolean).join(", "),
+  }));
+  html.push(para("В зала Newton, с ограничени места и записване."), rows(ws));
+  text.push(...ws.map((w) => `${w.time}  ${w.title} (${w.sub})`), "");
+
+  // Experiences: the classes in the rooms, then the stations.
+  html.push(h2("Experiences"));
+  text.push("EXPERIENCES", "");
+  MOVEMENT_DAYS.forEach((rooms, n) => {
+    html.push(h3(`${DAY_NAMES[n]}, ${DATES[n]}`));
+    text.push(`${DAY_NAMES[n]}, ${DATES[n]}`);
+    for (const r of rooms) {
+      const list = r.slots.filter((s) => !s.workshop);
+      if (list.length === 0) continue;
+      const by = r.partner ? `, ${r.partner.label} ${r.partner.name}` : "";
+      html.push(`<p style="margin:12px 0 4px;font:700 13px/1.4 ${FONT};color:#02251f">${esc(r.room + by)}</p>`);
+      html.push(rows(list.map((s) => ({ time: s.time, title: s.title, sub: [s.host ? `с ${s.host}` : null, s.partner ? `powered by ${s.partner.name}` : null].filter(Boolean).join(", ") || undefined }))));
+      text.push(`${r.room}${by}`, ...list.map((s) => `${s.time}  ${s.title}${s.host ? ` (с ${s.host})` : ""}`));
+    }
+    text.push("");
+  });
+  html.push(h3("Станции, и двата дни"));
+  text.push("Станции, и двата дни");
+  const st = STATIONS.map((s) => ({
+    time: s.zone,
+    title: s.items.map((it) => it.name).join(" и "),
+    // The item lines carry what differs by day ("само в събота"), so they go in first.
+    sub: [s.items.length > 1 ? s.items.map((it) => (it.sub ? `${it.name}: ${it.sub.bg.toLowerCase()}` : null)).filter(Boolean).join("; ") : null, s.facts?.bg, s.note?.bg, s.partner ? `powered by ${s.partner.name}` : null]
+      .filter(Boolean)
+      .join(". ") || undefined,
+  }));
+  html.push(rows(st));
+  text.push(...st.map((s) => `${s.time}  ${s.title}${s.sub ? ` (${s.sub})` : ""}`), "");
+
+  // Booking.
+  const booking = [
+    "Записването за workshops и experiences отваря в **петък, 6 ноември, в 08:30**, в приложението Sofia Life Summit и на страницата на билета ти (линкът е в писмото с билета). Местата са ограничени и се пазят с реда на записване.",
+    "**PLUS:** 1 workshop и 1 experience по избор. **PEAK:** 3 workshops и 3 experiences. **CORE** дава достъп до сцената и Village.",
+  ];
+  html.push(h2("Записване"), para(booking[0]), para(booking[1]), button("Виж програмата на сайта", programmeUrl), button("Workshops и experiences", workshopsUrl, "ink"));
+  text.push("ЗАПИСВАНЕ", "", plain(booking[0]), "", plain(booking[1]), "", `Програмата на сайта: ${programmeUrl}`, `Приложението за iPhone: ${APP_STORE_URL}`);
+  html.push(`<p style="margin:0 0 16px;font:400 14px/1.6 ${FONT};color:#02251f">Приложението за iPhone: <a href="${APP_STORE_URL}" style="color:#146455">Sofia Life Summit в App Store</a>.</p>`);
+
+  return frame({
+    subject: "Програмата: лекции, workshops и experiences",
+    bodyHtml: html.join(""),
+    bodyText: text,
+    why: "Получаваш това писмо, защото имаш билет за Sofia Life Summit.",
     unsubUrl: i.unsubUrl,
   });
 }

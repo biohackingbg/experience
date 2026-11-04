@@ -8,6 +8,7 @@ import { MAIL_SLOTS, defaultMailTexts, getMailTexts } from "@/lib/mail-texts";
 
 import { SendAllForm, TestForm } from "./Forms";
 import { AbandonedOfferSection } from "./AbandonedOfferSection";
+import { ProgrammeMailSection } from "./ProgrammeMailSection";
 import { MedOfferSection } from "./MedOfferSection";
 import { SequencesSection } from "./SequencesSection";
 import { TextForm } from "./TextForm";
@@ -53,6 +54,8 @@ export default async function MailPage() {
           </div>
           <HomeLink />
         </div>
+
+        <ProgrammeMailSection />
 
         <AbandonedOfferSection />
 
