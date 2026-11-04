@@ -29,6 +29,8 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 const GREEN = "#146455";
+// The gift blue of the tier bars, so a given-away seat reads the same on both cards.
+const GIFT_BLUE = GIFT_COLOR;
 const HATCH =
   "repeating-linear-gradient(135deg, #c9cfca 0 2px, transparent 2px 7px)";
 
@@ -208,40 +210,41 @@ function WeekStrip({ week }: { week: WeekDay[] }) {
 }
 
 /**
- * Half-ring: sold share of the room, the rest hatched. Number and caption
- * are SVG text, so they scale with the ring and never collide with it on a
- * phone. The fill keeps the same round caps as the track, so its start sits
- * exactly inside the track's rounded end; a tiny share is stretched to a
- * short pill rather than left as a dot or given flat ends that stick out.
+ * Half-ring: the taken share of the room - sold in green, given away in the
+ * gift blue of the tier bars, drawn on top of the sales - the rest hatched.
+ * Number and caption are SVG text, so they scale with the ring and never
+ * collide with it on a phone. The fills keep the same round caps as the
+ * track, so their start sits exactly inside the track's rounded end; a tiny
+ * share is stretched to a short pill rather than left as a dot.
  */
-function Gauge({ pct }: { pct: number }) {
+function Gauge({ soldPct, freePct }: { soldPct: number; freePct: number }) {
   const r = 80;
   const c = Math.PI * r; // half circumference
-  const share = Math.min(100, Math.max(0, pct)) / 100;
-  const filled = share > 0 ? Math.max(share * c, 6) : 0;
+  const sold = Math.min(100, Math.max(0, soldPct)) / 100;
+  const taken = Math.min(100, Math.max(0, soldPct + freePct)) / 100;
+  const pct = Math.round(taken * 100);
+  const soldLen = sold > 0 ? Math.max(sold * c, 6) : 0;
+  const takenLen = taken > 0 ? Math.max(taken * c, 6) : 0;
   return (
-    <svg viewBox="0 0 200 118" className="mx-auto mt-2 w-full max-w-[17rem]" role="img" aria-label={`${pct}% от залата е продадена`}>
+    <svg viewBox="0 0 200 118" className="mx-auto mt-2 w-full max-w-[17rem]" role="img" aria-label={`${pct}% от залата е заета`}>
       <defs>
         <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
           <rect width="3" height="7" fill="#c9cfca" />
         </pattern>
       </defs>
       <path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="url(#hatch)" strokeWidth="26" strokeLinecap="round" />
-      {share > 0 && (
-        <path
-          d="M20 100 A80 80 0 0 1 180 100"
-          fill="none"
-          stroke={GREEN}
-          strokeWidth="26"
-          strokeLinecap="round"
-          strokeDasharray={`${filled} ${c + 30}`}
-        />
+      {/* The gift arc runs to the taken share and the sold arc covers its start, so the blue shows only past the sales. */}
+      {taken > sold && (
+        <path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke={GIFT_BLUE} strokeWidth="26" strokeLinecap="round" strokeDasharray={`${takenLen} ${c + 30}`} />
+      )}
+      {sold > 0 && (
+        <path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke={GREEN} strokeWidth="26" strokeLinecap="round" strokeDasharray={`${soldLen} ${c + 30}`} />
       )}
       <text x="100" y="88" textAnchor="middle" fontSize="34" fontWeight="900" fill="#0b2a22" fontFamily="inherit" letterSpacing="-1">
         {pct}%
       </text>
       <text x="100" y="106" textAnchor="middle" fontSize="9" fill="#0b2a22" fillOpacity=".55" fontFamily="inherit">
-        от залата е продадена
+        от залата е заета
       </text>
     </svg>
   );
@@ -493,9 +496,10 @@ export default async function AdminDashboard({
       <div className="mt-4 grid gap-4 xl:grid-cols-4">
         <section className="rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6">
           <h2 className="text-lg font-bold tracking-tight">Запълване</h2>
-          <Gauge pct={soldPct} />
+          <Gauge soldPct={soldPct} freePct={d.capacityTotal ? (d.ticketsComped / d.capacityTotal) * 100 : 0} />
           <div className="mt-5 flex flex-wrap justify-center gap-4 text-xs text-[#0b2a22]/65">
             <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-[#146455]" />продадени {d.ticketsSold}</span>
+            <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-full" style={{ background: GIFT_BLUE }} />безплатни {d.ticketsComped}</span>
             <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-[#c9cfca]" />свободни {seatsLeft}</span>
           </div>
         </section>
