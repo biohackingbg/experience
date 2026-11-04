@@ -69,4 +69,6 @@ export const PARTNERS: Partner[] = [
   { name: "Volt Premium Taxi", logo: "/partners/volt-taxi-white.png" },
   { name: "LactoFlor", logo: "/partners/lactoflor-white.png" },
   { name: "Daye", logo: "/partners/daye-white.png" },
+  { name: "Sopharma", logo: "/partners/sopharma-white.png" },
+  { name: "Bodrost", logo: "/partners/bodrost-white.png" },
 ];
