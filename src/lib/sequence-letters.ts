@@ -244,6 +244,54 @@ export function handoverAskLetter(i: HandoverAskInput): Letter {
   });
 }
 
+/* ------------------------------------------------------------------ *
+ * Friday 08:30: booking is open, to PEAK
+ * ------------------------------------------------------------------ */
+
+export type BookingOpenInput = { name: string; codes: string[]; unsubUrl: string; lang?: "bg" | "en" };
+
+/**
+ * The moment booking opens, to everyone holding a PEAK ticket. The app books
+ * on one ticket per account, so a buyer who kept several gets a link to each
+ * ticket's page, where each books on its own allowance.
+ */
+export function bookingOpenLetter(i: BookingOpenInput): Letter {
+  const en = i.lang === "en";
+  const many = i.codes.length > 1;
+  const first = i.name.trim().split(/\s+/)[0] || i.name;
+  const page = (c: string) => `${SITE}/bilet/${encodeURIComponent(c)}${en ? "?lang=en" : ""}`;
+  const w = en
+    ? {
+        subject: "Booking is open: your 3 workshops and 3 experiences",
+        lead: `Hi ${first}! Booking for workshops and experiences is **open now**. With PEAK you book **3 workshops and 3 experiences**, and places go in the order people book.`,
+        how: many
+          ? "In the app the booking goes on one ticket. For each of your other tickets, open its page below and book there: each ticket has its own 3 and 3."
+          : "Open the app and go to Stations, or book on your ticket page.",
+        ticket: (c: string) => `Book for ticket ${c}`,
+        app: "The app", ios: "iPhone: App Store", web: "Android and computer",
+        why: "You are getting this because you have a PEAK ticket for Sofia Life Summit.",
+      }
+    : {
+        subject: "Записването е отворено: твоите 3 workshops и 3 experiences",
+        lead: `${hi(i.name)} Записването за workshops и experiences **вече е отворено**. С PEAK записваш **3 workshops и 3 experiences**, а местата се пазят с реда на записване.`,
+        how: many
+          ? "В приложението записването е на един билет. За всеки от другите си билети отвори страницата му по-долу и запиши там: всеки билет има свои 3 и 3."
+          : "Отвори приложението и влез в „Станции“, или запиши от страницата на билета си.",
+        ticket: (c: string) => `Запиши за билет ${c}`,
+        app: "Приложението", ios: "iPhone: App Store", web: "Android и компютър",
+        why: "Получаваш това писмо, защото имаш билет PEAK за Sofia Life Summit.",
+      };
+  const buttons = (many ? i.codes : i.codes.slice(0, 1)).map((c) => button(many ? w.ticket(c) : en ? "Open my ticket" : "Отвори билета", page(c))).join("");
+  return frame({
+    subject: w.subject,
+    bodyHtml: para(w.lead) + para(w.how) + buttons + h2(w.app) + appButtons(w.ios, w.web),
+    bodyText: [plain(w.lead), "", w.how, "", ...i.codes.map((c) => `${w.ticket(c)}: ${page(c)}`), "", `${w.ios}: ${APP_STORE_URL}`, `${w.web}: ${WEB_APP_URL}`],
+    why: w.why,
+    unsubUrl: i.unsubUrl,
+    lang: en ? "en" : "bg",
+  });
+}
+
 /** The two ways into the app, side by side: the App Store for iPhone, the web app for everything else. */
 function appButtons(ios: string, web: string): string {
   return `<p style="margin:6px 0 22px">
