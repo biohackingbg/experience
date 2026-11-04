@@ -123,5 +123,5 @@ export async function chooseTicketDay(_prev: DayState, formData: FormData): Prom
   const r = await changeTicketDay(code, day);
   revalidatePath(`/bilet/${code}`);
   if (!r.ok) return { status: "error", message: DAY_ERROR[r.reason][lang] };
-  return { status: "ok", message: r.droppedBookings > 0 ? (lang === "en" ? "Your workshop bookings for the other day were released." : "Записаните работилници за другия ден са освободени.") : undefined };
+  return { status: "ok", message: r.droppedBookings > 0 ? (lang === "en" ? "Your workshop bookings for the other day were released." : "Записаните workshops за другия ден са освободени.") : undefined };
 }

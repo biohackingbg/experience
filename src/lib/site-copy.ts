@@ -96,7 +96,7 @@ export const HERO: Copy<{
     firstTitle: "Първото по рода си биохакинг изживяване в България.",
     firstBody: "Два дни, в които науката за дълголетието се пипа, пробва и измерва - не се слуша от стол.",
     visitors: "посетители",
-    stations: "станции и преживявания",
+    stations: "станции и experiences",
     stageTag: "Сцената",
     speakersLabel: "международни лектори",
     speakersBody:
@@ -170,7 +170,7 @@ export const TRACKS: Copy<{
     ourFor: "За всички, без медицинско образование",
     ourDates: "07-08 ноември 2026",
     ourPoints: [
-      "Лекции на сцената и работилници със записан час",
+      "Лекции на сцената и workshops със записан час",
       "Същите лектори, на разбираем език, по 25 минути",
       "Билетите на тази страница",
     ],
@@ -235,8 +235,8 @@ export const CONCEPT: Copy<{
   bg: {
     experience: {
       eyebrow: "Experience",
-      title: (n) => `${n} преживявания`,
-      intro: "Движение, дишане и работилници: не гледаш отстрани, а правиш. Всяко преживяване е водено от партньор в своята област.",
+      title: (n) => `${n} experiences`,
+      intro: "Движение, дишане и workshops: не гледаш отстрани, а правиш. Всяко experience е водено от партньор в своята област.",
       items: [
         { id: "pilates-reformer", title: "Pilates reformer" },
         { id: "lagree", title: "Lagree" },
@@ -346,7 +346,7 @@ export const MOVEMENT_SECTION: Copy<{
       "Докато на сцената вървят лекциите, залите Newton и Columbus и станциите за измерване и възстановяване работят през целия ден. Местата са ограничени.",
     stations: "Станции, и двата дни",
     rooms: "Зали Newton и Columbus 1",
-    workshop: "Работилница",
+    workshop: "Workshop",
     seats: (n, upTo) => `${upTo ? "до " : ""}${n} места`,
     withHost: "с",
   },
@@ -374,7 +374,7 @@ export const PROGRAM_SECTION: Copy<{
     eyebrow: "Програма",
     title: "Два дни, един голям въпрос",
     intro:
-      "Как да превърнем повече години в повече живот? Лекциите на сцената и работилниците вървят паралелно през целия ден, със записване на час.",
+      "Как да превърнем повече години в повече живот? Лекциите на сцената и workshops вървят паралелно през целия ден, със записване на час.",
     footnote: "Предварителна програма · подлежи на финално потвърждение на лектори и часови диапазони.",
     days: [
       { day: "Събота", theme: "Тяло, мозък, сърце и бъдеще", intro: "От науката за стареенето до решенията, които можем да вземем още днес." },
@@ -421,7 +421,7 @@ export const TICKETS_SECTION: Copy<{
     launchBadge: (label) => `Стартови цени за ${label}`,
     specialBadge: (label) => `Специални цени ${label}`,
     title: "Три нива, една логика: колко надълбоко",
-    intro: "Всички билети дават достъп до сцената и Village. Разликата е в дните, работилниците и специалните преживявания.",
+    intro: "Всички билети дават достъп до сцената и Village. Разликата е в дните, workshops и experiences.",
     introOffer: (label, launch) => `Тези цени важат ${launch ? "за " : ""}${label}.`,
     featured: "Най-избиран",
     soldOut: "Изчерпано",
@@ -435,8 +435,8 @@ export const TICKETS_SECTION: Copy<{
       ["Достъп", "1 ден по избор", "И двата дни", "И двата дни"],
       ["Лекции", "При наличие на места", "Приоритетен достъп", "Гарантиран достъп"],
       ["Запазени места", "-", "-", "Премиум зона"],
-      ["Работилници", "-", "Включени", "Включени с приоритет"],
-      ["Специални преживявания", "-", "1 по избор", "Всички включени"],
+      ["Workshops", "-", "1 по избор", "3 по избор"],
+      ["Experiences", "-", "1 по избор", "3 по избор"],
       ["Обяд", "-", "-", "Безплатен, през двата дни"],
       ["Goody bag", "-", "Стойност €100+", "Стойност €250+"],
       ["Premium Lounge", "-", "-", "Включен"],
@@ -470,8 +470,8 @@ export const TICKETS_SECTION: Copy<{
       ["Access", "One day of your choice", "Both days", "Both days"],
       ["Talks", "Subject to seats", "Priority access", "Guaranteed access"],
       ["Reserved seating", "-", "-", "Premium area"],
-      ["Workshops", "-", "Included", "Included, with priority"],
-      ["Special experiences", "-", "One of your choice", "All included"],
+      ["Workshops", "-", "One of your choice", "Three of your choice"],
+      ["Special experiences", "-", "One of your choice", "Three of your choice"],
       ["Lunch", "-", "-", "Free, on both days"],
       ["Goody bag", "-", "Worth €100+", "Worth €250+"],
       ["Premium Lounge", "-", "-", "Included"],
@@ -498,7 +498,7 @@ export const TIER_FEATURES: Record<string, Copy<{ features: string[]; absent: st
         "Станциите за измерване и Village с 30 бранда",
         "Партньорски оферти и привилегии",
       ],
-      absent: ["Работилниците и преживяванията са в PLUS и PEAK"],
+      absent: ["Workshops и experiences са в PLUS и PEAK"],
     },
     en: {
       features: [
@@ -512,23 +512,23 @@ export const TIER_FEATURES: Record<string, Copy<{ features: string[]; absent: st
   },
   plus: {
     bg: {
-      features: ["И двата дни", "Приоритетен достъп до лекциите", "Работилниците включени", "1 специално преживяване по избор", "Goody bag на стойност €100+"],
+      features: ["И двата дни", "Приоритетен достъп до лекциите", "1 workshop по избор", "1 experience по избор", "Goody bag на стойност €100+"],
       absent: [],
     },
     en: {
-      features: ["Both days", "Priority access to the talks", "Workshops included", "One special experience of your choice", "Goody bag worth €100+"],
+      features: ["Both days", "Priority access to the talks", "One workshop of your choice", "One special experience of your choice", "Goody bag worth €100+"],
       absent: [],
     },
   },
   peak: {
     bg: {
       tagline: "Ограничени места",
-      features: ["Гарантиран достъп + премиум зона", "Работилници и преживявания с приоритет", "Безплатен обяд през двата дни", "Goody bag на стойност €250+", "Premium Lounge", "Meet & Greet с лектори", "Приоритетен вход"],
+      features: ["Гарантиран достъп + премиум зона", "3 workshops и 3 experiences", "Безплатен обяд през двата дни", "Goody bag на стойност €250+", "Premium Lounge", "Meet & Greet с лектори", "Приоритетен вход"],
       absent: [],
     },
     en: {
       tagline: "Limited places",
-      features: ["Guaranteed access + premium area", "Workshops and experiences with priority", "Free lunch on both days", "Goody bag worth €250+", "Premium Lounge", "Meet & Greet with speakers", "Priority entrance"],
+      features: ["Guaranteed access + premium area", "Three workshops and three experiences", "Free lunch on both days", "Goody bag worth €250+", "Premium Lounge", "Meet & Greet with speakers", "Priority entrance"],
       absent: [],
     },
   },
@@ -560,7 +560,7 @@ export const REGISTER: Copy<{
     title: "Два дни. Реални числа. Личен план.",
     bodyOpen: "Билетите са в продажба",
     bodyClosed:
-      "Билетите отварят съвсем скоро. Финализираме нивата и цените, за да са честни и към теб, и към програмата, която строим. Местата в работилниците и специалните преживявания са ограничени и се запазват с реда на купуване.",
+      "Билетите отварят съвсем скоро. Финализираме нивата и цените, за да са честни и към теб, и към програмата, която строим. Местата в workshops и experiences са ограничени и се запазват с реда на купуване.",
     offerJoin: (offer) => ` - на ${offer}`,
     buy: "Купи билет",
     buyFrom: (price) => ` от ${price} €`,
@@ -612,8 +612,8 @@ export const LIST: Copy<{
 }> = {
   bg: {
     eyebrow: "Бъди в течение",
-    title: "Програмата, работилниците и цените - на имейл",
-    body: "Пишем рядко и само по повод: когато програмата по часове е готова, когато отворим записването за работилниците и преди цените да се вдигнат. Отписваш се с едно кликване.",
+    title: "Програмата, workshops и цените - на имейл",
+    body: "Пишем рядко и само по повод: когато програмата по часове е готова, когато отворим записването за workshops и преди цените да се вдигнат. Отписваш се с едно кликване.",
     placeholder: "твоят имейл",
     button: "Пиши ми",
     consent: "Съгласен съм да получавам новини за Sofia Life Summit.",
@@ -712,7 +712,7 @@ export const SPONSORS_SECTION: Copy<{
     blurbs: {
       Сцена: "18 лекции и панела, международни лектори.",
       Движение: "Power Plate и пилатес, със записан час.",
-      Възстановяване: "Breathwork и Recovery работилници, по 30 минути.",
+      Възстановяване: "Breathwork и Recovery workshops, по 30 минути.",
     },
   },
   en: {
@@ -789,7 +789,7 @@ export const META: Copy<{ title: string; describe: (from: string) => string }> =
     title: "Sofia Life Summit 2026 - дълголетие и биохакинг, София | Biohacking Experience",
     describe: (from) =>
       "Фест за дълголетие и биохакинг - 07-08 ноември 2026, Гранд Хотел " +
-      "Милениум, София. Лекции, работилници, longevity паспорт, станции за " +
+      "Милениум, София. Лекции, workshops, longevity паспорт, станции за " +
       `измерване, международни лектори. Билети от ${from} €.`,
   },
   en: {

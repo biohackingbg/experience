@@ -314,7 +314,7 @@ export function listLetter(id: ListLetterId, i: ListLetterInput): Letter {
         "Програмата на Sofia Life Summit: двата дни по часове",
         [
           `${greet} Програмата е на сайта: лекторите по часове, работилниците и ${CONCEPT_TOTAL}-те станции и преживявания в Гранд Хотел Милениум на 7 и 8 ноември.`,
-          `Събота и неделя са различни. С CORE избираш един ден; с PLUS си и в двата, с работилниците и с едно специално преживяване по избор; PEAK добавя Premium Lounge и Meet & Greet с лекторите.`,
+          `Събота и неделя са различни. С CORE избираш един ден; с PLUS си и в двата, с една работилница и едно специално преживяване по избор; PEAK добавя Premium Lounge и Meet & Greet с лекторите.`,
           priceLine,
         ],
         { label: "Виж програмата", url: `${SITE}/programa?utm_source=email&utm_campaign=list-programa` },
@@ -351,7 +351,7 @@ export function listLetter(id: ListLetterId, i: ListLetterInput): Letter {
         "Една седмица до Sofia Life Summit",
         [
           `${greet} След седмица, в събота и неделя, Гранд Хотел Милениум е два дни дълголетие на живо: лектори по часове, работилници и ${CONCEPT_TOTAL} станции и преживявания - reformer, lagree, breathwork, PEMF, Power Plate, InBody и още.`,
-          `PEAK има още **${i.peakLeft} места**: Premium Lounge, Meet & Greet с лекторите, приоритет за работилниците и преживяванията, goody bag на стойност 250 €+.`,
+          `PEAK има още **${i.peakLeft} места**: Premium Lounge, Meet & Greet с лекторите, 3 работилници и 3 преживявания, goody bag на стойност 250 €+.`,
           priceLine,
         ],
         { label: "Виж билетите", url: bilet("sedmica") },

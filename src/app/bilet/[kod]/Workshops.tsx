@@ -82,11 +82,18 @@ export function Workshops({
           {[1, 2].map((day) => {
             const forDay = sessions.filter((s) => s.day === day);
             if (forDay.length === 0) return null;
+            // One list per room, in the order the rooms first appear in the day:
+            // the stations run a short slot every quarter hour, and mixed into
+            // one list they would bury the workshops between them.
+            const rooms = [...new Set(forDay.map((s) => s.location ?? ""))];
             return (
               <div key={day} className="mt-4">
                 <h3 className="font-mono text-[0.62rem] uppercase tracking-[0.18em] text-bh-ink/50">{day === 1 ? t.day1 : t.day2}</h3>
-                <ul className="mt-2 flex flex-col divide-y divide-bh-ink/8">
-                  {forDay.map((s) => {
+                {rooms.map((room) => (
+                <div key={room} className="mt-3">
+                {room && <h4 className="text-xs font-semibold uppercase tracking-wide text-bh-pine">{room}</h4>}
+                <ul className="mt-1 flex flex-col divide-y divide-bh-ink/8">
+                  {forDay.filter((s) => (s.location ?? "") === room).map((s) => {
                     const isBooked = booked.includes(s.id);
                     const allowance = remaining[s.kind];
                     const reason = isBooked
@@ -112,8 +119,8 @@ export function Workshops({
                           <div className={`mt-1 text-sm font-semibold ${isBooked ? "text-bh-pine" : "text-bh-ink"}`}>{s.title}</div>
                           {(s.host || s.location || s.description) && (
                             <div className="text-xs leading-relaxed text-bh-ink/60">
-                              {[s.host, s.location].filter(Boolean).join(" · ")}
-                              {s.description ? `${s.host || s.location ? " · " : ""}${s.description}` : ""}
+                              {[s.host, room ? null : s.location].filter(Boolean).join(" · ")}
+                              {s.description ? `${s.host || (!room && s.location) ? " · " : ""}${s.description}` : ""}
                             </div>
                           )}
                           {!isBooked && !reason && s.left <= 5 && (
@@ -143,6 +150,8 @@ export function Workshops({
                     );
                   })}
                 </ul>
+                </div>
+                ))}
               </div>
             );
           })}

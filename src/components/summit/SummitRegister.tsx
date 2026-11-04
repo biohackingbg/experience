@@ -62,7 +62,7 @@ export async function SummitRegister({ lang = "bg" }: { lang?: Lang }) {
               )}
               {lang === "en"
                 ? ". Places in the workshops and the special experiences are limited and go in the order people buy."
-                : ". Местата в работилниците и специалните преживявания са ограничени и се запазват с реда на купуване."}
+                : ". Местата в workshops и experiences са ограничени и се запазват с реда на купуване."}
                 </>
               )}
             </p>

@@ -8,7 +8,7 @@ const DATES = ["07.11", "08.11"];
 
 /**
  * The rooms and stations beside the stage: yoga, mobility and reformer
- * classes in Newton and Columbus 1, three workshops, and the recovery
+ * classes in Newton and Columbus 1, five workshops, and the recovery
  * stations. Same look as the stage programme above it, so the two read as
  * one timetable.
  */

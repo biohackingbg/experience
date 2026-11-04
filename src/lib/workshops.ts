@@ -19,15 +19,15 @@ import { type WorkshopKind, allowanceFor } from "@/lib/workshop-options";
  */
 
 /**
- * Booking opens 24 hours before the summit does (10:00 on Saturday, the
- * start in the event's schema), so the places go to people who are coming,
+ * Booking opens on the Friday morning before the summit (08:30, the day
+ * before it starts), so the places go to people who are coming,
  * not to whoever got in first on the day the tickets were bought. Cancelling
  * is never closed, and a place booked before this stays booked.
  */
-export const BOOKING_OPENS_AT = new Date("2026-11-06T10:00:00+02:00");
+export const BOOKING_OPENS_AT = new Date("2026-11-06T08:30:00+02:00");
 export const bookingOpen = () => Date.now() >= BOOKING_OPENS_AT.getTime();
 
-/** When it opens, in words, in Sofia time: "6 ноември в 10:00". */
+/** When it opens, in words, in Sofia time: "6 ноември в 08:30". */
 export function bookingOpensLabel(lang: "bg" | "en"): string {
   const fmt = (o: Intl.DateTimeFormatOptions) =>
     new Intl.DateTimeFormat(lang === "en" ? "en-GB" : "bg-BG", { timeZone: "Europe/Sofia", ...o }).format(BOOKING_OPENS_AT);

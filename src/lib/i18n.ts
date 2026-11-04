@@ -25,7 +25,7 @@ export const CHECKOUT = {
     limited: "Ограничени места",
     bothDays: "И двата дни, 07–08.11",
     oneDay: "1 ден по избор",
-    upgrade: (diff: string) => `+${diff} € за PLUS: и двата дни, работилниците, 1 преживяване и goody bag.`,
+    upgrade: (diff: string) => `+${diff} € за PLUS: и двата дни, 1 workshop, 1 experience и goody bag.`,
     details: "Данни за билета",
     continueBtn: "Продължи",
     day: "Кой ден",
@@ -150,7 +150,7 @@ export const RESEND_PAGE = {
 
 export const BOOKING = {
   bg: {
-    title: "Работилници и преживявания",
+    title: "Workshops и experiences",
     intro: "Местата са ограничени и се пазят с реда на записване. Можеш да се откажеш по всяко време.",
     day1: "Събота 07.11",
     day2: "Неделя 08.11",
@@ -165,9 +165,9 @@ export const BOOKING = {
     usedUp: "Използва избора си",
     left: (n: number) => (n === 1 ? "остава 1 място" : `остават ${n} места`),
     none: "Записването отваря скоро - ще пишем на купувачите, щом програмата се отвори.",
-    coreNote: "Работилниците и преживяванията са включени в PLUS и PEAK.",
+    coreNote: "Workshops и experiences са включени в PLUS и PEAK.",
     yours: "Твоята програма",
-    opensNote: (when: string) => `Записването се отваря на ${when}, 24 часа преди началото. До тогава можеш да разгледаш какво предстои.`,
+    opensNote: (when: string) => `Записването се отваря на ${when}. До тогава можеш да разгледаш какво предстои.`,
     notYet: "Отваря скоро",
   },
   en: {
@@ -188,7 +188,7 @@ export const BOOKING = {
     none: "Booking opens soon - we will write to ticket holders when it does.",
     coreNote: "Workshops and experiences are included with PLUS and PEAK.",
     yours: "Your programme",
-    opensNote: (when: string) => `Booking opens on ${when}, 24 hours before the summit starts. Until then you can look through what is coming.`,
+    opensNote: (when: string) => `Booking opens on ${when}. Until then you can look through what is coming.`,
     notYet: "Opens soon",
   },
 } as const;
