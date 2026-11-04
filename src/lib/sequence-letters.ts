@@ -149,6 +149,45 @@ export function abandonedOfferLetter(i: AbandonedOfferInput): Letter {
 }
 
 /* ------------------------------------------------------------------ *
+ * To buyers of several tickets: hand each one to its person
+ * ------------------------------------------------------------------ */
+
+export type HandoverAskInput = { name: string; tickets: ProgrammeTicket[]; unsubUrl: string };
+
+/**
+ * One link per ticket, for the buyer to forward. Each person takes their
+ * ticket under their own name and address, then signs in to the app with
+ * that address and books their own places - the app books on one ticket
+ * per account, so this is how every ticket gets its workshops.
+ */
+export function handoverAskLetter(i: HandoverAskInput): Letter {
+  const lead = `${hi(i.name)} Имаш **${i.tickets.length} билета** за Sofia Life Summit. За да може всеки да си запише workshops и experiences и баджът му да е с неговото име, изпрати на всеки човек линка към неговия билет.`;
+  const how = [
+    "Човекът отваря линка, пише името и имейла си и потвърждава имейла с 6-цифрен код.",
+    "После влиза с този имейл в приложението Sofia Life Summit (на iPhone от App Store, на Android и компютър в браузъра) и вижда своя билет.",
+    "От **петък, 6 ноември, в 08:30** си записва сам workshops и experiences, с лимита на своя билет: PLUS 1 workshop и 1 experience, PEAK по 3.",
+  ];
+  const rowsHtml = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;border-collapse:collapse">${i.tickets
+    .map((t) => {
+      const url = `${SITE}/vzemi?kod=${encodeURIComponent(t.code)}`;
+      const who = t.attendeeEmail ? `${t.attendeeName ?? ""} (${t.attendeeEmail})` : t.attendeeName ?? "още без име";
+      return `<tr>
+        <td valign="top" style="width:70px;padding:9px 10px 9px 0;border-top:1px solid #02251f14;font:600 13px/1.45 ${FONT};color:#146455">${esc(t.tierName)}</td>
+        <td valign="top" style="padding:9px 0;border-top:1px solid #02251f14;font:400 14px/1.45 ${FONT};color:#02251f">${esc(who)}<br><a href="${esc(url)}" style="font:400 12px/1.45 ${FONT};color:#146455;word-break:break-all">${esc(url)}</a></td>
+      </tr>`;
+    })
+    .join("")}</table>`;
+  const close = "Ако някой от билетите е за теб, отвори неговия линк и въведи своето име и имейла, с който влизаш. Ако не искаш да пращаш линкове, можеш да впишеш името и имейла на човека директно на страницата на билета и ние ще му пратим билета.";
+  return frame({
+    subject: `Дай всеки от ${i.tickets.length}-те билета на човека, който ще го ползва`,
+    bodyHtml: para(lead) + rowsHtml + bullets(how.map(plain)) + para(close) + button("Отвори приложението", APP_LINK, "ink"),
+    bodyText: [plain(lead), "", ...i.tickets.map((t) => `${t.tierName} ${t.code}: ${t.attendeeName ?? "още без име"}  ${SITE}/vzemi?kod=${t.code}`), "", ...how.map((h) => `- ${plain(h)}`), "", close, `Приложението: ${APP_LINK}`],
+    why: "Получаваш това писмо, защото имаш повече от един билет за Sofia Life Summit.",
+    unsubUrl: i.unsubUrl,
+  });
+}
+
+/* ------------------------------------------------------------------ *
  * The programme letter to every buyer (sent by hand, once per address)
  * ------------------------------------------------------------------ */
 

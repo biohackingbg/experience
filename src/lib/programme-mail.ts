@@ -6,7 +6,7 @@ import { getDb } from "@/lib/db";
 import { emailSends, orders, tickets } from "@/lib/db/schema";
 import { sendListMailBatch, sendSequenceMail } from "@/lib/email";
 import { getProgram } from "@/lib/program-data";
-import { type ProgrammeTicket, programmeLetter } from "@/lib/sequence-letters";
+import { type ProgrammeTicket, handoverAskLetter, programmeLetter } from "@/lib/sequence-letters";
 import { SOLD } from "@/lib/sold";
 import { getTier } from "@/lib/tickets";
 import { unsubscribePostUrl, unsubscribeUrl } from "@/lib/unsubscribe";
@@ -89,6 +89,61 @@ export async function sendProgrammeAll(): Promise<{ sent: number; remaining: num
     await getDb()
       .insert(emailSends)
       .values(letters.map(({ b }, j) => ({ kind: PROGRAMME_KIND, target: b.email, email: b.email, emailId: res.ids?.[j] ?? null })))
+      .onConflictDoNothing();
+    sent += slice.length;
+  }
+  return { sent, remaining: 0 };
+}
+
+/* ------------------------------------------------------------------ *
+ * To buyers of several tickets: hand each one on
+ * ------------------------------------------------------------------ */
+
+export const HANDOVER_KIND = "handover-ask";
+
+async function handoverSent(): Promise<Set<string>> {
+  const rows = await getDb().select({ target: emailSends.target }).from(emailSends).where(sql`${emailSends.kind} = ${HANDOVER_KIND}`);
+  return new Set(rows.map((r) => r.target));
+}
+
+/** Addresses with two tickets or more, and how many of their tickets still have nobody's name on them. */
+export async function handoverAudience(): Promise<{ waiting: number; sent: number; tickets: number; unnamed: number }> {
+  const [all, done] = await Promise.all([buyers(), handoverSent()]);
+  const many = all.filter((b) => b.tickets.length > 1);
+  const tickets = many.flatMap((b) => b.tickets);
+  return {
+    waiting: many.filter((b) => !done.has(b.email)).length,
+    sent: many.filter((b) => done.has(b.email)).length,
+    tickets: tickets.length,
+    unnamed: tickets.filter((t) => !t.attendeeName).length,
+  };
+}
+
+export async function handoverPreview(): Promise<{ subject: string; html: string }> {
+  const l = handoverAskLetter({ name: "Мария", tickets: SAMPLE_TICKETS, unsubUrl: "#" });
+  return { subject: l.subject, html: l.html };
+}
+
+export async function sendHandoverTest(to: string): Promise<boolean> {
+  const l = handoverAskLetter({ name: "Мария", tickets: SAMPLE_TICKETS, unsubUrl: unsubscribeUrl(to) });
+  const id = await sendSequenceMail({ to, ...l, unsubscribe: { url: unsubscribeUrl(to), postUrl: unsubscribePostUrl(to) } });
+  return id !== null;
+}
+
+export async function sendHandoverAll(): Promise<{ sent: number; remaining: number; error?: string }> {
+  const done = await handoverSent();
+  const waiting = (await buyers()).filter((b) => b.tickets.length > 1 && !done.has(b.email));
+  let sent = 0;
+  for (let i = 0; i < waiting.length; i += 100) {
+    const slice = waiting.slice(i, i + 100);
+    const letters = slice.map((b) => ({ b, l: handoverAskLetter({ name: b.name, tickets: b.tickets, unsubUrl: unsubscribeUrl(b.email) }) }));
+    const res = await sendListMailBatch(
+      letters.map(({ b, l }) => ({ to: b.email, name: null, subject: l.subject, body: "", ctaLabel: null, ctaUrl: null, html: l.html, text: l.text })),
+    );
+    if (!res.ok) return { sent, remaining: waiting.length - sent, error: res.error };
+    await getDb()
+      .insert(emailSends)
+      .values(letters.map(({ b }, j) => ({ kind: HANDOVER_KIND, target: b.email, email: b.email, emailId: res.ids?.[j] ?? null })))
       .onConflictDoNothing();
     sent += slice.length;
   }

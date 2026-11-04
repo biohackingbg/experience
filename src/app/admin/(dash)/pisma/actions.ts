@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { OFFER, sendOfferAll, sendOfferTest } from "@/lib/abandoned-offer";
 import { canAccess } from "@/lib/access";
-import { sendProgrammeAll, sendProgrammeTest } from "@/lib/programme-mail";
+import { sendHandoverAll, sendHandoverTest, sendProgrammeAll, sendProgrammeTest } from "@/lib/programme-mail";
 import { sendInfoMail, sendInfoMailTest } from "@/lib/event-mail";
 import { MAIL_SLOTS, saveMailTexts } from "@/lib/mail-texts";
 import { type ListLetterId, LIST_LETTERS } from "@/lib/sequence-letters";
@@ -244,4 +244,24 @@ export async function sendProgrammeAllAction(): Promise<MailState> {
   revalidatePath("/admin/pisma");
   if (r.error) return { status: "error", message: `Изпратени ${r.sent}, спря с грешка: ${r.error}. Остават ${r.remaining}. Натисни пак, за да продължи.` };
   return { status: "ok", message: `Изпратени ${r.sent}. Всички с билет имат писмото.` };
+}
+
+/* ------------------------------------------------------------------ *
+ * To buyers of several tickets
+ * ------------------------------------------------------------------ */
+
+export async function sendHandoverTestAction(_prev: MailState, formData: FormData): Promise<MailState> {
+  if (!(await canAccess("pisma"))) return { status: "error", message: "Няма достъп." };
+  const to = String(formData.get("to") ?? "").trim().toLowerCase();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)) return { status: "error", message: "Невалиден имейл." };
+  const ok = await sendHandoverTest(to);
+  return ok ? { status: "ok", message: `Пробата е изпратена до ${to}.` } : { status: "error", message: "Изпращането не мина. Провери дневника." };
+}
+
+export async function sendHandoverAllAction(): Promise<MailState> {
+  if (!(await canAccess("pisma"))) return { status: "error", message: "Няма достъп." };
+  const r = await sendHandoverAll();
+  revalidatePath("/admin/pisma");
+  if (r.error) return { status: "error", message: `Изпратени ${r.sent}, спря с грешка: ${r.error}. Остават ${r.remaining}. Натисни пак, за да продължи.` };
+  return { status: "ok", message: `Изпратени ${r.sent}. Всички с повече от един билет имат писмото.` };
 }
