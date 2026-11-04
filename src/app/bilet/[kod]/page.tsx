@@ -211,7 +211,7 @@ export default async function TicketPage({
           )}
 
           {!ticket.checkedInAt && (
-            <AttendeeForm code={ticket.code} current={ticket.attendeeName} lang={ticket.lang} />
+            <AttendeeForm code={ticket.code} current={ticket.attendeeName} currentEmail={ticket.attendeeEmail} lang={ticket.lang} />
           )}
 
           {arrival.length > 0 && <ArrivalPicker code={ticket.code} lang={ticket.lang} days={arrival} />}

@@ -6,7 +6,9 @@ import { revalidatePath } from "next/cache";
 import { chooseArrival } from "@/lib/arrivals";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { changeTicketDay } from "@/lib/ticket-day";
-import { setAttendeeName } from "@/lib/tickets-lookup";
+import { sendHandoverEmail } from "@/lib/email";
+import { getTier } from "@/lib/tickets";
+import { setAttendee } from "@/lib/tickets-lookup";
 import { BOOKING } from "@/lib/i18n";
 import { bookPlace, bookingOpensLabel, cancelPlace } from "@/lib/workshops";
 
@@ -66,14 +68,25 @@ export async function saveAttendee(_prev: AttendeeState, formData: FormData): Pr
 
   const code = String(formData.get("code") ?? "").trim().toUpperCase();
   const name = String(formData.get("name") ?? "").trim();
-  if (name.length > 80) return { status: "error", message: "Името е твърде дълго." };
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const en = formData.get("lang") === "en";
+  if (name.length > 80) return { status: "error", message: en ? "The name is too long." : "Името е твърде дълго." };
+  if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { status: "error", message: en ? "That email address does not look right." : "Имейлът не изглежда верен." };
+  if (email && !name) return { status: "error", message: en ? "Add the person's name too." : "Напиши и името на човека." };
 
-  const r = await setAttendeeName(code, name);
-  if (r === "not_found") return { status: "error", message: "Билетът не е намерен." };
-  if (r === "used") return { status: "error", message: "Билетът вече е използван и името не може да се променя." };
+  const r = await setAttendee(code, name, email || null);
+  if (r.r === "not_found") return { status: "error", message: en ? "Ticket not found." : "Билетът не е намерен." };
+  if (r.r === "used") return { status: "error", message: en ? "The ticket was already used and cannot change hands." : "Билетът вече е използван и не може да се променя." };
 
   revalidatePath(`/bilet/${code}`);
-  return { status: "ok", message: name ? `Записано: ${name}.` : "Името е изчистено." };
+  // A new holder gets the ticket and the way into the app, once per address.
+  const holder = email && email !== r.buyerEmail.toLowerCase() ? email : null;
+  if (holder && holder !== r.before?.toLowerCase()) {
+    const ok = await sendHandoverEmail({ to: holder, holderName: name, buyerName: r.buyerName, code, tierName: getTier(r.tierId)?.name ?? r.tierId, lang: r.lang === "en" ? "en" : "bg" });
+    if (!ok) return { status: "error", message: en ? `Saved, but the email to ${holder} did not go. Try again in a moment.` : `Записано, но писмото до ${holder} не тръгна. Опитай пак след малко.` };
+    return { status: "ok", message: en ? `Saved. The ticket went to ${holder}: they sign in to the app with that address.` : `Записано. Билетът е изпратен на ${holder}: с този имейл влиза в приложението.` };
+  }
+  return { status: "ok", message: name ? (en ? `Saved: ${name}.` : `Записано: ${name}.`) : en ? "Cleared." : "Името е изчистено." };
 }
 
 export type ArrivalState = { status: "idle" | "ok" | "error"; message?: string };

@@ -14,6 +14,7 @@ export type TicketView = {
   day: number | null;
   tierName: string;
   attendeeName: string | null;
+  attendeeEmail: string | null;
   buyerName: string;
   reference: string;
   checkedInAt: Date | null;
@@ -41,6 +42,7 @@ export async function findTicket(code: string): Promise<TicketView | null> {
       tierId: tickets.tierId,
       day: tickets.day,
       attendeeName: tickets.attendeeName,
+      attendeeEmail: tickets.attendeeEmail,
       checkedInAt: tickets.checkedInAt,
       arrivalSlot1: tickets.arrivalSlot1,
       arrivalSlot2: tickets.arrivalSlot2,
@@ -104,6 +106,33 @@ export async function checkInTicket(code: string): Promise<CheckInResult> {
  * and on the badge. Locked once the ticket has been used: after that the
  * name is a record, not a setting.
  */
+/**
+ * Who uses the ticket: a name, and an address when it is someone other than
+ * the buyer. Returns what the address was before, so the caller writes to the
+ * holder only when it is new.
+ */
+export async function setAttendee(
+  code: string,
+  name: string,
+  email: string | null,
+): Promise<{ r: "ok"; before: string | null; buyerName: string; buyerEmail: string; tierId: string; lang: string } | { r: "not_found" } | { r: "used" }> {
+  const [t] = await getDb()
+    .select({ code: tickets.code, checkedInAt: tickets.checkedInAt, before: tickets.attendeeEmail, tierId: tickets.tierId, buyerName: orders.name, buyerEmail: orders.email, lang: orders.lang })
+    .from(tickets)
+    .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
+    .where(sql`${tickets.code} = ${code} and ${SOLD}`)
+    .limit(1);
+  if (!t) return { r: "not_found" };
+  if (t.checkedInAt) return { r: "used" };
+  // The buyer's own address on their own ticket says nothing new: kept empty.
+  const holder = email && email.toLowerCase() !== t.buyerEmail.toLowerCase() ? email.toLowerCase() : null;
+  await getDb()
+    .update(tickets)
+    .set({ attendeeName: name.trim().replace(/\s+/g, " ").slice(0, 80) || null, attendeeEmail: holder })
+    .where(sql`${tickets.code} = ${t.code}`);
+  return { r: "ok", before: t.before, buyerName: t.buyerName, buyerEmail: t.buyerEmail, tierId: t.tierId, lang: t.lang };
+}
+
 export async function setAttendeeName(code: string, name: string): Promise<"ok" | "not_found" | "used"> {
   const ticket = await findTicket(code);
   if (!ticket) return "not_found";
@@ -127,6 +156,8 @@ export type AttendeeRow = {
   reference: string;
   buyerName: string;
   email: string;
+  /** The holder's own address, when the buyer gave the ticket to someone else. */
+  holderEmail: string | null;
   company: string | null;
   checkedInAt: Date | null;
 };
@@ -143,6 +174,7 @@ export async function listAttendees(): Promise<AttendeeRow[]> {
       buyerName: orders.name,
       reference: orders.reference,
       email: orders.email,
+      holderEmail: tickets.attendeeEmail,
       company: orders.invoiceCompany,
       totalCents: orders.totalCents,
     })
@@ -159,6 +191,7 @@ export async function listAttendees(): Promise<AttendeeRow[]> {
       reference: r.reference,
       buyerName: r.buyerName,
       email: r.email,
+      holderEmail: r.holderEmail,
       company: r.company,
       checkedInAt: r.checkedInAt,
     }))
@@ -250,6 +283,7 @@ export async function searchTickets(q: string): Promise<(TicketView & { email: s
       tierId: tickets.tierId,
       day: tickets.day,
       attendeeName: tickets.attendeeName,
+      attendeeEmail: tickets.attendeeEmail,
       checkedInAt: tickets.checkedInAt,
       arrivalSlot1: tickets.arrivalSlot1,
       arrivalSlot2: tickets.arrivalSlot2,

@@ -2,6 +2,7 @@ import "server-only";
 
 import { Resend } from "resend";
 
+import { APP_LINK } from "@/lib/app-links";
 import { type MailTexts, defaultMailTexts, getMailTexts, mailText } from "@/lib/mail-texts";
 import { DAY_LABEL, formatPrice } from "@/lib/tickets";
 
@@ -1114,6 +1115,82 @@ export async function sendLoginCodeEmail(input: LoginCodeInput): Promise<boolean
     return true;
   } catch (error) {
     console.error("[email] login code threw:", error);
+    return false;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * A ticket given to someone else
+ * ------------------------------------------------------------------ */
+
+export type HandoverInput = { to: string; holderName: string | null; buyerName: string; code: string; tierName: string; lang: "bg" | "en" };
+
+/**
+ * To the person the buyer named on a ticket: the ticket is theirs to open,
+ * and the app lets them in with this very address, where they book their
+ * own workshops and experiences.
+ */
+export function handoverParts(i: HandoverInput): MailParts {
+  const en = i.lang === "en";
+  const ticketUrl = `${SITE}/bilet/${encodeURIComponent(i.code)}${en ? "?lang=en" : ""}`;
+  const hiName = i.holderName ? i.holderName.trim().split(/\s+/)[0] : null;
+  const p = `font:400 15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f`;
+  const btn = (label: string, url: string, bg: string) =>
+    `<p style="margin:6px 0 14px"><a href="${esc(url)}" style="display:inline-block;background:${bg};color:#f1f5f3;text-decoration:none;font:600 14px/1 -apple-system,Segoe UI,Roboto,sans-serif;padding:14px 22px;border-radius:999px">${esc(label)}</a></p>`;
+  const t = en
+    ? {
+        subject: `${i.buyerName} gave you a ticket for Sofia Life Summit`,
+        title: "Your ticket for Sofia Life Summit",
+        hi: hiName ? `Hi ${esc(hiName)}!` : "Hi!",
+        lead: `${esc(i.buyerName)} gave you a <strong>${esc(i.tierName)}</strong> ticket for Sofia Life Summit, 7-8 November at the Grand Hotel Millennium, Sofia. The QR code on it is your way in.`,
+        app: `Sign in to the Sofia Life Summit app with <strong>${esc(i.to)}</strong>: your ticket is there, and from Friday, 6 November at 08:30 you book your own workshops and experiences. On iPhone the link opens the App Store; on Android or a computer it opens the web app.`,
+        open: "Open the ticket",
+        appBtn: "Open the app",
+        foot: `Ticket ${i.code}. Questions: reply to this email or write to hi@biohacking.bg.`,
+      }
+    : {
+        subject: `${i.buyerName} ти даде билет за Sofia Life Summit`,
+        title: "Билетът ти за Sofia Life Summit",
+        hi: hiName ? `Здравей, ${esc(hiName)}!` : "Здравей!",
+        lead: `${esc(i.buyerName)} ти даде билет <strong>${esc(i.tierName)}</strong> за Sofia Life Summit, 7 и 8 ноември в Гранд Хотел Милениум, София. QR кодът на билета е входът ти.`,
+        app: `Влез в приложението Sofia Life Summit с имейла <strong>${esc(i.to)}</strong>: билетът ти е там, а от петък, 6 ноември, в 08:30 си записваш сам workshops и experiences. На iPhone линкът отваря App Store, на Android или компютър отваря уеб приложението.`,
+        open: "Отвори билета",
+        appBtn: "Отвори приложението",
+        foot: `Билет ${i.code}. Въпроси: отговори на това писмо или пиши на hi@biohacking.bg.`,
+      };
+  const strip = (h: string) => h.replace(/<[^>]+>/g, "");
+  return {
+    subject: t.subject,
+    html: `<!doctype html><html lang="${i.lang}"><body style="margin:0;background:#f1f5f3;padding:28px 16px">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:20px;padding:32px">
+    <tr><td>
+      <img src="${SITE}/email-logo.png" width="200" height="54" alt="Biohacking Experience" style="display:block;border:0;outline:none;text-decoration:none;width:200px;height:auto;margin:0 0 20px">
+      <h1 style="margin:0 0 18px;font:800 24px/1.25 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f">${t.title}</h1>
+      <p style="margin:0 0 14px;${p}">${t.hi} ${t.lead}</p>
+      ${btn(t.open, ticketUrl, "#146455")}
+      <p style="margin:10px 0 14px;${p}">${t.app}</p>
+      ${btn(t.appBtn, APP_LINK, "#02251f")}
+      <div style="margin-top:12px;height:3px;background:#cef870;border-radius:2px"></div>
+      <p style="margin:18px 0 0;font:400 12px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f80">${esc(t.foot)}</p>
+    </td></tr>
+  </table></body></html>`,
+    text: [t.title, "", `${strip(t.hi)} ${strip(t.lead)}`, "", `${t.open}: ${ticketUrl}`, "", strip(t.app), `${t.appBtn}: ${APP_LINK}`, "", t.foot].join("\n"),
+  };
+}
+
+export async function sendHandoverEmail(i: HandoverInput): Promise<boolean> {
+  const resend = getResend();
+  const from = process.env.EMAIL_FROM;
+  if (!resend || !from) return false;
+  try {
+    const { error } = await resend.emails.send({ from, replyTo: REPLY_TO, to: i.to, ...handoverParts(i) });
+    if (error) {
+      console.error("[email] handover failed:", error);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("[email] handover threw:", error);
     return false;
   }
 }

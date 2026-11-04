@@ -9,10 +9,12 @@ export async function GET() {
   const rows = await listAttendees();
   const cell = (v: string | null | undefined) => `"${String(v ?? "").replaceAll('"', '""')}"`;
   const lines = [
-    ["Име", "Ниво", "Код", "Поръчка", "Купувач", "Имейл", "Фирма", "Име от участника", "Влязъл"].map(cell).join(";"),
+    ["Име", "Имейл на участника", "Ниво", "Код", "Поръчка", "Купувач", "Имейл на купувача", "Фирма", "Име от участника", "Влязъл"].map(cell).join(";"),
     ...rows.map((r) =>
       [
         r.name,
+        // The holder's own address, else the buyer's when the ticket is the buyer's own.
+        r.holderEmail ?? (r.named ? "" : r.email),
         r.tierName,
         r.code,
         r.reference,

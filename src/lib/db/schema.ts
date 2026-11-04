@@ -311,6 +311,12 @@ export const tickets = pgTable(
 
     attendeeName: text("attendee_name"),
     /**
+     * The holder's own address, when the buyer gave the ticket to someone
+     * else. The app signs that person in with it and shows them this ticket
+     * beside the buyer, who keeps it too.
+     */
+    attendeeEmail: text("attendee_email"),
+    /**
      * Which day this ticket admits, for the tiers that buy one: 1 = Saturday,
      * 2 = Sunday, null = both days (PLUS and PEAK) or a ticket issued before
      * the choice existed.

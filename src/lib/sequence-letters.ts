@@ -5,6 +5,7 @@
  * sample data without touching the database.
  */
 
+import { APP_LINK } from "@/lib/app-links";
 import { MOVEMENT_DAYS, STATIONS, WORKSHOPS } from "@/lib/movement-program";
 import type { Day } from "@/lib/program";
 import { type Pricing, priceOf } from "@/lib/pricing";
@@ -172,7 +173,8 @@ function rows(items: { time: string; title: string; sub?: string; quiet?: boolea
     .join("")}</table>`;
 }
 
-export type ProgrammeLetterInput = { name: string; days: Day[]; unsubUrl: string };
+export type ProgrammeTicket = { code: string; tierName: string; attendeeName: string | null; attendeeEmail: string | null };
+export type ProgrammeLetterInput = { name: string; days: Day[]; unsubUrl: string; tickets?: ProgrammeTicket[] };
 
 /**
  * The whole programme in one letter: the talks on the stage by day and
@@ -183,13 +185,33 @@ export type ProgrammeLetterInput = { name: string; days: Day[]; unsubUrl: string
  */
 export function programmeLetter(i: ProgrammeLetterInput): Letter {
   const programmeUrl = `${SITE}/programa?utm_source=email&utm_campaign=programme`;
-  const workshopsUrl = `${SITE}/programa?utm_source=email&utm_campaign=programme#movement`;
   const html: string[] = [];
   const text: string[] = [];
 
   const intro = `${hi(i.name)} В събота започваме. Ето цялата програма на едно място: лекциите на сцената, workshops и experiences в залите и станциите.`;
   html.push(para(intro));
   text.push(plain(intro), "");
+
+  // More than one ticket: each should reach the person who uses it, first of all.
+  const mine = i.tickets ?? [];
+  if (mine.length > 1) {
+    const ask = `Имаш **${mine.length} билета**. Дай всеки на човека, който ще го ползва: отвори билета и напиши името и имейла му. Пращаме му билета, той влиза с този имейл в приложението и сам си записва workshops и experiences, а баджът на входа е с неговото име.`;
+    html.push(h2("Твоите билети"), para(ask));
+    html.push(
+      `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;border-collapse:collapse">${mine
+        .map((t) => {
+          const url = `${SITE}/bilet/${encodeURIComponent(t.code)}?utm_source=email&utm_campaign=programme`;
+          const who = t.attendeeEmail ? `${t.attendeeName ?? ""} (${t.attendeeEmail})` : t.attendeeName ?? "още без име";
+          return `<tr>
+        <td valign="top" style="width:92px;padding:8px 10px 8px 0;border-top:1px solid #02251f14;font:600 13px/1.45 ${FONT};color:#146455">${esc(t.tierName)}</td>
+        <td valign="top" style="padding:8px 0;border-top:1px solid #02251f14;font:400 14px/1.45 ${FONT};color:#02251f">${esc(who)}<br><span style="font:400 12px/1.45 ${FONT};color:#02251f80">${esc(t.code)}</span></td>
+        <td valign="top" align="right" style="padding:8px 0;border-top:1px solid #02251f14"><a href="${esc(url)}" style="font:600 13px/1.45 ${FONT};color:#146455">Отвори</a></td>
+      </tr>`;
+        })
+        .join("")}</table>`,
+    );
+    text.push("ТВОИТЕ БИЛЕТИ", "", plain(ask), "", ...mine.map((t) => `${t.tierName} ${t.code}: ${t.attendeeName ?? "още без име"}${t.attendeeEmail ? ` (${t.attendeeEmail})` : ""}  ${SITE}/bilet/${t.code}`), "");
+  }
 
   // The stage, day by day, module by module.
   html.push(h2("Сцената"));
@@ -264,9 +286,11 @@ export function programmeLetter(i: ProgrammeLetterInput): Letter {
     "Записването за workshops и experiences отваря в **петък, 6 ноември, в 08:30**, в приложението Sofia Life Summit и на страницата на билета ти (линкът е в писмото с билета). Местата са ограничени и се пазят с реда на записване.",
     "**PLUS:** 1 workshop и 1 experience по избор. **PEAK:** 3 workshops и 3 experiences. **CORE** дава достъп до сцената и Village.",
   ];
-  html.push(h2("Записване"), para(booking[0]), para(booking[1]), button("Виж програмата на сайта", programmeUrl), button("Workshops и experiences", workshopsUrl, "ink"));
-  text.push("ЗАПИСВАНЕ", "", plain(booking[0]), "", plain(booking[1]), "", `Програмата на сайта: ${programmeUrl}`, `Приложението за iPhone: ${APP_STORE_URL}`);
-  html.push(`<p style="margin:0 0 16px;font:400 14px/1.6 ${FONT};color:#02251f">Приложението за iPhone: <a href="${APP_STORE_URL}" style="color:#146455">Sofia Life Summit в App Store</a>.</p>`);
+  html.push(h2("Записване"), para(booking[0]), para(booking[1]), button("Виж програмата на сайта", programmeUrl));
+  text.push("ЗАПИСВАНЕ", "", plain(booking[0]), "", plain(booking[1]), "", `Програмата на сайта: ${programmeUrl}`);
+  const appLine = "Влизаш в приложението с имейла, с който си купил билета (или с който ти е даден). На iPhone линкът отваря App Store, на Android и компютър отваря уеб приложението.";
+  html.push(para(appLine), button("Отвори приложението", APP_LINK, "ink"));
+  text.push("", appLine, `Приложението: ${APP_LINK}`);
 
   return frame({
     subject: "Програмата: лекции, workshops и experiences",

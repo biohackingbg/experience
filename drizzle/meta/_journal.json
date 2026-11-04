@@ -393,6 +393,13 @@
       "when": 1789000000054,
       "tag": "0055_credit_notes_partial",
       "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "7",
+      "when": 1789000000055,
+      "tag": "0056_ticket_holder_email",
+      "breakpoints": true
     }
   ]
 }

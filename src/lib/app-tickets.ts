@@ -40,7 +40,8 @@ export async function listTicketsForEmail(email: string): Promise<AppTicket[]> {
     })
     .from(tickets)
     .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
-    .where(sql`${orders.email} = ${email} and ${SOLD}`)
+    // The buyer's tickets, and any ticket given to this address by its buyer.
+    .where(sql`(${orders.email} = ${email} or lower(${tickets.attendeeEmail}) = ${email}) and ${SOLD}`)
     .orderBy(sql`${orders.paidAt} desc nulls last, ${tickets.code}`);
 
   return Promise.all(
@@ -65,7 +66,7 @@ export async function ownsTicket(email: string, code: string): Promise<boolean> 
     .select({ code: tickets.code })
     .from(tickets)
     .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
-    .where(sql`${tickets.code} = ${code} and ${orders.email} = ${email} and ${SOLD}`)
+    .where(sql`${tickets.code} = ${code} and (${orders.email} = ${email} or lower(${tickets.attendeeEmail}) = ${email}) and ${SOLD}`)
     .limit(1);
   return !!row;
 }
