@@ -1074,19 +1074,24 @@ export async function sendAccessLinkEmail(input: AccessLinkInput): Promise<boole
 
 /* ── The app's sign-in code ── */
 
-export type LoginCodeInput = { to: string; code: string; lang: "bg" | "en" };
+export type LoginCodeInput = { to: string; code: string; lang: "bg" | "en"; /** "ticket": typed on the website to take a ticket, not in the app. */ purpose?: "app" | "ticket" };
 
 export function loginCodeParts(input: LoginCodeInput): MailParts {
   const en = input.lang === "en";
   const title = en ? "Your sign-in code" : "Твоят код за вход";
-  const lead = en
-    ? "Enter this code in the Biohacking Experience app. It works for 10 minutes."
-    : "Въведи този код в приложението Biohacking Experience. Важи 10 минути.";
+  const ticket = input.purpose === "ticket";
+  const lead = ticket
+    ? en
+      ? "Enter this code on the page where you are adding your ticket. It works for 10 minutes."
+      : "Въведи този код на страницата, на която добавяш билета си. Важи 10 минути."
+    : en
+      ? "Enter this code in the Biohacking Experience app. It works for 10 minutes."
+      : "Въведи този код в приложението Biohacking Experience. Важи 10 минути.";
   const foot = en
     ? "If you did not ask for a code, ignore this email - nobody can sign in without it."
     : "Ако не си искал/а код, просто не обръщай внимание - без него никой не може да влезе.";
   return {
-    subject: `${input.code} · ${en ? "Biohacking Experience sign-in" : "вход в Biohacking Experience"}`,
+    subject: `${input.code} · ${ticket ? (en ? "your Sofia Life Summit ticket" : "билетът ти за Sofia Life Summit") : en ? "Biohacking Experience sign-in" : "вход в Biohacking Experience"}`,
     html: `<!doctype html><html lang="${input.lang}"><body style="margin:0;background:#f1f5f3;padding:28px 16px">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:20px;padding:32px">
     <tr><td>

@@ -309,3 +309,33 @@ export async function searchTickets(q: string): Promise<(TicketView & { email: s
     return { ...r, lang, tierName: ticketTierLabel(r.tierId, totalCents, lang, r.day) };
   });
 }
+
+export type ClaimResult = "ok" | "not_found" | "used" | "taken";
+
+/**
+ * A person takes a ticket they were given, by its number, under their own
+ * name and the address they just proved. A ticket already given to someone
+ * else stays theirs: only the buyer, from the ticket page, can move it.
+ */
+export async function claimTicket(rawCode: string, name: string, email: string): Promise<ClaimResult> {
+  const code = rawCode.trim().toUpperCase();
+  const [t] = await getDb()
+    .select({ code: tickets.code, checkedInAt: tickets.checkedInAt, holder: tickets.attendeeEmail, buyerEmail: orders.email })
+    .from(tickets)
+    .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
+    .where(sql`${tickets.code} = ${code} and ${SOLD}`)
+    .limit(1);
+  if (!t) return "not_found";
+  if (t.checkedInAt) return "used";
+  const me = email.toLowerCase();
+  if (t.holder && t.holder.toLowerCase() !== me) return "taken";
+  await getDb()
+    .update(tickets)
+    .set({
+      attendeeName: name.trim().replace(/\s+/g, " ").slice(0, 80) || null,
+      // The buyer naming themselves keeps the address empty: the order already has it.
+      attendeeEmail: me === t.buyerEmail.toLowerCase() ? null : me,
+    })
+    .where(sql`${tickets.code} = ${t.code}`);
+  return "ok";
+}

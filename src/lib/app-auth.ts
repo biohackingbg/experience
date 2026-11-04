@@ -48,7 +48,7 @@ function demo(): { email: string; code: string } | null {
 
 export type RequestCodeResult = { ok: true } | { ok: false; reason: "invalid" | "too_many" | "send_failed" };
 
-export async function requestLoginCode(rawEmail: string, lang: "bg" | "en"): Promise<RequestCodeResult> {
+export async function requestLoginCode(rawEmail: string, lang: "bg" | "en", purpose: "app" | "ticket" = "app"): Promise<RequestCodeResult> {
   const email = normaliseEmail(rawEmail);
   if (!isEmail(email)) return { ok: false, reason: "invalid" };
   const d = demo();
@@ -65,7 +65,7 @@ export async function requestLoginCode(rawEmail: string, lang: "bg" | "en"): Pro
   await db.insert(loginCodes).values({ email, codeHash: hash(`${email}:${code}`), expiresAt: new Date(Date.now() + CODE_TTL_MS) });
 
   const { sendLoginCodeEmail } = await import("@/lib/email");
-  const sent = await sendLoginCodeEmail({ to: email, code, lang });
+  const sent = await sendLoginCodeEmail({ to: email, code, lang, purpose });
   return sent ? { ok: true } : { ok: false, reason: "send_failed" };
 }
 
@@ -87,6 +87,13 @@ export async function verifyLoginCode(
     return { ok: true, token: await openSession(email, device, lang), email };
   }
 
+  const r = await consumeCode(email, code);
+  if (r !== "ok") return { ok: false, reason: r };
+  return { ok: true, token: await openSession(email, device, lang), email };
+}
+
+/** The latest unused code for the address, checked and spent; the attempt count stops guessing. */
+async function consumeCode(email: string, code: string): Promise<"ok" | "invalid" | "expired" | "too_many"> {
   const db = getDb();
   const [row] = await db
     .select()
@@ -94,16 +101,27 @@ export async function verifyLoginCode(
     .where(and(eq(loginCodes.email, email), isNull(loginCodes.usedAt)))
     .orderBy(desc(loginCodes.createdAt))
     .limit(1);
-  if (!row) return { ok: false, reason: "invalid" };
-  if (row.expiresAt.getTime() < Date.now()) return { ok: false, reason: "expired" };
-  if (row.attempts >= CODE_MAX_ATTEMPTS) return { ok: false, reason: "too_many" };
+  if (!row) return "invalid";
+  if (row.expiresAt.getTime() < Date.now()) return "expired";
+  if (row.attempts >= CODE_MAX_ATTEMPTS) return "too_many";
 
   if (!safeEqual(row.codeHash, hash(`${email}:${code}`))) {
     await db.update(loginCodes).set({ attempts: row.attempts + 1 }).where(eq(loginCodes.id, row.id));
-    return { ok: false, reason: row.attempts + 1 >= CODE_MAX_ATTEMPTS ? "too_many" : "invalid" };
+    return row.attempts + 1 >= CODE_MAX_ATTEMPTS ? "too_many" : "invalid";
   }
   await db.update(loginCodes).set({ usedAt: new Date() }).where(eq(loginCodes.id, row.id));
-  return { ok: true, token: await openSession(email, device, lang), email };
+  return "ok";
+}
+
+/**
+ * Proves the address on the website, with the same six digits the app uses,
+ * but opens no session: the person is claiming a ticket, not signing in.
+ */
+export async function verifyEmailCode(rawEmail: string, rawCode: string): Promise<"ok" | "invalid" | "expired" | "too_many"> {
+  const email = normaliseEmail(rawEmail);
+  const code = rawCode.replace(/\D/g, "");
+  if (!isEmail(email) || code.length !== 6) return "invalid";
+  return consumeCode(email, code);
 }
 
 async function openSession(email: string, device: string | null, lang: "bg" | "en"): Promise<string> {

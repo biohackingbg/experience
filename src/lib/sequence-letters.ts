@@ -195,22 +195,23 @@ export function programmeLetter(i: ProgrammeLetterInput): Letter {
   // More than one ticket: each should reach the person who uses it, first of all.
   const mine = i.tickets ?? [];
   if (mine.length > 1) {
-    const ask = `Имаш **${mine.length} билета**. Дай всеки на човека, който ще го ползва: отвори билета и напиши името и имейла му. Пращаме му билета, той влиза с този имейл в приложението и сам си записва workshops и experiences, а баджът на входа е с неговото име.`;
+    const ask = `Имаш **${mine.length} билета**. Изпрати на всеки човек линка към неговия билет (или само номера му). Той въвежда името и имейла си, потвърждава имейла с код и после влиза с него в приложението, където сам си записва workshops и experiences. Баджът на входа е с неговото име.`;
     html.push(h2("Твоите билети"), para(ask));
     html.push(
       `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;border-collapse:collapse">${mine
         .map((t) => {
-          const url = `${SITE}/bilet/${encodeURIComponent(t.code)}?utm_source=email&utm_campaign=programme`;
+          // The link to forward: it opens the claim page with the number filled in.
+          const url = `${SITE}/vzemi?kod=${encodeURIComponent(t.code)}`;
           const who = t.attendeeEmail ? `${t.attendeeName ?? ""} (${t.attendeeEmail})` : t.attendeeName ?? "още без име";
           return `<tr>
         <td valign="top" style="width:92px;padding:8px 10px 8px 0;border-top:1px solid #02251f14;font:600 13px/1.45 ${FONT};color:#146455">${esc(t.tierName)}</td>
         <td valign="top" style="padding:8px 0;border-top:1px solid #02251f14;font:400 14px/1.45 ${FONT};color:#02251f">${esc(who)}<br><span style="font:400 12px/1.45 ${FONT};color:#02251f80">${esc(t.code)}</span></td>
-        <td valign="top" align="right" style="padding:8px 0;border-top:1px solid #02251f14"><a href="${esc(url)}" style="font:600 13px/1.45 ${FONT};color:#146455">Отвори</a></td>
+        <td valign="top" align="right" style="padding:8px 0;border-top:1px solid #02251f14"><a href="${esc(url)}" style="font:600 13px/1.45 ${FONT};color:#146455">Линк за човека</a></td>
       </tr>`;
         })
         .join("")}</table>`,
     );
-    text.push("ТВОИТЕ БИЛЕТИ", "", plain(ask), "", ...mine.map((t) => `${t.tierName} ${t.code}: ${t.attendeeName ?? "още без име"}${t.attendeeEmail ? ` (${t.attendeeEmail})` : ""}  ${SITE}/bilet/${t.code}`), "");
+    text.push("ТВОИТЕ БИЛЕТИ", "", plain(ask), "", ...mine.map((t) => `${t.tierName} ${t.code}: ${t.attendeeName ?? "още без име"}${t.attendeeEmail ? ` (${t.attendeeEmail})` : ""}  ${SITE}/vzemi?kod=${t.code}`), "");
   }
 
   // The stage, day by day, module by module.
