@@ -1,4 +1,4 @@
-import { getMedOffer, renderMedLetter, sentTo } from "@/lib/med-offer";
+import { getMedOffer, renderMedLetter, sentTo, ticketsFor } from "@/lib/med-offer";
 
 import { removeMedRecipient } from "./actions";
 import { MedAddForm, MedSendForm, MedTestForm, MedTextForm } from "./MedOfferForms";
@@ -11,7 +11,7 @@ import { MedAddForm, MedSendForm, MedTestForm, MedTextForm } from "./MedOfferFor
  */
 export async function MedOfferSection() {
   const offer = await getMedOffer();
-  const done = await sentTo();
+  const [done, got] = await Promise.all([sentTo(), ticketsFor(offer)]);
   const waiting = offer.recipients.filter((r) => !done.has(r.email)).length;
   const sample = await renderMedLetter(offer, offer.recipients[0] ?? { name: "Мария Иванова", email: "primer@example.com" });
 
@@ -28,7 +28,10 @@ export async function MedOfferSection() {
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <div>
-          <div className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-bh-ink/50">Получатели · {offer.recipients.length}</div>
+          <div className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-bh-ink/50">
+            Получатели · {offer.recipients.length}
+            {got.size > 0 && <span className="ml-2 normal-case tracking-normal text-[#0b6d61]">с билети {got.size}</span>}
+          </div>
           {offer.recipients.length === 0 ? (
             <p className="mt-3 text-sm text-bh-ink/55">Още няма никого. Добави ги отдолу.</p>
           ) : (
@@ -41,6 +44,11 @@ export async function MedOfferSection() {
                     {r.code && <span className="ml-2 font-mono text-[0.65rem] text-bh-ink/45">{r.code}</span>}
                   </span>
                   <span className="flex shrink-0 items-center gap-3">
+                    {got.has(r.email) && (
+                      <span className="rounded-full bg-bh-lime/40 px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-wide text-bh-ink" title="Има платена поръчка с кода или безплатни билети от нас">
+                        билети: {got.get(r.email)}
+                      </span>
+                    )}
                     {done.has(r.email) ? (
                       <span className="rounded-full bg-[#0E8C7D]/15 px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-wide text-[#0b6d61]">изпратено</span>
                     ) : (

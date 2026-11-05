@@ -206,6 +206,29 @@ export async function sentTo(): Promise<Set<string>> {
   return new Set(rows.map((r) => r.target));
 }
 
+/**
+ * Who on the list already holds tickets from the offer: a paid order on
+ * their address that used their code, or a free one we issued by hand after
+ * they answered. The label is what the order holds, "2× CORE".
+ */
+export async function ticketsFor(offer: MedOffer): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  if (offer.recipients.length === 0) return out;
+  const emails = offer.recipients.map((r) => r.email.toLowerCase());
+  const codes = offer.recipients.flatMap((r) => (r.code ? [r.code] : []));
+  const rows = await getDb().execute<{ email: string; label: string }>(sql`
+    select lower(o.email) as email,
+      string_agg(i.quantity || '× ' || upper(i.tier_id), ', ' order by i.tier_id) as label
+    from orders o join order_items i on i.order_id = o.id
+    where o.status = 'paid' and not o.is_test
+      and lower(o.email) in (${sql.join(emails.map((e) => sql`${e}`), sql`, `)})
+      and (o.total_cents = 0 ${codes.length ? sql`or o.promo_code in (${sql.join(codes.map((c) => sql`${c}`), sql`, `)})` : sql``})
+    group by lower(o.email)
+  `);
+  for (const r of rows) out.set(r.email, r.label);
+  return out;
+}
+
 /** Sends the real wording to one address as a test, with a sample code that does nothing; nothing is recorded. */
 export async function sendMedTest(to: string): Promise<boolean> {
   const offer = await getMedOffer();
