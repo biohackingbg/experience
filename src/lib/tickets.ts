@@ -137,6 +137,13 @@ export type Tier = {
    * (and the dashboard counts) up to `capacity`.
    */
   publicCapacity?: number;
+  /**
+   * With a `publicCapacity`: count only what was paid for toward it, not the
+   * free tickets (gifts, partners, speakers). The page reads "sold out" after
+   * that many paying buyers, however many gifts were issued; `capacity` still
+   * counts everything and stays the hard ceiling.
+   */
+  publicIgnoresGifts?: boolean;
   tagline?: string;
   featured?: boolean;
   features: string[];
@@ -183,6 +190,9 @@ export const TIERS: Tier[] = [
     earlyPriceCents: 24900,
     listPriceCents: 34900,
     capacity: 50,
+    // Sold out to the public after 35 paying buyers; gifts do not count toward the 35.
+    publicCapacity: 35,
+    publicIgnoresGifts: true,
     tagline: "Ограничени места",
     features: [
       "Гарантиран достъп + премиум зона",

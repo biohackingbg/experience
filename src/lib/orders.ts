@@ -8,7 +8,7 @@ import { orderItems, orders, tickets } from "@/lib/db/schema";
 import { PENDING_HOLD_MINUTES } from "@/lib/orders-const";
 import { resolvePromo } from "@/lib/promo";
 import { getPricing, priceOf } from "@/lib/pricing";
-import { CURRENCY, TIERS, VAT_RATE, getTier, picksDay, splitVat } from "@/lib/tickets";
+import { CURRENCY, TIERS, type Tier, VAT_RATE, getTier, picksDay, splitVat } from "@/lib/tickets";
 
 export { PENDING_HOLD_MINUTES };
 
@@ -135,6 +135,7 @@ export async function createPendingOrder(
     const [taken] = await tx
       .select({
         n: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int`,
+        paid: sql<number>`coalesce(sum(${orderItems.quantity}) filter (where ${orders.totalCents} > 0), 0)::int`,
       })
       .from(orderItems)
       .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
@@ -148,7 +149,7 @@ export async function createPendingOrder(
       );
 
     // The public checkout stops at what the page shows as gone; the seats held for the organisers are issued from the admin.
-    const left = (tier.publicCapacity ?? tier.capacity) - (taken?.n ?? 0);
+    const left = publicLeft(tier, taken?.n ?? 0, taken?.paid ?? 0);
     if (left < input.quantity) {
       return { ok: false as const, reason: "sold_out" as const, left: Math.max(left, 0) };
     }
@@ -376,7 +377,11 @@ export async function markOrderPaid(
  */
 export async function getRemainingAll(): Promise<Record<string, number>> {
   const rows = await getDb()
-    .select({ tierId: orderItems.tierId, n: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int` })
+    .select({
+      tierId: orderItems.tierId,
+      n: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int`,
+      paid: sql<number>`coalesce(sum(${orderItems.quantity}) filter (where ${orders.totalCents} > 0), 0)::int`,
+    })
     .from(orderItems)
     .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
     .where(
@@ -386,7 +391,10 @@ export async function getRemainingAll(): Promise<Record<string, number>> {
     )
     .groupBy(orderItems.tierId);
   const out: Record<string, number> = {};
-  for (const t of TIERS) out[t.id] = Math.max(0, (t.publicCapacity ?? t.capacity) - (rows.find((r) => r.tierId === t.id)?.n ?? 0));
+  for (const t of TIERS) {
+    const r = rows.find((x) => x.tierId === t.id);
+    out[t.id] = Math.max(0, publicLeft(t, r?.n ?? 0, r?.paid ?? 0));
+  }
   return out;
 }
 
@@ -397,12 +405,15 @@ export async function getRemaining(tierId: string): Promise<number> {
 
   const db = getDb();
   const [taken] = await db
-    .select({ n: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int` })
+    .select({
+      n: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int`,
+      paid: sql<number>`coalesce(sum(${orderItems.quantity}) filter (where ${orders.totalCents} > 0), 0)::int`,
+    })
     .from(orderItems)
     .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
     .where(sql`${orderItems.tierId} = ${tier.id} and ${orders.status} = 'paid'`);
 
-  return Math.max((tier.publicCapacity ?? tier.capacity) - (taken?.n ?? 0), 0);
+  return Math.max(publicLeft(tier, taken?.n ?? 0, taken?.paid ?? 0), 0);
 }
 
 /**
@@ -498,6 +509,18 @@ export type SentTicketMail = {
   reference: string;
   input: { to: string; buyerName: string; reference: string; totalCents: number; invoiceNumber: number | null; tickets: { code: string; tierName: string }[] };
 };
+
+/**
+ * Seats the public can still take: the hard `capacity` less everything issued
+ * and, where the tier has a `publicCapacity`, that cap less what counts toward it
+ * (everything, or only paid tickets when the tier ignores gifts).
+ */
+function publicLeft(tier: Tier, taken: number, takenPaid: number): number {
+  const hard = tier.capacity - taken;
+  if (tier.publicCapacity === undefined) return hard;
+  return Math.min(hard, tier.publicCapacity - (tier.publicIgnoresGifts ? takenPaid : taken));
+}
+
 
 /**
  * The last ticket letter that went out, ready to be rendered again.
