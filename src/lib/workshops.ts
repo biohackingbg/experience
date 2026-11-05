@@ -11,9 +11,10 @@ import { type WorkshopKind, allowanceFor } from "@/lib/workshop-options";
 /**
  * Workshops and experiences, and who has a place in them.
  *
- * Every rule is checked in one transaction behind a per-workshop advisory
- * lock: two people taking the last place at the same moment are serialised
- * rather than both let in. What a ticket may book comes from its tier - the
+ * Every rule is checked in one transaction behind two advisory locks, the
+ * ticket's and the workshop's: two people taking the last place at the same
+ * moment are serialised rather than both let in, and so are two taps of the
+ * same ticket on two sessions. What a ticket may book comes from its tier - the
  * ticket cards promise it, so the code reads the promise from one table
  * (workshop-options.ts) instead of repeating it.
  */
@@ -142,6 +143,11 @@ export async function bookPlace(code: string, workshopId: string): Promise<BookR
   if (!t) return { ok: false, reason: "no_ticket" };
 
   return db.transaction(async (tx) => {
+    // Two locks, always in this order: the ticket first, so the same person
+    // tapping two sessions at once is served one after the other (otherwise
+    // both see "nothing booked yet" and a PLUS ends up with two); then the
+    // room, so two people taking its last place are served in turn.
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${"ticket:" + t.id}))`);
     await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${"workshop:" + workshopId}))`);
     const [w] = await tx.select().from(workshops).where(eq(workshops.id, workshopId)).limit(1);
     if (!w) return { ok: false as const, reason: "not_found" as const };
@@ -301,7 +307,12 @@ export async function admitWalkIn(workshopId: string, rawCode: string): Promise<
     .limit(1);
   if (!t) return { status: "no_ticket", code };
   const who = { name: t.attendeeName ?? t.buyerName, tierName: getTier(t.tierId)?.name ?? t.tierId, code };
-  return db.transaction(async (tx) => {
+  const r = await db.transaction(async (tx) => {
+    // Two locks, always in this order: the ticket first, so the same person
+    // tapping two sessions at once is served one after the other (otherwise
+    // both see "nothing booked yet" and a PLUS ends up with two); then the
+    // room, so two people taking its last place are served in turn.
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${"ticket:" + t.id}))`);
     await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${"workshop:" + workshopId}))`);
     const [w] = await tx.select().from(workshops).where(eq(workshops.id, workshopId)).limit(1);
     if (!w) return { status: "no_ticket" as const, code };
@@ -310,13 +321,16 @@ export async function admitWalkIn(workshopId: string, rawCode: string): Promise<
       .from(workshopBookings)
       .innerJoin(workshops, eq(workshops.id, workshopBookings.workshopId))
       .where(eq(workshopBookings.ticketId, t.id));
-    if (mine.some((m) => m.workshopId === w.id)) return checkInBooking(workshopId, code);
+    // Already has a place here: marked below, after the transaction - the
+    // pool has one connection, so a query from outside it would wait forever.
+    if (mine.some((m) => m.workshopId === w.id)) return { status: "booked_here" as const };
     if (mine.some((m) => m.day === w.day && overlaps(m.startsAt, m.endsAt, w.startsAt, w.endsAt))) return { status: "clash" as const };
     const [c] = await tx.select({ n: sql<number>`count(*)::int` }).from(workshopBookings).where(eq(workshopBookings.workshopId, w.id));
     if ((c?.n ?? 0) >= w.capacity) return { status: "full" as const };
     await tx.insert(workshopBookings).values({ workshopId: w.id, ticketId: t.id, checkedInAt: new Date() });
     return { ...who, status: "ok" as const };
   });
+  return r.status === "booked_here" ? checkInBooking(workshopId, code) : r;
 }
 
 export type WorkshopInput = {

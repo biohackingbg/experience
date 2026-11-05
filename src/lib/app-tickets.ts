@@ -42,7 +42,14 @@ export async function listTicketsForEmail(email: string): Promise<AppTicket[]> {
     .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
     // The buyer's tickets, and any ticket given to this address by its buyer.
     .where(sql`(${orders.email} = ${email} or lower(${tickets.attendeeEmail}) = ${email}) and ${SOLD}`)
-    .orderBy(sql`${orders.paidAt} desc nulls last, ${tickets.code}`);
+    // The person's own tickets first, then the buyer's unnamed ones, then the
+    // ones given to someone else: the app books on the first ticket of the
+    // best tier it finds, and that should be the person's own, not a
+    // friend's who will book from their own phone.
+    .orderBy(
+      sql`case when lower(${tickets.attendeeEmail}) = ${email} then 0 when ${tickets.attendeeEmail} is null then 1 else 2 end`,
+      sql`${orders.paidAt} desc nulls last, ${tickets.code}`,
+    );
 
   return Promise.all(
     rows.map(async (r) => ({

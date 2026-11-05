@@ -67,7 +67,7 @@ export async function GET(request: Request) {
       [...new Set(rows.flatMap((r) => [r.buyer, r.holder]).filter((e): e is string => !!e))],
       {
         title: "Записването е отворено",
-        body: "С PEAK записваш 3 workshops и 3 experiences. Отвори „Станции“ и избери, преди местата да свършат.",
+        body: "С PEAK записваш 3 workshops и 3 experiences. Отвори „Станции“, дръпни надолу да се обнови и избери, преди местата да свършат.",
         data: { screen: "stations" },
         collapseId: "booking-open",
       },
