@@ -147,7 +147,7 @@ export async function sendKindNow(_prev: MailState, formData: FormData): Promise
  * The letter to the medical-conference ticket holders (lib/med-offer.ts)
  * ------------------------------------------------------------------ */
 
-import { ensureCodes, getMedOffer, moveCodesUntil, parseRecipients, retireCode, saveMedOffer, sendMedOffer, sendMedTest } from "@/lib/med-offer";
+import { ensureCodes, getMedOffer, markMedDeclined, moveCodesUntil, parseRecipients, retireCode, saveMedOffer, sendMedOffer, sendMedTest } from "@/lib/med-offer";
 
 export async function saveMedText(_prev: MailState, formData: FormData): Promise<MailState> {
   if (!(await canAccess("pisma"))) return { status: "error", message: "Няма достъп." };
@@ -185,6 +185,12 @@ export async function removeMedRecipient(formData: FormData): Promise<void> {
   const cur = await getMedOffer();
   await retireCode(cur.recipients.find((r) => r.email === email)?.code);
   await saveMedOffer({ ...cur, recipients: cur.recipients.filter((r) => r.email !== email) });
+  revalidatePath("/admin/pisma");
+}
+
+export async function setMedDeclined(formData: FormData): Promise<void> {
+  if (!(await canAccess("pisma"))) return;
+  await markMedDeclined(String(formData.get("email") ?? "").toLowerCase(), formData.get("declined") === "1");
   revalidatePath("/admin/pisma");
 }
 

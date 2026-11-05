@@ -31,7 +31,8 @@ import { unsubscribePostUrl, unsubscribeUrl } from "@/lib/unsubscribe";
 export const MED_KIND = "med-offer";
 export const MED_CREDIT_CENTS = 5000;
 
-export type MedRecipient = { name: string; email: string; code?: string };
+/** `declined`: the person said no and the Association refunded them, so they are not waited for. */
+export type MedRecipient = { name: string; email: string; code?: string; declined?: boolean };
 export type MedOffer = { recipients: MedRecipient[]; subject: string; body: string; /** YYYY-MM-DD, last day the codes work. */ until: string };
 
 export const DEFAULT_SUBJECT = "Билетът ви за медицинската конференция и какво можем да направим с него";
@@ -162,6 +163,15 @@ export async function retireCode(code: string | undefined): Promise<void> {
   await getDb().update(promoCodes).set({ active: false }).where(eq(promoCodes.code, code));
 }
 
+/** Marks a person as declined (refunded by the Association) or takes the mark back; their code goes off and on with it. */
+export async function markMedDeclined(email: string, declined: boolean): Promise<void> {
+  const cur = await getMedOffer();
+  const who = cur.recipients.find((r) => r.email === email);
+  if (!who) return;
+  if (who.code) await getDb().update(promoCodes).set({ active: !declined }).where(eq(promoCodes.code, who.code));
+  await saveMedOffer({ ...cur, recipients: cur.recipients.map((r) => (r.email === email ? { ...r, declined: declined || undefined } : r)) });
+}
+
 /** The last day moves: every code of the list follows it. */
 export async function moveCodesUntil(offer: MedOffer, until: string): Promise<void> {
   const codes = offer.recipients.map((r) => r.code).filter((c): c is string => !!c);
@@ -245,6 +255,7 @@ export async function sendMedOffer(): Promise<{ sent: number; failed: number; re
   let sent = 0;
   let failed = 0;
   for (const r of offer.recipients) {
+    if (r.declined) continue;
     if (!r.code) {
       failed++;
       continue;
@@ -270,5 +281,5 @@ export async function sendMedOffer(): Promise<{ sent: number; failed: number; re
     }
   }
   const done = await sentTo();
-  return { sent, failed, remaining: offer.recipients.filter((r) => !done.has(r.email)).length };
+  return { sent, failed, remaining: offer.recipients.filter((r) => !r.declined && !done.has(r.email)).length };
 }

@@ -1,6 +1,6 @@
 import { getMedOffer, renderMedLetter, sentTo, ticketsFor } from "@/lib/med-offer";
 
-import { removeMedRecipient } from "./actions";
+import { removeMedRecipient, setMedDeclined } from "./actions";
 import { MedAddForm, MedSendForm, MedTestForm, MedTextForm } from "./MedOfferForms";
 
 /**
@@ -12,7 +12,7 @@ import { MedAddForm, MedSendForm, MedTestForm, MedTextForm } from "./MedOfferFor
 export async function MedOfferSection() {
   const offer = await getMedOffer();
   const [done, got] = await Promise.all([sentTo(), ticketsFor(offer)]);
-  const waiting = offer.recipients.filter((r) => !done.has(r.email)).length;
+  const waiting = offer.recipients.filter((r) => !done.has(r.email) && !r.declined).length;
   const sample = await renderMedLetter(offer, offer.recipients[0] ?? { name: "Мария Иванова", email: "primer@example.com" });
 
   return (
@@ -48,6 +48,16 @@ export async function MedOfferSection() {
                       <span className="rounded-full bg-bh-lime/40 px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-wide text-bh-ink" title="Има платена поръчка с кода или безплатни билети от нас">
                         билети: {got.get(r.email)}
                       </span>
+                    )}
+                    {r.declined && (
+                      <span className="rounded-full bg-bh-ink/10 px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-wide text-bh-ink/60" title="Отказа и БЛА му върна парите">отказа, върнати пари</span>
+                    )}
+                    {!got.has(r.email) && (
+                      <form action={setMedDeclined}>
+                        <input type="hidden" name="email" value={r.email} />
+                        <input type="hidden" name="declined" value={r.declined ? "0" : "1"} />
+                        <button type="submit" className="text-xs text-bh-ink/45 underline hover:text-bh-ink">{r.declined ? "върни" : "отказа"}</button>
+                      </form>
                     )}
                     {done.has(r.email) ? (
                       <span className="rounded-full bg-[#0E8C7D]/15 px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-wide text-[#0b6d61]">изпратено</span>
