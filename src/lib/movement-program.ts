@@ -58,11 +58,11 @@ export const MOVEMENT_DAYS: MoveRoom[][] = [
       slots: [
         yoga("10:00-10:40"),
         maya("10:50-11:30", "Dynamic Flow"),
-        maya("11:40-12:20", "Dynamic Strength"),
+        maya("11:40-12:20", "Strength & Mobility"),
         { time: "12:30-13:30", title: "The Power of Breath", host: "Яни Драгов", seats: 30, workshop: true },
         { time: "14:00-15:00", title: "The Inflamed Gut: The Hidden Barrier to Longevity", host: "проф. Godfrey Grech", seats: 15, workshop: true },
-        { time: "15:10-16:10", title: "Тялото, в което съм", titleEn: "The body I live in", host: "д-р Виолета Азис", seats: 15, workshop: true },
-        movez("16:20-17:00", "Spine Longevity"),
+        { ...movez("15:10-15:50", "Spine Longevity"), seats: 15 },
+        { time: "16:00-17:30", title: "Тялото, в което съм", titleEn: "The body I live in", host: "д-р Виолета Азис", seats: 30, workshop: true },
       ],
     },
     {
@@ -85,11 +85,12 @@ export const MOVEMENT_DAYS: MoveRoom[][] = [
       room: "Newton",
       slots: [
         yoga("10:00-10:40"),
-        movez("10:50-11:30", "Front & middle split mobility"),
-        movez("11:40-12:20", "Slow Strength"),
-        maya("12:40-13:20", "Dynamic Strength"),
-        maya("13:30-15:10", "Functional Training", true),
-        { time: "15:20-16:50", title: "В търсене на златната среда", titleEn: "In search of the golden mean", host: "проф. Даниела Илиева", seats: 15, workshop: true },
+        maya("10:50-11:30", "Mat Functional"),
+        maya("11:40-12:20", "Dynamic stretch"),
+        movez("12:40-13:20", "Front & middle split mobility"),
+        movez("13:30-14:10", "Slow Strength"),
+        { time: "14:20-15:10", title: "Vitality within", host: "Мария & Антония", seats: 30 },
+        { time: "15:20-16:50", title: "Грижата е в твоите ръце", titleEn: "Care is in your hands", host: "психолог Камелия Тодорова", seats: 15, workshop: true },
         {
           time: "17:00-17:40",
           title: "Тялото говори: стрес, хормони и адаптация през погледа на ендобиогенната медицина",
