@@ -20,6 +20,7 @@ export const PAGES = [
   { id: "vhod", label: "Вход на събитието", href: "/admin/vhod", sensitive: false },
   { id: "izdai", label: "Издаване на билети", href: "/admin/izdai", sensitive: true },
   { id: "rabotilnici", label: "Работилници", href: "/admin/rabotilnici", sensitive: false },
+  { id: "zala", label: "Зала (вход в работилници и преживявания)", href: "/admin/zala", sensitive: false },
   { id: "logistika", label: "Логистика на лекторите", href: "/admin/logistika", sensitive: true },
   { id: "smeni", label: "Смени", href: "/admin/smeni", sensitive: true },
 ] as const;

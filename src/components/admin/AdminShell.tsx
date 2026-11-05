@@ -106,6 +106,7 @@ const GROUPS = [
       { page: "podgotovka" as const, href: "/admin/podgotovka", label: "Подготовка", icon: I.check },
       { page: "shtandove" as const, href: "/admin/shtandove", label: "Щандове", icon: I.map },
       { page: "vhod" as const, href: "/admin/vhod", label: "Вход на събитието", icon: I.door },
+      { page: "zala" as const, href: "/admin/zala", label: "Зала (работилници)", icon: I.hands },
       { page: "smeni" as const, href: "/admin/smeni", label: "Смени", icon: I.rota },
       { page: "logistika" as const, href: "/admin/logistika", label: "Логистика на лекторите", icon: I.plane },
     ],

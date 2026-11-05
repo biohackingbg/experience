@@ -188,7 +188,7 @@ export async function cancelPlace(code: string, workshopId: string): Promise<boo
   return rows.length > 0;
 }
 
-export type WorkshopAttendee = { name: string; code: string; tierName: string; email: string; checkedIn: boolean };
+export type WorkshopAttendee = { name: string; code: string; tierName: string; email: string; checkedIn: boolean; checkedInAt: Date | null };
 
 /** The list for the workshop's own door, alphabetical. */
 export async function listWorkshopAttendees(workshopId: string): Promise<WorkshopAttendee[]> {
@@ -212,8 +212,111 @@ export async function listWorkshopAttendees(workshopId: string): Promise<Worksho
       tierName: getTier(r.tierId)?.name ?? r.tierId,
       email: r.email,
       checkedIn: !!r.checkedInAt,
+      checkedInAt: r.checkedInAt,
     }))
     .sort((a, b) => a.name.localeCompare(b.name, "bg"));
+}
+
+// ── The room's own door ───────────────────────────────────────────────────
+
+export type RoomScan =
+  /** Booked here and not yet in: marked as arrived. */
+  | { status: "ok"; name: string; tierName: string; code: string }
+  /** Booked here, already marked. */
+  | { status: "already"; name: string; tierName: string; code: string; at: Date }
+  /** A real ticket, but no place in this session. Says where they are booked at this hour instead. */
+  | { status: "not_booked"; name: string; tierName: string; code: string; elsewhere: string | null; left: number }
+  | { status: "no_ticket"; code: string };
+
+/**
+ * Scan at the room's door: marks the booking as used, or says why not. A
+ * ticket with no place here is told apart from a bad code, because the
+ * answer at the door differs: "you are booked in the other room" versus
+ * "this is not a ticket".
+ */
+export async function checkInBooking(workshopId: string, rawCode: string): Promise<RoomScan> {
+  const code = rawCode.trim().toUpperCase();
+  if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) return { status: "no_ticket", code };
+  const db = getDb();
+  const [t] = await db
+    .select({ id: tickets.id, tierId: tickets.tierId, attendeeName: tickets.attendeeName, buyerName: orders.name })
+    .from(tickets)
+    .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
+    .where(sql`${tickets.code} = ${code} and ${SOLD}`)
+    .limit(1);
+  if (!t) return { status: "no_ticket", code };
+  const who = { name: t.attendeeName ?? t.buyerName, tierName: getTier(t.tierId)?.name ?? t.tierId, code };
+
+  const [b] = await db
+    .select({ id: workshopBookings.id, checkedInAt: workshopBookings.checkedInAt })
+    .from(workshopBookings)
+    .where(and(eq(workshopBookings.workshopId, workshopId), eq(workshopBookings.ticketId, t.id)))
+    .limit(1);
+  if (!b) {
+    const [w] = await db.select().from(workshops).where(eq(workshops.id, workshopId)).limit(1);
+    if (!w) return { status: "no_ticket", code };
+    const others = await db
+      .select({ title: workshops.title, startsAt: workshops.startsAt, endsAt: workshops.endsAt, day: workshops.day })
+      .from(workshopBookings)
+      .innerJoin(workshops, eq(workshops.id, workshopBookings.workshopId))
+      .where(eq(workshopBookings.ticketId, t.id));
+    const clash = others.find((o) => o.day === w.day && overlaps(o.startsAt, o.endsAt, w.startsAt, w.endsAt));
+    const [c] = await db.select({ n: sql<number>`count(*)::int` }).from(workshopBookings).where(eq(workshopBookings.workshopId, w.id));
+    return { ...who, status: "not_booked", elsewhere: clash ? `${clash.title} (${clash.startsAt})` : null, left: Math.max(0, w.capacity - (c?.n ?? 0)) };
+  }
+  if (b.checkedInAt) return { ...who, status: "already", at: b.checkedInAt };
+  const updated = await db
+    .update(workshopBookings)
+    .set({ checkedInAt: new Date() })
+    .where(and(eq(workshopBookings.id, b.id), sql`${workshopBookings.checkedInAt} is null`))
+    .returning({ at: workshopBookings.checkedInAt });
+  if (updated.length === 0) return { ...who, status: "already", at: new Date() };
+  return { ...who, status: "ok" };
+}
+
+/** Un-marks an arrival: for the tap that landed on the wrong name. */
+export async function undoRoomCheckIn(workshopId: string, code: string): Promise<void> {
+  const db = getDb();
+  const [t] = await db.select({ id: tickets.id }).from(tickets).where(eq(tickets.code, code.trim().toUpperCase())).limit(1);
+  if (!t) return;
+  await db
+    .update(workshopBookings)
+    .set({ checkedInAt: null })
+    .where(and(eq(workshopBookings.workshopId, workshopId), eq(workshopBookings.ticketId, t.id)));
+}
+
+/**
+ * Lets in someone who has no place here but the room has one. The team's
+ * call at the door, so the tier's allowance is not asked - only the room's
+ * capacity and the clock (not two rooms at once). Books and marks in one go.
+ */
+export async function admitWalkIn(workshopId: string, rawCode: string): Promise<RoomScan | { status: "full" } | { status: "clash" }> {
+  const code = rawCode.trim().toUpperCase();
+  const db = getDb();
+  const [t] = await db
+    .select({ id: tickets.id, tierId: tickets.tierId, attendeeName: tickets.attendeeName, buyerName: orders.name })
+    .from(tickets)
+    .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
+    .where(sql`${tickets.code} = ${code} and ${SOLD}`)
+    .limit(1);
+  if (!t) return { status: "no_ticket", code };
+  const who = { name: t.attendeeName ?? t.buyerName, tierName: getTier(t.tierId)?.name ?? t.tierId, code };
+  return db.transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${"workshop:" + workshopId}))`);
+    const [w] = await tx.select().from(workshops).where(eq(workshops.id, workshopId)).limit(1);
+    if (!w) return { status: "no_ticket" as const, code };
+    const mine = await tx
+      .select({ workshopId: workshopBookings.workshopId, day: workshops.day, startsAt: workshops.startsAt, endsAt: workshops.endsAt })
+      .from(workshopBookings)
+      .innerJoin(workshops, eq(workshops.id, workshopBookings.workshopId))
+      .where(eq(workshopBookings.ticketId, t.id));
+    if (mine.some((m) => m.workshopId === w.id)) return checkInBooking(workshopId, code);
+    if (mine.some((m) => m.day === w.day && overlaps(m.startsAt, m.endsAt, w.startsAt, w.endsAt))) return { status: "clash" as const };
+    const [c] = await tx.select({ n: sql<number>`count(*)::int` }).from(workshopBookings).where(eq(workshopBookings.workshopId, w.id));
+    if ((c?.n ?? 0) >= w.capacity) return { status: "full" as const };
+    await tx.insert(workshopBookings).values({ workshopId: w.id, ticketId: t.id, checkedInAt: new Date() });
+    return { ...who, status: "ok" as const };
+  });
 }
 
 export type WorkshopInput = {
