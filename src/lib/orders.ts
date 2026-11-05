@@ -147,7 +147,8 @@ export async function createPendingOrder(
         )`,
       );
 
-    const left = tier.capacity - (taken?.n ?? 0);
+    // The public checkout stops at what the page shows as gone; the seats held for the organisers are issued from the admin.
+    const left = (tier.publicCapacity ?? tier.capacity) - (taken?.n ?? 0);
     if (left < input.quantity) {
       return { ok: false as const, reason: "sold_out" as const, left: Math.max(left, 0) };
     }
@@ -401,7 +402,7 @@ export async function getRemaining(tierId: string): Promise<number> {
     .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
     .where(sql`${orderItems.tierId} = ${tier.id} and ${orders.status} = 'paid'`);
 
-  return Math.max(tier.capacity - (taken?.n ?? 0), 0);
+  return Math.max((tier.publicCapacity ?? tier.capacity) - (taken?.n ?? 0), 0);
 }
 
 /**

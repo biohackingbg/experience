@@ -163,6 +163,8 @@ export const TIERS: Tier[] = [
     earlyPriceCents: 8900,
     listPriceCents: 12900,
     capacity: 300,
+    // Sold out to the public at 290; the last 10 stay for the organisers (admin can still issue up to 300).
+    publicCapacity: 290,
     featured: true,
     features: [
       "И двата дни",
