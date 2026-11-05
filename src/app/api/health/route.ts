@@ -76,6 +76,7 @@ export async function GET(request: Request) {
       select
         count(*) filter (
           where o.status = 'paid' and o.paid_at > now() - interval '24 hours'
+            and o.upgrades_ticket_code is null
             and not exists (select 1 from tickets t where t.order_id = o.id)
         ) as paid_no_tickets,
         count(*) filter (
