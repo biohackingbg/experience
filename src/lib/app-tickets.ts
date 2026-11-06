@@ -40,8 +40,12 @@ export async function listTicketsForEmail(email: string): Promise<AppTicket[]> {
     })
     .from(tickets)
     .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
-    // The buyer's tickets, and any ticket given to this address by its buyer.
-    .where(sql`(${orders.email} = ${email} or lower(${tickets.attendeeEmail}) = ${email}) and ${SOLD}`)
+    // The buyer's own tickets, and any ticket given to this address by its
+    // buyer. A ticket the buyer gave to another address is that person's
+    // now and is left out: the app books on the first ticket of the best tier
+    // it lists, and with two PEAK tickets its sort can land on the friend's
+    // (6 Nov: a buyer's experiences went onto her friend's ticket).
+    .where(sql`((${orders.email} = ${email} and (${tickets.attendeeEmail} is null or lower(${tickets.attendeeEmail}) = ${email})) or lower(${tickets.attendeeEmail}) = ${email}) and ${SOLD}`)
     // The person's own tickets first, then the buyer's unnamed ones, then the
     // ones given to someone else: the app books on the first ticket of the
     // best tier it finds, and that should be the person's own, not a
