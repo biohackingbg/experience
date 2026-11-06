@@ -80,7 +80,8 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
           {BOOKS.map((b, i) => (
             <Link key={b.id} href={`/admin/knigi?k=${b.id}`} className="flex flex-col items-center rounded-3xl bg-bh-cloud p-6 text-center ring-1 ring-bh-ink/8 transition-colors hover:ring-bh-ink/30">
               <div className="relative h-40 w-full">
-                <Image src={b.cover} alt={b.title} fill sizes="320px" className="object-contain" />
+                {/* next.config only lets the optimizer resize the speaker routes; these covers are 90 KB as they are. */}
+                <Image src={b.cover} alt={b.title} fill unoptimized className="object-contain" />
               </div>
               <h2 className="mt-4 text-xl font-bold tracking-tight text-bh-ink">{b.title}</h2>
               <p className="text-sm text-bh-ink/60">{b.author}</p>
