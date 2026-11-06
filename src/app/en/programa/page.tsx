@@ -12,7 +12,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/en/programa", languages: { bg: "/programa", en: "/en/programa", "x-default": "/programa" } },
 };
 
-export const revalidate = 3600;
+// Five minutes: the notice bar above the page can end at a set time (lib/notice.ts).
+export const revalidate = 300;
 
 export default function ProgramPageEn() {
   return (

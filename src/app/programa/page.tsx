@@ -13,7 +13,8 @@ export const metadata: Metadata = {
 };
 
 // The programme is edited in the admin; the page follows within minutes.
-export const revalidate = 3600;
+// Five minutes: the notice bar above the page can end at a set time (lib/notice.ts).
+export const revalidate = 300;
 
 /** The programme on its own page, for the links in mail and posts. */
 export default function ProgramPage() {

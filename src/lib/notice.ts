@@ -14,18 +14,27 @@ import { getSetting, setSetting } from "@/lib/settings";
  * Deliberately not dismissible and deliberately empty by default: a bar
  * that is always there stops being read.
  */
-export type Notice = { on: boolean; bg: string; en: string };
+export type Notice = {
+  on: boolean;
+  bg: string;
+  en: string;
+  /** ISO time after which the bar switches itself off ("69 € до днес" must not outlive today). */
+  until?: string;
+};
 
 const EMPTY: Notice = { on: false, bg: "", en: "" };
 
-function parse(value: string | null): Notice {
+export function parseNotice(value: string | null): Notice {
   if (!value) return EMPTY;
   try {
     const v = JSON.parse(value) as Partial<Notice>;
     const bg = typeof v.bg === "string" ? v.bg.trim().slice(0, 200) : "";
     const en = typeof v.en === "string" ? v.en.trim().slice(0, 200) : "";
-    // On means on *and* something to say - an empty bar renders nothing.
-    return { on: v.on === true && bg.length > 0, bg, en };
+    const until = typeof v.until === "string" && !Number.isNaN(Date.parse(v.until)) ? v.until : undefined;
+    const expired = until !== undefined && Date.now() >= Date.parse(until);
+    // On means on *and* something to say - an empty bar renders nothing -
+    // and not past its own end time.
+    return { on: v.on === true && bg.length > 0 && !expired, bg, en, until };
   } catch {
     return EMPTY;
   }
@@ -37,13 +46,14 @@ function parse(value: string | null): Notice {
  */
 export const getNotice = cache(async (): Promise<Notice> => {
   try {
-    return parse((await getSetting("site_notice"))?.value ?? null);
+    return parseNotice((await getSetting("site_notice"))?.value ?? null);
   } catch {
     return EMPTY;
   }
 });
 
 export async function saveNotice(n: Notice): Promise<void> {
+  // Saved from the dashboard: a new text starts without an end time.
   await setSetting("site_notice", JSON.stringify({ on: n.on, bg: n.bg.slice(0, 200), en: n.en.slice(0, 200) }));
 }
 
