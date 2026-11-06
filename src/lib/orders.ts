@@ -516,6 +516,7 @@ export type SentTicketMail = {
  * (everything, or only paid tickets when the tier ignores gifts).
  */
 function publicLeft(tier: Tier, taken: number, takenPaid: number): number {
+  if (tier.soldOut) return 0;
   const hard = tier.capacity - taken;
   if (tier.publicCapacity === undefined) return hard;
   return Math.min(hard, tier.publicCapacity - (tier.publicIgnoresGifts ? takenPaid : taken));

@@ -86,6 +86,7 @@ export async function paidForTicket(orderId: string, code: string, tier: Tier): 
 
 /** Seats left in a tier, counted the way the checkout counts them. */
 async function remaining(tier: Tier): Promise<number> {
+  if (tier.soldOut) return 0;
   const [taken] = await getDb()
     .select({ n: sql<number>`coalesce(sum(${orderItems.quantity}), 0)::int` })
     .from(orderItems)
@@ -140,7 +141,7 @@ export async function createUpgradeOrder(quote: Extract<UpgradeQuote, { ok: true
       .from(orderItems)
       .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
       .where(takenWhere(quote.to.id));
-    if (quote.to.capacity - (taken?.n ?? 0) < 1) return { error: "sold_out" as const };
+    if (quote.to.soldOut || quote.to.capacity - (taken?.n ?? 0) < 1) return { error: "sold_out" as const };
 
     const { netCents, vatCents } = splitVat(quote.diffCents);
     const reference = `SLS-${randomCode(6)}`;

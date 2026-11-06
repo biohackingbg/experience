@@ -144,6 +144,12 @@ export type Tier = {
    * counts everything and stays the hard ceiling.
    */
   publicIgnoresGifts?: boolean;
+  /**
+   * Closed to the public whatever the counts say: the page shows it sold
+   * out, checkout and upgrades into it refuse. Tickets issued by hand from
+   * the admin still go out, up to `capacity`.
+   */
+  soldOut?: boolean;
   tagline?: string;
   featured?: boolean;
   features: string[];
@@ -193,6 +199,8 @@ export const TIERS: Tier[] = [
     // Sold out to the public after 35 paying buyers; gifts do not count toward the 35.
     publicCapacity: 35,
     publicIgnoresGifts: true,
+    // Closed by hand on 6 November, the day before the summit.
+    soldOut: true,
     tagline: "Ограничени места",
     features: [
       "Гарантиран достъп + премиум зона",
