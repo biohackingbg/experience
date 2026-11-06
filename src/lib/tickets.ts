@@ -196,11 +196,10 @@ export const TIERS: Tier[] = [
     earlyPriceCents: 24900,
     listPriceCents: 34900,
     capacity: 50,
-    // Sold out to the public after 35 paying buyers; gifts do not count toward the 35.
-    publicCapacity: 35,
+    // Sold out to the public after 36 paying buyers; gifts (7 on 6 November)
+    // do not count toward the 36. Reopened on 6 November after a short close.
+    publicCapacity: 36,
     publicIgnoresGifts: true,
-    // Closed by hand on 6 November, the day before the summit.
-    soldOut: true,
     tagline: "Ограничени места",
     features: [
       "Гарантиран достъп + премиум зона",
