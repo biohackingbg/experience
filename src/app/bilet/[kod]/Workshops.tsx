@@ -58,7 +58,7 @@ export function Workshops({
       <h2 className="text-lg font-bold tracking-tight text-bh-ink">{t.title}</h2>
       {sessions.length === 0 ? (
         <p className="mt-2 text-sm text-bh-ink/60">{t.none}</p>
-      ) : remaining.workshop === 0 && remaining.experience === 0 && mine.length === 0 ? (
+      ) : remaining.workshop === 0 && remaining.experience === 0 && mine.length === 0 && !sessions.some((s) => s.kind === "bonus") ? (
         <p className="mt-2 text-sm text-bh-ink/60">{t.coreNote}</p>
       ) : (
         <>

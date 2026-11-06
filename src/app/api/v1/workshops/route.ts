@@ -16,6 +16,8 @@ export async function GET(request: Request) {
   // list, which it words itself ("Записването отваря скоро. Ще пратим известие…"). A browser (the web app,
   // which does read bookingOpen) always gets the list so people can look at what is coming.
   const fromBrowser = /Mozilla/i.test(request.headers.get("user-agent") ?? "");
-  const workshops = open || fromBrowser ? await listWorkshops() : [];
+  // The app shipped before the bonus kind knows only workshop and experience;
+  // anything else it would label a workshop. Rules stay on the server.
+  const workshops = (open || fromBrowser ? await listWorkshops() : []).map((w) => (w.kind === "bonus" ? { ...w, kind: "experience" as const } : w));
   return json({ workshops, bookingOpen: open, bookingOpensAt: BOOKING_OPENS_AT.toISOString() }, 200, { "Cache-Control": "no-store" });
 }

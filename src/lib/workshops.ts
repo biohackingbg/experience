@@ -123,7 +123,7 @@ export async function getTicketPlaces(code: string): Promise<TicketPlaces | null
   return {
     tierId: t.tierId,
     bookings: rows.map((r) => ({ workshopId: r.workshopId, bookedAt: r.bookedAt })),
-    remaining: { workshop: left("workshop"), experience: left("experience") },
+    remaining: { workshop: left("workshop"), experience: left("experience"), bonus: null },
   };
 }
 
