@@ -108,6 +108,8 @@ const GROUPS = [
       { page: "vhod" as const, href: "/admin/vhod", label: "Вход на събитието", icon: I.door },
       { page: "zala" as const, href: "/admin/zala", label: "Зала (работилници)", icon: I.hands },
       { page: "knigi" as const, href: "/admin/knigi", label: "Книги", icon: I.shop },
+      { page: "masazhi" as const, href: "/admin/masazhi", label: "Масажи (щанд B8)", icon: I.hands },
+      { page: "therabody" as const, href: "/admin/therabody", label: "Therabody (щанд B1)", icon: I.hands },
       { page: "smeni" as const, href: "/admin/smeni", label: "Смени", icon: I.rota },
       { page: "logistika" as const, href: "/admin/logistika", label: "Логистика на лекторите", icon: I.plane },
     ],

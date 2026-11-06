@@ -22,9 +22,17 @@ export const PAGES = [
   { id: "rabotilnici", label: "Работилници", href: "/admin/rabotilnici", sensitive: false },
   { id: "zala", label: "Зала (вход в работилници и преживявания)", href: "/admin/zala", sensitive: false },
   { id: "knigi", label: "Книги (продажба с QR)", href: "/admin/knigi", sensitive: false },
+  { id: "masazhi", label: "Масажи Sense Wellness (само щанд B8)", href: "/admin/masazhi", sensitive: false },
+  { id: "therabody", label: "Re Start by Therabody (само щанд B1)", href: "/admin/therabody", sensitive: false },
   { id: "logistika", label: "Логистика на лекторите", href: "/admin/logistika", sensitive: true },
   { id: "smeni", label: "Смени", href: "/admin/smeni", sensitive: true },
 ] as const;
 export type PageId = (typeof PAGES)[number]["id"];
 export const isPageId = (v: unknown): v is PageId => PAGES.some((p) => p.id === v);
 export const pageLabel = (id: string) => PAGES.find((p) => p.id === id)?.label ?? id;
+
+/**
+ * The pages that show one partner stand alone, for that partner's own access
+ * link: the stand's 15-minute slots, its names, and nothing of the rooms.
+ */
+export const STAND_PAGES = { masazhi: "Щанд B8", therabody: "Щанд B1" } as const;

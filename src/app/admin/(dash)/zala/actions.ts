@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 
 import { canAccess } from "@/lib/access";
-import { admitWalkIn, checkInBooking, undoRoomCheckIn } from "@/lib/workshops";
+import { STAND_PAGES } from "@/lib/access-options";
+import { admitWalkIn, checkInBooking, listWorkshops, undoRoomCheckIn } from "@/lib/workshops";
 
 import type { RoomState } from "./room-state";
 
@@ -38,20 +39,37 @@ export async function scanRoom(_prev: RoomState, formData: FormData): Promise<Ro
   return { status: "ok", code: r.code, name: r.name, tierName: r.tierName, scannedAt };
 }
 
+/**
+ * The door, or a partner stand's own page: a stand grant (masazhi, therabody)
+ * may mark people only at its own stand's slots, never at the rooms' doors.
+ */
+async function mayMark(workshopId: string): Promise<boolean> {
+  if (await canAccess("zala")) return true;
+  const mine: string[] = [];
+  for (const [page, stand] of Object.entries(STAND_PAGES)) if (await canAccess(page as keyof typeof STAND_PAGES)) mine.push(stand);
+  if (mine.length === 0) return false;
+  const w = (await listWorkshops(true)).find((x) => x.id === workshopId);
+  return !!w?.location && mine.includes(w.location);
+}
+
 /** The "Дойде" button beside a name in the list - same as a scan of that code. */
 export async function markArrived(formData: FormData): Promise<void> {
-  if (!(await canAccess("zala"))) return;
   const workshopId = String(formData.get("workshopId") ?? "");
+  if (!(await mayMark(workshopId))) return;
   const code = String(formData.get("code") ?? "").trim();
   if (UUID.test(workshopId) && code) await checkInBooking(workshopId, code);
   revalidatePath("/admin/zala");
+  revalidatePath("/admin/masazhi");
+  revalidatePath("/admin/therabody");
 }
 
 /** The tap that landed on the wrong name. */
 export async function unmarkArrived(formData: FormData): Promise<void> {
-  if (!(await canAccess("zala"))) return;
   const workshopId = String(formData.get("workshopId") ?? "");
+  if (!(await mayMark(workshopId))) return;
   const code = String(formData.get("code") ?? "").trim();
   if (UUID.test(workshopId) && code) await undoRoomCheckIn(workshopId, code);
   revalidatePath("/admin/zala");
+  revalidatePath("/admin/masazhi");
+  revalidatePath("/admin/therabody");
 }
