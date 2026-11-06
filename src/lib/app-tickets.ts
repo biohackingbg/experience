@@ -6,6 +6,7 @@ import { getDb } from "@/lib/db";
 import { orders, tickets } from "@/lib/db/schema";
 import { SOLD } from "@/lib/sold";
 import { arrivalDaysFor } from "@/lib/arrivals";
+import { latin } from "@/lib/latin";
 import { getTier } from "@/lib/tickets";
 import { type TicketPlaces, getTicketPlaces } from "@/lib/workshops";
 
@@ -37,6 +38,8 @@ export async function listTicketsForEmail(email: string): Promise<AppTicket[]> {
       arrivalSlot2: tickets.arrivalSlot2,
       reference: orders.reference,
       paidAt: orders.paidAt,
+      buyerName: orders.name,
+      holderEmail: tickets.attendeeEmail,
     })
     .from(tickets)
     .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
@@ -55,8 +58,23 @@ export async function listTicketsForEmail(email: string): Promise<AppTicket[]> {
       sql`${orders.paidAt} desc nulls last, ${tickets.code}`,
     );
 
+  // Among the buyer's own tickets with no address of their own, the one in
+  // the buyer's name goes first. The app greets the person by the first
+  // ticket's name and books on the first ticket of the best tier, so a ticket
+  // named for a friend must not lead (6 Nov: a buyer saw "Здравей, Иво" and
+  // her places went onto Ivo's ticket). Names compare by first name in Latin
+  // letters, so "Aleksandra Pavlov" matches "Александра Павлова".
+  const first = (n: string | null) => (n ? latin(n).trim().split(/\s+/)[0]?.toLowerCase() ?? "" : "");
+  const rank = (r: (typeof rows)[number]) => {
+    if (r.holderEmail && r.holderEmail.toLowerCase() === email) return 0;
+    if (r.holderEmail) return 4;
+    if (r.attendeeName && first(r.attendeeName) === first(r.buyerName)) return 1;
+    return r.attendeeName ? 3 : 2;
+  };
+  const ordered = rows.map((r, i) => ({ r, i })).sort((a, b) => rank(a.r) - rank(b.r) || a.i - b.i).map((x) => x.r);
+
   return Promise.all(
-    rows.map(async (r) => ({
+    ordered.map(async (r) => ({
       code: r.code,
       tierId: r.tierId,
       tierName: getTier(r.tierId)?.name ?? r.tierId,
