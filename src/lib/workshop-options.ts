@@ -29,3 +29,27 @@ export const ALLOWANCE: Record<string, Record<WorkshopKind, number | null>> = {
 
 export const allowanceFor = (tierId: string, kind: WorkshopKind): number | null =>
   (ALLOWANCE[tierId] ?? ALLOWANCE.core)[kind];
+
+/**
+ * The note for a ticket whose allowance of one kind is used up: sent as a
+ * push when the last place is booked or one more is tried, and shown on the
+ * ticket page. The app's own alert for "not_allowed" reads as if the kind
+ * were not in the ticket at all, which is wrong for a PEAK with 3 of 3 -
+ * this says what actually happened, and what to do.
+ */
+export function limitNote(kind: WorkshopKind, allowed: number, tierId: string, en = false): { title: string; body: string } {
+  const tier = tierId.toUpperCase();
+  const one = allowed === 1;
+  if (en) {
+    const noun = kind === "workshop" ? (one ? "workshop" : "workshops") : one ? "experience" : "experiences";
+    return {
+      title: `All your ${kind === "workshop" ? "workshops" : "experiences"} are booked`,
+      body: `You have ${allowed} of ${allowed} ${noun} on your ${tier} ticket. To book another, cancel one of yours first.`,
+    };
+  }
+  const noun = kind === "workshop" ? (one ? "работилница" : "работилници") : one ? "преживяване" : "преживявания";
+  return {
+    title: `Изчерпа ${kind === "workshop" ? "работилниците" : "преживяванията"} в билета си`,
+    body: `Имаш ${allowed} от ${allowed} ${noun} с ${tier} билета. За да запазиш друго, първо откажи някое от записаните.`,
+  };
+}

@@ -127,6 +127,20 @@ export async function getTicketPlaces(code: string): Promise<TicketPlaces | null
   };
 }
 
+/**
+ * When this ticket has used up its allowance of the session's kind (PEAK with
+ * 3 of 3 experiences, PLUS with its 1 workshop): the kind and how many the
+ * tier allows. Null when there is room left, no limit, or none at all (CORE).
+ */
+export async function allowanceUsedUp(code: string, workshopId: string): Promise<{ kind: WorkshopKind; allowed: number; tierId: string } | null> {
+  const [w] = await getDb().select({ kind: workshops.kind }).from(workshops).where(eq(workshops.id, workshopId)).limit(1);
+  const places = w ? await getTicketPlaces(code) : null;
+  if (!w || !places) return null;
+  const kind = w.kind as WorkshopKind;
+  const allowed = allowanceFor(places.tierId, kind);
+  return allowed && places.remaining[kind] === 0 ? { kind, allowed, tierId: places.tierId } : null;
+}
+
 export type BookResult =
   | { ok: true }
   | { ok: false; reason: "no_ticket" | "not_found" | "not_allowed" | "full" | "clash" | "already" | "closed" | "not_open" };

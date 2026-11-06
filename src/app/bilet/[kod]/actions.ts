@@ -10,7 +10,8 @@ import { sendHandoverEmail } from "@/lib/email";
 import { getTier } from "@/lib/tickets";
 import { setAttendee } from "@/lib/tickets-lookup";
 import { BOOKING } from "@/lib/i18n";
-import { bookPlace, bookingOpensLabel, cancelPlace } from "@/lib/workshops";
+import { limitNote } from "@/lib/workshop-options";
+import { allowanceUsedUp, bookPlace, bookingOpensLabel, cancelPlace } from "@/lib/workshops";
 
 export type AttendeeState = { status: "idle" | "ok" | "error"; message?: string };
 
@@ -51,6 +52,11 @@ export async function bookWorkshop(_prev: BookingState, formData: FormData): Pro
   revalidatePath(`/bilet/${code}`);
   if (r.ok) return { status: "ok" };
   if (r.reason === "not_open") return { status: "error", message: BOOKING[lang].opensNote(bookingOpensLabel(lang)) };
+  if (r.reason === "not_allowed") {
+    // Not "not included" when the ticket includes it and the places are simply all used.
+    const u = await allowanceUsedUp(code, workshopId);
+    if (u) return { status: "error", message: limitNote(u.kind, u.allowed, u.tierId, lang === "en").body };
+  }
   return { status: "error", message: BOOK_ERROR[r.reason][lang] };
 }
 
