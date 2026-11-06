@@ -36,13 +36,17 @@ function nowHHMM(): string {
  * session, then scan or tap names. Everyone sees the same list, so the
  * second phone at the same door shows who the first one let in.
  */
-export default async function RoomPage({ searchParams }: { searchParams: Promise<{ w?: string }> }) {
+export default async function RoomPage({ searchParams }: { searchParams: Promise<{ w?: string; shtand?: string }> }) {
   await requireAccess("zala");
-  const { w: chosenId = "" } = await searchParams;
+  const { w: chosenId = "", shtand = "" } = await searchParams;
   const list = await listWorkshops(true);
   const chosen = list.find((w) => w.id === chosenId);
 
+  if (!chosen && shtand) return <StandPage location={shtand} list={list} />;
+
   if (!chosen) {
+    // A stand with short slots (a massage every 15 minutes) is one page with every name on it.
+    const stands = [...new Set(list.filter((w) => w.active && w.location?.startsWith("Щанд")).map((w) => w.location as string))].sort();
     const today = todayDay();
     const now = nowHHMM();
     const counts = Object.fromEntries(
@@ -63,6 +67,19 @@ export default async function RoomPage({ searchParams }: { searchParams: Promise
             Избери сесията пред чиято врата стоиш. После сканираш билета или отбелязваш по име. Човек без запис
             може да бъде пуснат, ако има свободно място.
           </p>
+          {stands.length > 0 && (
+            <div className="mt-6 flex flex-wrap gap-2">
+              {stands.map((s) => (
+                <Link
+                  key={s}
+                  href={`/admin/zala?shtand=${encodeURIComponent(s)}`}
+                  className="rounded-full bg-bh-ink px-4 py-2 text-sm font-semibold text-bh-paper hover:bg-bh-ink/85"
+                >
+                  {s}: всички часове с имената
+                </Link>
+              ))}
+            </div>
+          )}
           {order.map((day) => {
             const forDay = list.filter((w) => w.day === day && w.active);
             if (forDay.length === 0) return null;
@@ -180,6 +197,90 @@ export default async function RoomPage({ searchParams }: { searchParams: Promise
             </ul>
           )}
         </section>
+      </div>
+    </div>
+  );
+}
+
+type Session = Awaited<ReturnType<typeof listWorkshops>>[number];
+
+/**
+ * One stand, every slot of the day with its names - for the people at the
+ * stand (a masseur with a phone), who need the next names, not a list of
+ * 24 sessions to open one by one. Today first, slots already over at the end.
+ */
+async function StandPage({ location, list }: { location: string; list: Session[] }) {
+  const slots = list.filter((w) => w.active && w.location === location);
+  const people = Object.fromEntries(
+    await Promise.all(slots.map(async (w) => [w.id, w.booked > 0 ? await listWorkshopAttendees(w.id) : []] as const)),
+  );
+  const today = todayDay();
+  const now = nowHHMM();
+  const order = today === 2 ? [2, 1] : [1, 2];
+  const title = slots[0]?.title ?? location;
+  const booked = slots.reduce((n, w) => n + w.booked, 0);
+  const places = slots.reduce((n, w) => n + w.capacity, 0);
+
+  return (
+    <div className="px-5 py-8 sm:px-8">
+      <div className="mx-auto w-full max-w-lg">
+        <Link href="/admin/zala" className="font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50 hover:text-bh-ink">← Всички сесии</Link>
+        <h1 className="mt-2 font-display text-2xl font-[900] uppercase tracking-tight text-bh-ink">{title}</h1>
+        <p className="mt-1 text-sm text-bh-ink/60">{location}, записани {booked} от {places} места</p>
+        {slots.length === 0 && <p className="mt-6 text-sm text-bh-ink/55">Няма часове на този щанд.</p>}
+        {order.map((day) => {
+          const forDay = slots.filter((w) => w.day === day);
+          if (forDay.length === 0) return null;
+          const current = today === day ? forDay.find((w) => w.endsAt > now) : undefined;
+          return (
+            <section key={day} className="mt-8">
+              <h2 className="text-lg font-bold tracking-tight text-bh-ink">{DAYS[day]}</h2>
+              <ul className="mt-3 flex flex-col gap-2">
+                {forDay.map((w) => {
+                  const over = today === day && w.endsAt <= now;
+                  return (
+                    <li key={w.id} className={`rounded-2xl bg-bh-cloud px-4 py-3 ring-1 ${current?.id === w.id ? "ring-bh-ink/50" : "ring-bh-ink/6"} ${over ? "opacity-50" : ""}`}>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-sm font-semibold text-bh-ink">{w.startsAt}-{w.endsAt}</span>
+                          {current?.id === w.id && <span className="rounded-full bg-[#ACEC1D] px-2 py-0.5 text-[0.62rem] font-semibold uppercase tracking-wide text-bh-ink">сега</span>}
+                        </div>
+                        <span className="text-xs text-bh-ink/55">{w.booked} / {w.capacity}</span>
+                      </div>
+                      {people[w.id].length === 0 ? (
+                        <p className="mt-1 text-sm text-bh-ink/45">свободно</p>
+                      ) : (
+                        <ul className="mt-2 flex flex-col gap-1.5">
+                          {people[w.id].map((a) => (
+                            <li key={a.code} className="flex items-center justify-between gap-3 text-sm">
+                              <div className="min-w-0">
+                                <span className={`font-medium ${a.checkedIn ? "text-bh-ink/50 line-through decoration-bh-ink/30" : "text-bh-ink"}`}>{a.name}</span>
+                                <span className="ml-2 text-xs text-bh-ink/45">{a.code}</span>
+                              </div>
+                              {a.checkedIn ? (
+                                <form action={unmarkArrived} className="shrink-0">
+                                  <input type="hidden" name="workshopId" value={w.id} />
+                                  <input type="hidden" name="code" value={a.code} />
+                                  <button type="submit" className="text-[0.65rem] font-semibold uppercase tracking-wide text-bh-ink/45 hover:text-bh-ink">върни</button>
+                                </form>
+                              ) : (
+                                <form action={markArrived} className="shrink-0">
+                                  <input type="hidden" name="workshopId" value={w.id} />
+                                  <input type="hidden" name="code" value={a.code} />
+                                  <button type="submit" className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white">Дойде</button>
+                                </form>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          );
+        })}
       </div>
     </div>
   );
