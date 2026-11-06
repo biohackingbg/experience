@@ -26,7 +26,9 @@ import { SPEAKERS_PLANNED } from "@/lib/site-copy";
 // and the Stripe webhook); this interval only covers a change that somehow
 // did not. Every re-render is an ISR write plus a function run on the bill,
 // and at five minutes that was most of the ISR cost.
-export const revalidate = 3600;
+// Five minutes, not an hour: CORE changes price at midnight on 6 November
+// (lib/pricing.ts) and the page must not show the old price for long.
+export const revalidate = 300;
 
 // Both languages are declared to search engines, so the English page is
 // found as the English version rather than as a near-duplicate.

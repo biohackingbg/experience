@@ -21,7 +21,9 @@ import { cheapestOf, getPricing, priceOf } from "@/lib/pricing";
 import { META, SPEAKERS_PLANNED } from "@/lib/site-copy";
 import { SALES_OPEN, formatPrice } from "@/lib/tickets";
 
-export const revalidate = 3600;
+// Five minutes, not an hour: CORE changes price at midnight on 6 November
+// (lib/pricing.ts) and the page must not show the old price for long.
+export const revalidate = 300;
 
 /**
  * The same page in English. Same sections, same data, same prices - only

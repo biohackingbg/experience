@@ -83,8 +83,21 @@ export const getPricing = cache(async (): Promise<Pricing> => {
   if (stage === "mid") {
     return { stage, discounted: true, label: mid.label, regularAfter: mid.regularAfter, prices: mid.prices, changedAt, mid };
   }
-  return { ...off(mid), changedAt };
+  return { ...lateCore(off(mid)), changedAt };
 });
+
+/**
+ * The day before the summit, CORE goes from 69 € to 99 € at midnight Sofia
+ * time - announced on the site and in the stories as "69 € до днес, от утре
+ * 99 €". Done by the clock rather than by hand so the checkout, the page and
+ * upgrades all change in the same second.
+ */
+export const CORE_LATE = { from: new Date("2026-11-07T00:00:00+02:00"), cents: 9900 };
+
+export function lateCore(p: Pricing): Pricing {
+  if (Date.now() < CORE_LATE.from.getTime()) return p;
+  return { ...p, prices: { ...p.prices, core: CORE_LATE.cents } };
+}
 
 export const priceOf = (p: Pricing, tier: Tier): number => p.prices[tier.id];
 
