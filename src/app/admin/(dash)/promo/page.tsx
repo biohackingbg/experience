@@ -5,7 +5,7 @@ import { requireAccess } from "@/lib/access";
 import { listPromos } from "@/lib/promo";
 import { formatPrice } from "@/lib/tickets";
 
-import { removePromo, togglePromo, updatePromoTiers } from "./actions";
+import { removePromo, togglePromo, updatePromoMax, updatePromoTiers } from "./actions";
 import { PromoForm } from "./Forms";
 import { TIER_CHOICES, tierValue } from "./tier-choices";
 
@@ -112,7 +112,27 @@ export default async function PromoPage() {
                             <p className="mt-1 text-[0.65rem] text-bh-ink/50">„Всички билети“ = важи за всички нива.</p>
                           </details>
                         </td>
-                        <td className="px-3 py-2 text-bh-ink/75">{c.uses}{c.maxUses ? ` / ${c.maxUses}` : ""}{c.tickets ? ` · ${c.tickets} билета` : ""}</td>
+                        <td className="px-3 py-2 text-bh-ink/75">
+                          {c.uses}{c.maxUses ? ` / ${c.maxUses}` : ""}{c.tickets ? ` · ${c.tickets} билета` : ""}
+                          <details className="mt-1">
+                            <summary className="cursor-pointer text-[0.7rem] font-semibold text-bh-ink/60">
+                              {c.maxUses ? `макс. ${c.maxUses}` : "без лимит"} · промени
+                            </summary>
+                            <form action={updatePromoMax} className="mt-1.5 flex flex-wrap items-center gap-2 text-xs">
+                              <input type="hidden" name="id" value={c.id} />
+                              <input
+                                type="number"
+                                name="maxUses"
+                                min={1}
+                                defaultValue={c.maxUses ?? ""}
+                                placeholder="без лимит"
+                                className="w-24 rounded-full border border-bh-ink/15 bg-bh-paper px-3 py-1.5 text-xs text-bh-ink placeholder:text-bh-ink/35"
+                              />
+                              <button type="submit" className="rounded-full border border-bh-ink/20 px-3 py-1 text-xs font-semibold text-bh-ink hover:border-bh-ink">Запиши</button>
+                            </form>
+                            <p className="mt-1 text-[0.65rem] text-bh-ink/50">{isGiftCode(c) ? "Брои билети." : "Брои поръчки."} Празно = без лимит.</p>
+                          </details>
+                        </td>
                         <td className="px-3 py-2 text-bh-ink/75">{c.validUntil ? bgDate(c.validUntil) : "-"}</td>
                         <td className="px-3 py-2 text-bh-ink/75">{c.note ?? "-"}</td>
                         <td className="px-3 py-2 text-bh-ink/75">{isGiftCode(c) ? "подарък, не е продажба" : `${formatPrice(c.discountCents)} € · ${formatPrice(c.revenueCents)} €`}</td>

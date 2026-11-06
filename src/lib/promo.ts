@@ -201,6 +201,11 @@ export async function setPromoTiers(id: string, tiers: string[]): Promise<void> 
   await getDb().update(promoCodes).set({ tiers: tiersOf(tiers.join(","))?.join(",") ?? null }).where(eq(promoCodes.id, id));
 }
 
+/** The row's "макс. брой": null = no limit. For a 100% code it counts tickets, for the rest orders. */
+export async function setPromoMaxUses(id: string, maxUses: number | null): Promise<void> {
+  await getDb().update(promoCodes).set({ maxUses }).where(eq(promoCodes.id, id));
+}
+
 export async function setPromoActive(id: string, active: boolean): Promise<void> {
   await getDb().update(promoCodes).set({ active }).where(eq(promoCodes.id, id));
 }

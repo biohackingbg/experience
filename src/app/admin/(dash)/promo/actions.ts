@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { canAccess } from "@/lib/access";
-import { createPromo, deletePromo, isPromoKind, normaliseCode, setPromoActive, setPromoTiers, tiersOf } from "@/lib/promo";
+import { createPromo, deletePromo, isPromoKind, normaliseCode, setPromoActive, setPromoMaxUses, setPromoTiers, tiersOf } from "@/lib/promo";
 
 export type FormState = { status: "idle" | "ok" | "error"; message?: string };
 const UUID = /^[0-9a-f-]{36}$/;
@@ -47,6 +47,18 @@ export async function updatePromoTiers(formData: FormData): Promise<void> {
   const id = String(formData.get("id") ?? "");
   if (!UUID.test(id)) return;
   await setPromoTiers(id, formData.getAll("tiers").flatMap((v) => String(v).split(",")).filter(Boolean));
+  revalidatePath("/admin/promo");
+}
+
+/** The number on a row: how many times the code may be used. Empty = no limit. */
+export async function updatePromoMax(formData: FormData): Promise<void> {
+  if (!(await canAccess("promo"))) return;
+  const id = String(formData.get("id") ?? "");
+  if (!UUID.test(id)) return;
+  const raw = String(formData.get("maxUses") ?? "").trim();
+  const maxUses = raw ? Number.parseInt(raw, 10) : null;
+  if (maxUses !== null && (!Number.isInteger(maxUses) || maxUses < 1 || maxUses > 100000)) return;
+  await setPromoMaxUses(id, maxUses);
   revalidatePath("/admin/promo");
 }
 
