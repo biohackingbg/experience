@@ -1,7 +1,7 @@
 import { ownsTicket } from "@/lib/app-tickets";
 import { fail, json, limited, readBody, requireUser } from "@/lib/api-v1";
 import { pushToEmails } from "@/lib/push";
-import { limitNote } from "@/lib/workshop-options";
+import { STAND_OPENS_NOTE, limitNote } from "@/lib/workshop-options";
 import { allowanceUsedUp, bookPlace, cancelPlace, getTicketPlaces } from "@/lib/workshops";
 
 export const dynamic = "force-dynamic";
@@ -28,6 +28,10 @@ export async function POST(request: Request, ctx: Ctx) {
   const r = await bookPlace(t.code, workshopId);
   // The last place of the tier booked, or one more tried: say so with a push.
   if (r.ok || r.reason === "not_allowed") await notifyLimit(t.user.email, t.code, workshopId, r.ok);
+  // The app knows no word for this reason and says "Опитай пак."; the push says when.
+  if (!r.ok && r.reason === "stand_not_open") {
+    await pushToEmails([t.user.email], { ...STAND_OPENS_NOTE, data: { screen: "stations" }, collapseId: `stand-open-${t.code}` }).catch((e) => console.error("[bookings] stand push failed:", e));
+  }
   if (!r.ok) return fail(409, r.reason);
   return json({ ok: true, places: await getTicketPlaces(t.code) });
 }

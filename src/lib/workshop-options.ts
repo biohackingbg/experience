@@ -53,3 +53,21 @@ export function limitNote(kind: WorkshopKind, allowed: number, tierId: string, e
     body: `Имаш ${allowed} от ${allowed} ${noun} с ${tier} билета. За да запазиш друго, първо откажи някое от записаните.`,
   };
 }
+
+/**
+ * The partner stands with a slot every 15 minutes (massage, Therabody, N8,
+ * Obsidian) open for booking at 10:00 on the slot's own day, when the stands
+ * open - so the places go to the people in the hall, not to whoever booked
+ * the whole weekend the night before. Bookings made before stay.
+ */
+export const OPEN_AT_TEN = ["Щанд B8", "Щанд B1", "Щанд C5", "Щанд B2"];
+
+export function standOpensAt(location: string | null, day: number): Date | null {
+  if (!location || !OPEN_AT_TEN.includes(location)) return null;
+  return new Date(day === 2 ? "2026-11-08T10:00:00+02:00" : "2026-11-07T10:00:00+02:00");
+}
+
+export const STAND_OPENS_NOTE = {
+  title: "Часовете на щандовете се отварят в 10:00",
+  body: "Масажите, Therabody, N8 и Obsidian се записват в деня на часа, от 10:00 сутринта. Опитай тогава.",
+};

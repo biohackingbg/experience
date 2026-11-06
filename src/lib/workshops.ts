@@ -6,7 +6,7 @@ import { getDb } from "@/lib/db";
 import { orders, tickets, workshopBookings, workshops } from "@/lib/db/schema";
 import { SOLD } from "@/lib/sold";
 import { getTier } from "@/lib/tickets";
-import { type WorkshopKind, allowanceFor } from "@/lib/workshop-options";
+import { type WorkshopKind, allowanceFor, standOpensAt } from "@/lib/workshop-options";
 
 /**
  * Workshops and experiences, and who has a place in them.
@@ -143,7 +143,7 @@ export async function allowanceUsedUp(code: string, workshopId: string): Promise
 
 export type BookResult =
   | { ok: true }
-  | { ok: false; reason: "no_ticket" | "not_found" | "not_allowed" | "full" | "clash" | "already" | "closed" | "not_open" };
+  | { ok: false; reason: "no_ticket" | "not_found" | "not_allowed" | "full" | "clash" | "already" | "closed" | "not_open" | "stand_not_open" };
 
 export async function bookPlace(code: string, workshopId: string): Promise<BookResult> {
   if (!bookingOpen()) return { ok: false, reason: "not_open" };
@@ -166,6 +166,8 @@ export async function bookPlace(code: string, workshopId: string): Promise<BookR
     const [w] = await tx.select().from(workshops).where(eq(workshops.id, workshopId)).limit(1);
     if (!w) return { ok: false as const, reason: "not_found" as const };
     if (!w.active) return { ok: false as const, reason: "closed" as const };
+    const opens = standOpensAt(w.location, w.day);
+    if (opens && Date.now() < opens.getTime()) return { ok: false as const, reason: "stand_not_open" as const };
 
     const kind = w.kind as WorkshopKind;
     const mine = await tx

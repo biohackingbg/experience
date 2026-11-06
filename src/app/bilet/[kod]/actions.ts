@@ -25,6 +25,7 @@ const BOOK_ERROR: Record<string, { bg: string; en: string }> = {
   full: { bg: "Местата свършиха, докато избираше.", en: "The places ran out while you were choosing." },
   clash: { bg: "В този час вече си записан другаде.", en: "You are already booked elsewhere at this time." },
   already: { bg: "Вече си записан за тази сесия.", en: "You are already booked for this session." },
+  stand_not_open: { bg: "Часовете на щандовете се записват в деня на часа, от 10:00 сутринта.", en: "The stand slots open for booking on their day, from 10:00." },
 };
 
 /**
