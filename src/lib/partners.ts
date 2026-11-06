@@ -71,4 +71,6 @@ export const PARTNERS: Partner[] = [
   { name: "Daye", logo: "/partners/daye-white.png" },
   { name: "Sopharma", logo: "/partners/sopharma-white.png" },
   { name: "Bodrost", logo: "/partners/bodrost-white.png" },
+  // Made from the small white file sent on 6 November; ask for a vector if it looks soft.
+  { name: "Euphorixz", logo: "/partners/euphorixz-white.png" },
 ];
