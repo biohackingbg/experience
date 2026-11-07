@@ -76,6 +76,19 @@ export default async function DoorPage({
           ))}
         </div>
 
+        {/* By tier: who is in today, of those expected today. */}
+        <div className="mt-3 grid grid-cols-3 gap-3">
+          {stats.byTier.map((t) => (
+            <div key={t.tierId} className="rounded-2xl bg-bh-cloud px-4 py-3 ring-1 ring-bh-ink/8">
+              <div className="font-mono text-[0.62rem] uppercase tracking-[0.15em] text-bh-ink/50">{t.tierId} влезли днес</div>
+              <div className="mt-1 text-2xl font-black tracking-tight text-bh-ink">
+                {t.today}
+                <span className="text-sm font-semibold text-bh-ink/50"> от {t.expected}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
         <Scanner />
 
         {/* Arrival windows: the plan (set once the programme is final) and

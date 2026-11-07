@@ -223,10 +223,12 @@ export async function getDoorStats(): Promise<{
   /** Expected on each day: a one-day ticket names one, the rest admit both. */
   saturday: number;
   sunday: number;
+  /** Per tier: in today, and expected today (a one-day ticket for another day is left out). */
+  byTier: { tierId: string; today: number; expected: number }[];
   recent: DoorRecent[];
 }> {
   const db = getDb();
-  const [[row], recentRows] = await Promise.all([
+  const [[row], recentRows, tierRows] = await Promise.all([
     db
       .select({
         total: sql<number>`count(*)::int`,
@@ -254,7 +256,18 @@ export async function getDoorStats(): Promise<{
       .where(sql`${tickets.checkedInAt} is not null`)
       .orderBy(sql`${tickets.checkedInAt} desc`)
       .limit(12),
+    db
+      .select({
+        tierId: tickets.tierId,
+        today: sql<number>`count(*) filter (where (${tickets.checkedInAt} at time zone 'Europe/Sofia')::date = (now() at time zone 'Europe/Sofia')::date)::int`,
+        expected: sql<number>`count(*) filter (where ${tickets.day} is null or ${tickets.day} = case when (now() at time zone 'Europe/Sofia')::date = date '2026-11-08' then 2 else 1 end)::int`,
+      })
+      .from(tickets)
+      .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
+      .where(SOLD)
+      .groupBy(tickets.tierId),
   ]);
+  const tierOrder = ["peak", "plus", "core"];
 
   return {
     total: row?.total ?? 0,
@@ -262,6 +275,7 @@ export async function getDoorStats(): Promise<{
     today: row?.today ?? 0,
     saturday: row?.saturday ?? 0,
     sunday: row?.sunday ?? 0,
+    byTier: tierRows.sort((x, y) => tierOrder.indexOf(x.tierId) - tierOrder.indexOf(y.tierId)),
     recent: recentRows.flatMap((r) =>
       r.at ? [{ code: r.code, name: r.attendeeName ?? r.buyerName, tierName: ticketTierLabel(r.tierId, r.totalCents, "bg", r.day), at: r.at }] : [],
     ),
