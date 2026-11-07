@@ -101,3 +101,17 @@ export async function saveSiteNotice(_prev: ActionState, formData: FormData): Pr
   revalidatePath("/en/programa");
   return { status: "ok", message: on ? "Лентата е включена." : "Записано." };
 }
+
+/**
+ * "Скрий продажбите": the dashboard is opened at the event in front of other
+ * people to search a ticket; the counts and the money stay off the screen
+ * until shown again. Remembered per browser, for a week.
+ */
+export async function toggleSalesHidden(formData: FormData): Promise<void> {
+  if (!(await canAccess("tablo"))) return;
+  const { cookies } = await import("next/headers");
+  const store = await cookies();
+  if (formData.get("hide") === "1") store.set("bh_hide_sales", "1", { path: "/admin", httpOnly: true, sameSite: "lax", secure: true, maxAge: 7 * 24 * 3600 });
+  else store.delete({ name: "bh_hide_sales", path: "/admin" });
+  revalidatePath("/admin");
+}

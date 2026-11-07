@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import Link from "next/link";
 
 import { FitNumber } from "@/components/admin/FitNumber";
@@ -11,7 +12,7 @@ import { getPricing } from "@/lib/pricing";
 import { getTrafficData } from "@/lib/site-views";
 import { formatPrice } from "@/lib/tickets";
 
-import { setTestOrder } from "./actions";
+import { setTestOrder, toggleSalesHidden } from "./actions";
 import { SalesHistory } from "./SalesHistory";
 import { ResendForm } from "./fakturi/ResendForm";
 import { PriceStages } from "./PriceStages";
@@ -258,6 +259,10 @@ export default async function AdminDashboard({
     code: codeParam.trim().toUpperCase().slice(0, 64),
     kind: kindParam === "sale" || kindParam === "gift" || kindParam === "issued" ? kindParam : "",
   };
+  // "Скрий продажбите" (a cookie): the screen keeps the search and the list of
+  // orders, without a count of tickets or a sum of money anywhere.
+  const hide = (await cookies()).get("bh_hide_sales")?.value === "1";
+  const money = (cents: number) => (hide ? "•••" : <Money cents={cents} />);
   const [d, traffic, found, fin, pricing, abandoned, pendingNow, notice, reminders] = await Promise.all([
     getDashboardData(page, filter),
     getTrafficData(30),
@@ -305,14 +310,20 @@ export default async function AdminDashboard({
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="font-display text-4xl font-[900] uppercase tracking-tight text-[#0b2a22]">Dashboard</h1>
-          <p className={`mt-2 text-sm ${onPace ? "text-[#0b2a22]/60" : "text-[#9c3d5c]"}`}>
+          {!hide && <p className={`mt-2 text-sm ${onPace ? "text-[#0b2a22]/60" : "text-[#9c3d5c]"}`}>
             {daysLeft} дни до събитието · продадени {d.ticketsSold} от {d.capacityTotal} ·{" "}
             {seatsLeft === 0
               ? "залата е пълна."
               : `нужни ${fmt1(neededPerDay)} на ден, продаваме ${fmt1(pacePerDay)} ${onPace ? "- темпото стига, ако се задържи." : "- под темпото, смятано по последните 7 дни."}`}
-          </p>
+          </p>}
         </div>
         <div className="flex flex-wrap items-center gap-3">
+          <form action={toggleSalesHidden}>
+            <input type="hidden" name="hide" value={hide ? "0" : "1"} />
+            <button type="submit" className="rounded-full border border-[#0b2a22]/25 px-5 py-3 text-sm font-semibold text-[#0b2a22] transition-colors hover:border-[#0b2a22]">
+              {hide ? "Покажи продажбите" : "Скрий продажбите"}
+            </button>
+          </form>
           <Link href="/admin/vhod" className="inline-flex items-center gap-2 rounded-full bg-[#146455] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_30px_-16px_rgba(20,100,85,.9)] transition-transform hover:-translate-y-0.5">
             <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="h-4 w-4"><path d="M10 4v12M4 10h12" /></svg>
             Вход на събитието
@@ -324,7 +335,7 @@ export default async function AdminDashboard({
       </div>
 
       {/* Stat tiles */}
-      <div data-fit-group className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {!hide && <div data-fit-group className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Stat
           dark
           label="Продадени билети"
@@ -365,7 +376,7 @@ export default async function AdminDashboard({
           href="#nedovarsheni"
           sub={abandoned.length ? `${toRemind} чакат напомняне · последните 14 дни` : "никой не е спрял на плащането"}
         />
-      </div>
+      </div>}
 
       {/* Search results, only when asked */}
       {q.trim().length >= 2 && (
@@ -389,7 +400,7 @@ export default async function AdminDashboard({
                       <div className="mt-0.5 text-xs text-[#0b2a22]/55">{when(o)}</div>
                     </div>
                     <div className="flex flex-wrap items-center gap-3">
-                      <span className="text-xs text-[#0b2a22]/60">{o.items} · <Money cents={o.totalCents} /></span>
+                      <span className="text-xs text-[#0b2a22]/60">{o.items} · {money(o.totalCents)}</span>
                       <StatusChip status={o.status} />
                       {/* Same GA chip as in the sales table: a pending order
                           found by its number is how a checkout is checked
@@ -422,6 +433,8 @@ export default async function AdminDashboard({
         </section>
       )}
 
+      {!hide && (
+        <>
       {/* Как върви: the week just gone, the pace it implies, and the day the
           room runs out at that pace. One question, three answers, one band. */}
       <div className="mt-6 grid gap-4 xl:grid-cols-4">
@@ -676,7 +689,10 @@ export default async function AdminDashboard({
         <SalesHistory history={d.history} launches={d.launches} />
       </div>
 
-      {d.odd.length > 0 && (
+        </>
+      )}
+
+      {!hide && d.odd.length > 0 && (
         <section className="mt-4 rounded-3xl bg-[#C4607F]/8 p-6 ring-1 ring-[#C4607F]/30">
           <h2 className="text-lg font-bold tracking-tight">Проверка: {d.odd.length} платени поръчки, които не се връзват</h2>
           <p className="mt-1 text-xs text-[#0b2a22]/60">
@@ -700,7 +716,7 @@ export default async function AdminDashboard({
 
       <section id="porachki" className="mt-4 rounded-3xl bg-white p-6 ring-1 ring-[#0b2a22]/6">
         <h2 className="text-lg font-bold tracking-tight">Последни продажби</h2>
-        <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[#0b2a22]/75">
+        {!hide && <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[#0b2a22]/75">
           <span>
             Днес: <span className="font-semibold text-[#0b2a22]">{d.soldToday}</span> продадени
           </span>
@@ -710,7 +726,7 @@ export default async function AdminDashboard({
               <span className="font-semibold" style={{ color: GIFT_TEXT }}>{d.giftToday} gift</span>
             </span>
           )}
-        </p>
+        </p>}
         <p className="mt-1 text-xs text-[#0b2a22]/50">Платени и върнати поръчки. Незавършените са в „Недовършени поръчки“ по-горе и се намират през търсенето.</p>
 
         {/* Narrow the list to a ticket kind, a promo code, or sold vs gift. A plain GET form, so the view is a link. */}
@@ -753,9 +769,9 @@ export default async function AdminDashboard({
               <Link href="/admin#porachki" className="px-2 py-2 text-xs font-semibold text-[#0b2a22]/60 underline underline-offset-2 hover:text-[#0b2a22]">
                 Изчисти
               </Link>
-              <span className="ml-auto text-xs font-semibold text-[#0b2a22]/70">
+              {!hide && <span className="ml-auto text-xs font-semibold text-[#0b2a22]/70">
                 {d.recentTotal} поръчки, {d.recentTickets} {d.recentFilter.tier ? `${d.recentFilter.tier.toUpperCase()} ` : ""}билета
-              </span>
+              </span>}
             </>
           )}
         </form>
@@ -807,7 +823,7 @@ export default async function AdminDashboard({
                           код {o.promoCode}
                           {o.discountCents > 0 && (
                             <>
-                              , −<Money cents={o.discountCents} />
+                              , −{money(o.discountCents)}
                             </>
                           )}
                         </span>
@@ -839,7 +855,7 @@ export default async function AdminDashboard({
                         GA {o.gaSessionId ? "✓" : "–"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right font-semibold"><Money cents={o.totalCents} /></td>
+                    <td className="px-4 py-3 text-right font-semibold">{money(o.totalCents)}</td>
                     <td className="px-4 py-3 text-right"><TestToggle reference={o.reference} isTest={o.isTest} /></td>
                   </tr>
                 ))}
@@ -859,7 +875,7 @@ export default async function AdminDashboard({
               <span />
             )}
             <span className="text-xs text-[#0b2a22]/55">
-              Страница {d.recentPage} от {Math.ceil(d.recentTotal / d.recentPageSize)}, общо {d.recentTotal} поръчки
+              Страница {d.recentPage} от {Math.ceil(d.recentTotal / d.recentPageSize)}{hide ? "" : `, общо ${d.recentTotal} поръчки`}
             </span>
             {d.recentPage * d.recentPageSize < d.recentTotal ? (
               <Link href={listHref(d.recentPage + 1)} className="rounded-full border border-[#0b2a22]/20 px-4 py-2 font-semibold text-[#0b2a22] hover:border-[#0b2a22]">
