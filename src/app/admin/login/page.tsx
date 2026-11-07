@@ -39,6 +39,14 @@ export default async function AdminLoginPage({
           </p>
         )}
         <LoginForm needsTotp={isTotpConfigured()} />
+        {/* People with a personal access (a partner's stand, the door team) have
+            no password: they sign in by email, and this page is where they land. */}
+        <Link
+          href="/dostap"
+          className="mt-6 block rounded-2xl bg-bh-cloud px-4 py-3 text-center text-sm font-semibold text-bh-ink ring-1 ring-bh-ink/10 hover:ring-bh-ink/30"
+        >
+          Нямаш парола? Влез с имейла си →
+        </Link>
       </div>
     </div>
   );
