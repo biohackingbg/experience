@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useActionState, useCallback, useEffect, useRef } from "react";
+import { useActionState, useCallback, useEffect, useRef, useState } from "react";
 
 import { Camera } from "../vhod/Camera";
 import { type GoodyState, scanGoody, undoGoody } from "./actions";
@@ -20,6 +20,10 @@ export function GoodyScanner() {
   const formRef = useRef<HTMLFormElement>(null);
   const handled = useRef<number | undefined>(undefined);
   const router = useRouter();
+  // The answer stays 6 seconds, then the box is clean again: a ticket shown a
+  // second time is then plainly "Вече е взел", not the green left from before.
+  const [shownAt, setShownAt] = useState<number | undefined>(undefined);
+  const visible = !!state.scannedAt && state.scannedAt === shownAt;
 
   const onCode = useCallback((code: string) => {
     if (!inputRef.current || !formRef.current) return;
@@ -35,17 +39,25 @@ export function GoodyScanner() {
   useEffect(() => {
     if (!state.scannedAt || state.scannedAt === handled.current) return;
     handled.current = state.scannedAt;
+    const at = state.scannedAt;
+    const show = requestAnimationFrame(() => setShownAt(at));
+    const hide = setTimeout(() => setShownAt((cur) => (cur === at ? undefined : cur)), 6000);
     if (inputRef.current) inputRef.current.value = "";
     if (navigator.vibrate) navigator.vibrate(state.status === "given" ? 60 : [60, 60, 60]);
     router.refresh();
+    return () => {
+      cancelAnimationFrame(show);
+      clearTimeout(hide);
+    };
   }, [state, router]);
 
+  const status = visible ? state.status : "idle";
   const tone =
-    state.status === "given"
+    status === "given"
       ? "bg-emerald-600 text-white"
-      : state.status === "already"
+      : status === "already"
         ? "bg-amber-500 text-amber-950"
-        : state.status === "invalid" || state.status === "error"
+        : status === "invalid" || status === "error"
           ? "bg-red-600 text-white"
           : "bg-bh-cloud text-bh-ink/45 ring-1 ring-bh-ink/10";
 
@@ -67,11 +79,11 @@ export function GoodyScanner() {
         </button>
       </form>
 
-      <Camera onCode={onCode} />
+      <Camera onCode={onCode} repeatMs={2500} />
 
       <div className={`mt-5 flex min-h-[9rem] flex-col items-center justify-center rounded-3xl px-6 py-8 text-center transition-colors ${tone}`} role="status" aria-live="assertive">
-        {state.status === "idle" && <p className="text-sm">Готов за сканиране</p>}
-        {(state.status === "given" || state.status === "already") && (
+        {status === "idle" && <p className="text-sm">Готов за сканиране</p>}
+        {(status === "given" || status === "already") && (
           <>
             <p className="text-3xl font-black uppercase tracking-tight">{state.status === "given" ? "Дай торбичка" : "Вече е взел"}</p>
             <TierBadge tier={state.tierName} />
@@ -88,7 +100,7 @@ export function GoodyScanner() {
             </form>
           </>
         )}
-        {(state.status === "invalid" || state.status === "error") && (
+        {(status === "invalid" || status === "error") && (
           <>
             <p className="text-3xl font-black uppercase tracking-tight">Невалиден</p>
             <p className="mt-2 text-sm opacity-90">{state.message}</p>

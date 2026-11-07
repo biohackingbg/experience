@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from "react";
  * has no native barcode API. A code is reported once, then ignored for a few
  * seconds, so a ticket held in front of the lens does not fire twice.
  */
-export function Camera({ onCode }: { onCode: (code: string) => void }) {
+export function Camera({ onCode, repeatMs = 4000 }: { onCode: (code: string) => void; /** How long the same code is ignored after it was read. */ repeatMs?: number }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [on, setOn] = useState(false);
@@ -57,7 +57,7 @@ export function Camera({ onCode }: { onCode: (code: string) => void }) {
           if (!hit?.data) return;
           const code = hit.data.trim().toUpperCase();
           const now = Date.now();
-          if (code === last.code && now - last.at < 4000) return;
+          if (code === last.code && now - last.at < repeatMs) return;
           last = { code, at: now };
           onCode(code);
         };
@@ -73,7 +73,7 @@ export function Camera({ onCode }: { onCode: (code: string) => void }) {
       cancelAnimationFrame(frame);
       stream?.getTracks().forEach((t) => t.stop());
     };
-  }, [on, onCode]);
+  }, [on, onCode, repeatMs]);
 
   return (
     <div className="mt-4">
