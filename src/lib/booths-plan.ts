@@ -10,15 +10,22 @@
  *
  * Each box is a position on the plan image, in percent of its width and
  * height, measured from the PDF's own vector rectangles rather than by eye.
+ * v5 (7 Nov) puts the same modules on the hotel's own floor-2 plan: every box
+ * was carried over from v4 through the atrium, which is on both drawings
+ * (scale 0.283), and checked against the lift banks; the image is lightly
+ * cropped, marks the Premium Lounge in Ballroom 3, and carries each module's
+ * partner on it and in a legend underneath (as of 7 Nov - a change on the
+ * board does not redraw the image). The source and the
+ * script are in "Sofia Life Summit - визуали/83 План на щандовете v5".
  * The image is the plan with the modules already coloured; the board lays
  * its own state over them, so a change of partner never needs a new image.
  */
 
 // Versioned name: the app caches the plan by URL, and a new drawing must not
 // be served from an old cache under the old boxes.
-export const PLAN_IMAGE = "/plan-shtandove-v4.webp";
+export const PLAN_IMAGE = "/plan-shtandove-v5.webp";
 /** width / height of the plan image, so the overlay keeps its shape. */
-export const PLAN_ASPECT = 1825 / 1680;
+export const PLAN_ASPECT = 1097 / 815;
 
 export const ZONES = [
   { id: "A", label: "Premium", hint: "до входа на залата, най-видими", colour: "#0acbb5" },
@@ -33,38 +40,38 @@ export const zoneOf = (id: string) => ZONES.find((z) => z.id === id[0]);
 export type Box = [number, number, number, number];
 
 export const BOOTHS: { id: string; zone: ZoneId; box: Box }[] = [
-  { id: "A1", zone: "A", box: [11.02, 43.33, 6.6, 4.79] },
-  { id: "A2", zone: "A", box: [18.58, 43.33, 6.6, 4.79] },
-  { id: "A3", zone: "A", box: [26.14, 43.41, 6.6, 4.79] },
-  { id: "A4", zone: "A", box: [8.09, 48.76, 4.4, 7.17] },
-  { id: "A5", zone: "A", box: [8.09, 56.4, 4.4, 7.17] },
-  { id: "A6", zone: "A", box: [8.09, 64.06, 4.4, 7.17] },
-  { id: "B0", zone: "B", box: [51.8, 32.8, 2.45, 4.8] },
-  { id: "B8", zone: "B", box: [45.69, 32.8, 2.45, 4.8] },
-  { id: "B1", zone: "B", box: [40.27, 50.48, 4.4, 7.17] },
-  { id: "B2", zone: "B", box: [34.25, 62.74, 4.4, 7.17] },
-  { id: "B3", zone: "B", box: [50.08, 41.01, 4.4, 7.17] },
-  { id: "B4", zone: "B", box: [45.04, 50.48, 4.4, 7.17] },
-  { id: "B5", zone: "B", box: [50.41, 73.69, 4.4, 7.17] },
-  { id: "B7", zone: "B", box: [50.47, 63.81, 4.4, 7.17] },
-  { id: "C1", zone: "C", box: [6.25, 76.73, 6.6, 4.78] },
-  { id: "C2", zone: "C", box: [15.51, 71.25, 6.6, 4.78] },
-  { id: "C3", zone: "C", box: [22.52, 71.25, 6.6, 4.78] },
-  { id: "C4", zone: "C", box: [29.7, 71.25, 6.6, 4.78] },
-  { id: "C5", zone: "C", box: [41.38, 73.98, 4.4, 7.17] },
-  { id: "D1", zone: "D", box: [24.33, 81.96, 4.4, 7.17] },
-  { id: "D2", zone: "D", box: [32.27, 83.33, 6.6, 4.78] },
-  { id: "D3", zone: "D", box: [24.33, 91.49, 6.6, 4.78] },
-  { id: "D4", zone: "D", box: [31.01, 91.43, 6.6, 4.78] },
-  { id: "D5", zone: "D", box: [39.07, 83.15, 6.6, 4.78] },
-  { id: "D6", zone: "D", box: [37.7, 91.43, 6.6, 4.78] },
-  { id: "D7", zone: "D", box: [50.47, 80.89, 4.4, 7.17] },
-  { id: "D8", zone: "D", box: [44.33, 91.43, 6.6, 4.78] },
+  { id: "A1", zone: "A", box: [30.09, 33.01, 4.66, 4.19] },
+  { id: "A2", zone: "A", box: [35.43, 33.01, 4.66, 4.19] },
+  { id: "A3", zone: "A", box: [40.77, 33.08, 4.66, 4.19] },
+  { id: "A4", zone: "A", box: [28.02, 37.77, 3.11, 6.28] },
+  { id: "A5", zone: "A", box: [28.02, 44.45, 3.11, 6.28] },
+  { id: "A6", zone: "A", box: [28.02, 51.16, 3.11, 6.28] },
+  { id: "B0", zone: "B", box: [58.91, 23.79, 1.73, 4.2] },
+  { id: "B8", zone: "B", box: [54.59, 23.79, 1.73, 4.2] },
+  { id: "B1", zone: "B", box: [50.76, 39.27, 3.11, 6.28] },
+  { id: "B2", zone: "B", box: [46.5, 50.0, 3.11, 6.28] },
+  { id: "B3", zone: "B", box: [57.69, 30.98, 3.11, 6.28] },
+  { id: "B4", zone: "B", box: [54.13, 39.27, 3.11, 6.28] },
+  { id: "B5", zone: "B", box: [57.92, 59.59, 3.11, 6.28] },
+  { id: "B7", zone: "B", box: [57.97, 50.94, 3.11, 6.28] },
+  { id: "C1", zone: "C", box: [26.72, 62.25, 4.66, 4.18] },
+  { id: "C2", zone: "C", box: [33.26, 57.45, 4.66, 4.18] },
+  { id: "C3", zone: "C", box: [38.21, 57.45, 4.66, 4.18] },
+  { id: "C4", zone: "C", box: [43.29, 57.45, 4.66, 4.18] },
+  { id: "C5", zone: "C", box: [51.54, 59.84, 3.11, 6.28] },
+  { id: "D1", zone: "D", box: [39.49, 66.83, 3.11, 6.28] },
+  { id: "D2", zone: "D", box: [45.1, 68.03, 4.66, 4.18] },
+  { id: "D3", zone: "D", box: [39.49, 75.17, 4.66, 4.18] },
+  { id: "D4", zone: "D", box: [44.21, 75.12, 4.66, 4.18] },
+  { id: "D5", zone: "D", box: [49.91, 67.87, 4.66, 4.18] },
+  { id: "D6", zone: "D", box: [48.94, 75.12, 4.66, 4.18] },
+  { id: "D7", zone: "D", box: [57.97, 65.89, 3.11, 6.28] },
+  { id: "D8", zone: "D", box: [53.63, 75.12, 4.66, 4.18] },
   // The bar by the main flow is let out like a module, so a partner can be
   // put on it from the board. It sits in the B row on the drawing, so it is
   // counted with zone B; the hydration-station bar below it is Health
   // Upgrade's and stays off the list.
-  { id: "BAR", zone: "B", box: [41.7, 60.89, 5.21, 4.78] },
+  { id: "BAR", zone: "B", box: [51.77, 48.39, 3.68, 4.18] },
 ];
 export const isBooth = (v: unknown): v is string => BOOTHS.some((b) => b.id === v);
 
