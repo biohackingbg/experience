@@ -108,6 +108,7 @@ const GROUPS = [
       { page: "vhod" as const, href: "/admin/vhod", label: "Вход на събитието", icon: I.door },
       { page: "zala" as const, href: "/admin/zala", label: "Зала (работилници)", icon: I.hands },
       { page: "knigi" as const, href: "/admin/knigi", label: "Книги", icon: I.shop },
+      { page: "torbichki" as const, href: "/admin/torbichki", label: "Goody bags", icon: I.gift },
       { page: "masazhi" as const, href: "/admin/masazhi", label: "Масажи (щанд B8)", icon: I.hands },
       { page: "therabody" as const, href: "/admin/therabody", label: "Therabody (щанд B1)", icon: I.hands },
       { page: "n8" as const, href: "/admin/n8", label: "N8 Skin Check (щанд C5)", icon: I.hands },

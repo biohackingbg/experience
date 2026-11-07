@@ -22,6 +22,7 @@ export const PAGES = [
   { id: "rabotilnici", label: "Работилници", href: "/admin/rabotilnici", sensitive: false },
   { id: "zala", label: "Зала (вход в работилници и преживявания)", href: "/admin/zala", sensitive: false },
   { id: "knigi", label: "Книги (продажба с QR)", href: "/admin/knigi", sensitive: false },
+  { id: "torbichki", label: "Goody bags (раздаване)", href: "/admin/torbichki", sensitive: false },
   { id: "masazhi", label: "Масажи Sense Wellness (само щанд B8)", href: "/admin/masazhi", sensitive: false },
   { id: "therabody", label: "Re Start by Therabody (само щанд B1)", href: "/admin/therabody", sensitive: false },
   { id: "n8", label: "Skin Check by N8 Molecule (само щанд C5)", href: "/admin/n8", sensitive: false },

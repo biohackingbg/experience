@@ -339,3 +339,51 @@ export async function claimTicket(rawCode: string, name: string, email: string):
     .where(sql`${tickets.code} = ${t.code}`);
   return "ok";
 }
+
+/**
+ * The goody bag table: one bag per ticket, marked when it is handed over, so
+ * the same ticket shown twice (or at the other end of the table) is caught.
+ * Any sold ticket counts - the table decides by the tier on the screen.
+ */
+export type GoodyResult =
+  | { status: "given"; ticket: TicketView; at: Date }
+  | { status: "already"; ticket: TicketView; at: Date }
+  | { status: "not_found" };
+
+export async function giveGoodyBag(code: string): Promise<GoodyResult> {
+  const ticket = await findTicket(code);
+  if (!ticket) return { status: "not_found" };
+  const db = getDb();
+  const now = new Date();
+  const updated = await db
+    .update(tickets)
+    .set({ goodyBagAt: now })
+    .where(sql`${tickets.code} = ${ticket.code} and ${tickets.goodyBagAt} is null`)
+    .returning({ code: tickets.code });
+  if (updated.length > 0) return { status: "given", ticket, at: now };
+  const [row] = await db.select({ at: tickets.goodyBagAt }).from(tickets).where(sql`${tickets.code} = ${ticket.code}`).limit(1);
+  return { status: "already", ticket, at: row?.at ?? now };
+}
+
+/** The tap on the wrong ticket: the bag goes back to not handed over. */
+export async function undoGoodyBag(code: string): Promise<void> {
+  const normalised = code.trim().toUpperCase();
+  await getDb().update(tickets).set({ goodyBagAt: null }).where(sql`${tickets.code} = ${normalised}`);
+}
+
+/** Handed over so far, of all sold tickets, by tier. */
+export async function goodyBagCounts(): Promise<{ given: number; total: number; byTier: { tierId: string; given: number; total: number }[] }> {
+  const rows = await getDb()
+    .select({
+      tierId: tickets.tierId,
+      given: sql<number>`count(${tickets.goodyBagAt})::int`,
+      total: sql<number>`count(*)::int`,
+    })
+    .from(tickets)
+    .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
+    .where(SOLD)
+    .groupBy(tickets.tierId);
+  const order = ["peak", "plus", "core"];
+  const byTier = rows.sort((a, b) => order.indexOf(a.tierId) - order.indexOf(b.tierId));
+  return { given: rows.reduce((n, r) => n + r.given, 0), total: rows.reduce((n, r) => n + r.total, 0), byTier };
+}

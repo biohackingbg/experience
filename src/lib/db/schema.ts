@@ -330,6 +330,8 @@ export const tickets = pgTable(
      */
     arrivalSlot1: text("arrival_slot_1"),
     arrivalSlot2: text("arrival_slot_2"),
+    /** When the holder took the goody bag at the summit (one per ticket); null until then. */
+    goodyBagAt: timestamp("goody_bag_at", { withTimezone: true }),
 
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
