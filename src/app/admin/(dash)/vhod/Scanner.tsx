@@ -125,9 +125,10 @@ export function Scanner() {
         {state.status === "ok" && (
           <>
             <p className="text-3xl font-black uppercase tracking-tight">Заповядай</p>
-            <p className="mt-2 text-lg font-semibold">{state.name}</p>
+            <TierBadge tier={state.tierName} />
+            <p className="mt-3 text-lg font-semibold">{state.name}</p>
             <p className="text-sm opacity-80">
-              {state.tierName}{state.day ? ` · ${state.day === 1 ? "Събота 07.11" : "Неделя 08.11"}` : ""} · {state.code}
+              {state.day ? `${state.day === 1 ? "Събота 07.11" : "Неделя 08.11"} · ` : ""}{state.code}
             </p>
           </>
         )}
@@ -137,7 +138,8 @@ export function Scanner() {
             <p className="text-3xl font-black uppercase tracking-tight">
               Вече е влязъл
             </p>
-            <p className="mt-2 text-lg font-semibold">{state.name}</p>
+            <TierBadge tier={state.tierName} />
+            <p className="mt-3 text-lg font-semibold">{state.name}</p>
             <p className="text-sm opacity-80">
               {state.usedAt &&
                 new Date(state.usedAt).toLocaleString("bg-BG", {
@@ -198,4 +200,16 @@ export function Scanner() {
       )}
     </div>
   );
+}
+
+/**
+ * The ticket's tier, big enough to read at arm's length: the door tells a
+ * PEAK from a CORE at a glance (the PEAK lounge, the workshops), not from a
+ * line of small print under the name.
+ */
+function TierBadge({ tier }: { tier?: string }) {
+  if (!tier) return null;
+  const t = tier.toUpperCase();
+  const colour = t.includes("PEAK") ? "bg-[#ACEC1D] text-[#02251F]" : t.includes("PLUS") ? "bg-white text-[#146455]" : "bg-[#02251F] text-white";
+  return <p className={`mt-3 rounded-2xl px-6 py-2 text-4xl font-black uppercase tracking-tight ring-2 ring-white/60 ${colour}`}>{t}</p>;
 }
