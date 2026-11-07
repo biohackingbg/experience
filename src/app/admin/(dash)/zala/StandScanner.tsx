@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useActionState, useCallback, useEffect, useRef } from "react";
 
 import { Camera } from "../vhod/Camera";
-import { scanStand } from "./actions";
+import { bookAtStand, scanStand } from "./actions";
 import { initialRoomState } from "./room-state";
 
 const time = (iso: string) => new Date(iso).toLocaleTimeString("bg-BG", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Sofia" });
@@ -14,8 +14,11 @@ const time = (iso: string) => new Date(iso).toLocaleTimeString("bg-BG", { hour: 
  * code. The ticket says which of its slots at this stand it holds; that one
  * is marked as arrived, and the list below updates.
  */
-export function StandScanner({ stand, title }: { stand: string; title?: string }) {
-  const [state, action, pending] = useActionState(scanStand, initialRoomState);
+export function StandScanner({ stand, title, free = [] }: { stand: string; title?: string; free?: { id: string; label: string }[] }) {
+  const [scan, action, pending] = useActionState(scanStand, initialRoomState);
+  const [booked, bookAction, booking] = useActionState(bookAtStand, initialRoomState);
+  // Whichever answered last is on the screen: a scan, or a booking made from it.
+  const state = (booked.scannedAt ?? 0) > (scan.scannedAt ?? 0) ? booked : scan;
   const inputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const handled = useRef<number | undefined>(undefined);
@@ -83,7 +86,24 @@ export function StandScanner({ stand, title }: { stand: string; title?: string }
           <>
             <p className="text-2xl font-black uppercase tracking-tight">Не е записан тук</p>
             <p className="mt-1 text-lg font-semibold">{state.name}</p>
-            <p className="text-sm opacity-90">{state.tierName}. Ако има свободно място в списъка, може да го приемете.</p>
+            <p className="text-sm opacity-90">{state.tierName}. Запиши го в свободен час:</p>
+            {free.length === 0 ? (
+              <p className="mt-2 text-sm font-semibold">Няма свободни часове.</p>
+            ) : (
+              <div className="mt-3 flex flex-wrap justify-center gap-2">
+                {free.map((f) => (
+                  <form key={f.id} action={bookAction}>
+                    <input type="hidden" name="stand" value={stand} />
+                    {title && <input type="hidden" name="title" value={title} />}
+                    <input type="hidden" name="code" value={state.code} />
+                    <input type="hidden" name="workshopId" value={f.id} />
+                    <button type="submit" disabled={booking} className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-red-700 disabled:opacity-50">
+                      {f.label}
+                    </button>
+                  </form>
+                ))}
+              </div>
+            )}
           </>
         )}
         {(state.status === "no_ticket" || state.status === "error") && (

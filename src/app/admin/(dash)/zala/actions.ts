@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { canAccess } from "@/lib/access";
 import { STAND_SCOPES } from "@/lib/access-options";
-import { admitWalkIn, checkInAtStand, checkInBooking, listWorkshops, undoRoomCheckIn } from "@/lib/workshops";
+import { admitWalkIn, cancelPlace, checkInAtStand, checkInBooking, listWorkshops, undoRoomCheckIn } from "@/lib/workshops";
 
 import type { RoomState } from "./room-state";
 
@@ -61,6 +61,39 @@ export async function scanStand(_prev: RoomState, formData: FormData): Promise<R
 }
 
 /**
+ * "Запиши" beside a free slot, after a scan said the ticket has no place at
+ * this stand: the stand books the person itself (the tier's allowance is not
+ * asked - the stand decides, as at a room's door). A slot running now also
+ * marks the person as arrived; a later one only holds the place.
+ */
+export async function bookAtStand(_prev: RoomState, formData: FormData): Promise<RoomState> {
+  const stand = String(formData.get("stand") ?? "");
+  const title = String(formData.get("title") ?? "") || undefined;
+  const code = String(formData.get("code") ?? "").trim();
+  const workshopId = String(formData.get("workshopId") ?? "");
+  const scopes = STAND_SCOPES.filter((x) => x.location === stand && x.title === title);
+  let allowed = !!stand && (await canAccess("zala"));
+  for (const x of scopes) allowed ||= await canAccess(x.page);
+  if (!allowed) return { status: "error", message: "Сесията изтече. Влез отново." };
+  if (!UUID.test(workshopId) || !code) return { status: "error", message: "Няма избран час." };
+  const w = (await listWorkshops(true)).find((x) => x.id === workshopId);
+  if (!w || w.location !== stand || (title && w.title !== title)) return { status: "error", message: "Този час не е на щанда." };
+  const sofiaDay = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia" }).format(new Date()) === "2026-11-08" ? 2 : 1;
+  const now = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Sofia", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date());
+  const runningNow = w.day === sofiaDay && w.startsAt <= now && now < w.endsAt;
+  const scannedAt = Date.now();
+  const r = await admitWalkIn(workshopId, code, runningNow);
+  revalidatePath("/admin/zala");
+  for (const x of STAND_SCOPES) revalidatePath(`/admin/${x.page}`);
+  const slot = `${w.title}, ${w.day === 2 ? "неделя" : "събота"} ${w.startsAt}-${w.endsAt}`;
+  if (r.status === "full") return { status: "error", message: `${slot}: вече е пълно.`, scannedAt };
+  if (r.status === "clash") return { status: "error", message: `${slot}: по това време има друг запис.`, scannedAt };
+  if (r.status === "no_ticket") return { status: "no_ticket", code: r.code, scannedAt };
+  if (r.status === "ok" || r.status === "already") return { status: "ok", code: r.code, name: r.name, tierName: r.tierName, slot: `Записан: ${slot}`, scannedAt };
+  return { status: "error", message: "Не успяхме да запишем.", scannedAt };
+}
+
+/**
  * The door, or a partner stand's own page: a stand grant (masazhi, therabody)
  * may mark people only at its own stand's slots, never at the rooms' doors.
  */
@@ -79,6 +112,16 @@ export async function markArrived(formData: FormData): Promise<void> {
   if (!(await mayMark(workshopId))) return;
   const code = String(formData.get("code") ?? "").trim();
   if (UUID.test(workshopId) && code) await checkInBooking(workshopId, code);
+  revalidatePath("/admin/zala");
+  for (const x of STAND_SCOPES) revalidatePath(`/admin/${x.page}`);
+}
+
+/** "Отпиши": the stand frees the place, for someone who will not come or asked to change. */
+export async function cancelAtStand(formData: FormData): Promise<void> {
+  const workshopId = String(formData.get("workshopId") ?? "");
+  if (!(await mayMark(workshopId))) return;
+  const code = String(formData.get("code") ?? "").trim().toUpperCase();
+  if (UUID.test(workshopId) && code) await cancelPlace(code, workshopId);
   revalidatePath("/admin/zala");
   for (const x of STAND_SCOPES) revalidatePath(`/admin/${x.page}`);
 }

@@ -312,7 +312,7 @@ export async function undoRoomCheckIn(workshopId: string, code: string): Promise
  * call at the door, so the tier's allowance is not asked - only the room's
  * capacity and the clock (not two rooms at once). Books and marks in one go.
  */
-export async function admitWalkIn(workshopId: string, rawCode: string): Promise<RoomScan | { status: "full" } | { status: "clash" }> {
+export async function admitWalkIn(workshopId: string, rawCode: string, arrivedNow = true): Promise<RoomScan | { status: "full" } | { status: "clash" }> {
   const code = rawCode.trim().toUpperCase();
   const db = getDb();
   const [t] = await db
@@ -343,10 +343,12 @@ export async function admitWalkIn(workshopId: string, rawCode: string): Promise<
     if (mine.some((m) => m.day === w.day && overlaps(m.startsAt, m.endsAt, w.startsAt, w.endsAt))) return { status: "clash" as const };
     const [c] = await tx.select({ n: sql<number>`count(*)::int` }).from(workshopBookings).where(eq(workshopBookings.workshopId, w.id));
     if ((c?.n ?? 0) >= w.capacity) return { status: "full" as const };
-    await tx.insert(workshopBookings).values({ workshopId: w.id, ticketId: t.id, checkedInAt: new Date() });
+    // A slot later in the day is booked, not yet marked as arrived.
+    await tx.insert(workshopBookings).values({ workshopId: w.id, ticketId: t.id, checkedInAt: arrivedNow ? new Date() : null });
     return { ...who, status: "ok" as const };
   });
-  return r.status === "booked_here" ? checkInBooking(workshopId, code) : r;
+  if (r.status === "booked_here") return arrivedNow ? checkInBooking(workshopId, code) : { ...who, status: "already" as const, at: new Date() };
+  return r;
 }
 
 export type WorkshopInput = {

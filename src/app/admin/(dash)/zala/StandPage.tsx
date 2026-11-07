@@ -3,6 +3,7 @@ import Link from "next/link";
 import { listWorkshopAttendees, type listWorkshops } from "@/lib/workshops";
 
 import { markArrived, unmarkArrived } from "./actions";
+import { CancelButton } from "./CancelButton";
 import { StandScanner } from "./StandScanner";
 
 export const DAYS = ["", "Събота 07.11", "Неделя 08.11"];
@@ -47,7 +48,16 @@ export async function StandPage({ location, title: only, list, back = true, sess
         {back && <Link href="/admin/zala" className="font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50 hover:text-bh-ink">← Всички сесии</Link>}
         <h1 className="mt-2 font-display text-2xl font-[900] uppercase tracking-tight text-bh-ink">{title}</h1>
         <p className="mt-1 text-sm text-bh-ink/60">{location}, записани {booked} от {places} места</p>
-        {slots.length > 0 && <StandScanner stand={location} title={only} />}
+        {slots.length > 0 && (
+          <StandScanner
+            stand={location}
+            title={only}
+            free={slots
+              .filter((w) => w.left > 0 && (today === null || w.day > today || (w.day === today && w.endsAt > now)))
+              .slice(0, 16)
+              .map((w) => ({ id: w.id, label: `${w.day === 2 ? "Нд" : "Сб"} ${w.startsAt}${new Set(slots.map((x) => x.title)).size > 1 ? ` ${w.title}` : ""}` }))}
+          />
+        )}
         {slots.length === 0 && <p className="mt-6 text-sm text-bh-ink/55">Няма часове на този щанд.</p>}
         {order.map((day) => {
           const forDay = slots.filter((w) => w.day === day);
@@ -83,6 +93,8 @@ export async function StandPage({ location, title: only, list, back = true, sess
                                 <span className={`font-medium ${a.checkedIn ? "text-bh-ink/50 line-through decoration-bh-ink/30" : "text-bh-ink"}`}>{a.name}</span>
                                 <span className="ml-2 text-xs text-bh-ink/45">{a.code}</span>
                               </div>
+                              <div className="flex shrink-0 items-center gap-3">
+                              <CancelButton workshopId={w.id} code={a.code} name={a.name} />
                               {a.checkedIn ? (
                                 <form action={unmarkArrived} className="shrink-0">
                                   <input type="hidden" name="workshopId" value={w.id} />
@@ -96,6 +108,7 @@ export async function StandPage({ location, title: only, list, back = true, sess
                                   <button type="submit" className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white">Дойде</button>
                                 </form>
                               )}
+                              </div>
                             </li>
                           ))}
                         </ul>
