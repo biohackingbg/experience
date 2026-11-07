@@ -13,6 +13,14 @@ export type ScanState = {
   /** 1 = Saturday, 2 = Sunday - what the door has to check on a one-day ticket. */
   day?: number | null;
   usedAt?: string;
+  /** On a second scan the whole ticket, so the door can check the person and let them back in. */
+  ticket?: {
+    holder: string;
+    holderEmail: string | null;
+    buyerName: string;
+    reference: string;
+    bookings: string[];
+  };
   message?: string;
   scannedAt?: number;
 };

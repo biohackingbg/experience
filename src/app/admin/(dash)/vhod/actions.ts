@@ -6,6 +6,7 @@ import { canAccess } from "@/lib/access";
 import { assignRemaining, getArrivalPlan, isSlotId, saveArrivalPlan } from "@/lib/arrivals";
 import type { ScanState } from "@/lib/scan-state";
 import { checkInTicket } from "@/lib/tickets-lookup";
+import { ticketBookingLines } from "@/lib/workshops";
 
 /**
  * Door scan.
@@ -45,13 +46,21 @@ export async function scanTicket(
   }
 
   if (result.status === "already_used") {
+    const t = result.ticket;
     return {
       status: "used",
-      code: result.ticket.code,
-      name: result.ticket.buyerName,
-      tierName: result.ticket.tierName,
-      day: result.ticket.day,
-      usedAt: result.ticket.checkedInAt?.toISOString(),
+      code: t.code,
+      name: t.attendeeName || t.buyerName,
+      tierName: t.tierName,
+      day: t.day,
+      usedAt: t.checkedInAt?.toISOString(),
+      ticket: {
+        holder: t.attendeeName || t.buyerName,
+        holderEmail: t.attendeeEmail,
+        buyerName: t.buyerName,
+        reference: t.reference,
+        bookings: await ticketBookingLines(t.code).catch(() => []),
+      },
       scannedAt,
     };
   }
@@ -59,7 +68,7 @@ export async function scanTicket(
   return {
     status: "ok",
     code: result.ticket.code,
-    name: result.ticket.buyerName,
+    name: result.ticket.attendeeName || result.ticket.buyerName,
     tierName: result.ticket.tierName,
     day: result.ticket.day,
     scannedAt,

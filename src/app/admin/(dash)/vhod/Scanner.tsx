@@ -141,12 +141,15 @@ export function Scanner() {
             <TierBadge tier={state.tierName} />
             <p className="mt-3 text-lg font-semibold">{state.name}</p>
             <p className="text-sm opacity-80">
+              първо влизане{" "}
               {state.usedAt &&
                 new Date(state.usedAt).toLocaleString("bg-BG", {
                   dateStyle: "short",
                   timeStyle: "short",
+                  timeZone: "Europe/Sofia",
                 })}
             </p>
+            {state.ticket && <TicketCard state={state} />}
           </>
         )}
 
@@ -212,4 +215,39 @@ function TierBadge({ tier }: { tier?: string }) {
   const t = tier.toUpperCase();
   const colour = t.includes("PEAK") ? "bg-[#ACEC1D] text-[#02251F]" : t.includes("PLUS") ? "bg-white text-[#146455]" : "bg-[#02251F] text-white";
   return <p className={`mt-3 rounded-2xl px-6 py-2 text-4xl font-black uppercase tracking-tight ring-2 ring-white/60 ${colour}`}>{t}</p>;
+}
+
+/** The whole ticket on a second scan: who it is for, whose order, what they booked. */
+function TicketCard({ state }: { state: ScanState }) {
+  const t = state.ticket!;
+  const rows: [string, string][] = [
+    ["Билет", state.code ?? ""],
+    ["Ден", state.day ? (state.day === 1 ? "Събота 07.11" : "Неделя 08.11") : "и двата дни"],
+    ["На името на", t.holder],
+    ...(t.holderEmail ? ([["Имейл", t.holderEmail]] as [string, string][]) : []),
+    ...(t.buyerName !== t.holder ? ([["Купувач", t.buyerName]] as [string, string][]) : []),
+    ["Поръчка", t.reference],
+  ];
+  return (
+    <div className="mt-4 w-full max-w-md rounded-2xl bg-white/90 p-4 text-left text-sm text-bh-ink">
+      <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
+        {rows.map(([k, v]) => (
+          <div key={k} className="contents">
+            <dt className="text-bh-ink/55">{k}</dt>
+            <dd className="font-semibold break-words">{v}</dd>
+          </div>
+        ))}
+      </dl>
+      {t.bookings.length > 0 && (
+        <div className="mt-3 border-t border-bh-ink/10 pt-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-bh-ink/55">Записан за</p>
+          <ul className="mt-1 space-y-0.5">
+            {t.bookings.map((b) => (
+              <li key={b}>{b}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
 }
