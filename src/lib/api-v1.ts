@@ -54,5 +54,9 @@ export async function requireUser(request: Request): Promise<{ user: AppUser } |
   return { user };
 }
 
-/** Public reads are cached a little at the edge: the programme does not change by the second. */
-export const publicCache = { "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600" };
+/**
+ * Public reads are cached a little at the edge. Short during the summit: the
+ * programme changes on the day and a phone must see it within a minute, not
+ * after the ten minutes a long stale-while-revalidate allowed.
+ */
+export const publicCache = { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=30" };

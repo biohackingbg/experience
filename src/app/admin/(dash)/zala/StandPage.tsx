@@ -4,6 +4,7 @@ import { listWorkshopAttendees, type listWorkshops } from "@/lib/workshops";
 
 import { markArrived, unmarkArrived } from "./actions";
 import { CancelButton } from "./CancelButton";
+import { SlotBook } from "./SlotBook";
 import { StandScanner } from "./StandScanner";
 
 export const DAYS = ["", "Събота 07.11", "Неделя 08.11"];
@@ -83,9 +84,8 @@ export async function StandPage({ location, title: only, list, back = true, sess
                           {sessionLinks && <Link href={`/admin/zala?w=${w.id}`} className="font-semibold text-bh-ink underline">без запис</Link>}
                         </span>
                       </div>
-                      {people[w.id].length === 0 ? (
-                        <p className="mt-1 text-sm text-bh-ink/45">свободно</p>
-                      ) : (
+                      {people[w.id].length === 0 && <p className="mt-1 text-sm text-bh-ink/45">свободно</p>}
+                      {people[w.id].length > 0 && (
                         <ul className="mt-2 flex flex-col gap-1.5">
                           {people[w.id].map((a) => (
                             <li key={a.code} className="flex items-center justify-between gap-3 text-sm">
@@ -113,6 +113,8 @@ export async function StandPage({ location, title: only, list, back = true, sess
                           ))}
                         </ul>
                       )}
+                      {/* Anyone with this page books a free place by ticket code, no scan needed. */}
+                      {w.left > 0 && !over && <SlotBook stand={location} title={only} workshopId={w.id} />}
                     </li>
                   );
                 })}

@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     /** So a guest without a ticket sees the live price on the buy button. */
     prices: pricing.prices,
     priceStage: pricing.stage,
-  });
+  }, 200, { "Cache-Control": "no-store" });
 }
 
 /** Deletes the account the app keeps for this address; see deleteAppAccount for what stays. */

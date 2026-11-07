@@ -28,7 +28,7 @@ const BOOKS = [
     id: "beztegovnost",
     title: "Безтегловност",
     author: "д-р Росио Салас-Уейлън",
-    price: 25,
+    price: 18,
     cover: "/knigi/beztegovnost.jpg",
     url: "https://buy.stripe.com/5kQ00l1tDbsvdOpbjy18c00",
     link: "plink_1UYvnqPQhzRmdtRLjM1ocRZo",
@@ -74,7 +74,7 @@ async function recentPayments(): Promise<Paid[] | null> {
     const stripe = getStripe();
     const since = Date.now() - 10 * 60_000;
     const lists = await Promise.all(
-      BOOKS.map((b) => stripe.checkout.sessions.list({ payment_link: b.link, status: "complete", limit: 30 }).then((r) => ({ b, rows: r.data }))),
+      BOOKS.map((b) => stripe.checkout.sessions.list({ payment_link: b.link, status: "complete", limit: 30, expand: ["data.line_items"] }).then((r) => ({ b, rows: r.data }))),
     );
     return lists
       .flatMap(({ b, rows }) =>
@@ -84,7 +84,7 @@ async function recentPayments(): Promise<Paid[] | null> {
             id: r.id,
             at: new Date(r.created * 1000),
             book: b.title,
-            qty: Math.max(1, Math.round((r.amount_total ?? 0) / (b.price * 100))),
+            qty: r.line_items?.data[0]?.quantity ?? Math.max(1, Math.round((r.amount_total ?? 0) / (b.price * 100))),
             amount: (r.amount_total ?? 0) / 100,
             name: r.customer_details?.name ?? "",
             email: r.customer_details?.email ?? "",
