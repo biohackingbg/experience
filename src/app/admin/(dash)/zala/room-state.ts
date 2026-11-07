@@ -11,6 +11,8 @@ export type RoomState = {
   /** Free places in this room, on "not_booked" - whether a walk-in is possible. */
   left?: number;
   message?: string;
+  /** At a partner stand: which of the ticket's slots there was marked. */
+  slot?: string;
   /** Changes on every scan so two identical scans in a row both register. */
   scannedAt?: number;
 };

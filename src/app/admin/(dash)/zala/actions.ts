@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { canAccess } from "@/lib/access";
 import { STAND_PAGES } from "@/lib/access-options";
-import { admitWalkIn, checkInBooking, listWorkshops, undoRoomCheckIn } from "@/lib/workshops";
+import { admitWalkIn, checkInAtStand, checkInBooking, listWorkshops, undoRoomCheckIn } from "@/lib/workshops";
 
 import type { RoomState } from "./room-state";
 
@@ -37,6 +37,26 @@ export async function scanRoom(_prev: RoomState, formData: FormData): Promise<Ro
     return { status: "not_booked", code: r.code, name: r.name, tierName: r.tierName, elsewhere: r.elsewhere, left: r.left, scannedAt };
   }
   return { status: "ok", code: r.code, name: r.name, tierName: r.tierName, scannedAt };
+}
+
+/** A scan at a partner stand's page: the ticket's own slot at that stand is found and marked. */
+export async function scanStand(_prev: RoomState, formData: FormData): Promise<RoomState> {
+  const stand = String(formData.get("stand") ?? "");
+  const raw = String(formData.get("code") ?? "").trim();
+  const pages = Object.entries(STAND_PAGES).filter(([, s]) => s === stand).map(([p]) => p as keyof typeof STAND_PAGES);
+  if (pages.length === 0) return { status: "error", message: "Непознат щанд." };
+  let allowed = await canAccess("zala");
+  for (const p of pages) allowed ||= await canAccess(p);
+  if (!allowed) return { status: "error", message: "Сесията изтече. Влез отново." };
+  if (!raw) return { status: "idle" };
+  const scannedAt = Date.now();
+  const r = await checkInAtStand(stand, raw);
+  revalidatePath("/admin/zala");
+  for (const page of Object.keys(STAND_PAGES)) revalidatePath(`/admin/${page}`);
+  if (r.status === "no_ticket") return { status: "no_ticket", code: r.code, scannedAt };
+  if (r.status === "not_booked") return { status: "not_booked", code: r.code, name: r.name, tierName: r.tierName, scannedAt };
+  if (r.status === "already") return { status: "already", code: r.code, name: r.name, tierName: r.tierName, at: r.at.toISOString(), slot: r.slot, scannedAt };
+  return { status: "ok", code: r.code, name: r.name, tierName: r.tierName, slot: r.slot, scannedAt };
 }
 
 /**

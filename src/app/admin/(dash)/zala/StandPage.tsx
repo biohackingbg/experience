@@ -3,6 +3,7 @@ import Link from "next/link";
 import { listWorkshopAttendees, type listWorkshops } from "@/lib/workshops";
 
 import { markArrived, unmarkArrived } from "./actions";
+import { StandScanner } from "./StandScanner";
 
 export const DAYS = ["", "Събота 07.11", "Неделя 08.11"];
 export const time = (d: Date) => d.toLocaleTimeString("bg-BG", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Sofia" });
@@ -43,6 +44,7 @@ export async function StandPage({ location, list, back = true }: { location: str
         {back && <Link href="/admin/zala" className="font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50 hover:text-bh-ink">← Всички сесии</Link>}
         <h1 className="mt-2 font-display text-2xl font-[900] uppercase tracking-tight text-bh-ink">{title}</h1>
         <p className="mt-1 text-sm text-bh-ink/60">{location}, записани {booked} от {places} места</p>
+        {slots.length > 0 && <StandScanner stand={location} />}
         {slots.length === 0 && <p className="mt-6 text-sm text-bh-ink/55">Няма часове на този щанд.</p>}
         {order.map((day) => {
           const forDay = slots.filter((w) => w.day === day);

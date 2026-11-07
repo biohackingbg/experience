@@ -380,3 +380,53 @@ export async function deleteWorkshop(id: string): Promise<boolean> {
   await db.delete(workshops).where(eq(workshops.id, id));
   return true;
 }
+
+/** What a ticket has booked, one line each, for the door's second-scan card: "Сб 14:00-15:00 Title, Newton". */
+export async function ticketBookingLines(code: string): Promise<string[]> {
+  const rows = await getDb()
+    .select({ title: workshops.title, day: workshops.day, startsAt: workshops.startsAt, endsAt: workshops.endsAt, location: workshops.location })
+    .from(workshopBookings)
+    .innerJoin(workshops, eq(workshops.id, workshopBookings.workshopId))
+    .innerJoin(tickets, eq(tickets.id, workshopBookings.ticketId))
+    .where(eq(tickets.code, code.trim().toUpperCase()))
+    .orderBy(asc(workshops.day), asc(workshops.startsAt));
+  return rows.map((r) => {
+    const when = r.startsAt ? `${r.day === 2 ? "Нд" : "Сб"} ${r.startsAt}-${r.endsAt} ` : "";
+    const where = r.location && r.location.length <= 20 ? `, ${r.location}` : "";
+    return `${when}${r.title}${where}`;
+  });
+}
+
+/**
+ * A scan at a partner stand (a slot every 15-20 minutes): the stand does not
+ * pick the slot first, the ticket says which of its slots it holds here -
+ * today's first, the one running or next - and that booking is marked.
+ */
+export async function checkInAtStand(location: string, rawCode: string): Promise<RoomScan & { slot?: string }> {
+  const code = rawCode.trim().toUpperCase();
+  if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) return { status: "no_ticket", code };
+  const db = getDb();
+  const [t] = await db
+    .select({ id: tickets.id, tierId: tickets.tierId, attendeeName: tickets.attendeeName, buyerName: orders.name })
+    .from(tickets)
+    .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
+    .where(sql`${tickets.code} = ${code} and ${SOLD}`)
+    .limit(1);
+  if (!t) return { status: "no_ticket", code };
+  const mine = await db
+    .select({ id: workshops.id, day: workshops.day, startsAt: workshops.startsAt, endsAt: workshops.endsAt })
+    .from(workshopBookings)
+    .innerJoin(workshops, eq(workshops.id, workshopBookings.workshopId))
+    .where(and(eq(workshopBookings.ticketId, t.id), eq(workshops.location, location)))
+    .orderBy(asc(workshops.day), asc(workshops.startsAt));
+  if (mine.length === 0) {
+    return { status: "not_booked", name: t.attendeeName ?? t.buyerName, tierName: getTier(t.tierId)?.name ?? t.tierId, code, elsewhere: null, left: 0 };
+  }
+  const sofia = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia" }).format(new Date(Date.now()));
+  const today = sofia === "2026-11-08" ? 2 : 1;
+  const now = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Sofia", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(Date.now()));
+  const pick = mine.find((m) => m.day === today && m.endsAt > now) ?? mine.find((m) => m.day === today) ?? mine[0];
+  const r = await checkInBooking(pick.id, code);
+  const slot = `${pick.day === 2 ? "Неделя" : "Събота"} ${pick.startsAt}-${pick.endsAt}${mine.length > 1 ? ` (има ${mine.length} часа тук)` : ""}`;
+  return { ...r, slot };
+}
