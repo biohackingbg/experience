@@ -62,7 +62,16 @@ const BOOKS = [
   },
 ] as const;
 
-type Paid = { id: string; at: Date; book: string; qty: number; amount: number; name: string; email: string; /** In the last 10 minutes. */ fresh: boolean };
+type Paid = { id: string; at: Date; book: string; qty: number; amount: number; /** Given back since (a price cut refunded by hand). */ refunded: number; name: string; email: string; /** In the last 10 minutes. */ fresh: boolean };
+
+/** What Stripe has given back on the session's payment, in euros. */
+function refundedOf(r: { payment_intent?: unknown }): number {
+  const pi = r.payment_intent;
+  if (!pi || typeof pi === "string") return 0;
+  const ch = (pi as { latest_charge?: unknown }).latest_charge;
+  if (!ch || typeof ch === "string") return 0;
+  return ((ch as { amount_refunded?: number }).amount_refunded ?? 0) / 100;
+}
 
 /**
  * The paid ones, newest first, from Stripe itself: the reception sees the
@@ -74,7 +83,7 @@ async function recentPayments(): Promise<Paid[] | null> {
     const stripe = getStripe();
     const since = Date.now() - 10 * 60_000;
     const lists = await Promise.all(
-      BOOKS.map((b) => stripe.checkout.sessions.list({ payment_link: b.link, status: "complete", limit: 30, expand: ["data.line_items"] }).then((r) => ({ b, rows: r.data }))),
+      BOOKS.map((b) => stripe.checkout.sessions.list({ payment_link: b.link, status: "complete", limit: 30, expand: ["data.line_items", "data.payment_intent.latest_charge"] }).then((r) => ({ b, rows: r.data }))),
     );
     return lists
       .flatMap(({ b, rows }) =>
@@ -85,7 +94,8 @@ async function recentPayments(): Promise<Paid[] | null> {
             at: new Date(r.created * 1000),
             book: b.title,
             qty: r.line_items?.data[0]?.quantity ?? Math.max(1, Math.round((r.amount_total ?? 0) / (b.price * 100))),
-            amount: (r.amount_total ?? 0) / 100,
+            amount: (r.amount_total ?? 0) / 100 - refundedOf(r),
+            refunded: refundedOf(r),
             name: r.customer_details?.name ?? "",
             email: r.customer_details?.email ?? "",
             fresh: r.created * 1000 > since,
@@ -163,7 +173,10 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
                     <div className="truncate font-semibold text-bh-ink">{p.name || p.email || "без име"}</div>
                     <div className="truncate text-xs text-bh-ink/55">{p.book}{p.qty > 1 ? ` × ${p.qty}` : ""}</div>
                   </div>
-                  <div className="shrink-0 text-right font-bold text-bh-ink">{p.amount.toFixed(2)} €</div>
+                  <div className="shrink-0 text-right">
+                    <div className="font-bold text-bh-ink">{p.amount.toFixed(2)} €</div>
+                    {p.refunded > 0 && <div className="text-[0.65rem] text-bh-ink/50">върнати {p.refunded.toFixed(2)} €</div>}
+                  </div>
                 </li>
               ))}
             </ul>
