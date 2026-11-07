@@ -59,8 +59,7 @@ export async function markArrived(formData: FormData): Promise<void> {
   const code = String(formData.get("code") ?? "").trim();
   if (UUID.test(workshopId) && code) await checkInBooking(workshopId, code);
   revalidatePath("/admin/zala");
-  revalidatePath("/admin/masazhi");
-  revalidatePath("/admin/therabody");
+  for (const page of Object.keys(STAND_PAGES)) revalidatePath(`/admin/${page}`);
 }
 
 /** The tap that landed on the wrong name. */
@@ -70,6 +69,5 @@ export async function unmarkArrived(formData: FormData): Promise<void> {
   const code = String(formData.get("code") ?? "").trim();
   if (UUID.test(workshopId) && code) await undoRoomCheckIn(workshopId, code);
   revalidatePath("/admin/zala");
-  revalidatePath("/admin/masazhi");
-  revalidatePath("/admin/therabody");
+  for (const page of Object.keys(STAND_PAGES)) revalidatePath(`/admin/${page}`);
 }

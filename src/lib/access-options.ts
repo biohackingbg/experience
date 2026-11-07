@@ -24,6 +24,8 @@ export const PAGES = [
   { id: "knigi", label: "Книги (продажба с QR)", href: "/admin/knigi", sensitive: false },
   { id: "masazhi", label: "Масажи Sense Wellness (само щанд B8)", href: "/admin/masazhi", sensitive: false },
   { id: "therabody", label: "Re Start by Therabody (само щанд B1)", href: "/admin/therabody", sensitive: false },
+  { id: "n8", label: "Skin Check by N8 Molecule (само щанд C5)", href: "/admin/n8", sensitive: false },
+  { id: "obsidian", label: "PEMF Bed by Obsidian Club (само щанд B2)", href: "/admin/obsidian", sensitive: false },
   { id: "logistika", label: "Логистика на лекторите", href: "/admin/logistika", sensitive: true },
   { id: "smeni", label: "Смени", href: "/admin/smeni", sensitive: true },
 ] as const;
@@ -35,4 +37,4 @@ export const pageLabel = (id: string) => PAGES.find((p) => p.id === id)?.label ?
  * The pages that show one partner stand alone, for that partner's own access
  * link: the stand's 15-minute slots, its names, and nothing of the rooms.
  */
-export const STAND_PAGES = { masazhi: "Щанд B8", therabody: "Щанд B1" } as const;
+export const STAND_PAGES = { masazhi: "Щанд B8", therabody: "Щанд B1", n8: "Щанд C5", obsidian: "Щанд B2" } as const;
