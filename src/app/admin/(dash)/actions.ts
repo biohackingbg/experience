@@ -105,13 +105,14 @@ export async function saveSiteNotice(_prev: ActionState, formData: FormData): Pr
 /**
  * "Скрий продажбите": the dashboard is opened at the event in front of other
  * people to search a ticket; the counts and the money stay off the screen
- * until shown again. Remembered per browser, for a week.
+ * until shown again. Hidden by default; shown per browser, for a day.
  */
 export async function toggleSalesHidden(formData: FormData): Promise<void> {
   if (!(await canAccess("tablo"))) return;
   const { cookies } = await import("next/headers");
   const store = await cookies();
-  if (formData.get("hide") === "1") store.set("bh_hide_sales", "1", { path: "/admin", httpOnly: true, sameSite: "lax", secure: true, maxAge: 7 * 24 * 3600 });
-  else store.delete({ name: "bh_hide_sales", path: "/admin" });
+  // Hidden is the default; showing is what a browser has to ask for, for a day.
+  if (formData.get("hide") === "1") store.delete({ name: "bh_show_sales", path: "/admin" });
+  else store.set("bh_show_sales", "1", { path: "/admin", httpOnly: true, sameSite: "lax", secure: true, maxAge: 24 * 3600 });
   revalidatePath("/admin");
 }

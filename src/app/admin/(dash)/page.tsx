@@ -261,7 +261,8 @@ export default async function AdminDashboard({
   };
   // "Скрий продажбите" (a cookie): the screen keeps the search and the list of
   // orders, without a count of tickets or a sum of money anywhere.
-  const hide = (await cookies()).get("bh_hide_sales")?.value === "1";
+  // Hidden unless this browser asked to see them ("Покажи продажбите").
+  const hide = (await cookies()).get("bh_show_sales")?.value !== "1";
   const money = (cents: number) => (hide ? "•••" : <Money cents={cents} />);
   const [d, traffic, found, fin, pricing, abandoned, pendingNow, notice, reminders] = await Promise.all([
     getDashboardData(page, filter),
