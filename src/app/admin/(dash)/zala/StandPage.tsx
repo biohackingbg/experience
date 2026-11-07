@@ -26,7 +26,7 @@ type Session = Awaited<ReturnType<typeof listWorkshops>>[number];
  * stand (a masseur with a phone), who need the next names, not a list of
  * 24 sessions to open one by one. Today first, slots already over at the end.
  */
-export async function StandPage({ location, title: only, list, back = true }: { location: string; title?: string; list: Session[]; back?: boolean }) {
+export async function StandPage({ location, title: only, list, back = true, sessionLinks = false }: { location: string; title?: string; list: Session[]; back?: boolean; sessionLinks?: boolean }) {
   const slots = list.filter((w) => w.active && w.location === location && (!only || w.title === only));
   const people = Object.fromEntries(
     await Promise.all(slots.map(async (w) => [w.id, w.booked > 0 ? await listWorkshopAttendees(w.id) : []] as const)),
@@ -67,7 +67,11 @@ export async function StandPage({ location, title: only, list, back = true }: { 
                           {mixed && <span className="text-sm font-semibold text-bh-ink">{w.title}</span>}
                           {current?.id === w.id && <span className="rounded-full bg-[#ACEC1D] px-2 py-0.5 text-[0.62rem] font-semibold uppercase tracking-wide text-bh-ink">сега</span>}
                         </div>
-                        <span className="text-xs text-bh-ink/55">{w.booked} / {w.capacity}</span>
+                        <span className="flex items-center gap-3 text-xs text-bh-ink/55">
+                          {w.booked} / {w.capacity}
+                          {/* The door team opens the session for a walk-in ("Пусни без запис"). */}
+                          {sessionLinks && <Link href={`/admin/zala?w=${w.id}`} className="font-semibold text-bh-ink underline">без запис</Link>}
+                        </span>
                       </div>
                       {people[w.id].length === 0 ? (
                         <p className="mt-1 text-sm text-bh-ink/45">свободно</p>

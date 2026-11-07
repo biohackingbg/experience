@@ -45,8 +45,8 @@ export async function scanStand(_prev: RoomState, formData: FormData): Promise<R
   const title = String(formData.get("title") ?? "") || undefined;
   const raw = String(formData.get("code") ?? "").trim();
   const scopes = STAND_SCOPES.filter((x) => x.location === stand && x.title === title);
-  if (scopes.length === 0) return { status: "error", message: "Непознат щанд." };
-  let allowed = await canAccess("zala");
+  // The door team ("zala") scans at any room or stand; a partner only at its own.
+  let allowed = !!stand && (await canAccess("zala"));
   for (const x of scopes) allowed ||= await canAccess(x.page);
   if (!allowed) return { status: "error", message: "Сесията изтече. Влез отново." };
   if (!raw) return { status: "idle" };

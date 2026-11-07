@@ -29,11 +29,13 @@ export default async function RoomPage({ searchParams }: { searchParams: Promise
   const list = await listWorkshops(true);
   const chosen = list.find((w) => w.id === chosenId);
 
-  if (!chosen && shtand) return <StandPage location={shtand} list={list} />;
+  if (!chosen && shtand) return <StandPage location={shtand} list={list} sessionLinks />;
 
   if (!chosen) {
     // A stand with short slots (a massage every 15 minutes) is one page with every name on it.
     const stands = [...new Set(list.filter((w) => w.active && w.location?.startsWith("Щанд")).map((w) => w.location as string))].sort();
+    // The rooms with sessions (Newton, Columbus 1, Columbus 2): one door page each, only that room's sessions.
+    const halls = [...new Set(list.filter((w) => w.active && w.startsAt && w.location && !w.location.startsWith("Щанд") && w.location.length <= 20).map((w) => w.location as string))].sort();
     const today = todayDay();
     const now = nowHHMM();
     const counts = Object.fromEntries(
@@ -54,6 +56,22 @@ export default async function RoomPage({ searchParams }: { searchParams: Promise
             Избери сесията пред чиято врата стоиш. После сканираш билета или отбелязваш по име. Човек без запис
             може да бъде пуснат, ако има свободно място.
           </p>
+          {halls.length > 0 && (
+            <div className="mt-6">
+              <p className="text-xs font-semibold uppercase tracking-wide text-bh-ink/55">Вход на зала: само сесиите в нея, със скенер</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {halls.map((h) => (
+                  <Link
+                    key={h}
+                    href={`/admin/zala?shtand=${encodeURIComponent(h)}`}
+                    className="rounded-full bg-[#146455] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#146455]/85"
+                  >
+                    {h}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
           {stands.length > 0 && (
             <div className="mt-6 flex flex-wrap gap-2">
               {stands.map((s) => (
