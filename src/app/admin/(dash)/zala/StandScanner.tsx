@@ -14,7 +14,7 @@ const time = (iso: string) => new Date(iso).toLocaleTimeString("bg-BG", { hour: 
  * code. The ticket says which of its slots at this stand it holds; that one
  * is marked as arrived, and the list below updates.
  */
-export function StandScanner({ stand }: { stand: string }) {
+export function StandScanner({ stand, title }: { stand: string; title?: string }) {
   const [state, action, pending] = useActionState(scanStand, initialRoomState);
   const inputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -48,6 +48,7 @@ export function StandScanner({ stand }: { stand: string }) {
     <div className="mt-6">
       <form ref={formRef} action={action} className="flex gap-3">
         <input type="hidden" name="stand" value={stand} />
+        {title && <input type="hidden" name="title" value={title} />}
         <input
           ref={inputRef}
           name="code"

@@ -26,15 +26,18 @@ type Session = Awaited<ReturnType<typeof listWorkshops>>[number];
  * stand (a masseur with a phone), who need the next names, not a list of
  * 24 sessions to open one by one. Today first, slots already over at the end.
  */
-export async function StandPage({ location, list, back = true }: { location: string; list: Session[]; back?: boolean }) {
-  const slots = list.filter((w) => w.active && w.location === location);
+export async function StandPage({ location, title: only, list, back = true }: { location: string; title?: string; list: Session[]; back?: boolean }) {
+  const slots = list.filter((w) => w.active && w.location === location && (!only || w.title === only));
   const people = Object.fromEntries(
     await Promise.all(slots.map(async (w) => [w.id, w.booked > 0 ? await listWorkshopAttendees(w.id) : []] as const)),
   );
   const today = todayDay();
   const now = nowHHMM();
   const order = today === 2 ? [2, 1] : [1, 2];
-  const title = slots[0]?.title ?? location;
+  // One stand can run several procedures at the same hours (D4): then the page
+  // is named by the stand and every slot says which procedure it is.
+  const mixed = new Set(slots.map((w) => w.title)).size > 1;
+  const title = mixed ? location : (slots[0]?.title ?? location);
   const booked = slots.reduce((n, w) => n + w.booked, 0);
   const places = slots.reduce((n, w) => n + w.capacity, 0);
 
@@ -44,7 +47,7 @@ export async function StandPage({ location, list, back = true }: { location: str
         {back && <Link href="/admin/zala" className="font-mono text-xs uppercase tracking-[0.25em] text-bh-ink/50 hover:text-bh-ink">← Всички сесии</Link>}
         <h1 className="mt-2 font-display text-2xl font-[900] uppercase tracking-tight text-bh-ink">{title}</h1>
         <p className="mt-1 text-sm text-bh-ink/60">{location}, записани {booked} от {places} места</p>
-        {slots.length > 0 && <StandScanner stand={location} />}
+        {slots.length > 0 && <StandScanner stand={location} title={only} />}
         {slots.length === 0 && <p className="mt-6 text-sm text-bh-ink/55">Няма часове на този щанд.</p>}
         {order.map((day) => {
           const forDay = slots.filter((w) => w.day === day);
@@ -61,6 +64,7 @@ export async function StandPage({ location, list, back = true }: { location: str
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2">
                           <span className="font-mono text-sm font-semibold text-bh-ink">{w.startsAt}-{w.endsAt}</span>
+                          {mixed && <span className="text-sm font-semibold text-bh-ink">{w.title}</span>}
                           {current?.id === w.id && <span className="rounded-full bg-[#ACEC1D] px-2 py-0.5 text-[0.62rem] font-semibold uppercase tracking-wide text-bh-ink">сега</span>}
                         </div>
                         <span className="text-xs text-bh-ink/55">{w.booked} / {w.capacity}</span>

@@ -402,7 +402,7 @@ export async function ticketBookingLines(code: string): Promise<string[]> {
  * pick the slot first, the ticket says which of its slots it holds here -
  * today's first, the one running or next - and that booking is marked.
  */
-export async function checkInAtStand(location: string, rawCode: string): Promise<RoomScan & { slot?: string }> {
+export async function checkInAtStand(location: string, rawCode: string, title?: string): Promise<RoomScan & { slot?: string }> {
   const code = rawCode.trim().toUpperCase();
   if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) return { status: "no_ticket", code };
   const db = getDb();
@@ -414,10 +414,10 @@ export async function checkInAtStand(location: string, rawCode: string): Promise
     .limit(1);
   if (!t) return { status: "no_ticket", code };
   const mine = await db
-    .select({ id: workshops.id, day: workshops.day, startsAt: workshops.startsAt, endsAt: workshops.endsAt })
+    .select({ id: workshops.id, title: workshops.title, day: workshops.day, startsAt: workshops.startsAt, endsAt: workshops.endsAt })
     .from(workshopBookings)
     .innerJoin(workshops, eq(workshops.id, workshopBookings.workshopId))
-    .where(and(eq(workshopBookings.ticketId, t.id), eq(workshops.location, location)))
+    .where(and(eq(workshopBookings.ticketId, t.id), eq(workshops.location, location), title ? eq(workshops.title, title) : undefined))
     .orderBy(asc(workshops.day), asc(workshops.startsAt));
   if (mine.length === 0) {
     return { status: "not_booked", name: t.attendeeName ?? t.buyerName, tierName: getTier(t.tierId)?.name ?? t.tierId, code, elsewhere: null, left: 0 };
@@ -427,6 +427,6 @@ export async function checkInAtStand(location: string, rawCode: string): Promise
   const now = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Sofia", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(Date.now()));
   const pick = mine.find((m) => m.day === today && m.endsAt > now) ?? mine.find((m) => m.day === today) ?? mine[0];
   const r = await checkInBooking(pick.id, code);
-  const slot = `${pick.day === 2 ? "Неделя" : "Събота"} ${pick.startsAt}-${pick.endsAt}${mine.length > 1 ? ` (има ${mine.length} часа тук)` : ""}`;
+  const slot = `${pick.title}, ${pick.day === 2 ? "неделя" : "събота"} ${pick.startsAt}-${pick.endsAt}${mine.length > 1 ? ` (има ${mine.length} часа тук)` : ""}`;
   return { ...r, slot };
 }
