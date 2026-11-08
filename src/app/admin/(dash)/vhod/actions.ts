@@ -45,6 +45,19 @@ export async function scanTicket(
     };
   }
 
+  if (result.status === "wrong_day") {
+    const t = result.ticket;
+    return {
+      status: "invalid",
+      code: t.code,
+      name: t.attendeeName || t.buyerName,
+      tierName: t.tierName,
+      day: t.day,
+      message: `Билетът е за ${t.day === 1 ? "събота 07.11" : "неделя 08.11"}, не за днес.`,
+      scannedAt,
+    };
+  }
+
   if (result.status === "already_used") {
     const t = result.ticket;
     return {

@@ -156,8 +156,9 @@ export function Scanner() {
         {(state.status === "invalid" || state.status === "error") && (
           <>
             <p className="text-3xl font-black uppercase tracking-tight">
-              Невалиден
+              {state.name ? "Друг ден" : "Невалиден"}
             </p>
+            {state.name && <p className="mt-2 text-lg font-semibold">{state.name}{state.tierName ? `, ${state.tierName}` : ""}</p>}
             <p className="mt-2 text-sm opacity-90">
               {state.message ?? "Кодът не е разпознат."}
             </p>

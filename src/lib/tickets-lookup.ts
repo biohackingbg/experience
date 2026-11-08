@@ -71,16 +71,42 @@ export async function findTicket(code: string): Promise<TicketView | null> {
  * to see, and it needs the original time to be useful.
  */
 export type CheckInResult =
-  | { status: "admitted"; ticket: TicketView }
+  | { status: "admitted"; ticket: TicketView; /** First entry on an earlier day, for a two-day ticket. */ before?: Date }
   | { status: "already_used"; ticket: TicketView }
+  /** A one-day ticket shown on the other day. Not marked. */
+  | { status: "wrong_day"; ticket: TicketView }
   | { status: "not_found" };
+
+/** 1 on Saturday 07.11, 2 on Sunday 08.11, null on any other date (tests, the days before). */
+function summitDay(d: Date = new Date()): number | null {
+  const s = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia" }).format(d);
+  return s === "2026-11-07" ? 1 : s === "2026-11-08" ? 2 : null;
+}
 
 export async function checkInTicket(code: string): Promise<CheckInResult> {
   const ticket = await findTicket(code);
   if (!ticket) return { status: "not_found" };
 
+  const today = summitDay();
+  if (ticket.day && today && ticket.day !== today) return { status: "wrong_day", ticket };
+
   if (ticket.checkedInAt) {
-    return { status: "already_used", ticket };
+    // A two-day ticket used yesterday is a new entry today: the time moves to
+    // now, so a second scan today is caught again and "today" counts it.
+    // (Saturday's entries were copied to ticket_checkins_sat before this.)
+    const before = ticket.checkedInAt;
+    const sameDay = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia" }).format(before) === new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia" }).format(new Date());
+    if (sameDay || !today) return { status: "already_used", ticket };
+    const moved = await getDb()
+      .update(tickets)
+      .set({ checkedInAt: new Date() })
+      .where(sql`${tickets.code} = ${ticket.code} and ${tickets.checkedInAt} = ${before}`)
+      .returning({ code: tickets.code });
+    if (moved.length === 0) {
+      const fresh = await findTicket(code);
+      return { status: "already_used", ticket: fresh ?? ticket };
+    }
+    return { status: "admitted", ticket, before };
   }
 
   const db = getDb();
