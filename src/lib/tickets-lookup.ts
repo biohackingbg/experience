@@ -100,7 +100,8 @@ export async function checkInTicket(code: string): Promise<CheckInResult> {
     const moved = await getDb()
       .update(tickets)
       .set({ checkedInAt: new Date() })
-      .where(sql`${tickets.code} = ${ticket.code} and ${tickets.checkedInAt} = ${before}`)
+      // Only while it still holds an earlier day's time: of two scanners at once, one wins.
+      .where(sql`${tickets.code} = ${ticket.code} and (${tickets.checkedInAt} at time zone 'Europe/Sofia')::date < (now() at time zone 'Europe/Sofia')::date`)
       .returning({ code: tickets.code });
     if (moved.length === 0) {
       const fresh = await findTicket(code);
