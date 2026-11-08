@@ -38,6 +38,9 @@ export const TICKET_ALLOWANCE: Record<string, Partial<Record<WorkshopKind, numbe
   "DA2Z-UDT2": { workshop: 2, experience: 2 },
   "NPY2-NNYW": { workshop: 2, experience: 2 },
   "P2UU-ST54": { workshop: 2, experience: 2 },
+  // SLS-KDATBZ, PEAK: Антонио Минков (6 booked already) and Милена Минкова.
+  "BRLY-WVRC": { experience: 9 },
+  "Y5YS-Z4S5": { experience: 6 },
 };
 
 export const allowanceForTicket = (code: string, tierId: string, kind: WorkshopKind): number | null => {
