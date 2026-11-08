@@ -49,6 +49,38 @@ export async function listSessions(): Promise<SessionRow[]> {
 
 export const peopleList = (v: string | null) => (v ?? "").split(/\r?\n|;/).map((s) => s.trim()).filter(Boolean);
 
+/**
+ * Speakers who dropped out on the day. Taken out of every slot as it is read -
+ * the name, the line of the note with their talk, and one from the panel's
+ * "Панел с N гости" - so the programme changes without an edit to the table.
+ * Exact names only: "Кристин Илиева" stays.
+ */
+const WITHDRAWN = ["Мария Илиева", "Милена Драганова"];
+
+function withdraw(r: SessionRow): SessionRow {
+  const names = peopleList(r.people);
+  const gone = names.filter((n) => WITHDRAWN.includes(n));
+  if (gone.length === 0) return r;
+  const marks = gone.flatMap((n) => [n, latin(n)]);
+  const lines = (v: string | null) => {
+    if (!v) return v;
+    const kept = v.split(/\r?\n/).filter((l) => !marks.some((m) => l.includes(m)));
+    return kept.length ? kept.join("\n") : null;
+  };
+  const count = (v: string | null) =>
+    v?.replace(/(Панел с )(\d+)/, (_, a: string, n: string) => `${a}${Number(n) - gone.length}`).replace(/(Panel with )(\d+)/, (_, a: string, n: string) => `${a}${Number(n) - gone.length}`) ?? v;
+  return {
+    ...r,
+    people: names.filter((n) => !WITHDRAWN.includes(n)).join("\n"),
+    note: lines(r.note),
+    noteEn: lines(r.noteEn),
+    title: count(r.title) ?? r.title,
+    titleEn: count(r.titleEn),
+    role: count(r.role),
+    roleEn: count(r.roleEn),
+  };
+}
+
 export async function getProgram(lang: Lang = "bg"): Promise<Day[]> {
   let rows: SessionRow[] = [];
   try {
@@ -87,6 +119,7 @@ export async function getProgram(lang: Lang = "bg"): Promise<Day[]> {
     ...meta,
     slots: rows
       .filter((r) => r.day === i + 1)
+      .map(withdraw)
       .map<Slot>((r) => ({
         time: r.time,
         // English where it exists, the Bulgarian original where it does not:
