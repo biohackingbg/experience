@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 
 import { currentChallenge, dayNumber, participantEmails, phaseOf, sofiaHour, sofiaWeekday } from "@/lib/challenge";
+import { getDb } from "@/lib/db";
+import { deviceTokens } from "@/lib/db/schema";
 import { pushToEmails } from "@/lib/push";
+import { isNull } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -30,7 +33,17 @@ export async function GET(request: Request) {
   let to: string[] = [];
   let msg: { title: string; body: string; collapseId: string } | null = null;
 
-  if (day < 1) {
+  // Day 1 at noon (its own cron, 12:00 Sofia on the start day): an invitation
+  // to everyone with the app who has not joined yet. Joined people already had
+  // the 07:30 "Ден 1"; this run sends nothing else.
+  if (hour >= 11 && hour <= 13) {
+    if (day === 1) {
+      const joined = new Set(await participantEmails(c));
+      const devices = await getDb().selectDistinct({ email: deviceTokens.email }).from(deviceTokens).where(isNull(deviceTokens.disabledAt));
+      to = devices.map((d) => d.email).filter((e): e is string => !!e && !joined.has(e));
+      msg = { title: "Днес започва „30 дни ритъм“", body: "Една сутрешна котва за 30 дни, в групи по 20. Запиши се в приложението, още днес.", collapseId: "ritam-invite" };
+    }
+  } else if (day < 1) {
     // The three days before: everyone who joined early gets one heads-up.
     if (!evening && day === -2) {
       to = await participantEmails(c);
