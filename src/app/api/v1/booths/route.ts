@@ -38,16 +38,5 @@ export async function GET() {
       category: profile?.category ?? null,
     };
   });
-  // Not a stand, but people tap it: Ballroom 3 answers with what it is.
-  const vip = {
-    id: "VIP",
-    zone: "A",
-    box: [1, (143 * 100) / APP_H, 22, (160 * 100) / APP_H],
-    taken: false,
-    partner: "VIP Lounge",
-    partnerId: null,
-    logo: null,
-    category: "Millennium Grand Ballroom 3",
-  };
-  return json({ image: APP_IMAGE, aspect: APP_ASPECT, zones: ZONES, booths: [...booths, vip], count: BOOTHS.length }, 200, publicCache);
+  return json({ image: APP_IMAGE, aspect: APP_ASPECT, zones: ZONES, booths, count: BOOTHS.length }, 200, publicCache);
 }
