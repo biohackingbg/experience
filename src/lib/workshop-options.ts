@@ -31,6 +31,21 @@ export const allowanceFor = (tierId: string, kind: WorkshopKind): number | null 
   (ALLOWANCE[tierId] ?? ALLOWANCE.core)[kind];
 
 /**
+ * Tickets given more than their tier on the day, by the team (SLS-QAWRLQ:
+ * three PLUS for one group, 2 workshops and 2 experiences each, 08.11).
+ */
+export const TICKET_ALLOWANCE: Record<string, Partial<Record<WorkshopKind, number | null>>> = {
+  "DA2Z-UDT2": { workshop: 2, experience: 2 },
+  "NPY2-NNYW": { workshop: 2, experience: 2 },
+  "P2UU-ST54": { workshop: 2, experience: 2 },
+};
+
+export const allowanceForTicket = (code: string, tierId: string, kind: WorkshopKind): number | null => {
+  const own = TICKET_ALLOWANCE[code.toUpperCase()]?.[kind];
+  return own !== undefined ? own : allowanceFor(tierId, kind);
+};
+
+/**
  * The note for a ticket whose allowance of one kind is used up: sent as a
  * push when the last place is booked or one more is tried, and shown on the
  * ticket page. The app's own alert for "not_allowed" reads as if the kind

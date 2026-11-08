@@ -6,7 +6,7 @@ import { getDb } from "@/lib/db";
 import { orders, tickets, workshopBookings, workshops } from "@/lib/db/schema";
 import { SOLD } from "@/lib/sold";
 import { getTier } from "@/lib/tickets";
-import { type WorkshopKind, allowanceFor, standOpensAt } from "@/lib/workshop-options";
+import { type WorkshopKind, allowanceForTicket, standOpensAt } from "@/lib/workshop-options";
 
 /**
  * Workshops and experiences, and who has a place in them.
@@ -117,7 +117,7 @@ export async function getTicketPlaces(code: string): Promise<TicketPlaces | null
     .where(eq(workshopBookings.ticketId, t.id));
   const used = (kind: WorkshopKind) => rows.filter((r) => r.kind === kind).length;
   const left = (kind: WorkshopKind) => {
-    const allowed = allowanceFor(t.tierId, kind);
+    const allowed = allowanceForTicket(code, t.tierId, kind);
     return allowed === null ? null : Math.max(0, allowed - used(kind));
   };
   return {
@@ -137,7 +137,7 @@ export async function allowanceUsedUp(code: string, workshopId: string): Promise
   const places = w ? await getTicketPlaces(code) : null;
   if (!w || !places) return null;
   const kind = w.kind as WorkshopKind;
-  const allowed = allowanceFor(places.tierId, kind);
+  const allowed = allowanceForTicket(code, places.tierId, kind);
   return allowed && places.remaining[kind] === 0 ? { kind, allowed, tierId: places.tierId } : null;
 }
 
@@ -178,7 +178,7 @@ export async function bookPlace(code: string, workshopId: string): Promise<BookR
 
     if (mine.some((m) => m.workshopId === w.id)) return { ok: false as const, reason: "already" as const };
 
-    const allowed = allowanceFor(t.tierId, kind);
+    const allowed = allowanceForTicket(code, t.tierId, kind);
     if (allowed === 0) return { ok: false as const, reason: "not_allowed" as const };
     if (allowed !== null && mine.filter((m) => m.kind === kind).length >= allowed) {
       return { ok: false as const, reason: "not_allowed" as const };
