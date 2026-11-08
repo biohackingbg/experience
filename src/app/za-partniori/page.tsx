@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { DECK_CLOSED } from "@/lib/deck-links";
+
+import { DeckClosed } from "./DeckClosed";
+
 export const metadata: Metadata = {
   title: "Партньорска програма | Sofia Life Summit",
   robots: { index: false, follow: false },
@@ -15,6 +19,7 @@ export const metadata: Metadata = {
  * and offers the one thing that helps: a way to ask for a link.
  */
 export default function PartnersEntryPage() {
+  if (DECK_CLOSED) return <DeckClosed />;
   return (
     <div className="bh-doc min-h-screen px-5 py-10 sm:px-8 lg:px-10">
       <div className="mx-auto w-full max-w-3xl">

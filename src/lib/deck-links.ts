@@ -101,6 +101,9 @@ function foldToken(v: string): string {
     .replace(/[_-]/g, "");
 }
 
+/** The partner deck is closed for everyone after the summit; flip to false to reopen it. */
+export const DECK_CLOSED = true;
+
 export async function findActiveLink(raw: string): Promise<DeckLink | null> {
   // Messengers and mail clients like to glue punctuation to a pasted URL, and
   // some append a stray slash. Forgive that rather than 404 someone who has

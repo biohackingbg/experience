@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { DECK_CLOSED } from "@/lib/deck-links";
+import { DeckClosed } from "../DeckClosed";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -134,6 +136,8 @@ function Dash() {
  * revoked token is a plain 404 - the deck does not confirm it exists.
  */
 export default async function PartnersPage({ params, searchParams }: Props) {
+  // Closed after the summit (08.11.2026): every link shows the closing note.
+  if (DECK_CLOSED) return <DeckClosed />;
   const { token } = await params;
   const link = await findActiveLink(token);
   if (!link) notFound();
