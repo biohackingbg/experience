@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { canAccess } from "@/lib/access";
 import { STAND_SCOPES } from "@/lib/access-options";
+import { findTicketsByPerson } from "@/lib/tickets-lookup";
 import { admitWalkIn, cancelPlace, checkInAtStand, checkInBooking, listWorkshops, undoRoomCheckIn } from "@/lib/workshops";
 
 import type { RoomState } from "./room-state";
@@ -69,13 +70,21 @@ export async function scanStand(_prev: RoomState, formData: FormData): Promise<R
 export async function bookAtStand(_prev: RoomState, formData: FormData): Promise<RoomState> {
   const stand = String(formData.get("stand") ?? "");
   const title = String(formData.get("title") ?? "") || undefined;
-  const code = String(formData.get("code") ?? "").trim();
+  // "pick" is a button from a list of matches; "code" is what was typed or scanned.
+  let code = String(formData.get("pick") || formData.get("code") || "").trim();
   const workshopId = String(formData.get("workshopId") ?? "");
   const scopes = STAND_SCOPES.filter((x) => x.location === stand && x.title === title);
   let allowed = !!stand && (await canAccess("zala"));
   for (const x of scopes) allowed ||= await canAccess(x.page);
   if (!allowed) return { status: "error", message: "Сесията изтече. Влез отново." };
   if (!UUID.test(workshopId) || !code) return { status: "error", message: "Няма избран час." };
+  // Not a ticket code: a phone or a name, looked up among the valid tickets.
+  if (!/^[A-Z0-9]{4}-?[A-Z0-9]{4}$/i.test(code)) {
+    const found = await findTicketsByPerson(code);
+    if (found.length === 0) return { status: "error", message: `Няма билет с „${code}“. Пробвай с фамилия или с телефона от поръчката.`, scannedAt: Date.now() };
+    if (found.length > 1) return { status: "pick", candidates: found, scannedAt: Date.now() };
+    code = found[0].code;
+  }
   const w = (await listWorkshops(true)).find((x) => x.id === workshopId);
   if (!w || w.location !== stand || (title && w.title !== title)) return { status: "error", message: "Този час не е на щанда." };
   const sofiaDay = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia" }).format(new Date()) === "2026-11-08" ? 2 : 1;

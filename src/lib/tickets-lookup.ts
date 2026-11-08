@@ -401,3 +401,41 @@ export async function goodyBagCounts(): Promise<{ given: number; total: number; 
   const byTier = rows.sort((a, b) => order.indexOf(a.tierId) - order.indexOf(b.tierId));
   return { given: rows.reduce((n, r) => n + r.given, 0), total: rows.reduce((n, r) => n + r.total, 0), byTier };
 }
+
+export type PersonMatch = { code: string; name: string; tierName: string };
+
+/**
+ * A person at a stand who has no code at hand: found by phone (any 6+ digits
+ * of it, so "+359 88..." and "088..." both match) or by name (holder, else
+ * buyer). Valid tickets only; a handful at most, for the stand to pick from.
+ */
+export async function findTicketsByPerson(query: string): Promise<PersonMatch[]> {
+  const q = query.trim();
+  if (q.length < 3) return [];
+  const digits = q.replace(/\D/g, "");
+  const phone = digits.length >= 6 && digits.length >= q.replace(/\s/g, "").length - 2;
+  const tail = digits.replace(/^(00359|359|0)/, "");
+  const rows = await getDb()
+    .select({
+      code: tickets.code,
+      tierId: tickets.tierId,
+      day: tickets.day,
+      attendeeName: tickets.attendeeName,
+      buyerName: orders.name,
+      totalCents: orders.totalCents,
+    })
+    .from(tickets)
+    .innerJoin(orders, sql`${orders.id} = ${tickets.orderId}`)
+    .where(
+      phone
+        ? sql`${SOLD} and regexp_replace(coalesce(${orders.phone}, ''), '[^0-9]', '', 'g') like ${"%" + tail + "%"}`
+        : sql`${SOLD} and coalesce(nullif(${tickets.attendeeName}, ''), ${orders.name}) ilike ${"%" + q.replace(/[%_]/g, "") + "%"}`,
+    )
+    .orderBy(sql`coalesce(nullif(${tickets.attendeeName}, ''), ${orders.name})`)
+    .limit(8);
+  return rows.map((r) => ({
+    code: r.code,
+    name: r.attendeeName || r.buyerName,
+    tierName: ticketTierLabel(r.tierId, r.totalCents, "bg", r.day),
+  }));
+}

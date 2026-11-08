@@ -90,10 +90,9 @@ export function SlotBook({
           name="code"
           autoFocus
           autoComplete="off"
-          autoCapitalize="characters"
           spellCheck={false}
-          placeholder="Код на билета"
-          className="w-36 rounded-xl border border-bh-ink/15 bg-white px-3 py-1.5 font-mono text-sm uppercase tracking-widest text-bh-ink outline-none focus:border-bh-pine"
+          placeholder="Код, телефон или име"
+          className="w-52 rounded-xl border border-bh-ink/15 bg-white px-3 py-1.5 text-sm text-bh-ink outline-none focus:border-bh-pine"
         />
         <button
           type="submit"
@@ -111,6 +110,26 @@ export function SlotBook({
         </button>
         {error && (
           <p className="w-full text-xs font-semibold text-red-700">{error}</p>
+        )}
+        {state.status === "pick" && (
+          <div className="w-full">
+            <p className="text-xs font-semibold text-bh-ink/70">Няколко души отговарят. Кой е?</p>
+            <div className="mt-1.5 flex flex-col gap-1.5">
+              {state.candidates?.map((c) => (
+                <button
+                  key={c.code}
+                  type="submit"
+                  name="pick"
+                  value={c.code}
+                  disabled={pending}
+                  className="flex items-center justify-between gap-3 rounded-xl bg-white px-3 py-2 text-left text-sm ring-1 ring-bh-ink/10 hover:ring-bh-ink/40 disabled:opacity-50"
+                >
+                  <span className="font-semibold text-bh-ink">{c.name}</span>
+                  <span className="text-xs text-bh-ink/55">{c.tierName}, {c.code}</span>
+                </button>
+              ))}
+            </div>
+          </div>
         )}
         {state.status === "ok" && (
           <p className="w-full text-xs font-semibold text-emerald-700">
