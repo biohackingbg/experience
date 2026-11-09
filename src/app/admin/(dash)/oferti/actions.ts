@@ -35,7 +35,11 @@ function link(raw: string): string | null | false {
   const withScheme = /^https?:\/\//i.test(v) ? v : `https://${v}`;
   try {
     const u = new URL(withScheme);
-    return u.hostname.includes(".") ? u.toString().slice(0, 500) : false;
+    // Never cut a link: a WhatsApp link with a prefilled message runs past
+    // 800 characters, and cutting it at 500 left half a letter (%D0) at the
+    // end - iOS would not open it at all. Too long is refused, not trimmed.
+    const href = u.toString();
+    return u.hostname.includes(".") && href.length <= 2000 ? href : false;
   } catch {
     return false;
   }
