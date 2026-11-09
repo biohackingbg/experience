@@ -311,7 +311,8 @@ export default async function AdminDashboard({
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="font-display text-4xl font-[900] uppercase tracking-tight text-[#0b2a22]">Dashboard</h1>
-          {!hide && <p className={`mt-2 text-sm ${onPace ? "text-[#0b2a22]/60" : "text-[#9c3d5c]"}`}>
+          {d.frozen && <p className="mt-2 text-sm text-[#0b2a22]/60">Събитието приключи. Статистиката е замразена към неделя, 08.11 включително.</p>}
+          {!hide && !d.frozen && <p className={`mt-2 text-sm ${onPace ? "text-[#0b2a22]/60" : "text-[#9c3d5c]"}`}>
             {daysLeft} дни до събитието · продадени {d.ticketsSold} от {d.capacityTotal} ·{" "}
             {seatsLeft === 0
               ? "залата е пълна."

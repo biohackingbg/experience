@@ -6,7 +6,7 @@ import { getDb } from "@/lib/db";
 import { genderSplit } from "@/lib/gender";
 import { campaigns, orderItems, orders, signups, tickets } from "@/lib/db/schema";
 import { PENDING_HOLD_MINUTES } from "@/lib/orders";
-import { COMPED, GIFT, KEPT_CENTS, SALE, SOLD } from "@/lib/sold";
+import { COMPED as COMPED_ALL, GIFT, KEPT_CENTS, SALE as SALE_ALL, SOLD as SOLD_ALL } from "@/lib/sold";
 import { sofiaDaysBack } from "@/lib/sofia-days";
 import { TIERS, VAT_RATE, type TierId, picksDay } from "@/lib/tickets";
 
@@ -132,6 +132,8 @@ export type DashboardData = {
   soldYesterday: number;
   /** Whole days until doors open, never below one - the pace line divides by it. */
   daysToEvent: number;
+  /** The summit is over and the figures stand as of the end of 08.11. */
+  frozen: boolean;
   signupCount: number;
   /** Joined in the last seven days - whether the list is actually growing. */
   signupWeek: number;
@@ -164,6 +166,24 @@ export type RecentFilter = {
   kind: "" | "sale" | "gift" | "issued";
 };
 
+/**
+ * The summit is over (07-08.11.2026): the dashboard stops counting at the
+ * last second of Sunday 08.11 in Sofia. Orders paid after it are left out of
+ * every sum, and every "now" (today, yesterday, the last 7 and 21 days, the
+ * day strip) reads as that moment - the numbers stay as they stood when the
+ * doors closed. A string literal, never a bound Date: postgres-js will not
+ * bind a Date inside a raw sql fragment.
+ */
+export const STATS_FROZEN_AT = new Date("2026-11-08T23:59:59+02:00");
+const FROZEN_NOW = sql.raw(`'${STATS_FROZEN_AT.toISOString()}'::timestamptz`);
+/** The clock the dashboard reads: real time until the freeze, then the freeze. */
+const statsNow = () => (Date.now() < STATS_FROZEN_AT.getTime() ? sql`now()` : FROZEN_NOW);
+const statsClock = () => Math.min(Date.now(), STATS_FROZEN_AT.getTime());
+const UNTIL_FROZEN = sql`coalesce(${orders.paidAt}, ${orders.createdAt}) <= ${FROZEN_NOW}`;
+const SOLD = sql`${SOLD_ALL} and ${UNTIL_FROZEN}`;
+const SALE = sql`${SALE_ALL} and ${UNTIL_FROZEN}`;
+const COMPED = sql`${COMPED_ALL} and ${UNTIL_FROZEN}`;
+
 /** Doors open on the first festival morning. */
 const EVENT_DAY = new Date("2026-11-07T09:00:00+02:00");
 
@@ -185,12 +205,13 @@ export async function getDashboardData(page = 1, filter: RecentFilter = { tier: 
   const recentPage = Math.max(1, Math.floor(page) || 1);
   // Read once here, on the server, rather than in the page's render - React
   // treats a clock read during render as impure, and it is right to.
-  const daysToEvent = Math.max(1, Math.ceil((EVENT_DAY.getTime() - Date.now()) / 86_400_000));
+  const daysToEvent = Math.max(1, Math.ceil((EVENT_DAY.getTime() - statsClock()) / 86_400_000));
+  const NOW = statsNow();
   // The last seven Sofia calendar days, oldest first, for the week strip.
   const sofiaDay = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia" });
   // Fourteen days: seven made the bars thick and the picture short.
   const WINDOW = 14;
-  const weekDays = sofiaDaysBack(WINDOW);
+  const weekDays = sofiaDaysBack(WINDOW, new Date(statsClock()));
 
   const [totals, perTierRows, dailyRows, dayTierRows, recentRows, signupRow, last7Row, checkedInRow, daySplitRows, dayRow, oddRows, hourRows, weekdayRows, punchRows, buyerNames, compedRows, taggedRows, launchRows] =
     await Promise.all([
@@ -282,13 +303,13 @@ export async function getDashboardData(page = 1, filter: RecentFilter = { tier: 
         .limit(RECENT_PAGE_SIZE)
         .offset((recentPage - 1) * RECENT_PAGE_SIZE),
 
-      db.select({ n: sql<number>`count(*) filter (where ${signups.unsubscribedAt} is null)::int`, week: sql<number>`count(*) filter (where ${signups.unsubscribedAt} is null and ${signups.createdAt} > now() - interval '7 days')::int` }).from(signups),
+      db.select({ n: sql<number>`count(*) filter (where ${signups.unsubscribedAt} is null)::int`, week: sql<number>`count(*) filter (where ${signups.unsubscribedAt} is null and ${signups.createdAt} > ${NOW} - interval '7 days')::int` }).from(signups),
 
       db
         .select({ n: sql<number>`coalesce(sum((${orderItems.quantity} - ${orderItems.creditedQuantity})), 0)::int` })
         .from(orderItems)
         .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
-        .where(sql`${SALE} and ${orders.paidAt} > now() - interval '7 days'`),
+        .where(sql`${SALE} and ${orders.paidAt} > ${NOW} - interval '7 days'`),
 
       db
         .select({
@@ -311,8 +332,8 @@ export async function getDashboardData(page = 1, filter: RecentFilter = { tier: 
 
       db
         .select({
-          today: sql<number>`coalesce(sum((${orderItems.quantity} - ${orderItems.creditedQuantity})) filter (where (${orders.paidAt} at time zone 'Europe/Sofia')::date = (now() at time zone 'Europe/Sofia')::date), 0)::int`,
-          yesterday: sql<number>`coalesce(sum((${orderItems.quantity} - ${orderItems.creditedQuantity})) filter (where (${orders.paidAt} at time zone 'Europe/Sofia')::date = (now() at time zone 'Europe/Sofia')::date - 1), 0)::int`,
+          today: sql<number>`coalesce(sum((${orderItems.quantity} - ${orderItems.creditedQuantity})) filter (where (${orders.paidAt} at time zone 'Europe/Sofia')::date = (${NOW} at time zone 'Europe/Sofia')::date), 0)::int`,
+          yesterday: sql<number>`coalesce(sum((${orderItems.quantity} - ${orderItems.creditedQuantity})) filter (where (${orders.paidAt} at time zone 'Europe/Sofia')::date = (${NOW} at time zone 'Europe/Sofia')::date - 1), 0)::int`,
         })
         .from(orderItems)
         .innerJoin(orders, sql`${orders.id} = ${orderItems.orderId}`)
@@ -377,7 +398,7 @@ export async function getDashboardData(page = 1, filter: RecentFilter = { tier: 
           count: sql<number>`count(*)::int`,
         })
         .from(orders)
-        .where(sql`${SALE} and ${orders.paidAt} > now() - interval '21 days'`)
+        .where(sql`${SALE} and ${orders.paidAt} > ${NOW} - interval '21 days'`)
         .groupBy(
           sql`to_char(${orders.paidAt} at time zone 'Europe/Sofia', 'YYYY-MM-DD')`,
           sql`extract(hour from ${orders.paidAt} at time zone 'Europe/Sofia')`,
@@ -442,7 +463,7 @@ export async function getDashboardData(page = 1, filter: RecentFilter = { tier: 
   // Gift tickets, per tier and today. Their own queries: the free total above
   // lumps speakers, partners and gifts together, and a gift is the one kind the
   // team wants to tell apart from a sale at a glance.
-  const todaySofia = sql`(${orders.paidAt} at time zone 'Europe/Sofia')::date = (now() at time zone 'Europe/Sofia')::date`;
+  const todaySofia = sql`(${orders.paidAt} at time zone 'Europe/Sofia')::date = (${NOW} at time zone 'Europe/Sofia')::date`;
   const [giftRows, freeTodayRows, [recentTotalRow], promoCodeRows, [recentTicketsRow]] = await Promise.all([
     db
       .select({ tierId: tickets.tierId, count: sql<number>`count(*)::int`, today: sql<number>`count(*) filter (where ${todaySofia})::int` })
@@ -586,6 +607,7 @@ export async function getDashboardData(page = 1, filter: RecentFilter = { tier: 
     soldToday: dayRow[0]?.today ?? 0,
     soldYesterday: dayRow[0]?.yesterday ?? 0,
     daysToEvent,
+    frozen: statsClock() >= STATS_FROZEN_AT.getTime(),
     signupCount: signupRow[0]?.n ?? 0,
     signupWeek: signupRow[0]?.week ?? 0,
     checkedIn: checkedInRow[0]?.n ?? 0,
