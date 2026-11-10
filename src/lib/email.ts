@@ -1073,13 +1073,18 @@ export async function sendAccessLinkEmail(input: AccessLinkInput): Promise<boole
 
 /* ── The app's sign-in code ── */
 
-export type LoginCodeInput = { to: string; code: string; lang: "bg" | "en"; /** "ticket": typed on the website to take a ticket, not in the app. */ purpose?: "app" | "ticket" };
+export type LoginCodeInput = { to: string; code: string; lang: "bg" | "en"; /** "ticket": typed on the website to take a ticket, not in the app. "offers": the partner offers page on the website. */ purpose?: "app" | "ticket" | "offers" };
 
 export function loginCodeParts(input: LoginCodeInput): MailParts {
   const en = input.lang === "en";
   const title = en ? "Your sign-in code" : "Твоят код за вход";
   const ticket = input.purpose === "ticket";
-  const lead = ticket
+  const offersPage = input.purpose === "offers";
+  const lead = offersPage
+    ? en
+      ? "Enter this code on the partner offers page. It works for 10 minutes."
+      : "Въведи този код на страницата с офертите на партньорите. Важи 10 минути."
+    : ticket
     ? en
       ? "Enter this code on the page where you are adding your ticket. It works for 10 minutes."
       : "Въведи този код на страницата, на която добавяш билета си. Важи 10 минути."
@@ -1090,7 +1095,7 @@ export function loginCodeParts(input: LoginCodeInput): MailParts {
     ? "If you did not ask for a code, ignore this email - nobody can sign in without it."
     : "Ако не си искал/а код, просто не обръщай внимание - без него никой не може да влезе.";
   return {
-    subject: `${input.code} · ${ticket ? (en ? "your Sofia Life Summit ticket" : "билетът ти за Sofia Life Summit") : en ? "Biohacking Experience sign-in" : "вход в Biohacking Experience"}`,
+    subject: `${input.code} · ${offersPage ? (en ? "Sofia Life Summit partner offers" : "офертите на Sofia Life Summit") : ticket ? (en ? "your Sofia Life Summit ticket" : "билетът ти за Sofia Life Summit") : en ? "Biohacking Experience sign-in" : "вход в Biohacking Experience"}`,
     html: `<!doctype html><html lang="${input.lang}"><body style="margin:0;background:#f1f5f3;padding:28px 16px">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:20px;padding:32px">
     <tr><td>

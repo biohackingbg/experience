@@ -48,7 +48,7 @@ function demo(): { email: string; code: string } | null {
 
 export type RequestCodeResult = { ok: true } | { ok: false; reason: "invalid" | "too_many" | "send_failed" };
 
-export async function requestLoginCode(rawEmail: string, lang: "bg" | "en", purpose: "app" | "ticket" = "app"): Promise<RequestCodeResult> {
+export async function requestLoginCode(rawEmail: string, lang: "bg" | "en", purpose: "app" | "ticket" | "offers" = "app"): Promise<RequestCodeResult> {
   const email = normaliseEmail(rawEmail);
   if (!isEmail(email)) return { ok: false, reason: "invalid" };
   const d = demo();
@@ -142,6 +142,15 @@ export type AppUser = { email: string; sessionId: string; lang: "bg" | "en" };
 export async function authFromRequest(request: Request): Promise<AppUser | null> {
   const header = request.headers.get("authorization") ?? "";
   const token = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
+  return userFromToken(token);
+}
+
+/**
+ * A session token, from the app's bearer header or the website's cookie (the
+ * offers page signs in with the same six digits and keeps the token in an
+ * HttpOnly cookie), resolved to the address it was issued to.
+ */
+export async function userFromToken(token: string | undefined | null): Promise<AppUser | null> {
   if (!token || token.length > 200) return null;
   const db = getDb();
   const [s] = await db.select().from(appSessions).where(eq(appSessions.tokenHash, hash(token))).limit(1);
