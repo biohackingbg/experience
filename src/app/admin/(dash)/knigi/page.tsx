@@ -5,7 +5,7 @@ import QRCode from "qrcode";
 
 import { HomeLink } from "@/components/admin/HomeLink";
 import { requireAccess } from "@/lib/access";
-import { getStripe } from "@/lib/stripe";
+import { BOOKS, type BookSale, allBookSales, bookTotals } from "@/lib/books";
 
 import { AutoRefresh } from "./AutoRefresh";
 
@@ -16,98 +16,26 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-/**
- * The book table at the summit: a helper holds up a phone or a tablet and the
- * buyer scans the code and pays on their own phone. The links are Stripe
- * Payment Links (made in the Stripe dashboard, books tax category, 9% VAT
- * included, 1-10 copies, name and email asked), so the money and the receipt
- * are Stripe's - nothing here touches an order.
- */
-const BOOKS = [
-  {
-    id: "beztegovnost",
-    title: "Безтегловност",
-    author: "д-р Росио Салас-Уейлън",
-    price: 18,
-    cover: "/knigi/beztegovnost.jpg",
-    url: "https://buy.stripe.com/5kQ00l1tDbsvdOpbjy18c00",
-    link: "plink_1UYvnqPQhzRmdtRLjM1ocRZo",
-  },
-  {
-    id: "protokolite",
-    title: "Протоколите на Хюберман",
-    author: "д-р Андрю Хюберман",
-    price: 30,
-    cover: "/knigi/protokolite.jpg",
-    url: "https://buy.stripe.com/7sY9AVb4ddADeSt73i18c01",
-    link: "plink_1UYvpyPQhzRmdtRLW774nS60",
-  },
-  {
-    id: "zhivei-do-100",
-    title: "Живей до 100",
-    author: "Румен Георгиев",
-    price: 15,
-    cover: "/knigi/zhivei-do-100.jpg",
-    url: "https://buy.stripe.com/dRm8wRc8haor11D2N218c02",
-    link: "plink_1UZ6C5PQhzRmdtRLHz4wskfp",
-  },
-  {
-    id: "teatrite-na-tyaloto",
-    title: "Театрите на тялото",
-    author: "Джойс Макдугъл, превод Виолета Азис",
-    price: 13,
-    cover: "/knigi/teatrite-na-tyaloto.jpg",
-    url: "https://buy.stripe.com/3cIaEZ0pz9kn39L1IY18c03",
-    link: "plink_1UZ6EAPQhzRmdtRLHUvo8T75",
-  },
-] as const;
-
-type Paid = { id: string; at: Date; book: string; qty: number; amount: number; /** Given back since (a price cut refunded by hand). */ refunded: number; name: string; email: string; /** In the last 10 minutes. */ fresh: boolean };
-
-/** What Stripe has given back on the session's payment, in euros. */
-function refundedOf(r: { payment_intent?: unknown }): number {
-  const pi = r.payment_intent;
-  if (!pi || typeof pi === "string") return 0;
-  const ch = (pi as { latest_charge?: unknown }).latest_charge;
-  if (!ch || typeof ch === "string") return 0;
-  return ((ch as { amount_refunded?: number }).amount_refunded ?? 0) / 100;
-}
+type Paid = BookSale & { /** In the last 10 minutes. */ fresh: boolean };
 
 /**
- * The paid ones, newest first, from Stripe itself: the reception sees the
- * buyer's name appear here the moment the payment goes through, and hands
- * the book over. Read on every load; nothing is stored on our side.
+ * Every sale, newest first, card ones read from Stripe on every load: the
+ * reception sees the buyer's name appear here the moment the payment goes
+ * through, and hands the book over. Nothing is stored on our side.
  */
-async function recentPayments(): Promise<Paid[] | null> {
+async function payments(): Promise<Paid[] | null> {
   try {
-    const stripe = getStripe();
     const since = Date.now() - 10 * 60_000;
-    const lists = await Promise.all(
-      BOOKS.map((b) => stripe.checkout.sessions.list({ payment_link: b.link, status: "complete", limit: 30, expand: ["data.line_items", "data.payment_intent.latest_charge"] }).then((r) => ({ b, rows: r.data }))),
-    );
-    return lists
-      .flatMap(({ b, rows }) =>
-        rows
-          .filter((r) => r.payment_status === "paid")
-          .map((r) => ({
-            id: r.id,
-            at: new Date(r.created * 1000),
-            book: b.title,
-            qty: r.line_items?.data[0]?.quantity ?? Math.max(1, Math.round((r.amount_total ?? 0) / (b.price * 100))),
-            amount: (r.amount_total ?? 0) / 100 - refundedOf(r),
-            refunded: refundedOf(r),
-            name: r.customer_details?.name ?? "",
-            email: r.customer_details?.email ?? "",
-            fresh: r.created * 1000 > since,
-          })),
-      )
-      .sort((x, y) => y.at.getTime() - x.at.getTime());
+    return (await allBookSales()).map((s) => ({ ...s, fresh: s.channel === "карта" && s.at.getTime() > since }));
   } catch (e) {
     console.error("[knigi] stripe list failed:", e);
     return null;
   }
 }
 
+const eur = (n: number) => `${n.toFixed(2).replace(".", ",")} €`;
+
+const ddmm = (d: Date) => d.toLocaleDateString("bg-BG", { day: "2-digit", month: "2-digit", timeZone: "Europe/Sofia" });
 const hhmm = (d: Date) => d.toLocaleTimeString("bg-BG", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Sofia" });
 
 const qrSvg = (url: string) =>
@@ -134,7 +62,9 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     );
   }
 
-  const [qrs, paid] = await Promise.all([Promise.all(BOOKS.map((b) => qrSvg(b.url))), recentPayments()]);
+  const [qrs, paid] = await Promise.all([Promise.all(BOOKS.map((b) => qrSvg(b.url))), payments()]);
+  const totals = paid ? bookTotals(paid) : [];
+  const all = totals.reduce((a, t) => ({ copies: a.copies + t.copies, gross: a.gross + t.gross, refunded: a.refunded + t.refunded, amount: a.amount + t.amount }), { copies: 0, gross: 0, refunded: 0, amount: 0 });
   return (
     <div className="px-5 py-8 sm:px-8">
       <div className="mx-auto w-full max-w-4xl">
@@ -149,6 +79,52 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
           Купувачът сканира кода с камерата на своя телефон и плаща там. Може да избере и повече бройки.
           Разписката идва на имейла му от Stripe. Натисни книга, за да покажеш кода на цял екран.
         </p>
+        {paid && (
+          <section className="mt-6 rounded-3xl bg-white p-5 ring-1 ring-bh-ink/8">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-lg font-bold tracking-tight text-bh-ink">Справка: продадени книги</h2>
+              <a href="/admin/knigi/eksport" className="rounded-full border border-bh-ink/25 px-4 py-2 text-sm font-semibold text-bh-ink transition-colors hover:border-bh-ink">
+                Експорт CSV
+              </a>
+            </div>
+            <div className="mt-3 overflow-x-auto">
+              <table className="w-full min-w-[34rem] text-sm">
+                <thead>
+                  <tr className="text-left text-xs uppercase tracking-wide text-bh-ink/50">
+                    <th className="py-2 pr-3 font-semibold">Книга</th>
+                    <th className="py-2 pr-3 text-right font-semibold">Бройки</th>
+                    <th className="py-2 pr-3 text-right font-semibold">с карта / по фактура</th>
+                    <th className="py-2 pr-3 text-right font-semibold">Платено</th>
+                    <th className="py-2 pr-3 text-right font-semibold">Върнато</th>
+                    <th className="py-2 text-right font-semibold">Остава</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-bh-ink/8">
+                  {totals.map((t) => (
+                    <tr key={t.id}>
+                      <td className="py-2 pr-3 font-semibold text-bh-ink">{t.title}</td>
+                      <td className="py-2 pr-3 text-right font-bold text-bh-ink">{t.copies}</td>
+                      <td className="py-2 pr-3 text-right text-bh-ink/60">{t.copiesCard} / {t.copiesInvoice}</td>
+                      <td className="py-2 pr-3 text-right text-bh-ink/70">{eur(t.gross)}</td>
+                      <td className="py-2 pr-3 text-right text-bh-ink/70">{t.refunded ? eur(t.refunded) : "-"}</td>
+                      <td className="py-2 text-right font-semibold text-bh-ink">{eur(t.amount)}</td>
+                    </tr>
+                  ))}
+                  <tr className="border-t-2 border-bh-ink/15">
+                    <td className="py-2 pr-3 font-bold text-bh-ink">Общо</td>
+                    <td className="py-2 pr-3 text-right font-black text-bh-ink">{all.copies}</td>
+                    <td />
+                    <td className="py-2 pr-3 text-right text-bh-ink/70">{eur(all.gross)}</td>
+                    <td className="py-2 pr-3 text-right text-bh-ink/70">{all.refunded ? eur(all.refunded) : "-"}</td>
+                    <td className="py-2 text-right font-bold text-bh-ink">{eur(all.amount)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="mt-2 text-xs text-bh-ink/50">Сумите са с ДДС. Картовите плащания са от Stripe, фактурите от Админ → Документи. Продажба, върната изцяло, не се брои.</p>
+          </section>
+        )}
+
         <section className="mt-6 rounded-3xl bg-bh-cloud p-5 ring-1 ring-bh-ink/8">
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-lg font-bold tracking-tight text-bh-ink">Платени</h2>
@@ -167,11 +143,11 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
                 <li key={p.id} className={`flex items-center justify-between gap-3 py-2.5 text-sm ${p.fresh ? "" : "opacity-60"}`}>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs text-bh-ink/60">{hhmm(p.at)}</span>
+                      <span className="font-mono text-xs text-bh-ink/60">{ddmm(p.at)} {hhmm(p.at)}</span>
                       {p.fresh && <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[0.62rem] font-semibold uppercase tracking-wide text-white">платено</span>}
                     </div>
                     <div className="truncate font-semibold text-bh-ink">{p.name || p.email || "без име"}</div>
-                    <div className="truncate text-xs text-bh-ink/55">{p.book}{p.qty > 1 ? ` × ${p.qty}` : ""}</div>
+                    <div className="truncate text-xs text-bh-ink/55">{p.book}{p.qty > 1 ? ` × ${p.qty}` : ""}{p.channel === "фактура" ? ", по фактура" : ""}</div>
                   </div>
                   <div className="shrink-0 text-right">
                     <div className="font-bold text-bh-ink">{p.amount.toFixed(2)} €</div>
