@@ -95,7 +95,7 @@ export function partnerMail(input: { to: string; name: string; brand: string; to
     ${p(`Ще Ви помолим за 3 минути, за да ни кажете как беше за Вас (анкетата е отворена до ${SURVEY_CLOSES_LABEL}). Обратната Ви връзка ще определи формата за 2027:`)}
     ${button(url, "Попълнете анкетата")}
     ${p("След като съберем отговорите, ще Ви изпратим кратък отчет за събитието (посетители, обхват в социалните мрежи, снимки). Ще получите и предимство при избора на позиция и пакет за следващото издание.")}
-    ${sign(["С благодарност,", "Мария Варсанова", "Партньорства | Sofia Life Summit", `<a href="mailto:hi@biohacking.bg" style="color:#146455">hi@biohacking.bg</a>`])}`,
+    ${sign(["С благодарност,", "Джулия Димитрова, Мария Варсанова и Ема Димитрова", "Sofia Life Summit | Biohacking.bg", `<a href="mailto:hi@biohacking.bg" style="color:#146455">hi@biohacking.bg</a>`])}`,
     "Линкът към анкетата е за Вашата марка. Ако искате да отговори колега, просто му го препратете.",
   );
   const text = [
@@ -110,8 +110,8 @@ export function partnerMail(input: { to: string; name: string; brand: string; to
     "След като съберем отговорите, ще Ви изпратим кратък отчет за събитието (посетители, обхват в социалните мрежи, снимки). Ще получите и предимство при избора на позиция и пакет за следващото издание.",
     "",
     "С благодарност,",
-    "Мария Варсанова",
-    "Партньорства | Sofia Life Summit",
+    "Джулия Димитрова, Мария Варсанова и Ема Димитрова",
+    "Sofia Life Summit | Biohacking.bg",
     "hi@biohacking.bg",
   ].join("\n");
   return { to: input.to, subject: PARTNER_SUBJECT, html, text };
@@ -159,7 +159,8 @@ export function earlyConfirmMail(input: { to: string; by: string; token: string 
     ${p(`${esc(input.by)} те записа за ранен достъп до билетите за Sofia Life Summit 2027: ще ти пишем, когато билетите излязат, преди общата продажба.`)}
     ${p("Ако искаш, потвърди с един клик:")}
     ${button(url, "Потвърждавам")}
-    ${p("Ако не потвърдиш, няма да ти пишем повече.")}`,
+    ${p("Ако не потвърдиш, няма да ти пишем повече.")}
+    ${sign(["До скоро,", "Джулия Димитрова, Мария Варсанова и Ема Димитрова", "Sofia Life Summit | Biohacking.bg"])}`,
     "Получаваш това писмо, защото някой от посетителите на Sofia Life Summit 2026 е написал имейла ти в анкетата след събитието.",
   );
   const text = [
@@ -169,6 +170,10 @@ export function earlyConfirmMail(input: { to: string; by: string; token: string 
     url,
     "",
     "Ако не потвърдиш, няма да ти пишем повече.",
+    "",
+    "До скоро,",
+    "Джулия Димитрова, Мария Варсанова и Ема Димитрова",
+    "Sofia Life Summit | Biohacking.bg",
   ].join("\n");
   return { to: input.to, subject: "Потвърди ранния си достъп до Sofia Life Summit 2027", html, text };
 }
