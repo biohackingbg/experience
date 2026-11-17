@@ -20,7 +20,7 @@ export default async function EarlyAccessPage({ params, searchParams }: { params
   return (
     <div className="flex min-h-screen items-center justify-center rounded-[1.75rem] bg-bh-paper px-5 py-16">
       <div className="w-full max-w-md">
-        <BackLink>Към сайта</BackLink>
+        <BackLink label="Към сайта" />
         <h1 className="mt-8 font-display text-[clamp(1.8rem,4.5vw,2.6rem)] font-[900] uppercase leading-[0.95] tracking-tight text-bh-ink">Ранен достъп 2027</h1>
         {ok === "1" ? (
           <p className="mt-4 text-sm leading-relaxed text-bh-ink/70">Готово! Ще ти пишем, когато билетите за Sofia Life Summit 2027 излязат, преди общата продажба. 💚</p>

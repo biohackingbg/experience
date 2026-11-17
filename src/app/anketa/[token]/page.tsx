@@ -26,7 +26,7 @@ export default async function SurveyPage({ params }: { params: Promise<{ token: 
   const shell = (children: React.ReactNode) => (
     <div className="min-h-screen rounded-[1.75rem] bg-bh-paper px-5 py-12 sm:px-8 sm:py-16">
       <div className="mx-auto w-full max-w-2xl">
-        <BackLink>Към сайта</BackLink>
+        <BackLink label="Към сайта" />
         {children}
       </div>
     </div>
