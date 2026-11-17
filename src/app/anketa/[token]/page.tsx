@@ -74,7 +74,7 @@ export default async function SurveyPage({ params }: { params: Promise<{ token: 
       <p className="mt-4 text-sm leading-relaxed text-bh-ink/70">
         {partner
           ? `Отнема около 3 минути и е отворена до ${SURVEY_CLOSES_LABEL}. Отговорите Ви ще определят формата за 2027.${invite.brand ? ` Анкетата е за ${invite.brand}.` : ""}`
-          : `Отнема около 2 минути и е отворена до ${SURVEY_CLOSES_LABEL}. Ще прочетем всеки отговор. Задължителни са само въпросите със звездичка.`}
+          : `Отнема около 2 минути и е отворена до ${SURVEY_CLOSES_LABEL}. Ще прочетем всеки отговор.`}
       </p>
       <SurveyForm token={token} questions={questionsFor(partner ? "partner" : "visitor")} presets={presets} holderEmail={invite.holderEmail} partner={partner} />
     </>,

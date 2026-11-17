@@ -151,7 +151,6 @@ export function SurveyForm({
           <p className="text-base font-semibold leading-snug text-bh-ink">
             <span className="mr-2 text-bh-ink/35">{i + 1}.</span>
             {q.label}
-            {"required" in q && q.required && <span className="text-bh-pine"> *</span>}
           </p>
           {q.kind === "scale" && <Scale q={q} />}
           {(q.kind === "single" || q.kind === "multi") && <Choice q={q} preset={presets[q.id]} />}
