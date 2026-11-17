@@ -7,7 +7,7 @@ import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { earlyAccess, orders, surveyInvites, tickets } from "@/lib/db/schema";
 import { SOLD } from "@/lib/sold";
-import { EARLY_CONSENT, EARLY_YES, MAX_EXTRA_EMAILS, type Question, type SurveyKind, questionsFor } from "@/lib/survey-questions";
+import { EARLY_CONSENT, EARLY_YES, MAX_EXTRA_EMAILS, type Question, SURVEY_CLOSES_LABEL, type SurveyKind, questionsFor, surveyOpen } from "@/lib/survey-questions";
 import { TIERS } from "@/lib/tickets";
 
 export const SITE = "https://thelongevitysummit.eu";
@@ -207,6 +207,7 @@ export function readAnswers(questions: Question[], form: FormData): { answers: A
  */
 export async function submitSurvey(invite: Invite, form: FormData, kind: SurveyKind): Promise<SubmitResult & { toConfirm?: { email: string; token: string }[] }> {
   if (invite.submittedAt) return { ok: false, error: "Тази анкета вече е попълнена. Благодарим!" };
+  if (!surveyOpen()) return { ok: false, error: `Анкетата приключи на ${SURVEY_CLOSES_LABEL}. Благодарим!` };
   const read = readAnswers(questionsFor(kind), form);
   if ("error" in read) return { ok: false, error: read.error };
 
@@ -271,4 +272,58 @@ export async function surveyResults(kind: SurveyKind) {
 
 export async function earlyAccessList() {
   return getDb().select().from(earlyAccess).orderBy(earlyAccess.createdAt);
+}
+
+/**
+ * The daily note while the survey runs: what came in today, where the
+ * totals stand, and today's written answers to read. Nothing when nothing
+ * came in - a note saying "0" every evening is noise.
+ */
+export async function surveyDigest(now = new Date()): Promise<{ subject: string; text: string; html: string } | null> {
+  const day = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Sofia" });
+  const today = day.format(now);
+  const [visitors, partners, early] = await Promise.all([surveyResults("visitor"), surveyResults("partner"), earlyAccessList()]);
+  const isToday = (d: Date | null) => !!d && day.format(d) === today;
+
+  const block = (name: string, kind: SurveyKind, rows: Awaited<ReturnType<typeof surveyResults>>) => {
+    const sent = rows.filter((r) => r.sentAt).length;
+    const done = rows.filter((r) => r.submittedAt);
+    const fresh = done.filter((r) => isToday(r.submittedAt));
+    const num = (id: string, list = done) => list.map((r) => Number((r.answers as Record<string, unknown> | null)?.[id])).filter((n) => Number.isFinite(n));
+    const nps = num("nps");
+    const score = nps.length ? Math.round(((nps.filter((n) => n >= 9).length - nps.filter((n) => n <= 6).length) / nps.length) * 100) : null;
+    const avg = (id: string) => {
+      const v = num(id);
+      return v.length ? (v.reduce((a, b) => a + b, 0) / v.length).toFixed(1) : "-";
+    };
+    const lines = [
+      `${name}: +${fresh.length} днес, общо ${done.length} от ${sent} пратени${sent ? ` (${Math.round((done.length / sent) * 100)}%)` : ""}`,
+      `NPS ${score === null ? "-" : score > 0 ? `+${score}` : score}`,
+      kind === "visitor" ? `Лекции ${avg("talks")} от 5, организация ${avg("organisation")} от 5` : `Екип ${avg("team")} от 5, трафик ${avg("traffic")} от 5, публика ${avg("audience")} от 5`,
+    ];
+    const texts = questionsFor(kind)
+      .filter((q) => q.kind === "text" && q.long)
+      .flatMap((q) => fresh.map((r) => (r.answers as Record<string, unknown> | null)?.[q.id]).filter(Boolean).map((v) => `${q.label}\n  „${String(v)}“`));
+    return { fresh: fresh.length, lines, texts };
+  };
+
+  const v = block("Посетители", "visitor", visitors);
+  const p = block("Партньори", "partner", partners);
+  if (v.fresh + p.fresh === 0) return null;
+  const confirmed = early.filter((e) => e.confirmedAt).length;
+  const earlyLine = `Ранен достъп 2027: ${confirmed} потвърдени, ${early.length - confirmed} чакат потвърждение`;
+
+  const textParts = [
+    ...v.lines,
+    "",
+    ...(p.fresh || partners.some((r) => r.sentAt) ? [...p.lines, ""] : []),
+    earlyLine,
+    ...(v.texts.length || p.texts.length ? ["", "Написано днес:", ...v.texts, ...p.texts] : []),
+    "",
+    `Всички отговори: ${SITE}/admin/anketa`,
+  ];
+  const esc = (s: string) => s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+  const html = `<div style="font:14px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#02251f;white-space:pre-wrap">${esc(textParts.join("\n"))}</div>`;
+  const vScore = v.lines[1].replace("NPS ", "");
+  return { subject: `Анкета: +${v.fresh + p.fresh} днес, NPS ${vScore}`, text: textParts.join("\n"), html };
 }

@@ -102,3 +102,8 @@ export const EARLY_CONSENT =
   "Искам ранен достъп до билетите за Sofia Life Summit 2027: Biohacking.bg да ми пише, когато билетите излязат, преди общата продажба. Мога да се отпиша по всяко време.";
 
 export const MAX_EXTRA_EMAILS = 4;
+
+/** The survey takes answers until the end of this day in Sofia; the daily summary stops with it. */
+export const SURVEY_CLOSES = new Date("2026-12-06T23:59:59+02:00");
+export const SURVEY_CLOSES_LABEL = "6 декември";
+export const surveyOpen = (now = Date.now()) => now <= SURVEY_CLOSES.getTime();

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { BackLink } from "@/components/BackLink";
-import { questionsFor } from "@/lib/survey-questions";
+import { SURVEY_CLOSES_LABEL, questionsFor, surveyOpen } from "@/lib/survey-questions";
 import { firstName, getInvite, scannedDay } from "@/lib/surveys";
 
 import { SurveyForm } from "./Form";
@@ -52,6 +52,15 @@ export default async function SurveyPage({ params }: { params: Promise<{ token: 
     );
   }
 
+  if (!surveyOpen()) {
+    return shell(
+      <>
+        <h1 className="mt-8 font-display text-[clamp(1.8rem,4.5vw,2.8rem)] font-[900] uppercase leading-[0.95] tracking-tight text-bh-ink">Анкетата приключи</h1>
+        <p className="mt-4 text-sm leading-relaxed text-bh-ink/70">Анкетата беше отворена до {SURVEY_CLOSES_LABEL}. Благодарим на всички, които отговориха! Ако искаш да ни кажеш нещо, пиши на hi@biohacking.bg.</p>
+      </>,
+    );
+  }
+
   const day = partner ? null : await scannedDay(invite.ticketId);
   const presets: Record<string, string | null> = partner ? { brand: invite.brand, person: invite.label, email: invite.holderEmail } : { day };
   const name = !partner && invite.label && !/^Билет \d/.test(invite.label) ? firstName(invite.label.replace(/\s*\([^)]*\)\s*$/, "")) || null : null;
@@ -64,8 +73,8 @@ export default async function SurveyPage({ params }: { params: Promise<{ token: 
       </h1>
       <p className="mt-4 text-sm leading-relaxed text-bh-ink/70">
         {partner
-          ? `Отнема около 3 минути. Отговорите Ви ще определят формата за 2027.${invite.brand ? ` Анкетата е за ${invite.brand}.` : ""}`
-          : "Отнема около 2 минути. Ще прочетем всеки отговор. Задължителни са само въпросите със звездичка."}
+          ? `Отнема около 3 минути и е отворена до ${SURVEY_CLOSES_LABEL}. Отговорите Ви ще определят формата за 2027.${invite.brand ? ` Анкетата е за ${invite.brand}.` : ""}`
+          : `Отнема около 2 минути и е отворена до ${SURVEY_CLOSES_LABEL}. Ще прочетем всеки отговор. Задължителни са само въпросите със звездичка.`}
       </p>
       <SurveyForm token={token} questions={questionsFor(partner ? "partner" : "visitor")} presets={presets} holderEmail={invite.holderEmail} partner={partner} />
     </>,
