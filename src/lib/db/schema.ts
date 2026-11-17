@@ -1179,3 +1179,55 @@ export const members = pgTable("members", {
   consentVersion: text("consent_version").notNull(),
   leftAt: timestamp("left_at", { withTimezone: true }),
 });
+
+/**
+ * The post-event survey. One row per invitation - a ticket (kind "visitor")
+ * or a partner (kind "partner") - with its own link token, answered once.
+ * The answers are kept as JSON keyed by question id: the questions live in
+ * code (src/lib/surveys.ts), and a question changed next year must not need
+ * a migration on a table of past answers.
+ */
+export const surveyInvites = pgTable(
+  "survey_invites",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    kind: text("kind").notNull(),
+    token: text("token").notNull().unique(),
+    ticketId: uuid("ticket_id").references(() => tickets.id, { onDelete: "set null" }),
+    /** Partner invitations: the brand, as the team typed it. */
+    brand: text("brand"),
+    /** The person the link is for, as far as we know it: a name, or "Билет 2 (PLUS)". */
+    label: text("label"),
+    /** The address the letter carrying this link went to. */
+    sentTo: text("sent_to"),
+    /** The link owner's own address, when we know it - not so for a ticket passed on by its buyer. */
+    holderEmail: text("holder_email"),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+    answers: jsonb("answers"),
+    submittedAt: timestamp("submitted_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("survey_invites_kind_ticket_idx").on(table.kind, table.ticketId),
+    index("survey_invites_sent_to_idx").on(table.sentTo),
+  ],
+);
+
+/**
+ * "Early access to the 2027 tickets". The person who ticks it in the survey
+ * is in at once; an address they add for someone else gets a letter and is
+ * in only once its owner confirms (the consent has to be theirs).
+ */
+export const earlyAccess = pgTable("early_access", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  email: text("email").notNull().unique(),
+  /** Who added it, when it was not the person themself. */
+  invitedBy: text("invited_by"),
+  source: text("source").notNull().default("survey-2026"),
+  consentText: text("consent_text").notNull(),
+  confirmToken: text("confirm_token").unique(),
+  confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
+  inviteSentAt: timestamp("invite_sent_at", { withTimezone: true }),
+  unsubscribedAt: timestamp("unsubscribed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
