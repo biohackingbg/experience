@@ -57,7 +57,7 @@ export function visitorMail(input: { to: string; name: string; token: string; ot
     ${p(`Отнема около 2 минути. Анкетата е отворена до ${SURVEY_CLOSES_LABEL}. Ще прочетем всеки отговор.`)}
     ${company}
     ${p(`Скоро ще споделим снимки и моменти от събитието в <a href="https://www.instagram.com/longevitysummit.eu/" style="color:#146455">@longevitysummit.eu</a>.`)}
-    ${sign(["До скоро,", "Джулия Димитрова и Мария Варсанова", "Sofia Life Summit | Biohacking.bg"])}`,
+    ${sign(["До скоро,", "Джулия Димитрова, Мария Варсанова и Ема Димитрова", "Sofia Life Summit | Biohacking.bg"])}`,
     "Получаваш това писмо, защото имаше билет за Sofia Life Summit 2026. Линкът към анкетата е личен: важи за един отговор.",
   );
   const text = [
@@ -75,7 +75,7 @@ export function visitorMail(input: { to: string; name: string; token: string; ot
     "Скоро ще споделим снимки и моменти от събитието в @longevitysummit.eu.",
     "",
     "До скоро,",
-    "Джулия Димитрова и Мария Варсанова",
+    "Джулия Димитрова, Мария Варсанова и Ема Димитрова",
     "Sofia Life Summit | Biohacking.bg",
   ].join("\n");
   return { to: input.to, subject: VISITOR_SUBJECT, html, text };
