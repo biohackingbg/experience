@@ -66,7 +66,7 @@ export function CopyCode({ code, lang }: { code: string; lang: "bg" | "en" }) {
           () => {},
         );
       }}
-      className="inline-flex items-center gap-3 rounded-full border border-dashed border-bh-ink/30 bg-white px-4 py-2 text-left"
+      className="inline-flex items-center gap-3 rounded-full border border-dashed border-bh-ink/30 bg-bh-cloud px-4 py-2 text-left"
       aria-label={lang === "en" ? `Copy code ${code}` : `Копирай кода ${code}`}
     >
       <span className="font-mono text-base font-bold tracking-widest text-bh-ink">{code}</span>

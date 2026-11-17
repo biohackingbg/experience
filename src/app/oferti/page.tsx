@@ -145,11 +145,11 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
             {groups.map((g) => {
               const p = g.partnerId ? profile.get(g.partnerId) : undefined;
               return (
-                <section key={g.key} className="rounded-3xl bg-white p-5 ring-1 ring-bh-ink/8 sm:p-7">
+                <section key={g.key} className="rounded-3xl bg-bh-cloud p-5 ring-1 ring-bh-ink/8 sm:p-7">
                   <div className="flex items-start gap-4">
                     {g.logo && (
                       // eslint-disable-next-line @next/next/no-img-element -- partner logos are served by our own route, sized by the box
-                      <img src={g.logo} alt="" className="h-14 w-14 shrink-0 rounded-2xl bg-bh-cloud object-contain p-1.5" />
+                      <img src={g.logo} alt="" className="h-14 w-14 shrink-0 rounded-2xl bg-white object-contain p-1.5" />
                     )}
                     <div className="min-w-0">
                       <h2 className="text-xl font-bold text-bh-ink">{g.name}</h2>
@@ -165,7 +165,7 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
 
                   <div className="mt-5 space-y-3">
                     {g.items.map((o) => (
-                      <div key={o.id} className="rounded-2xl bg-bh-cloud p-4 sm:p-5">
+                      <div key={o.id} className="rounded-2xl bg-bh-paper p-4 sm:p-5">
                         <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-bh-ink/50">
                           <span>{o.place === "online" ? t.online : t.onsite}</span>
                           {o.validTo && <span>{t.until(fmtDate(o.validTo))}</span>}

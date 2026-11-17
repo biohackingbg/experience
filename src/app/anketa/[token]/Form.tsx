@@ -6,10 +6,10 @@ import { EARLY_CONSENT, EARLY_YES, MAX_EXTRA_EMAILS, type Question } from "@/lib
 
 import { type SurveyState, submitAnswers } from "./actions";
 
-const box = "rounded-3xl bg-white p-5 ring-1 ring-bh-ink/8 sm:p-6";
-const field = "mt-3 w-full rounded-2xl border border-bh-ink/15 bg-bh-cloud px-4 py-3 text-sm text-bh-ink placeholder:text-bh-ink/35 focus:border-bh-pine focus:outline-none";
+const box = "rounded-3xl bg-bh-cloud p-5 ring-1 ring-bh-ink/8 sm:p-6";
+const field = "mt-3 w-full rounded-2xl border border-bh-ink/15 bg-bh-paper px-4 py-3 text-sm text-bh-ink placeholder:text-bh-ink/35 focus:border-bh-pine focus:outline-none";
 const chip =
-  "flex cursor-pointer items-center gap-3 rounded-2xl border border-bh-ink/12 bg-bh-cloud px-4 py-3 text-sm text-bh-ink transition-colors has-[:checked]:border-bh-pine has-[:checked]:bg-bh-pine/10";
+  "flex cursor-pointer items-center gap-3 rounded-2xl border border-bh-ink/12 bg-bh-paper px-4 py-3 text-sm text-bh-ink transition-colors has-[:checked]:border-bh-pine has-[:checked]:bg-bh-pine/10";
 
 function Scale({ q }: { q: Extract<Question, { kind: "scale" }> }) {
   const values = Array.from({ length: q.max - q.min + 1 }, (_, i) => q.min + i);
@@ -19,7 +19,7 @@ function Scale({ q }: { q: Extract<Question, { kind: "scale" }> }) {
         {values.map((v) => (
           <label key={v} className="cursor-pointer">
             <input type="radio" name={q.id} value={v} required={q.required} className="peer sr-only" />
-            <span className="flex h-11 items-center justify-center rounded-xl border border-bh-ink/12 bg-bh-cloud text-sm font-semibold text-bh-ink transition-colors peer-checked:border-bh-ink peer-checked:bg-bh-ink peer-checked:text-bh-paper peer-focus-visible:ring-2 peer-focus-visible:ring-bh-pine">
+            <span className="flex h-11 items-center justify-center rounded-xl border border-bh-ink/12 bg-bh-paper text-sm font-semibold text-bh-ink transition-colors peer-checked:border-bh-ink peer-checked:bg-bh-ink peer-checked:text-bh-paper peer-focus-visible:ring-2 peer-focus-visible:ring-bh-pine">
               {v}
             </span>
           </label>
@@ -47,7 +47,7 @@ function Choice({ q, preset }: { q: Extract<Question, { kind: "single" | "multi"
             defaultChecked={preset === o}
             required={!multi && q.required}
             onChange={multi ? undefined : () => setOther(false)}
-            className="h-4 w-4 accent-[#146455]"
+            className="h-4 w-4 accent-bh-pine"
           />
           {o}
         </label>
@@ -59,7 +59,7 @@ function Choice({ q, preset }: { q: Extract<Question, { kind: "single" | "multi"
             name={multi ? `${q.id}__otherOn` : q.id}
             value="__other"
             onChange={(e) => setOther(e.target.checked)}
-            className="h-4 w-4 accent-[#146455]"
+            className="h-4 w-4 accent-bh-pine"
           />
           Друго
         </label>
@@ -77,7 +77,7 @@ function Early({ q, holderEmail }: { q: Extract<Question, { kind: "early" }>; ho
       <div className="mt-4 grid gap-2">
         {[EARLY_YES, "Не, благодаря"].map((o) => (
           <label key={o} className={chip}>
-            <input type="radio" name={q.id} value={o} onChange={() => setYes(o === EARLY_YES)} className="h-4 w-4 accent-[#146455]" />
+            <input type="radio" name={q.id} value={o} onChange={() => setYes(o === EARLY_YES)} className="h-4 w-4 accent-bh-pine" />
             {o}
           </label>
         ))}
